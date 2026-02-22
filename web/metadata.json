@@ -1,0 +1,8 @@
+
+{
+  "name": "EduManage University Portal",
+  "description": "A comprehensive university management system for handling classrooms, subjects, and weekly schedules with a modern, mobile-first design.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}

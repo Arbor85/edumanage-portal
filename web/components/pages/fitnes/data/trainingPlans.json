@@ -1,0 +1,227 @@
+{
+  "trainingPlans": [
+    {
+      "id": "fbw",
+      "name": "Full Body Workout",
+      "category": "General Strength",
+      "description": "A training method where the entire body is trained during each session. It focuses on compound movements and high training frequency.",
+      "recommendedFrequencyPerWeek": 2,
+      "defaultDurationMinutes": 45,
+      "goalCompatibility": ["strength", "hypertrophy", "general_fitness"],
+      "experienceLevel": ["beginner", "intermediate"],
+      "defaultStructure": {
+        "sessionsPerWeek": 3,
+        "mainLiftsPerSession": 3,
+        "accessoryExercisesPerSession": 2
+      },
+      "pros": [
+        "High training frequency for all muscle groups",
+        "Simple structure and easy progression",
+        "Excellent for building foundational strength"
+      ],
+      "cons": [
+        "Limited volume per muscle group per session",
+        "Systemically demanding sessions",
+        "Less suitable for advanced specialization"
+      ],
+      "example": {
+        "session": ["Squat", "Bench Press", "Barbell Row", "Lunges", "Plank"]
+      }
+    },
+    {
+      "id": "ppl",
+      "name": "Push Pull Legs",
+      "category": "Hypertrophy Split",
+      "description": "A split based on movement patterns, dividing training into pushing, pulling, and leg-focused sessions.",
+      "recommendedFrequencyPerWeek": 3,
+      "defaultDurationMinutes": 60,
+      "goalCompatibility": ["hypertrophy", "bodybuilding"],
+      "experienceLevel": ["intermediate", "advanced"],
+      "defaultStructure": {
+        "sessionsPerWeek": 3,
+        "pushExercises": 4,
+        "pullExercises": 4,
+        "legExercises": 4
+      },
+      "pros": [
+        "Clear separation of muscle groups",
+        "High volume potential",
+        "Good recovery between sessions"
+      ],
+      "cons": [
+        "Low muscle frequency at 3 sessions per week",
+        "Less optimal for pure strength gains"
+      ],
+      "example": {
+        "pushDay": ["Bench Press", "Overhead Press", "Dips", "Triceps Pushdown"],
+        "pullDay": ["Pull-ups", "Barbell Row", "Face Pull", "Biceps Curl"],
+        "legsDay": ["Squat", "Romanian Deadlift", "Lunges", "Calf Raises"]
+      }
+    },
+    {
+      "id": "upper_lower",
+      "name": "Upper / Lower Split",
+      "category": "Strength & Hypertrophy",
+      "description": "A split dividing training into upper-body and lower-body sessions, allowing balanced volume and recovery.",
+      "recommendedFrequencyPerWeek": 4,
+      "defaultDurationMinutes": 60,
+      "goalCompatibility": ["strength", "hypertrophy"],
+      "experienceLevel": ["intermediate"],
+      "defaultStructure": {
+        "upperSessionsPerWeek": 2,
+        "lowerSessionsPerWeek": 2
+      },
+      "pros": [
+        "Balanced training volume",
+        "Good frequency per muscle group",
+        "Flexible exercise selection"
+      ],
+      "cons": [
+        "Requires more weekly sessions",
+        "Longer workouts"
+      ],
+      "example": {
+        "upper": ["Bench Press", "Row", "Overhead Press", "Pull-ups"],
+        "lower": ["Squat", "Deadlift", "Leg Curl", "Core Work"]
+      }
+    },
+    {
+      "id": "big_lifts",
+      "name": "Big Lifts Focus",
+      "category": "Strength",
+      "description": "A minimalist strength-focused approach built around compound barbell lifts with limited accessories.",
+      "recommendedFrequencyPerWeek": 3,
+      "defaultDurationMinutes": 40,
+      "goalCompatibility": ["strength"],
+      "experienceLevel": ["beginner", "intermediate"],
+      "defaultStructure": {
+        "mainLiftPerSession": 1,
+        "accessoryExercises": 2
+      },
+      "pros": [
+        "Highly effective for strength progression",
+        "Short and efficient workouts",
+        "Easy to track and program"
+      ],
+      "cons": [
+        "Limited hypertrophy stimulus",
+        "Requires good technique discipline"
+      ],
+      "example": {
+        "week": [
+          { "day": "Monday", "mainLift": "Squat" },
+          { "day": "Wednesday", "mainLift": "Bench Press" },
+          { "day": "Friday", "mainLift": "Deadlift" }
+        ]
+      }
+    },
+    {
+      "id": "linear_periodization",
+      "name": "Linear Periodization",
+      "category": "Progression Model",
+      "description": "A progression model where intensity increases and volume decreases over time in a linear fashion.",
+      "recommendedFrequencyPerWeek": 3,
+      "defaultDurationMinutes": 45,
+      "goalCompatibility": ["strength", "hypertrophy"],
+      "experienceLevel": ["beginner"],
+      "defaultStructure": {
+        "phases": ["5x5", "4x4", "3x3"]
+      },
+      "pros": [
+        "Simple and predictable progression",
+        "Easy to implement",
+        "Very effective for beginners"
+      ],
+      "cons": [
+        "Plateaus after extended use",
+        "Limited adaptability"
+      ],
+      "example": {
+        "progression": ["5x5 @ 70%", "4x4 @ 80%", "3x3 @ 85%"]
+      }
+    },
+    {
+      "id": "dup",
+      "name": "Daily Undulating Periodization",
+      "category": "Advanced Progression",
+      "description": "A method where training volume and intensity change frequently, often within the same week.",
+      "recommendedFrequencyPerWeek": 3,
+      "defaultDurationMinutes": 45,
+      "goalCompatibility": ["strength", "hypertrophy"],
+      "experienceLevel": ["intermediate", "advanced"],
+      "defaultStructure": {
+        "weeklyVariations": ["volume", "moderate", "intensity"]
+      },
+      "pros": [
+        "Reduces plateaus",
+        "Improves long-term adaptation",
+        "Balances strength and hypertrophy"
+      ],
+      "cons": [
+        "More complex programming",
+        "Harder to track for beginners"
+      ],
+      "example": {
+        "week": [
+          "Monday: 5x5",
+          "Wednesday: 4x4",
+          "Friday: 3x3"
+        ]
+      }
+    },
+    {
+      "id": "block_periodization",
+      "name": "Block Periodization",
+      "category": "Advanced Strength",
+      "description": "A structured approach dividing training into sequential blocks focused on specific adaptations.",
+      "recommendedFrequencyPerWeek": 4,
+      "defaultDurationMinutes": 60,
+      "goalCompatibility": ["strength", "competitive_lifting"],
+      "experienceLevel": ["advanced"],
+      "defaultStructure": {
+        "blocks": ["hypertrophy", "strength", "peak"]
+      },
+      "pros": [
+        "Highly effective for long-term planning",
+        "Clear focus per training block",
+        "Used in competitive sports"
+      ],
+      "cons": [
+        "Low flexibility",
+        "Overkill for recreational lifters"
+      ],
+      "example": {
+        "blocks": [
+          "4 weeks hypertrophy",
+          "3 weeks strength",
+          "1 week peak"
+        ]
+      }
+    },
+    {
+      "id": "autoregulatory",
+      "name": "Autoregulation (RPE/RIR)",
+      "category": "Adaptive Training",
+      "description": "A method that adjusts training intensity based on perceived exertion or reps in reserve.",
+      "recommendedFrequencyPerWeek": 3,
+      "defaultDurationMinutes": 45,
+      "goalCompatibility": ["strength", "hypertrophy"],
+      "experienceLevel": ["intermediate", "advanced"],
+      "defaultStructure": {
+        "intensityControl": ["RPE", "RIR"]
+      },
+      "pros": [
+        "Adapts to daily readiness",
+        "Reduces injury risk",
+        "Highly flexible"
+      ],
+      "cons": [
+        "Requires experience",
+        "Subjective intensity estimation"
+      ],
+      "example": {
+        "set": "Top set @ RPE 8, followed by 2 back-off sets"
+      }
+    }
+  ]
+}

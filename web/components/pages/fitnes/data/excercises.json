@@ -1,0 +1,135 @@
+{
+  "exercises": [
+    {
+      "name": "Bench Press",
+      "category": "strength",
+      "equipment": ["barbell", "bench"],
+      "instructions": [
+        "Lie back on a flat bench. Using a medium-width grip (a grip that creates a 90-degree angle in the middle of the movement between the forearms and the upper arms), lift the bar from the rack and hold it straight over you with your arms locked.",
+        "From the starting position, breathe in and begin coming down slowly until the bar touches your middle chest.",
+        "After a brief pause, push the bar back to the starting position as you breathe out. Focus on using your chest muscles to push the bar. Lock your arms and squeeze your chest in the contracted position at the top, hold for a second and then start coming down slowly again.",
+        "Repeat the movement for the prescribed amount of repetitions."
+      ],
+      "primary_muscles": ["chest"],
+      "secondary_muscles": ["shoulders", "triceps"]
+    },
+    {
+      "name": "Incline Bench Press",
+      "category": "strength",
+      "equipment": ["barbell", "incline bench"],
+      "instructions": [
+        "Lie back on an incline bench. Using a medium-width grip, lift the bar from the rack and hold it straight over you with your arms locked. This will be your starting position.",
+        "As you breathe in, come down slowly until you feel the bar on your upper chest.",
+        "After a second pause, bring the bar back to the starting position as you breathe out and push the bar using your chest muscles. Lock your arms and squeeze your chest, hold for a second and then start coming down slowly again.",
+        "Repeat for the recommended amount of repetitions."
+      ],
+      "primary_muscles": ["chest"],
+      "secondary_muscles": ["shoulders", "triceps"]
+    },
+    {
+      "name": "Back Squat",
+      "category": "strength",
+      "equipment": ["barbell"],
+      "instructions": [
+        "This exercise is best performed inside a squat rack for safety. Set the bar on a rack that best matches your height. Step under the bar and place the back of your shoulders (slightly below the neck) across it.",
+        "Hold on to the bar using both arms at each side and lift it off the rack by first pushing with your legs and at the same time straightening your torso.",
+        "Step away from the rack and position your legs using a shoulder width medium stance with the toes slightly pointed out. Keep your head up and maintain a straight back. This is your starting position.",
+        "Begin to lower the bar by bending the knees as you maintain a straight posture with the head up. Continue down until your thighs are slightly below parallel to the floor. Inhale as you perform this portion.",
+        "Begin to raise the bar as you exhale by pushing the floor with the heel of your foot as you straighten the legs again and return to the starting position."
+      ],
+      "primary_muscles": ["quads"],
+      "secondary_muscles": ["glutes", "hamstrings", "lower back"]
+    },
+    {
+      "name": "Front Squat",
+      "category": "strength",
+      "equipment": ["barbell"],
+      "instructions": [
+        "This exercise is best performed inside a squat rack. Set the bar at a height that best matches your shoulders. Bring your arms under the bar while keeping the elbows high and the upper arm parallel to the floor. Rest the bar on top of the deltoids.",
+        "Lift the bar off the rack by first pushing with your legs and at the same time straightening your torso. Step away from the rack and position your legs using a shoulder width stance.",
+        "Begin to lower the bar by bending the knees as you maintain a straight posture. Continue down until the angle between the upper leg and the calves becomes slightly less than 90-degrees. Inhale during this part.",
+        "Raise the bar as you exhale by pushing the floor with the ball of your foot mainly as you straighten the legs again."
+      ],
+      "primary_muscles": ["quads"],
+      "secondary_muscles": ["glutes", "hamstrings", "lower back", "abs"]
+    },
+    {
+      "name": "Military Press",
+      "category": "strength",
+      "equipment": ["barbell"],
+      "instructions": [
+        "Start by having a barbell on a rack at shoulder height. Grab the barbell with a pronated (palms facing forward) grip. Your hands should be wider than shoulder width.",
+        "Slightly bend the knees and place the barbell on your collar bone. Lift the barbell up over your head by locking your arms. Hold at about shoulder level and slightly in front of your head.",
+        "Lower the barbell down to the collarbone slowly as you inhale.",
+        "Lift the barbell back up to the starting position as you exhale."
+      ],
+      "primary_muscles": ["shoulders"],
+      "secondary_muscles": ["triceps"]
+    },
+    {
+      "name": "Push Press",
+      "category": "strength",
+      "equipment": ["barbell"],
+      "instructions": [
+        "Set up the barbell on a rack at a height that is around your upper chest. Grab the barbell with a grip wider than shoulder width. Position the bar on your front shoulders.",
+        "Dip your body by bending the knees slightly while keeping the torso upright.",
+        "Immediately reverse direction and explosively drive upward through the heels, using the momentum of the legs to help push the bar overhead.",
+        "Lock your arms at the top and then lower the bar back to your shoulders under control."
+      ],
+      "primary_muscles": ["shoulders"],
+      "secondary_muscles": ["triceps", "quads", "glutes"]
+    },
+    {
+      "name": "Bent Over Row",
+      "category": "strength",
+      "equipment": ["barbell"],
+      "instructions": [
+        "Holding a barbell with a pronated grip (palms facing down), bend your knees slightly and bring your torso forward, by bending at the waist, while keeping the back straight until it is almost parallel to the floor. Tip: Make sure that you keep the head up.",
+        "While keeping the torso stationary, lift the barbell to you. Keep the elbows close to the body and only use the forearms to hold the weight. At the top contracted position, squeeze the back muscles and hold for a brief pause.",
+        "Slowly lower the barbell back to the starting position as you inhale.",
+        "Repeat for the recommended amount of repetitions."
+      ],
+      "primary_muscles": ["middle back"],
+      "secondary_muscles": ["lats", "biceps", "shoulders"]
+    },
+    {
+      "name": "Triceps Dips",
+      "category": "strength",
+      "equipment": ["other"],
+      "instructions": [
+        "To get into the starting position, hold your body at arms length above the parallel bars.",
+        "While breathing in, lower yourself slowly with your torso kept upright and your elbows close to your body. This helps place more emphasis on the triceps. Lower yourself until your arms form a 90-degree angle.",
+        "Push your torso back up using your triceps to the starting position as you breathe out.",
+        "Repeat for the prescribed amount of repetitions."
+      ],
+      "primary_muscles": ["triceps"],
+      "secondary_muscles": ["chest", "shoulders"]
+    },
+    {
+      "name": "Ring Dips",
+      "category": "strength",
+      "equipment": ["other"],
+      "instructions": [
+        "Support yourself above the rings with your arms straight and your shoulders directly above your hands. This is the starting position.",
+        "Lower yourself by bending the elbows, allowing them to flare out slightly. Keep the rings close to your body for stability.",
+        "Continue down until you feel a stretch in your chest or shoulders.",
+        "Push yourself back up to the starting position by extending your elbows. Maintain control of the rings throughout the entire movement."
+      ],
+      "primary_muscles": ["chest", "triceps"],
+      "secondary_muscles": ["shoulders", "abs"]
+    },
+    {
+      "name": "Barbell Deadlift",
+      "category": "strength",
+      "equipment": ["barbell"],
+      "instructions": [
+        "Approach the bar so that it is centered over your feet. Your feet should be about hip width apart. Bend at the hip to grip the bar at shoulder width.",
+        "Lower your hips and flex the knees until your shins contact the bar. Keep your chest up and your back arched.",
+        "Begin driving through the heels to move the weight upward. After the bar passes the knees, aggressively pull the bar back, pulling your shoulder blades together as you drive your hips forward into the bar.",
+        "Lower the bar by bending at the hips and guiding it to the floor."
+      ],
+      "primary_muscles": ["lower back"],
+      "secondary_muscles": ["glutes", "hamstrings", "quads", "traps"]
+    }
+  ]
+}
