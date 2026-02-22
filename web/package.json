@@ -13,11 +13,11 @@
   },
   "dependencies": {
     "@google/genai": "^1.40.0",
-    "jsondiffpatch": "^0.6.0",
-    "recharts": "^2.12.5",
+    "jsondiffpatch": "^0.7.3",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
-    "react-router-dom": "^6.20.0"
+    "react-router-dom": "^6.20.0",
+    "recharts": "^2.12.5"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",
