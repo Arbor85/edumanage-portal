@@ -1,3 +1,4 @@
+import SavedWorkoutsPage from './components/pages/SavedWorkoutsPage';
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useParams } from 'react-router-dom';
 import { AppView } from './types';
@@ -249,6 +250,7 @@ const AuthInitializer: React.FC<{ missingVars: string[]; hasMissingEnv: boolean 
           <Route path="/accept-invitation" element={<AcceptInvitation />} />
           <Route path="/alerts" element={<ProtectedRoute allowedRoles={['plan', 'gym', 'platform']}><AlertsViewWrapper /></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute allowedRoles={['plan', 'gym', 'platform']}><ProfilePageWrapper /></ProtectedRoute>} />
+          <Route path="/saved-workouts" element={<ProtectedRoute allowedRoles={['gym']}><SavedWorkoutsPage /></ProtectedRoute>} />
           <Route path="*" element={<Navigate to="/login" replace />} />
         </>
       )}

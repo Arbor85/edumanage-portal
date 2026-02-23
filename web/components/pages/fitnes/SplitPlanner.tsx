@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import trainingPlanData from './data/trainingPlans.json';
-import exerciseData from './data/excercises.json';
 import { createTrainingPlan } from '../../../services/trainingPlanService';
 import { getMentees } from '../../../services/menteesService';
 import { useAuth } from '../../../contexts/AuthContext';

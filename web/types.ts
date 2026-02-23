@@ -21,6 +21,7 @@ export enum AppView {
   PLATFORM_SUBSCRIPTION_HISTORY = 'platform_subscription_history',
   MENTEES = 'mentees',
   ACCEPT_MENTEE_INVITATION = 'accept_mentee_invitation'
+  ,SAVED_WORKOUTS = 'saved_workouts'
 }
 
 export interface Room {
@@ -84,5 +85,23 @@ export interface Mentee {
   type: MenteeType;
   notes?: string;
   created: string;
+}
+
+
+// --- Saved Workouts Feature ---
+export interface ExerciseSet {
+  exerciseName: string;
+  reps: number;
+  weight: number;
+  notes?: string;
+}
+
+export interface SavedWorkout {
+  id: string;
+  workoutName: string;
+  description?: string;
+  createdBy: string;
+  createdAt: string;
+  exerciseSets: ExerciseSet[];
 }
 

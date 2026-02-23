@@ -112,7 +112,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeView, onNavigate, title
                 <span className="hidden sm:inline">{theme === 'dark' ? 'Light' : 'Dark'} mode</span>
               </button>
               {onAddClick && (
-                <button 
+                <button
                   onClick={onAddClick}
                   className="bg-primary hover:bg-primary/90 text-white rounded-full flex items-center justify-center p-2.5 shadow-lg shadow-primary/20 transition-all active:scale-95"
                 >
@@ -167,151 +167,153 @@ const Layout: React.FC<LayoutProps> = ({ children, activeView, onNavigate, title
             <nav className="flex flex-col gap-2 h-full">
               <div className="flex flex-col gap-2">
                 {isPlanUser && (
-                <NavLink
-                  to="/rooms"
-                  onClick={() => handleMenuNavigate(AppView.ROOMS)}
-                  className={({ isActive }) =>
-                    `flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 ${
-                      isActive ? 'text-primary' : 'text-slate-700 dark:text-slate-200'
-                    }`
-                  }
-                >
-                  <span className="material-symbols-outlined">meeting_room</span>
-                  <span>Rooms</span>
-                </NavLink>
+                  <NavLink
+                    to="/rooms"
+                    onClick={() => handleMenuNavigate(AppView.ROOMS)}
+                    className={({ isActive }) =>
+                      `flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 ${isActive ? 'text-primary' : 'text-slate-700 dark:text-slate-200'
+                      }`
+                    }
+                  >
+                    <span className="material-symbols-outlined">meeting_room</span>
+                    <span>Rooms</span>
+                  </NavLink>
                 )}
                 {isPlanUser && (
-                <NavLink
-                  to="/subjects"
-                  onClick={() => handleMenuNavigate(AppView.SUBJECTS)}
-                  className={({ isActive }) =>
-                    `flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 ${
-                      isActive ? 'text-primary' : 'text-slate-700 dark:text-slate-200'
-                    }`
-                  }
-                >
-                  <span className="material-symbols-outlined">book</span>
-                  <span>Subjects</span>
-                </NavLink>
+                  <NavLink
+                    to="/subjects"
+                    onClick={() => handleMenuNavigate(AppView.SUBJECTS)}
+                    className={({ isActive }) =>
+                      `flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 ${isActive ? 'text-primary' : 'text-slate-700 dark:text-slate-200'
+                      }`
+                    }
+                  >
+                    <span className="material-symbols-outlined">book</span>
+                    <span>Subjects</span>
+                  </NavLink>
                 )}
                 {isPlanUser && (
-                <NavLink
-                  to="/teaching-stuffs"
-                  onClick={() => handleMenuNavigate(AppView.TEACHING_STUFFS)}
-                  className={({ isActive }) =>
-                    `flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 ${
-                      isActive ? 'text-primary' : 'text-slate-700 dark:text-slate-200'
-                    }`
-                  }
-                >
-                  <span className="material-symbols-outlined">person</span>
-                  <span>Staff</span>
-                </NavLink>
+                  <NavLink
+                    to="/teaching-stuffs"
+                    onClick={() => handleMenuNavigate(AppView.TEACHING_STUFFS)}
+                    className={({ isActive }) =>
+                      `flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 ${isActive ? 'text-primary' : 'text-slate-700 dark:text-slate-200'
+                      }`
+                    }
+                  >
+                    <span className="material-symbols-outlined">person</span>
+                    <span>Staff</span>
+                  </NavLink>
                 )}
                 {isPlanUser && (
-                <NavLink
-                  to="/schedule"
-                  onClick={() => handleMenuNavigate(AppView.SCHEDULE)}
-                  className={({ isActive }) =>
-                    `flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 ${
-                      isActive ? 'text-primary' : 'text-slate-700 dark:text-slate-200'
-                    }`
-                  }
-                >
-                  <span className="material-symbols-outlined">calendar_month</span>
-                  <span>Schedule</span>
-                </NavLink>
+                  <NavLink
+                    to="/schedule"
+                    onClick={() => handleMenuNavigate(AppView.SCHEDULE)}
+                    className={({ isActive }) =>
+                      `flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 ${isActive ? 'text-primary' : 'text-slate-700 dark:text-slate-200'
+                      }`
+                    }
+                  >
+                    <span className="material-symbols-outlined">calendar_month</span>
+                    <span>Schedule</span>
+                  </NavLink>
                 )}
                 {isGymUser && (
-                <NavLink
-                  to="/active-workout"
-                  onClick={() => setIsMenuOpen(false)}
-                  className={({ isActive }) =>
-                    `flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 ${
-                      isActive ? 'text-primary' : 'text-slate-700 dark:text-slate-200'
-                    }`
-                  }
-                >
-                  <span className="material-symbols-outlined">bolt</span>
-                  <span>Active Workout</span>
-                </NavLink>
+                  <NavLink
+                    to="/active-workout"
+                    onClick={() => setIsMenuOpen(false)}
+                    className={({ isActive }) =>
+                      `flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 ${isActive ? 'text-primary' : 'text-slate-700 dark:text-slate-200'
+                      }`
+                    }
+                  >
+                    <span className="material-symbols-outlined">bolt</span>
+                    <span>Active Workout</span>
+                  </NavLink>
                 )}
                 {isGymUser && (
-                <NavLink
-                  to="/explore"
-                  onClick={() => setIsMenuOpen(false)}
-                  className={({ isActive }) =>
-                    `flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 ${
-                      isActive ? 'text-primary' : 'text-slate-700 dark:text-slate-200'
-                    }`
-                  }
-                >
-                  <span className="material-symbols-outlined">travel_explore</span>
-                  <span>Explore</span>
-                </NavLink>
+                  <NavLink
+                    to="/explore"
+                    onClick={() => setIsMenuOpen(false)}
+                    className={({ isActive }) =>
+                      `flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 ${isActive ? 'text-primary' : 'text-slate-700 dark:text-slate-200'
+                      }`
+                    }
+                  >
+                    <span className="material-symbols-outlined">travel_explore</span>
+                    <span>Explore</span>
+                  </NavLink>
                 )}
                 {isGymUser && (
-                <NavLink
-                  to="/split-plans"
-                  onClick={() => setIsMenuOpen(false)}
-                  className={({ isActive }) =>
-                    `flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 ${
-                      isActive ? 'text-primary' : 'text-slate-700 dark:text-slate-200'
-                    }`
-                  }
-                >
-                  <span className="material-symbols-outlined">checklist</span>
-                  <span>Saved Plans</span>
-                </NavLink>
+                  <NavLink
+                    to="/split-plans"
+                    onClick={() => setIsMenuOpen(false)}
+                    className={({ isActive }) =>
+                      `flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 ${isActive ? 'text-primary' : 'text-slate-700 dark:text-slate-200'
+                      }`
+                    }
+                  >
+                    <span className="material-symbols-outlined">checklist</span>
+                    <span>Saved Plans</span>
+                  </NavLink>
                 )}
                 {isGymUser && (
-                <NavLink
-                  to="/history"
-                  onClick={() => setIsMenuOpen(false)}
-                  className={({ isActive }) =>
-                    `flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 ${
-                      isActive ? 'text-primary' : 'text-slate-700 dark:text-slate-200'
-                    }`
-                  }
-                >
-                  <span className="material-symbols-outlined">history</span>
-                  <span>Workout History</span>
-                </NavLink>
+                  <NavLink
+                    to="/saved-workouts"
+                    onClick={() => handleMenuNavigate(AppView.SAVED_WORKOUTS)}
+                    className={({ isActive }) =>
+                      `flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 ${isActive ? 'text-primary' : 'text-slate-700 dark:text-slate-200'
+                      }`
+                    }
+                  >
+                    <span className="material-symbols-outlined">fitness_center</span>
+                    <span>Saved Workouts</span>
+                  </NavLink>
+                )}
+                {isGymUser && (
+                  <NavLink
+                    to="/history"
+                    onClick={() => setIsMenuOpen(false)}
+                    className={({ isActive }) =>
+                      `flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 ${isActive ? 'text-primary' : 'text-slate-700 dark:text-slate-200'
+                      }`
+                    }
+                  >
+                    <span className="material-symbols-outlined">history</span>
+                    <span>Workout History</span>
+                  </NavLink>
                 )}
                 {isPlatformUser && (
-                <NavLink
-                  to="/platform/subscription-history"
-                  onClick={() => handleMenuNavigate(AppView.PLATFORM_SUBSCRIPTION_HISTORY)}
-                  className={({ isActive }) =>
-                    `flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 ${
-                      isActive ? 'text-primary' : 'text-slate-700 dark:text-slate-200'
-                    }`
-                  }
-                >
-                  <span className="material-symbols-outlined">history_edu</span>
-                  <span>Subscription History</span>
-                </NavLink>
+                  <NavLink
+                    to="/platform/subscription-history"
+                    onClick={() => handleMenuNavigate(AppView.PLATFORM_SUBSCRIPTION_HISTORY)}
+                    className={({ isActive }) =>
+                      `flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 ${isActive ? 'text-primary' : 'text-slate-700 dark:text-slate-200'
+                      }`
+                    }
+                  >
+                    <span className="material-symbols-outlined">history_edu</span>
+                    <span>Subscription History</span>
+                  </NavLink>
                 )}
                 {isGymUser && (
-                <NavLink
-                  to="/mentees"
-                  onClick={() => handleMenuNavigate(AppView.MENTEES)}
-                  className={({ isActive }) =>
-                    `flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 ${
-                      isActive ? 'text-primary' : 'text-slate-700 dark:text-slate-200'
-                    }`
-                  }
-                >
-                  <span className="material-symbols-outlined">people</span>
-                  <span>Mentees</span>
-                </NavLink>
+                  <NavLink
+                    to="/mentees"
+                    onClick={() => handleMenuNavigate(AppView.MENTEES)}
+                    className={({ isActive }) =>
+                      `flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 ${isActive ? 'text-primary' : 'text-slate-700 dark:text-slate-200'
+                      }`
+                    }
+                  >
+                    <span className="material-symbols-outlined">people</span>
+                    <span>Mentees</span>
+                  </NavLink>
                 )}
                 <NavLink
                   to="/alerts"
                   onClick={() => handleMenuNavigate(AppView.ALERTS)}
                   className={({ isActive }) =>
-                    `flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 ${
-                      isActive ? 'text-primary' : 'text-slate-700 dark:text-slate-200'
+                    `flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 ${isActive ? 'text-primary' : 'text-slate-700 dark:text-slate-200'
                     }`
                   }
                 >
@@ -322,8 +324,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeView, onNavigate, title
                   to="/profile"
                   onClick={() => handleMenuNavigate(AppView.PROFILE)}
                   className={({ isActive }) =>
-                    `flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 ${
-                      isActive ? 'text-primary' : 'text-slate-700 dark:text-slate-200'
+                    `flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 ${isActive ? 'text-primary' : 'text-slate-700 dark:text-slate-200'
                     }`
                   }
                 >
@@ -339,167 +340,168 @@ const Layout: React.FC<LayoutProps> = ({ children, activeView, onNavigate, title
       <aside className="hidden md:flex md:fixed md:left-0 md:top-0 md:h-full md:w-72 md:bg-white md:dark:bg-surface-dark md:border-r md:border-slate-200 md:dark:border-slate-800 md:p-5 md:pt-24">
         <nav className="flex flex-col gap-2 w-full h-full">
           <div className="flex flex-col gap-2">
-          {isPlanUser && (
-            <NavLink
-              to="/rooms"
-              onClick={() => handleMenuNavigate(AppView.ROOMS)}
-              className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 ${
-                  isActive ? 'text-primary' : 'text-slate-700 dark:text-slate-200'
-                }`
-              }
-            >
-              <span className="material-symbols-outlined">meeting_room</span>
-              <span>Rooms</span>
-            </NavLink>
-          )}
-          {isPlanUser && (
-            <NavLink
-              to="/subjects"
-              onClick={() => handleMenuNavigate(AppView.SUBJECTS)}
-              className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 ${
-                  isActive ? 'text-primary' : 'text-slate-700 dark:text-slate-200'
-                }`
-              }
-            >
-              <span className="material-symbols-outlined">book</span>
-              <span>Subjects</span>
-            </NavLink>
-          )}
-          {isPlanUser && (
-            <NavLink
-              to="/teaching-stuffs"
-              onClick={() => handleMenuNavigate(AppView.TEACHING_STUFFS)}
-              className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 ${
-                  isActive ? 'text-primary' : 'text-slate-700 dark:text-slate-200'
-                }`
-              }
-            >
-              <span className="material-symbols-outlined">person</span>
-              <span>Staff</span>
-            </NavLink>
-          )}
-          {isPlanUser && (
-            <NavLink
-              to="/schedule"
-              onClick={() => handleMenuNavigate(AppView.SCHEDULE)}
-              className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 ${
-                  isActive ? 'text-primary' : 'text-slate-700 dark:text-slate-200'
-                }`
-              }
-            >
-              <span className="material-symbols-outlined">calendar_month</span>
-              <span>Schedule</span>
-            </NavLink>
-          )}
-          {isGymUser && (
-            <NavLink
-              to="/active-workout"
-              className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 ${
-                  isActive ? 'text-primary' : 'text-slate-700 dark:text-slate-200'
-                }`
-              }
-            >
-              <span className="material-symbols-outlined">bolt</span>
-              <span>Active Workout</span>
-            </NavLink>
-          )}
-          {isGymUser && (
-            <NavLink
-              to="/explore"
-              className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 ${
-                  isActive ? 'text-primary' : 'text-slate-700 dark:text-slate-200'
-                }`
-              }
-            >
-              <span className="material-symbols-outlined">travel_explore</span>
-              <span>Explore</span>
-            </NavLink>
-          )}
+            {isPlanUser && (
+              <NavLink
+                to="/rooms"
+                onClick={() => handleMenuNavigate(AppView.ROOMS)}
+                className={({ isActive }) =>
+                  `flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 ${isActive ? 'text-primary' : 'text-slate-700 dark:text-slate-200'
+                  }`
+                }
+              >
+                <span className="material-symbols-outlined">meeting_room</span>
+                <span>Rooms</span>
+              </NavLink>
+            )}
+            {isPlanUser && (
+              <NavLink
+                to="/subjects"
+                onClick={() => handleMenuNavigate(AppView.SUBJECTS)}
+                className={({ isActive }) =>
+                  `flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 ${isActive ? 'text-primary' : 'text-slate-700 dark:text-slate-200'
+                  }`
+                }
+              >
+                <span className="material-symbols-outlined">book</span>
+                <span>Subjects</span>
+              </NavLink>
+            )}
+            {isPlanUser && (
+              <NavLink
+                to="/teaching-stuffs"
+                onClick={() => handleMenuNavigate(AppView.TEACHING_STUFFS)}
+                className={({ isActive }) =>
+                  `flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 ${isActive ? 'text-primary' : 'text-slate-700 dark:text-slate-200'
+                  }`
+                }
+              >
+                <span className="material-symbols-outlined">person</span>
+                <span>Staff</span>
+              </NavLink>
+            )}
+            {isPlanUser && (
+              <NavLink
+                to="/schedule"
+                onClick={() => handleMenuNavigate(AppView.SCHEDULE)}
+                className={({ isActive }) =>
+                  `flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 ${isActive ? 'text-primary' : 'text-slate-700 dark:text-slate-200'
+                  }`
+                }
+              >
+                <span className="material-symbols-outlined">calendar_month</span>
+                <span>Schedule</span>
+              </NavLink>
+            )}
+            {isGymUser && (
+              <NavLink
+                to="/active-workout"
+                className={({ isActive }) =>
+                  `flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 ${isActive ? 'text-primary' : 'text-slate-700 dark:text-slate-200'
+                  }`
+                }
+              >
+                <span className="material-symbols-outlined">bolt</span>
+                <span>Active Workout</span>
+              </NavLink>
+            )}
+            {isGymUser && (
+              <NavLink
+                to="/explore"
+                className={({ isActive }) =>
+                  `flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 ${isActive ? 'text-primary' : 'text-slate-700 dark:text-slate-200'
+                  }`
+                }
+              >
+                <span className="material-symbols-outlined">travel_explore</span>
+                <span>Explore</span>
+              </NavLink>
+            )}
 
-          {isGymUser && (
+            {isGymUser && (
+              <NavLink
+                to="/split-plans"
+                className={({ isActive }) =>
+                  `flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 ${isActive ? 'text-primary' : 'text-slate-700 dark:text-slate-200'
+                  }`
+                }
+              >
+                <span className="material-symbols-outlined">checklist</span>
+                <span>Saved Plans</span>
+              </NavLink>
+            )}
+            {isGymUser && (
+                  <NavLink
+                    to="/saved-workouts"
+                    onClick={() => handleMenuNavigate(AppView.SAVED_WORKOUTS)}
+                    className={({ isActive }) =>
+                      `flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 ${isActive ? 'text-primary' : 'text-slate-700 dark:text-slate-200'
+                      }`
+                    }
+                  >
+                    <span className="material-symbols-outlined">fitness_center</span>
+                    <span>Saved Workouts</span>
+                  </NavLink>
+                )}
+            {isGymUser && (
+              <NavLink
+                to="/history"
+                className={({ isActive }) =>
+                  `flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 ${isActive ? 'text-primary' : 'text-slate-700 dark:text-slate-200'
+                  }`
+                }
+              >
+                <span className="material-symbols-outlined">history</span>
+                <span>Workout History</span>
+              </NavLink>
+            )}
+            {isGymUser && (
+              <NavLink
+                to="/mentees"
+                onClick={() => handleMenuNavigate(AppView.MENTEES)}
+                className={({ isActive }) =>
+                  `flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 ${isActive ? 'text-primary' : 'text-slate-700 dark:text-slate-200'
+                  }`
+                }
+              >
+                <span className="material-symbols-outlined">people</span>
+                <span>Mentees</span>
+              </NavLink>
+            )}
+            {isPlatformUser && (
+              <NavLink
+                to="/platform/subscription-history"
+                onClick={() => handleMenuNavigate(AppView.PLATFORM_SUBSCRIPTION_HISTORY)}
+                className={({ isActive }) =>
+                  `flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 ${isActive ? 'text-primary' : 'text-slate-700 dark:text-slate-200'
+                  }`
+                }
+              >
+                <span className="material-symbols-outlined">history_edu</span>
+                <span>Subscription History</span>
+              </NavLink>
+            )}
             <NavLink
-              to="/split-plans"
+              to="/alerts"
+              onClick={() => handleMenuNavigate(AppView.ALERTS)}
               className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 ${
-                  isActive ? 'text-primary' : 'text-slate-700 dark:text-slate-200'
+                `flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 ${isActive ? 'text-primary' : 'text-slate-700 dark:text-slate-200'
                 }`
               }
             >
-              <span className="material-symbols-outlined">checklist</span>
-              <span>Saved Plans</span>
+              <span className="material-symbols-outlined">notifications</span>
+              <span>Alerts</span>
             </NavLink>
-          )}
-          {isGymUser && (
             <NavLink
-              to="/history"
+              to="/profile"
+              onClick={() => handleMenuNavigate(AppView.PROFILE)}
               className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 ${
-                  isActive ? 'text-primary' : 'text-slate-700 dark:text-slate-200'
+                `flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 ${isActive ? 'text-primary' : 'text-slate-700 dark:text-slate-200'
                 }`
               }
             >
-              <span className="material-symbols-outlined">history</span>
-              <span>Workout History</span>
+              <span className="material-symbols-outlined">account_circle</span>
+              <span>Profile</span>
             </NavLink>
-          )}
-          {isGymUser && (
-            <NavLink
-              to="/mentees"
-              onClick={() => handleMenuNavigate(AppView.MENTEES)}
-              className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 ${
-                  isActive ? 'text-primary' : 'text-slate-700 dark:text-slate-200'
-                }`
-              }
-            >
-              <span className="material-symbols-outlined">people</span>
-              <span>Mentees</span>
-            </NavLink>
-          )}
-          {isPlatformUser && (
-            <NavLink
-              to="/platform/subscription-history"
-              onClick={() => handleMenuNavigate(AppView.PLATFORM_SUBSCRIPTION_HISTORY)}
-              className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 ${
-                  isActive ? 'text-primary' : 'text-slate-700 dark:text-slate-200'
-                }`
-              }
-            >
-              <span className="material-symbols-outlined">history_edu</span>
-              <span>Subscription History</span>
-            </NavLink>
-          )}
-          <NavLink
-            to="/alerts"
-            onClick={() => handleMenuNavigate(AppView.ALERTS)}
-            className={({ isActive }) =>
-              `flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 ${
-                isActive ? 'text-primary' : 'text-slate-700 dark:text-slate-200'
-              }`
-            }
-          >
-            <span className="material-symbols-outlined">notifications</span>
-            <span>Alerts</span>
-          </NavLink>
-          <NavLink
-            to="/profile"
-            onClick={() => handleMenuNavigate(AppView.PROFILE)}
-            className={({ isActive }) =>
-              `flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 ${
-                isActive ? 'text-primary' : 'text-slate-700 dark:text-slate-200'
-              }`
-            }
-          >
-            <span className="material-symbols-outlined">account_circle</span>
-            <span>Profile</span>
-          </NavLink>
           </div>
         </nav>
       </aside>
@@ -510,7 +512,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeView, onNavigate, title
 
       <nav className="fixed bottom-0 left-0 right-0 bg-white/80 dark:bg-background-dark/80 backdrop-blur-xl border-t border-slate-200 dark:border-slate-800 px-6 py-3 flex justify-between items-center z-50 md:hidden">
         {isPlanUser && (
-          <Link 
+          <Link
             to="/rooms"
             className={`flex flex-col items-center gap-1 ${activeView === AppView.ROOMS ? 'text-primary' : 'text-slate-400'}`}
           >
@@ -519,7 +521,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeView, onNavigate, title
           </Link>
         )}
         {isPlanUser && (
-          <Link 
+          <Link
             to="/subjects"
             className={`flex flex-col items-center gap-1 ${activeView === AppView.SUBJECTS ? 'text-primary' : 'text-slate-400'}`}
           >
@@ -528,7 +530,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeView, onNavigate, title
           </Link>
         )}
         {isPlanUser && (
-          <Link 
+          <Link
             to="/teaching-stuffs"
             className={`flex flex-col items-center gap-1 ${activeView === AppView.TEACHING_STUFFS ? 'text-primary' : 'text-slate-400'}`}
           >
@@ -537,7 +539,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeView, onNavigate, title
           </Link>
         )}
         {isPlanUser && (
-          <Link 
+          <Link
             to="/schedule"
             className={`flex flex-col items-center gap-1 ${activeView === AppView.SCHEDULE ? 'text-primary' : 'text-slate-400'}`}
           >
@@ -563,14 +565,14 @@ const Layout: React.FC<LayoutProps> = ({ children, activeView, onNavigate, title
             <span className="text-[10px] font-bold">History</span>
           </Link>
         )}
-        <Link 
+        <Link
           to="/alerts"
           className={`flex flex-col items-center gap-1 ${activeView === AppView.ALERTS ? 'text-primary' : 'text-slate-400'}`}
         >
           <span className="material-symbols-outlined">notifications</span>
           <span className="text-[10px] font-bold">Alerts</span>
         </Link>
-        <Link 
+        <Link
           to="/profile"
           className={`flex flex-col items-center gap-1 ${activeView === AppView.PROFILE ? 'text-primary' : 'text-slate-400'}`}
         >
