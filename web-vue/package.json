@@ -12,10 +12,10 @@
     "lint": "run-s lint:*",
     "lint:oxlint": "oxlint . --fix",
     "lint:eslint": "eslint . --fix --cache",
-    "format": "oxfmt src/"
+    "format": "prettier --write --experimental-cli src/"
   },
   "dependencies": {
-    "vue": "beta",
+    "vue": "^3.5.28",
     "vue-router": "^5.0.2"
   },
   "devDependencies": {
@@ -31,29 +31,14 @@
     "eslint-plugin-vue": "~10.8.0",
     "jiti": "^2.6.1",
     "npm-run-all2": "^8.0.4",
-    "oxfmt": "^0.32.0",
     "oxlint": "~1.47.0",
+    "prettier": "3.8.1",
     "typescript": "~5.9.3",
-    "vite": "beta",
+    "vite": "^7.3.1",
     "vite-plugin-vue-devtools": "^8.0.6",
     "vue-tsc": "^3.2.4"
   },
   "engines": {
     "node": "^20.19.0 || >=22.12.0"
-  },
-  "overrides": {
-    "vue": "beta",
-    "@vue/compiler-core": "beta",
-    "@vue/compiler-dom": "beta",
-    "@vue/compiler-sfc": "beta",
-    "@vue/compiler-ssr": "beta",
-    "@vue/compiler-vapor": "beta",
-    "@vue/reactivity": "beta",
-    "@vue/runtime-core": "beta",
-    "@vue/runtime-dom": "beta",
-    "@vue/runtime-vapor": "beta",
-    "@vue/server-renderer": "beta",
-    "@vue/shared": "beta",
-    "@vue/compat": "beta"
   }
 }

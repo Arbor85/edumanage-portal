@@ -1,61 +1,61 @@
 <!DOCTYPE html>
-<html lang="">
-  <head>
-    <meta charset="UTF-8">
-    <link rel="icon" href="/favicon.ico">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EduManage Portal</title>
-    <script>
-      (() => {
-        const stored = localStorage.getItem('theme');
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        const theme = stored === 'light' || stored === 'dark' ? stored : (prefersDark ? 'dark' : 'light');
-        if (theme === 'dark') {
-          document.documentElement.classList.add('dark');
-        } else {
-          document.documentElement.classList.remove('dark');
-        }
-      })();
-    </script>
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
-    <script>
-      tailwind.config = {
-        darkMode: "class",
-        theme: {
-          extend: {
-            colors: {
-              "primary": "#135bec",
-              "background-light": "#f6f6f8",
-              "background-dark": "#101622",
-              "surface-dark": "#1a2130",
-              "border-dark": "#2d3648",
-            },
-            fontFamily: {
-              "display": ["Lexend", "sans-serif"]
-            },
-            borderRadius: {
-              "DEFAULT": "0.25rem",
-              "lg": "0.5rem",
-              "xl": "0.75rem",
-              "2xl": "1rem",
-              "3xl": "1.5rem",
-              "full": "9999px"
-            },
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EduManage Portal</title>
+  <script>
+    (() => {
+      const stored = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const theme = stored === 'light' || stored === 'dark' ? stored : (prefersDark ? 'dark' : 'light');
+      if (theme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    })();
+  </script>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#135bec",
+            "background-light": "#f6f6f8",
+            "background-dark": "#101622",
+            "surface-dark": "#1a2130",
+            "border-dark": "#2d3648",
+          },
+          fontFamily: {
+            "display": ["Lexend", "sans-serif"]
+          },
+          borderRadius: {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "2xl": "1rem",
+            "3xl": "1.5rem",
+            "full": "9999px"
           },
         },
-      }
-    </script>
-    <style>
-      body { font-family: 'Lexend', sans-serif; }
-      .no-scrollbar::-webkit-scrollbar { display: none; }
-      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-      .ios-blur { backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
-    </style>
-  </head>
-  <body>
-    <div id="app"></div>
-    <script type="module" src="/src/main.ts"></script>
-  </body>
+      },
+    }
+  </script>
+  <style>
+    body { font-family: 'Lexend', sans-serif; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    .ios-blur { backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+  </style>
+  <link rel="stylesheet" href="/index.css">
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 antialiased overflow-x-hidden">
+  <div id="app"></div>
+  <script type="module" src="/src/main.ts"></script>
+</body>
 </html>
