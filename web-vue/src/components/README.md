@@ -1,0 +1,1 @@
+This folder will contain Vue components ported from the React web version.

@@ -1,0 +1,1 @@
+This folder will contain static assets (images, etc.) ported from the React web version.
