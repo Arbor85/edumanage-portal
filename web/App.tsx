@@ -13,7 +13,7 @@ import FitnessSplitPlanner from './components/pages/fitnes/SplitPlanner';
 import FitnessTrainingPlanConfirmation from './components/pages/fitnes/TrainingPlanConfirmation';
 import FitnessSplitPlansList from './components/pages/fitnes/SplitPlansList';
 import FitnessEditSplitPlan from './components/pages/fitnes/EditSplitPlan';
-import MenteesList from './components/pages/fitnes/MenteesList';
+import MenteesList from './components/pages/fitnes/mentees/MenteesList';
 import AcceptInvitation from './components/pages/fitnes/AcceptInvitation';
 import LoginPage from './components/LoginPage';
 import CallbackPage from './components/CallbackPage';

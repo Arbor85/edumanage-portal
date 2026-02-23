@@ -1,30 +1,29 @@
 import React, { useEffect, useState } from 'react';
+import EditMenteeDialog from './EditMenteeDialog';
 import { Link, useNavigate } from 'react-router-dom';
-import { getMentees, createMentee, deleteMentee } from '../../../services/menteesService';
-import { getTrainingPlans, deleteTrainingPlan } from '../../../services/trainingPlanService';
-import { useAuth } from '../../../contexts/AuthContext';
-import { Mentee } from '../../../types';
-import WorkoutActionBar from './components/WorkoutActionBar';
+import { getMentees, deleteMentee } from '../../../../services/menteesService';
+import { getTrainingPlans, deleteTrainingPlan } from '../../../../services/trainingPlanService';
+import { useAuth } from '../../../../contexts/AuthContext';
+import { Mentee } from '../../../../types';
+import WorkoutActionBar from '../components/WorkoutActionBar';
+import CreateMenteeDialog from './CreateMenteeDialog';
 
 interface MenteesListProps {
   onInvite?: () => void;
 }
 
 const MenteesList: React.FC<MenteesListProps> = ({ onInvite }) => {
-  const navigate = useNavigate();
   const { user } = useAuth();
   const [mentees, setMentees] = useState<Mentee[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showInviteForm, setShowInviteForm] = useState(false);
-  const [inviteName, setInviteName] = useState('');
-  const [inviteEmail, setInviteEmail] = useState('');
-  const [inviteLoading, setInviteLoading] = useState(false);
-  const [inviteError, setInviteError] = useState<string | null>(null);
+  // Invite form state moved to CreateMenteeDialog
   const [selectedInviteKey, setSelectedInviteKey] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [menteeToDelete, setMenteeToDelete] = useState<Mentee | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [menteeToEdit, setMenteeToEdit] = useState<Mentee | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortField, setSortField] = useState<'name' | 'email_address' | 'status' | 'created'>('created');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
@@ -49,35 +48,7 @@ const MenteesList: React.FC<MenteesListProps> = ({ onInvite }) => {
     }
   };
 
-  const handleInvite = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!inviteName.trim() || !inviteEmail.trim()) {
-      setInviteError('Please fill in all fields');
-      return;
-    }
-
-    setInviteLoading(true);
-    setInviteError(null);
-    try {
-      if (!user?.sub) {
-        throw new Error('User not authenticated');
-      }
-      const newMentee = await createMentee({
-        name: inviteName,
-        email_address: inviteEmail,
-        creator_id: user.sub
-      });
-      setMentees([...mentees, newMentee]);
-      setInviteName('');
-      setInviteEmail('');
-      setShowInviteForm(false);
-      if (onInvite) onInvite();
-    } catch (err) {
-      setInviteError(err instanceof Error ? err.message : 'Failed to create mentee');
-    } finally {
-      setInviteLoading(false);
-    }
-  }
+  // Invite handler moved to CreateMenteeDialog
 
   const handleCopyInviteKey = (inviteKey: string) => {
     setSelectedInviteKey(inviteKey);
@@ -254,10 +225,7 @@ const MenteesList: React.FC<MenteesListProps> = ({ onInvite }) => {
                 </p>
               </div>
               <button
-                onClick={() => {
-                  setShowInviteForm(true);
-                  setInviteError(null);
-                }}
+                onClick={() => setShowInviteForm(true)}
                 className="flex items-center gap-2 justify-center px-6 py-3 bg-primary hover:bg-primary/90 text-white rounded-lg font-medium transition w-full"
               >
                 <span className="material-symbols-outlined">add_circle</span>
@@ -281,113 +249,114 @@ const MenteesList: React.FC<MenteesListProps> = ({ onInvite }) => {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-slate-200 dark:border-slate-700">
-                  <th 
-                    onClick={() => handleSort('name')}
-                    className="text-left py-3 px-4 font-semibold text-slate-700 dark:text-slate-300 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition select-none"
-                  >
-                    <div className="flex items-center gap-1">
-                      Name
-                      {sortField === 'name' && (
-                        <span className="material-symbols-outlined text-sm">
-                          {sortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward'}
-                        </span>
-                      )}
-                    </div>
+                  <th onClick={() => handleSort('name')} className="text-left py-3 px-4 font-semibold text-slate-700 dark:text-slate-300 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition select-none">
+                    <div className="flex items-center gap-1">Name{sortField === 'name' && (<span className="material-symbols-outlined text-sm">{sortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward'}</span>)}</div>
                   </th>
-                  <th 
-                    onClick={() => handleSort('email_address')}
-                    className="text-left py-3 px-4 font-semibold text-slate-700 dark:text-slate-300 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition select-none"
-                  >
-                    <div className="flex items-center gap-1">
-                      Email
-                      {sortField === 'email_address' && (
-                        <span className="material-symbols-outlined text-sm">
-                          {sortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward'}
-                        </span>
-                      )}
-                    </div>
+                  <th className="text-left py-3 px-4 font-semibold text-slate-700 dark:text-slate-300">Type/Status</th>
+                  <th onClick={() => handleSort('email_address')} className="text-left py-3 px-4 font-semibold text-slate-700 dark:text-slate-300 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition select-none">
+                    <div className="flex items-center gap-1">Email{sortField === 'email_address' && (<span className="material-symbols-outlined text-sm">{sortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward'}</span>)}</div>
                   </th>
-                  <th 
-                    onClick={() => handleSort('status')}
-                    className="text-left py-3 px-4 font-semibold text-slate-700 dark:text-slate-300 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition select-none"
-                  >
-                    <div className="flex items-center gap-1">
-                      Status
-                      {sortField === 'status' && (
-                        <span className="material-symbols-outlined text-sm">
-                          {sortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward'}
-                        </span>
-                      )}
-                    </div>
+                  <th onClick={() => handleSort('created')} className="text-left py-3 px-4 font-semibold text-slate-700 dark:text-slate-300 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition select-none">
+                    <div className="flex items-center gap-1">Created{sortField === 'created' && (<span className="material-symbols-outlined text-sm">{sortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward'}</span>)}</div>
                   </th>
-                  <th 
-                    onClick={() => handleSort('created')}
-                    className="text-left py-3 px-4 font-semibold text-slate-700 dark:text-slate-300 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition select-none"
-                  >
-                    <div className="flex items-center gap-1">
-                      Created
-                      {sortField === 'created' && (
-                        <span className="material-symbols-outlined text-sm">
-                          {sortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward'}
-                        </span>
-                      )}
-                    </div>
-                  </th>
-                  <th className="text-left py-3 px-4 font-semibold text-slate-700 dark:text-slate-300">Actions</th>
+                  <th className="text-left py-3 px-4 font-semibold text-slate-700 dark:text-slate-300">Notes</th>
+                  <th className="text-left py-3 px-4 font-semibold text-slate-700 dark:text-slate-300">Work</th>
+                  <th className="text-left py-3 px-4 font-semibold text-slate-700 dark:text-slate-300">Action</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredAndSortedMentees.map((mentee) => (
-                  <tr
-                    key={mentee.id}
-                    className="border-b border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition"
-                  >
-                    <td className="py-3 px-4 text-slate-900 dark:text-white">{mentee.name}</td>
-                    <td className="py-3 px-4 text-slate-600 dark:text-slate-400">{mentee.email_address}</td>
-                    <td className="py-3 px-4">{getStatusBadge(mentee.status)}</td>
-                    <td className="py-3 px-4 text-slate-600 dark:text-slate-400">{formatDate(mentee.created)}</td>
-                    <td className="py-3 px-4">
-                      <div className="flex gap-2">
-                        <Link
-                          to={`/split-plans/create?mentee=${mentee.id}`}
-                          className="flex items-center gap-1 px-3 py-1 rounded bg-green-100 hover:bg-green-200 dark:bg-green-950 dark:hover:bg-green-900 text-green-700 dark:text-green-300 text-xs font-medium transition"
-                        >
-                          <span className="material-symbols-outlined text-sm">add_circle</span>
-                          Create Plan
-                        </Link>
-                        <Link
-                          to={`/split-plans?mentee=${mentee.id}`}
-                          className="flex items-center gap-1 px-3 py-1 rounded bg-primary/10 hover:bg-primary/20 dark:bg-primary/20 dark:hover:bg-primary/30 text-primary text-xs font-medium transition"
-                        >
-                          <span className="material-symbols-outlined text-sm">fitness_center</span>
-                          Plans
-                        </Link>
-                        {mentee.status === 'invited' && (
-                          <button
-                            onClick={() => handleCopyInviteKey(mentee.invite_key)}
-                            className="flex items-center gap-1 px-3 py-1 rounded bg-blue-100 hover:bg-blue-200 dark:bg-blue-950 dark:hover:bg-blue-900 text-blue-700 dark:text-blue-300 text-xs font-medium transition"
+                {filteredAndSortedMentees.map((mentee) => {
+                  // Icon and tooltip for type
+                  let typeIcon = 'person', typeTooltip = 'In Person';
+                  if (mentee.type === 'Online') { typeIcon = 'wifi'; typeTooltip = 'Online'; }
+                  if (mentee.type === 'Group') { typeIcon = 'groups'; typeTooltip = 'Group'; }
+                  // Icon and tooltip for status
+                  let statusIcon = 'check_circle', statusTooltip = 'Active';
+                  if (mentee.status === 'Suspended') { statusIcon = 'pause_circle'; statusTooltip = 'Suspended'; }
+                  return (
+                    <tr
+                      key={mentee.id}
+                      className="border-b border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition"
+                    >
+                      <td className="py-3 px-4 text-slate-900 dark:text-white">{mentee.name}</td>
+                      <td className="py-3 px-4">
+                        <span className="inline-flex gap-2">
+                          <span title={typeTooltip} className="material-symbols-outlined text-base align-middle cursor-help">{typeIcon}</span>
+                          <span title={statusTooltip} className="material-symbols-outlined text-base align-middle cursor-help">{statusIcon}</span>
+                        </span>
+                      </td>
+                      <td className="py-3 px-4 text-slate-600 dark:text-slate-400">{mentee.email_address || '-'}</td>
+                      <td className="py-3 px-4 text-slate-600 dark:text-slate-400">{formatDate(mentee.created)}</td>
+                      <td className="py-3 px-4 text-slate-600 dark:text-slate-400 max-w-xs truncate" title={mentee.notes || ''}>
+                        {mentee.notes || '-'}
+                      </td>
+                      <td className="py-3 px-4">
+                        <div className="flex gap-2">
+                          <Link
+                            to={`/split-plans/create?mentee=${mentee.id}`}
+                            className="flex items-center gap-1 px-3 py-1 rounded bg-green-100 hover:bg-green-200 dark:bg-green-950 dark:hover:bg-green-900 text-green-700 dark:text-green-300 text-xs font-medium transition"
                           >
-                            <span className="material-symbols-outlined text-sm">share</span>
-                            Share
-                          </button>
-                        )}
+                            <span className="material-symbols-outlined text-sm">add_circle</span>
+                            Create Plan
+                          </Link>
+                          <Link
+                            to={`/split-plans?mentee=${mentee.id}`}
+                            className="flex items-center gap-1 px-3 py-1 rounded bg-primary/10 hover:bg-primary/20 dark:bg-primary/20 dark:hover:bg-primary/30 text-primary text-xs font-medium transition"
+                          >
+                            <span className="material-symbols-outlined text-sm">fitness_center</span>
+                            Plans
+                          </Link>
+                          {mentee.status === 'invited' && (
+                            <button
+                              onClick={() => handleCopyInviteKey(mentee.invite_key)}
+                              className="flex items-center gap-1 px-3 py-1 rounded bg-blue-100 hover:bg-blue-200 dark:bg-blue-950 dark:hover:bg-blue-900 text-blue-700 dark:text-blue-300 text-xs font-medium transition"
+                            >
+                              <span className="material-symbols-outlined text-sm">share</span>
+                              Share
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                      <td className="py-3 px-4">
                         <button
-                          onClick={() => setMenteeToDelete(mentee)}
-                          className="flex items-center gap-1 px-3 py-1 rounded bg-red-100 hover:bg-red-200 dark:bg-red-950 dark:hover:bg-red-900 text-red-700 dark:text-red-300 text-xs font-medium transition"
+                          onClick={() => setMenteeToEdit(mentee)}
+                          className="flex items-center gap-1 px-3 py-1 rounded bg-yellow-100 hover:bg-yellow-200 dark:bg-yellow-950 dark:hover:bg-yellow-900 text-yellow-700 dark:text-yellow-300 text-xs font-medium transition"
                         >
-                          <span className="material-symbols-outlined text-sm">delete</span>
-                          Delete
+                          <span className="material-symbols-outlined text-sm">edit</span>
+                          Edit
                         </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
         )}
       </div>
 
+      {/* Edit Mentee Dialog */}
+      {menteeToEdit && (
+        <EditMenteeDialog
+          mentee={menteeToEdit}
+          onClose={() => setMenteeToEdit(null)}
+          onDelete={(mentee) => { setMenteeToDelete(mentee); setMenteeToEdit(null); }}
+          onUpdate={() => {
+            setMenteeToEdit(null);
+            loadMentees();
+          }}
+        />
+      )}
+      {showInviteForm && (
+        <CreateMenteeDialog
+          onClose={() => setShowInviteForm(false)}
+          onCreate={mentee => {
+            setShowInviteForm(false);
+            loadMentees();
+            if (onInvite) onInvite();
+          }}
+        />
+      )}
       {selectedInviteKey && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4">
           <div className="bg-white dark:bg-surface-dark rounded-lg shadow-lg max-w-md w-full p-6 space-y-4">
@@ -428,85 +397,6 @@ const MenteesList: React.FC<MenteesListProps> = ({ onInvite }) => {
                 Close
               </button>
             </div>
-          </div>
-        </div>
-      )}
-
-      {showInviteForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4">
-          <div className="bg-white dark:bg-surface-dark rounded-lg shadow-lg max-w-md w-full p-6 space-y-4">
-            <div className="flex items-start justify-between">
-              <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Invite New Mentee</h3>
-              <button
-                onClick={() => {
-                  setShowInviteForm(false);
-                  setInviteError(null);
-                }}
-                className="text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition"
-              >
-                <span className="material-symbols-outlined">close</span>
-              </button>
-            </div>
-
-            {inviteError && (
-              <div className="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900 rounded-lg p-3 text-red-700 dark:text-red-300 text-sm">
-                {inviteError}
-              </div>
-            )}
-
-            <form onSubmit={handleInvite} className="space-y-3">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Name</label>
-                <input
-                  type="text"
-                  placeholder="Enter mentee's name"
-                  value={inviteName}
-                  onChange={(e) => setInviteName(e.target.value)}
-                  className="w-full px-3 py-2 rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-primary"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Email</label>
-                <input
-                  type="email"
-                  placeholder="Enter mentee's email"
-                  value={inviteEmail}
-                  onChange={(e) => setInviteEmail(e.target.value)}
-                  className="w-full px-3 py-2 rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-primary"
-                />
-              </div>
-
-              <div className="flex gap-2 pt-2">
-                <button
-                  type="submit"
-                  disabled={inviteLoading}
-                  className="flex-1 bg-primary hover:bg-primary/90 disabled:bg-primary/50 text-white py-2 rounded font-medium transition flex items-center justify-center gap-2"
-                >
-                  {inviteLoading ? (
-                    <>
-                      <span className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></span>
-                      Creating...
-                    </>
-                  ) : (
-                    <>
-                      <span className="material-symbols-outlined text-sm">add</span>
-                      Create & Invite
-                    </>
-                  )}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowInviteForm(false);
-                    setInviteError(null);
-                  }}
-                  className="flex-1 bg-slate-300 hover:bg-slate-400 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-900 dark:text-white py-2 rounded font-medium transition"
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
           </div>
         </div>
       )}
@@ -565,7 +455,6 @@ const MenteesList: React.FC<MenteesListProps> = ({ onInvite }) => {
           icon: 'add_circle',
           onClick: () => {
             setShowInviteForm(true);
-            setInviteError(null);
           }
         }}
       />

@@ -1,9 +1,26 @@
+export const updateMentee = async (menteeId: string, payload: Partial<Mentee>): Promise<Mentee> => {
+  const response = await fetch(`http://127.0.0.1:8000/api/mentees/${menteeId}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
+  });
+  if (!response.ok) {
+    throw new Error('Failed to update mentee.');
+  }
+  return (await response.json()) as Mentee;
+};
 import { Mentee } from '../types';
+
 
 export interface MenteeCreate {
   name: string;
-  email_address: string;
+  email_address?: string;
   creator_id: string;
+  type: 'InPerson' | 'Online' | 'Group';
+  status: 'Active' | 'Suspended';
+  notes?: string;
 }
 
 export const getMentees = async (userId: string, signal?: AbortSignal): Promise<Mentee[]> => {

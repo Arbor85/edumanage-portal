@@ -3,6 +3,20 @@ from __future__ import annotations
 import csv
 import json
 import math
+from fastapi import Depends, FastAPI, HTTPException, Query, Body
+from fastapi.encoders import jsonable_encoder
+from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import desc, func, select, text
+from sqlalchemy.orm import Session
+
+from .db import Base, SessionLocal, engine
+from .models import TrainingPlan, WorkoutHistory, Mentee
+from .schemas import TrainingPlanCreate, TrainingPlanOut, WorkoutHistoryCreate, WorkoutHistoryOut, WorkoutHistoryPage, MenteeCreate, MenteeOut, AcceptInvitationRequest
+from .auth import router as auth_router
+
+# PATCH endpoint for updating mentee will be placed after app is defined
+
+
 from datetime import datetime
 from pathlib import Path
 
@@ -14,16 +28,7 @@ backend_dir = Path(__file__).parent.parent
 env_path = backend_dir / ".env"
 load_dotenv(dotenv_path=env_path)
 
-from fastapi import Depends, FastAPI, HTTPException, Query
-from fastapi.encoders import jsonable_encoder
-from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy import desc, func, select, text
-from sqlalchemy.orm import Session
 
-from .db import Base, SessionLocal, engine
-from .models import TrainingPlan, WorkoutHistory, Mentee
-from .schemas import TrainingPlanCreate, TrainingPlanOut, WorkoutHistoryCreate, WorkoutHistoryOut, WorkoutHistoryPage, MenteeCreate, MenteeOut, AcceptInvitationRequest
-from .auth import router as auth_router
 
 app = FastAPI(
     title="Alpaki Planner Fitness API",
@@ -412,11 +417,19 @@ def create_mentee(
     payload: MenteeCreate,
     db: Session = Depends(get_db),
 ) -> MenteeOut:
-    existing = db.execute(select(Mentee).where(Mentee.email_address == payload.email_address)).scalar_one_or_none()
-    if existing:
-        raise HTTPException(status_code=400, detail="Mentee with this email already exists.")
+    if payload.email_address:
+        existing = db.execute(select(Mentee).where(Mentee.email_address == payload.email_address)).scalar_one_or_none()
+        if existing:
+            raise HTTPException(status_code=400, detail="Mentee with this email already exists.")
 
-    mentee = Mentee(name=payload.name, email_address=payload.email_address, creator_id=payload.creator_id)
+    mentee = Mentee(
+        name=payload.name,
+        email_address=payload.email_address,
+        creator_id=payload.creator_id,
+        type=payload.type,
+        status=payload.status,
+        notes=payload.notes
+    )
     db.add(mentee)
     db.commit()
     db.refresh(mentee)
@@ -453,5 +466,23 @@ def delete_mentee(
     db.commit()
 
     return {"message": "Mentee deleted successfully."}
+
+
+@app.patch("/api/mentees/{mentee_id}", response_model=MenteeOut, tags=["Mentees"], summary="Update a mentee")
+def update_mentee(
+    mentee_id: str,
+    payload: dict = Body(...),
+    db: Session = Depends(get_db),
+) -> MenteeOut:
+    mentee = db.get(Mentee, mentee_id)
+    if not mentee:
+        raise HTTPException(status_code=404, detail="Mentee not found.")
+    # Only update provided fields
+    for key, value in payload.items():
+        if hasattr(mentee, key):
+            setattr(mentee, key, value)
+    db.commit()
+    db.refresh(mentee)
+    return MenteeOut.model_validate(mentee)
 
 

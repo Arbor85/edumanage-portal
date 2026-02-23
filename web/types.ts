@@ -71,12 +71,18 @@ export interface ScheduleItem {
   durationHours: number;
 }
 
+
+export type MenteeType = 'InPerson' | 'Online' | 'Group';
+export type MenteeStatus = 'Active' | 'Suspended';
+
 export interface Mentee {
   id: string;
   name: string;
-  email_address: string;
+  email_address?: string;
   invite_key: string;
-  status: 'invited' | 'accepted' | 'deleted';
+  status: MenteeStatus;
+  type: MenteeType;
+  notes?: string;
   created: string;
 }
 

@@ -80,16 +80,20 @@ class TrainingPlanOut(TrainingPlanCreate):
         from_attributes = True
 
 
+
 class MenteeCreate(BaseModel):
     name: str
-    email_address: str
+    email_address: str | None = None
     creator_id: str
+    type: str = "InPerson"  # InPerson, Online, Group
+    status: str = "Active"   # Active, Suspended
+    notes: str | None = None
+
 
 
 class MenteeOut(MenteeCreate):
     id: str
     invite_key: str
-    status: str
     created: datetime
 
     class Config:

@@ -45,8 +45,10 @@ class Mentee(Base):
     creator_id = Column(String(255), nullable=True, index=True)
     user_id = Column(String(255), nullable=True, index=True)
     name = Column(String(200), nullable=False)
-    email_address = Column(String(255), nullable=False, unique=True, index=True)
+    email_address = Column(String(255), nullable=True, unique=False, index=True)  # Now optional
     invite_key = Column(String(36), nullable=False, unique=True, index=True, default=lambda: str(uuid.uuid4()))
-    status = Column(String(50), nullable=False, default="invited", index=True)
+    status = Column(String(50), nullable=False, default="Active", index=True)  # Default to Active
+    type = Column(String(50), nullable=False, default="InPerson", index=True)  # New: InPerson, Online, Group
+    notes = Column(String(1000), nullable=True)  # New: free text notes
     created = Column(DateTime, nullable=False, default=datetime.utcnow)
 
