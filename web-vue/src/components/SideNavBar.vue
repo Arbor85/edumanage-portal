@@ -7,16 +7,23 @@
       <li class="my-5">
         <router-link to="/profile" class="block px-4 py-2 rounded hover:bg-slate-700 transition-colors" active-class="bg-slate-700">Profile</router-link>
       </li>
-      <!-- Add more navigation links as needed -->
+      <li class="my-5" v-if="!isAuthenticated">
+        <router-link to="/login" class="block px-4 py-2 rounded hover:bg-slate-700 transition-colors" active-class="bg-slate-700">Login</router-link>
+      </li>
     </ul>
   </nav>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
+import { useAuth0 } from '@auth0/auth0-vue';
 
 export default defineComponent({
   name: 'SideNavBar',
+  setup() {
+    const { isAuthenticated } = useAuth0();
+    return { isAuthenticated };
+  }
 });
 </script>
 
