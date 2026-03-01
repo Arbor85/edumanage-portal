@@ -28,6 +28,10 @@ import { useAuth0 } from '@auth0/auth0-vue';
 const { loginWithRedirect } = useAuth0();
 
 function loginWith(connection: string) {
-  loginWithRedirect({ connection });
+  loginWithRedirect({
+    authorizationParams: {
+      connection
+    }
+  });
 }
 </script>
