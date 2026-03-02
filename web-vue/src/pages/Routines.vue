@@ -4,6 +4,31 @@
       <h1 class="text-2xl font-bold text-slate-900 dark:text-slate-100">Routines</h1>
     </div>
 
+    <div class="mb-4 flex items-center justify-end">
+      <div class="inline-flex overflow-hidden rounded-md border border-slate-300 dark:border-slate-600">
+        <button
+          type="button"
+          @click="viewMode = 'tile'"
+          class="px-3 py-1.5 text-xs font-medium"
+          :class="viewMode === 'tile'
+            ? 'bg-emerald-500 text-white'
+            : 'bg-white text-slate-700 hover:bg-slate-100 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600'"
+        >
+          Tile
+        </button>
+        <button
+          type="button"
+          @click="viewMode = 'list'"
+          class="border-l border-slate-300 px-3 py-1.5 text-xs font-medium dark:border-slate-600"
+          :class="viewMode === 'list'
+            ? 'bg-emerald-500 text-white'
+            : 'bg-white text-slate-700 hover:bg-slate-100 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600'"
+        >
+          List
+        </button>
+      </div>
+    </div>
+
     <div
       v-if="errorMessage"
       class="mb-3 rounded-md border border-rose-300 bg-rose-50 px-3 py-2 text-sm text-rose-700 dark:border-rose-700 dark:bg-rose-900/30 dark:text-rose-300"
@@ -18,10 +43,7 @@
       Loading routines...
     </div>
 
-    <div
-      v-else
-      class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800"
-    >
+    <div v-else-if="viewMode === 'list'" class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
       <div class="overflow-x-auto">
         <table class="min-w-full text-left text-sm">
           <thead class="bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200">
@@ -67,6 +89,43 @@
       </div>
     </div>
 
+    <div v-else class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <article
+        v-for="routine in routines"
+        :key="routine.id"
+        class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800"
+      >
+        <p class="mb-3 font-semibold text-slate-900 dark:text-slate-100">{{ routine.name }}</p>
+
+        <div class="flex flex-wrap gap-2">
+          <span
+            v-for="excercise in routine.excercises"
+            :key="`${routine.id}-${excercise}`"
+            class="rounded-full bg-slate-200 px-2 py-1 text-xs text-slate-700 dark:bg-slate-700 dark:text-slate-200"
+          >
+            {{ excercise }}
+          </span>
+        </div>
+
+        <div class="mt-4 flex justify-end">
+          <button
+            type="button"
+            @click="openEditDialog(routine)"
+            class="inline-flex items-center rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600"
+          >
+            Edit
+          </button>
+        </div>
+      </article>
+
+      <div
+        v-if="routines.length === 0"
+        class="md:col-span-2 lg:col-span-3 rounded-md border border-slate-300 bg-white p-4 text-sm text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+      >
+        No routines yet.
+      </div>
+    </div>
+
     <div class="fixed bottom-0 left-56 right-0 z-30 px-6 pb-3">
       <div class="mx-auto w-full max-w-5xl">
         <DialogActionPanel primary-label="Add routine" @primary-click="openCreateDialog" />
@@ -102,26 +161,21 @@
 
           <div>
             <p class="mb-2 text-sm font-medium text-slate-700 dark:text-slate-200">Excercises</p>
-            <div class="max-h-56 space-y-2 overflow-auto rounded-md border border-slate-300 p-2 dark:border-slate-600">
-              <label
-                v-for="excercise in excerciseOptions"
-                :key="excercise"
-                class="flex items-center gap-2 rounded px-2 py-1 text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700"
-              >
-                <input
-                  type="checkbox"
-                  :value="excercise"
-                  :checked="formExcercises.includes(excercise)"
-                  @change="toggleExcercise(excercise)"
-                  class="h-4 w-4 rounded border-slate-300 text-emerald-500 focus:ring-emerald-500"
-                />
-                <span>{{ excercise }}</span>
-              </label>
+            <SelectExcercise v-model="formExcercises" :options="excerciseOptions" button-text="Add excercises" />
 
-              <p v-if="excerciseOptions.length === 0" class="px-2 py-1 text-xs text-slate-500 dark:text-slate-300">
-                No excercises available.
-              </p>
+            <div class="mt-3 flex flex-wrap gap-2">
+              <span
+                v-for="excercise in formExcercises"
+                :key="excercise"
+                class="rounded-full bg-slate-200 px-2 py-1 text-xs text-slate-700 dark:bg-slate-700 dark:text-slate-200"
+              >
+                {{ excercise }}
+              </span>
             </div>
+
+            <p v-if="formExcercises.length === 0" class="mt-2 text-xs text-slate-500 dark:text-slate-300">
+              No excercises selected.
+            </p>
           </div>
 
           <DialogActionPanel
@@ -141,6 +195,8 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import DialogActionPanel from '../components/DialogActionPanel.vue'
+import SelectExcercise from '../components/SelectExcercise.vue'
+import { useLocalStorageState } from '../composables/useLocalStorageState'
 import { usePageTitle } from '../composables/usePageTitle'
 import { useExcercisesApi } from '../services/excercisesApi'
 import { routinesApi } from '../services/routinesApi'
@@ -151,6 +207,7 @@ usePageTitle('Routines')
 const excercisesApi = useExcercisesApi()
 
 const routines = ref<Routine[]>([])
+const viewMode = useLocalStorageState<'tile' | 'list'>('routines:viewMode', 'list')
 const excerciseOptions = ref<string[]>([])
 const isLoading = ref(false)
 const errorMessage = ref('')
@@ -209,15 +266,6 @@ const closeDialog = () => {
   editingRoutineId.value = null
   formName.value = ''
   formExcercises.value = []
-}
-
-const toggleExcercise = (excerciseName: string) => {
-  if (formExcercises.value.includes(excerciseName)) {
-    formExcercises.value = formExcercises.value.filter((item) => item !== excerciseName)
-    return
-  }
-
-  formExcercises.value = [...formExcercises.value, excerciseName]
 }
 
 const submitRoutine = async () => {
