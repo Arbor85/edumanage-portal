@@ -1,10 +1,31 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { authGuard } from '@auth0/auth0-vue'
 
 import Home from './pages/Home.vue'
 import Profile from './pages/Profile.vue'
 import Login from './pages/Login.vue'
 import Clients from './pages/Clients.vue'
+import Invite from './pages/Invite.vue'
+
+const hasAuth0CacheEntries = () => {
+  return Object.keys(localStorage).some((key) => key.startsWith('@@auth0spajs@@'))
+}
+
+const isUserAuthenticated = () => {
+  return localStorage.getItem('auth0.is.authenticated') === 'true' || hasAuth0CacheEntries()
+}
+
+const requireAuth = (to: { fullPath: string }) => {
+  if (isUserAuthenticated()) {
+    return true
+  }
+
+  return {
+    name: 'Login',
+    query: {
+      redirect: to.fullPath,
+    },
+  }
+}
 
 const routes = [
   {
@@ -22,7 +43,13 @@ const routes = [
     path: '/clients',
     name: 'Clients',
     component: Clients,
-    beforeEnter: authGuard,
+    beforeEnter: requireAuth,
+  },
+  {
+    path: '/invite/:invitationCode',
+    name: 'Invite',
+    component: Invite,
+    beforeEnter: requireAuth,
   },
   {
     path: '/login',

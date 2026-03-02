@@ -1,106 +1,58 @@
 from __future__ import annotations
 
-from datetime import date, datetime
+from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
+ClientTag = Literal[
+    "Online",
+    "Inperson",
+    "Group",
+    "Female",
+    "Male",
+    "Gym",
+    "Mix",
+    "CrossFit",
+]
 
-class WorkoutSet(BaseModel):
-    exercise_title: str
-    superset_id: int | None = None
-    exercise_notes: str | None = None
-    set_index: int
-    set_type: str
-    weight_kg: float | None = None
-    reps: int | None = None
-
-
-class WorkoutHistoryOut(BaseModel):
-    id: int
-    title: str
-    workout_date: date
-    duration_minutes: int
-    volume_kg: float
-    sets: int
-    workout_sets: list[WorkoutSet]
-    start_time: datetime | None = None
-    end_time: datetime | None = None
-    created_at: datetime
-
-    class Config:
-        from_attributes = True
+ClientStatus = Literal["Active", "Suspended", "Pending"]
 
 
-class WorkoutHistoryPage(BaseModel):
-    items: list[WorkoutHistoryOut]
-    page: int = Field(ge=1)
-    page_size: int = Field(ge=1)
-    total: int = Field(ge=0)
-    total_pages: int = Field(ge=0)
-
-
-class WorkoutHistoryCreate(BaseModel):
-    title: str
-    workout_date: date
-    duration_minutes: int
-    volume_kg: float
-    sets: int
-    workout_sets: list[WorkoutSet]
-    start_time: datetime | None = None
-    end_time: datetime | None = None
-
-
-class TrainingPlanSet(BaseModel):
-    type: str
-    weight: str
-    reps: str
-
-
-class TrainingPlanExercise(BaseModel):
+class ClientBase(BaseModel):
     name: str
-    sets: list[TrainingPlanSet]
+    tags: list[ClientTag]
+    imageUrl: str = Field(min_length=1)
+    status: ClientStatus
+    invitationCode: str = Field(min_length=1)
 
 
-class TrainingPlanCreate(BaseModel):
+class ClientCreate(ClientBase):
+    pass
+
+
+class ClientUpdate(ClientBase):
+    pass
+
+
+class ClientOut(ClientBase):
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+
+    imageUrl: str = Field(validation_alias="image_url")
+    invitationCode: str = Field(validation_alias="invitation_code")
+    currentUserId: int | None = Field(default=None, validation_alias="current_user_id")
+
+
+class UserBase(BaseModel):
     name: str
-    description: str | None = None
-    template_id: str
-    template_name: str
-    days_of_week: list[str] = Field(min_length=1)
-    exercises_by_day: dict[str, list[TrainingPlanExercise]] = Field(default_factory=dict)
-    creator_id: str | None = None
-    mentee_id: str | None = None
+    email: str
+    externalId: str = Field(min_length=1)
 
 
-class TrainingPlanOut(TrainingPlanCreate):
-    id: int
-    created_at: datetime
+class UserOut(UserBase):
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
 
-    class Config:
-        from_attributes = True
+    externalId: str = Field(validation_alias="external_id")
 
 
-
-class MenteeCreate(BaseModel):
-    name: str
-    email_address: str | None = None
-    creator_id: str
-    type: str = "InPerson"  # InPerson, Online, Group
-    status: str = "Active"   # Active, Suspended
-    notes: str | None = None
-
-
-
-class MenteeOut(MenteeCreate):
-    id: str
-    invite_key: str
-    created: datetime
-
-    class Config:
-        from_attributes = True
-
-
-class AcceptInvitationRequest(BaseModel):
-    name: str
-    user_id: str
-
+class AcceptClientInvitationRequest(BaseModel):
+    imageUrl: str = Field(min_length=1)

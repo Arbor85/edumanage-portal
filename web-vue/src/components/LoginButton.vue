@@ -11,12 +11,26 @@
 <script setup lang="ts">
 import { useAuth0 } from '@auth0/auth0-vue'
 
+const props = withDefaults(
+  defineProps<{
+    returnTo?: string
+  }>(),
+  {
+    returnTo: '/',
+  },
+)
+
+const LOGIN_RETURN_TO_KEY = 'login:returnTo'
+
 const { loginWithRedirect, isLoading } = useAuth0()
 
 const handleLogin = () => {
+  sessionStorage.setItem(LOGIN_RETURN_TO_KEY, props.returnTo)
+
   loginWithRedirect({
     authorizationParams: {
       scope: 'openid profile email',
+      redirect_uri: `${window.location.origin}/login`,
     },
   })
 }

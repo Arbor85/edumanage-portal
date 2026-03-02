@@ -4,57 +4,56 @@
       <h1 class="text-2xl font-bold text-slate-900 dark:text-slate-100">Clients</h1>
     </div>
 
-    <div v-if="!isAuthenticated" class="rounded-md border border-slate-300 bg-white p-4 text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
-      This page is available only for logged in users.
-    </div>
+    <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center">
+      <input v-model.trim="searchQuery" type="text" placeholder="Search by name, status or tag"
+        class="w-full sm:flex-1 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100" />
+      <div class="flex items-center gap-2">
+        <div class="inline-flex overflow-hidden rounded-md border border-slate-300 dark:border-slate-600">
+          <button type="button" @click="viewMode = 'tile'" class="px-3 py-1.5 text-xs font-medium"
+            :class="viewMode === 'tile' ? 'bg-emerald-500 text-white' : 'bg-white text-slate-700 hover:bg-slate-100 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600'">
+            Tile
+          </button>
+          <button type="button" @click="viewMode = 'list'"
+            class="border-l border-slate-300 px-3 py-1.5 text-xs font-medium dark:border-slate-600"
+            :class="viewMode === 'list' ? 'bg-emerald-500 text-white' : 'bg-white text-slate-700 hover:bg-slate-100 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600'">
+            List
+          </button>
+        </div>
 
-    <div v-else class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center">
-      <input
-        v-model.trim="searchQuery"
-        type="text"
-        placeholder="Search by name, status or tag"
-        class="w-full sm:flex-1 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
-      />
-      <div class="inline-flex overflow-hidden rounded-md border border-slate-300 dark:border-slate-600">
-        <button
-          type="button"
-          @click="viewMode = 'tile'"
-          class="px-3 py-1.5 text-xs font-medium"
-          :class="viewMode === 'tile' ? 'bg-emerald-500 text-white' : 'bg-white text-slate-700 hover:bg-slate-100 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600'"
-        >
-          Tile
-        </button>
-        <button
-          type="button"
-          @click="viewMode = 'list'"
-          class="border-l border-slate-300 px-3 py-1.5 text-xs font-medium dark:border-slate-600"
-          :class="viewMode === 'list' ? 'bg-emerald-500 text-white' : 'bg-white text-slate-700 hover:bg-slate-100 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600'"
-        >
-          List
+        <button type="button" @click="loadClients" :disabled="isLoadingClients" aria-label="Refresh clients"
+          title="Refresh clients"
+          class="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white p-2 text-slate-700 hover:bg-slate-100 disabled:opacity-60 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            class="h-4 w-4" :class="isLoadingClients ? 'animate-spin' : ''">
+            <path d="M21 12a9 9 0 1 1-2.64-6.36" />
+            <polyline points="21 3 21 9 15 9" />
+          </svg>
         </button>
       </div>
     </div>
 
-    <div v-if="isAuthenticated">
+    <div>
+      <div v-if="clientsError"
+        class="mb-3 rounded-md border border-rose-300 bg-rose-50 px-3 py-2 text-sm text-rose-700 dark:border-rose-700 dark:bg-rose-900/30 dark:text-rose-300">
+        {{ clientsError }}
+      </div>
+
+      <div v-if="isLoadingClients"
+        class="mb-3 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
+        Loading clients...
+      </div>
+
       <div v-if="viewMode === 'tile'" class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <article
-          v-for="client in filteredClients"
-          :key="client.invitationCode"
-          class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800"
-        >
+        <article v-for="client in filteredClients" :key="client.invitationCode"
+          class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
           <div class="mb-3 flex items-center gap-3">
-            <img
-              :src="client.imageUrl"
-              :alt="`${client.name} image`"
-              class="h-12 w-12 rounded-full object-cover border border-slate-200 dark:border-slate-600"
-            />
+            <img :src="client.imageUrl" :alt="`${client.name} image`"
+              class="h-12 w-12 rounded-full object-cover border border-slate-200 dark:border-slate-600" />
             <div>
               <div class="flex items-center gap-2">
                 <p class="font-semibold text-slate-900 dark:text-slate-100">{{ client.name }}</p>
-                <span
-                  class="rounded-full px-2 py-0.5 text-[10px] font-medium"
-                  :class="getStatusBadgeClass(client.status)"
-                >
+                <span class="rounded-full px-2 py-0.5 text-[10px] font-medium"
+                  :class="getStatusBadgeClass(client.status)">
                   {{ client.status }}
                 </span>
               </div>
@@ -62,35 +61,28 @@
           </div>
 
           <div class="flex flex-wrap gap-2">
-            <span
-              v-for="tag in client.tags"
-              :key="`${client.invitationCode}-${tag}`"
-              class="rounded-full bg-slate-200 px-2 py-1 text-xs text-slate-700 dark:bg-slate-700 dark:text-slate-200"
-            >
+            <span v-for="tag in client.tags" :key="`${client.invitationCode}-${tag}`"
+              class="rounded-full bg-slate-200 px-2 py-1 text-xs text-slate-700 dark:bg-slate-700 dark:text-slate-200">
               {{ tag }}
             </span>
           </div>
 
           <div class="mt-4 flex justify-end gap-2">
-            <button
-              type="button"
-              @click="openEditDialog(client)"
-              class="inline-flex items-center rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600"
-            >
+            <button type="button" @click="openEditDialog(client)"
+              class="inline-flex items-center rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600">
               Edit
             </button>
           </div>
         </article>
 
-        <div
-          v-if="filteredClients.length === 0"
-          class="md:col-span-2 lg:col-span-3 rounded-md border border-slate-300 bg-white p-4 text-sm text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
-        >
+        <div v-if="filteredClients.length === 0"
+          class="md:col-span-2 lg:col-span-3 rounded-md border border-slate-300 bg-white p-4 text-sm text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
           No clients found for "{{ searchQuery }}".
         </div>
       </div>
 
-      <div v-else class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
+      <div v-else
+        class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
         <div class="overflow-x-auto">
           <table class="min-w-full text-left text-sm">
             <thead class="bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200">
@@ -102,43 +94,32 @@
               </tr>
             </thead>
             <tbody>
-              <tr
-                v-for="client in filteredClients"
-                :key="client.invitationCode"
-                class="border-t border-slate-200 dark:border-slate-700"
-              >
+              <tr v-for="client in filteredClients" :key="client.invitationCode"
+                class="border-t border-slate-200 dark:border-slate-700">
                 <td class="px-4 py-3">
                   <div class="flex items-center gap-3">
-                    <img
-                      :src="client.imageUrl"
-                      :alt="`${client.name} image`"
-                      class="h-9 w-9 rounded-full object-cover border border-slate-200 dark:border-slate-600"
-                    />
+                    <img :src="client.imageUrl" :alt="`${client.name} image`"
+                      class="h-9 w-9 rounded-full object-cover border border-slate-200 dark:border-slate-600" />
                     <p class="font-medium text-slate-900 dark:text-slate-100">{{ client.name }}</p>
                   </div>
                 </td>
                 <td class="px-4 py-3">
                   <div class="flex flex-wrap gap-1.5">
-                    <span
-                      v-for="tag in client.tags"
-                      :key="`${client.invitationCode}-${tag}`"
-                      class="rounded-full bg-slate-200 px-2 py-0.5 text-[11px] text-slate-700 dark:bg-slate-700 dark:text-slate-200"
-                    >
+                    <span v-for="tag in client.tags" :key="`${client.invitationCode}-${tag}`"
+                      class="rounded-full bg-slate-200 px-2 py-0.5 text-[11px] text-slate-700 dark:bg-slate-700 dark:text-slate-200">
                       {{ tag }}
                     </span>
                   </div>
                 </td>
                 <td class="px-4 py-3">
-                  <span class="rounded-full px-2 py-0.5 text-[10px] font-medium" :class="getStatusBadgeClass(client.status)">
+                  <span class="rounded-full px-2 py-0.5 text-[10px] font-medium"
+                    :class="getStatusBadgeClass(client.status)">
                     {{ client.status }}
                   </span>
                 </td>
                 <td class="px-4 py-3 text-right">
-                  <button
-                    type="button"
-                    @click="openEditDialog(client)"
-                    class="inline-flex items-center rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600"
-                  >
+                  <button type="button" @click="openEditDialog(client)"
+                    class="inline-flex items-center rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600">
                     Edit
                   </button>
                 </td>
@@ -147,101 +128,77 @@
           </table>
         </div>
 
-        <div
-          v-if="filteredClients.length === 0"
-          class="border-t border-slate-200 px-4 py-4 text-sm text-slate-700 dark:border-slate-700 dark:text-slate-200"
-        >
+        <div v-if="filteredClients.length === 0"
+          class="border-t border-slate-200 px-4 py-4 text-sm text-slate-700 dark:border-slate-700 dark:text-slate-200">
           No clients found for "{{ searchQuery }}".
         </div>
       </div>
 
       <div class="fixed bottom-0 left-56 right-0 z-30 px-6 pb-3">
         <div class="mx-auto w-full max-w-5xl">
-          <DialogActionPanel
-            primary-label="Create invitation"
-            @primary-click="openDialog"
-          />
+          <DialogActionPanel primary-label="Create invitation" @primary-click="openDialog" />
         </div>
       </div>
     </div>
 
-    <div
-      v-if="showDialog"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4"
-      @click.self="closeDialog"
-    >
-      <div class="w-full max-w-lg rounded-lg border border-slate-200 bg-white p-5 shadow-lg dark:border-slate-700 dark:bg-slate-800">
+    <div v-if="showDialog" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4"
+      @click.self="closeDialog">
+      <div
+        class="w-full max-w-lg rounded-lg border border-slate-200 bg-white p-5 shadow-lg dark:border-slate-700 dark:bg-slate-800">
         <div class="mb-4 flex items-center justify-between">
           <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">
             {{ dialogMode === 'edit' ? 'Edit client' : 'Create invitation' }}
           </h2>
-          <button
-            type="button"
-            @click="closeDialog"
-            class="rounded px-2 py-1 text-slate-500 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700"
-          >
+          <button type="button" @click="closeDialog"
+            class="rounded px-2 py-1 text-slate-500 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700">
             ✕
           </button>
         </div>
 
         <div class="space-y-4">
           <template v-if="dialogMode === 'edit' || !generatedInvitationUrl">
-          <div>
-            <label for="client-name" class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">Name</label>
-            <input
-              id="client-name"
-              v-model.trim="formName"
-              type="text"
-              class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
-              placeholder="Client name"
-            />
-          </div>
+            <form class="space-y-4" @submit.prevent="submitDialog">
+              <div>
+                <label for="client-name"
+                  class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">Name</label>
+                <input id="client-name" v-model.trim="formName" type="text"
+                  class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+                  placeholder="Client name" />
+              </div>
 
-          <div>
-            <p class="mb-2 text-sm font-medium text-slate-700 dark:text-slate-200">Tags</p>
-            <div class="flex flex-wrap items-center gap-2">
-              <div v-for="group in tagGroups" :key="group.name">
-                <div class="inline-flex overflow-hidden rounded-md border border-slate-300 dark:border-slate-600">
-                  <button
-                    v-for="tag in group.tags"
-                    :key="tag"
-                    type="button"
-                    @click="toggleTag(tag)"
-                    class="px-3 py-1 text-xs font-medium transition border-r border-slate-300 last:border-r-0 dark:border-slate-600"
-                    :class="formTags.includes(tag)
-                      ? 'border-emerald-500 bg-emerald-500 text-white'
-                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600'"
-                  >
-                    {{ tag }}
-                  </button>
+              <div>
+                <p class="mb-2 text-sm font-medium text-slate-700 dark:text-slate-200">Tags</p>
+                <div class="flex flex-wrap items-center gap-2">
+                  <div v-for="group in tagGroups" :key="group.name">
+                    <div class="inline-flex overflow-hidden rounded-md border border-slate-300 dark:border-slate-600">
+                      <button v-for="tag in group.tags" :key="tag" type="button" @click="toggleTag(tag)"
+                        class="px-3 py-1 text-xs font-medium transition border-r border-slate-300 last:border-r-0 dark:border-slate-600"
+                        :class="formTags.includes(tag)
+                          ? 'border-emerald-500 bg-emerald-500 text-white'
+                          : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600'">
+                        {{ tag }}
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
-
-          <DialogActionPanel
-            :primary-label="dialogMode === 'edit' ? 'Save changes' : 'Create invitation'"
-            :primary-disabled="!canCreate"
-            :secondary-label="secondaryActionLabel"
-            :secondary-variant="secondaryActionVariant"
-            @primary-click="submitDialog"
-            @secondary-click="runSecondaryDialogAction"
-          />
+              <div v-if="generatedInvitationUrl && canCopyInvitationUrl"
+                class="rounded-md border border-emerald-300 bg-emerald-50 p-3 dark:border-emerald-700 dark:bg-emerald-900/30">
+                <div class="mb-2 flex items-center justify-between gap-2">
+                  <p class="text-sm font-medium text-emerald-800 dark:text-emerald-300">Invitation URL</p>
+                  <button v-if="canCopyInvitationUrl" type="button" @click="copyInvitationUrl"
+                    class="inline-flex items-center rounded-md border border-emerald-400 bg-white px-2 py-1 text-xs font-medium text-emerald-800 hover:bg-emerald-100 dark:border-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-200 dark:hover:bg-emerald-900/60">
+                    {{ isInvitationUrlCopied ? 'Copied' : 'Copy URL' }}
+                  </button>
+                </div>
+                <p class="break-all text-sm text-emerald-900 dark:text-emerald-200">{{ generatedInvitationUrl }}</p>
+              </div>
+              <DialogActionPanel :primary-label="dialogMode === 'edit' ? 'Save changes' : 'Create invitation'"
+                :primary-disabled="!canCreate" cancel-label="Cancel" :secondary-label="secondaryActionLabel"
+                :secondary-variant="secondaryActionVariant" primary-button-type="submit" @primary-click="submitDialog"
+                @secondary-click="runSecondaryDialogAction" @cancel-click="closeDialog" />
+            </form>
           </template>
-
-          <div v-if="generatedInvitationUrl" class="rounded-md border border-emerald-300 bg-emerald-50 p-3 dark:border-emerald-700 dark:bg-emerald-900/30">
-            <div class="mb-2 flex items-center justify-between gap-2">
-              <p class="text-sm font-medium text-emerald-800 dark:text-emerald-300">Invitation URL</p>
-              <button
-                type="button"
-                @click="copyInvitationUrl"
-                class="inline-flex items-center rounded-md border border-emerald-400 bg-white px-2 py-1 text-xs font-medium text-emerald-800 hover:bg-emerald-100 dark:border-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-200 dark:hover:bg-emerald-900/60"
-              >
-                {{ isInvitationUrlCopied ? 'Copied' : 'Copy URL' }}
-              </button>
-            </div>
-            <p class="break-all text-sm text-emerald-900 dark:text-emerald-200">{{ generatedInvitationUrl }}</p>
-          </div>
         </div>
       </div>
     </div>
@@ -249,15 +206,16 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { useAuth0 } from '@auth0/auth0-vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import type { Client, ClientStatus, ClientTag } from '../types/client'
 import DialogActionPanel from '../components/DialogActionPanel.vue'
 import { usePageTitle } from '../composables/usePageTitle'
+import { useLocalStorageState } from '../composables/useLocalStorageState'
+import { useClientsApi } from '../services/clientsApi'
 
 usePageTitle('Clients')
 
-const { isAuthenticated } = useAuth0()
+const clientsApi = useClientsApi()
 
 const tagGroups: Array<{ name: string; tags: ClientTag[] }> = [
   { name: 'Session Type', tags: ['Online', 'Inperson', 'Group'] },
@@ -265,24 +223,11 @@ const tagGroups: Array<{ name: string; tags: ClientTag[] }> = [
   { name: 'Training', tags: ['Gym', 'CrossFit', 'Mix'] },
 ]
 
-const clients = ref<Client[]>([
-  {
-    name: 'Alex Turner',
-    tags: ['Online', 'Male', 'Gym'],
-    imageUrl: 'https://i.pravatar.cc/160?img=11',
-    status: 'Active',
-    invitationCode: 'ALEX-4F9K2P',
-  },
-  {
-    name: 'Marta Lewis',
-    tags: ['Inperson', 'Female', 'CrossFit'],
-    imageUrl: 'https://i.pravatar.cc/160?img=32',
-    status: 'Pending',
-    invitationCode: 'MARTA-2J7VQX',
-  },
-])
+const clients = ref<Client[]>([])
 const searchQuery = ref('')
-const viewMode = ref<'tile' | 'list'>('tile')
+const viewMode = useLocalStorageState<'tile' | 'list'>('clients:viewMode', 'tile')
+const isLoadingClients = ref(false)
+const clientsError = ref('')
 
 const showDialog = ref(false)
 const formName = ref('')
@@ -321,6 +266,14 @@ const secondaryActionVariant = computed<'default' | 'success' | 'danger'>(() => 
   }
 
   return 'default'
+})
+
+const canCopyInvitationUrl = computed(() => {
+  if (dialogMode.value === 'create') {
+    return true
+  }
+
+  return editingClient.value?.status === 'Pending'
 })
 
 const editingClient = computed(() => {
@@ -366,6 +319,29 @@ const toggleTag = (tag: ClientTag) => {
   formTags.value = [...selectedFromOtherGroups, tag]
 }
 
+const loadClients = async () => {
+  isLoadingClients.value = true
+  clientsError.value = ''
+
+  try {
+    clients.value = await clientsApi.listClients()
+  } catch {
+    clientsError.value = 'Failed to load clients'
+  } finally {
+    isLoadingClients.value = false
+  }
+}
+
+const replaceClientInState = (nextClient: Client) => {
+  clients.value = clients.value.map((client) => {
+    if (client.invitationCode !== nextClient.invitationCode) {
+      return client
+    }
+
+    return nextClient
+  })
+}
+
 const openDialog = () => {
   dialogMode.value = 'create'
   editingClientCode.value = null
@@ -398,13 +374,12 @@ const generateInvitationCode = () => {
   return `${namePrefix}-${random}`
 }
 
-const createInvitation = () => {
+const createInvitation = async () => {
   if (!canCreate.value) {
     return
   }
 
   const invitationCode = generateInvitationCode()
-  generatedInvitationUrl.value = `${window.location.origin}/invite/${invitationCode}`
 
   const newClient: Client = {
     name: formName.value,
@@ -414,46 +389,56 @@ const createInvitation = () => {
     invitationCode,
   }
 
-  clients.value = [newClient, ...clients.value]
+  try {
+    const createdClient = await clientsApi.addClient(newClient)
+    generatedInvitationUrl.value = `${window.location.origin}/invite/${createdClient.invitationCode}`
+    clients.value = [createdClient, ...clients.value]
+    clientsError.value = ''
+  } catch {
+    clientsError.value = 'Failed to create invitation'
+  }
 }
 
-const saveClientChanges = () => {
+const saveClientChanges = async () => {
   if (!canCreate.value || !editingClientCode.value) {
     return
   }
 
-  clients.value = clients.value.map((client) => {
-    if (client.invitationCode !== editingClientCode.value) {
-      return client
-    }
+  const payload: Client = {
+    name: formName.value,
+    tags: [...formTags.value],
+    imageUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(formName.value)}&background=E2E8F0&color=0F172A`,
+    status: editingClient.value?.status || 'Pending',
+    invitationCode: editingClientCode.value,
+  }
 
-    return {
-      ...client,
-      name: formName.value,
-      tags: [...formTags.value],
-      imageUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(formName.value)}&background=E2E8F0&color=0F172A`,
-    }
-  })
+  try {
+    const updatedClient = await clientsApi.editClient(editingClientCode.value, payload)
+    replaceClientInState(updatedClient)
+    clientsError.value = ''
+  } catch {
+    clientsError.value = 'Failed to save client changes'
+  }
 }
 
-const submitDialog = () => {
+const submitDialog = async () => {
   if (dialogMode.value === 'edit') {
-    saveClientChanges()
+    await saveClientChanges()
     closeDialog()
     return
   }
 
-  createInvitation()
+  await createInvitation()
 }
 
-const runSecondaryDialogAction = () => {
+const runSecondaryDialogAction = async () => {
   if (secondaryActionLabel.value === 'Suspend') {
-    toggleEditingClientProgress('Suspended')
+    await toggleEditingClientProgress('Suspended')
     return
   }
 
   if (secondaryActionLabel.value === 'Resume') {
-    toggleEditingClientProgress('Active')
+    await toggleEditingClientProgress('Active')
   }
 }
 
@@ -461,23 +446,33 @@ const updateClientProgressStatus = (
   invitationCode: string,
   nextStatus: Extract<ClientStatus, 'Active' | 'Suspended'>,
 ) => {
-  clients.value = clients.value.map((client) => {
-    if (client.invitationCode !== invitationCode) {
-      return client
-    }
+  const currentClient = clients.value.find((client) => client.invitationCode === invitationCode)
 
-    const canSuspend = client.status === 'Active' && nextStatus === 'Suspended'
-    const canResume = client.status === 'Suspended' && nextStatus === 'Active'
+  if (!currentClient) {
+    return
+  }
 
-    if (!canSuspend && !canResume) {
-      return client
-    }
+  const canSuspend = currentClient.status === 'Active' && nextStatus === 'Suspended'
+  const canResume = currentClient.status === 'Suspended' && nextStatus === 'Active'
 
-    return {
-      ...client,
-      status: nextStatus,
-    }
-  })
+  if (!canSuspend && !canResume) {
+    return
+  }
+
+  const payload: Client = {
+    ...currentClient,
+    status: nextStatus,
+  }
+
+  return clientsApi
+    .editClient(invitationCode, payload)
+    .then((updatedClient) => {
+      replaceClientInState(updatedClient)
+      clientsError.value = ''
+    })
+    .catch(() => {
+      clientsError.value = 'Failed to update client status'
+    })
 }
 
 const toggleEditingClientProgress = (nextStatus: Extract<ClientStatus, 'Active' | 'Suspended'>) => {
@@ -485,8 +480,24 @@ const toggleEditingClientProgress = (nextStatus: Extract<ClientStatus, 'Active' 
     return
   }
 
-  updateClientProgressStatus(editingClientCode.value, nextStatus)
+  return updateClientProgressStatus(editingClientCode.value, nextStatus)
 }
+
+onMounted(() => {
+  loadClients()
+})
+
+watch(
+  () => true,
+  (value) => {
+    if (value) {
+      loadClients()
+      return
+    }
+
+    clients.value = []
+  },
+)
 
 const copyInvitationUrl = async () => {
   if (!generatedInvitationUrl.value) {

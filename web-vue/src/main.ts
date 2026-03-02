@@ -14,7 +14,7 @@ app.use(
     useRefreshTokens: true,
     useRefreshTokensFallback: true,
     authorizationParams: {
-      redirect_uri: `${window.location.origin}/callback`,
+      redirect_uri: `${window.location.origin}/login`,
       scope: 'openid profile email',
     },
   }),

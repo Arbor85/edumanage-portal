@@ -1,18 +1,30 @@
 <template>
   <div :class="panelClass">
     <div class="flex items-center justify-between gap-3">
-      <button
-        v-if="secondaryLabel"
-        type="button"
-        @click="$emit('secondary-click')"
-        :class="secondaryButtonClass"
-      >
-        {{ secondaryLabel }}
-      </button>
-      <span v-else></span>
+      <div class="flex items-center gap-2">
+        <button
+          v-if="cancelLabel"
+          type="button"
+          @click="$emit('cancel-click')"
+          class="inline-flex items-center rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600"
+        >
+          {{ cancelLabel }}
+        </button>
+
+        <button
+          v-if="secondaryLabel"
+          type="button"
+          @click="$emit('secondary-click')"
+          :class="secondaryButtonClass"
+        >
+          {{ secondaryLabel }}
+        </button>
+
+        <span v-if="!cancelLabel && !secondaryLabel"></span>
+      </div>
 
       <button
-        type="button"
+        :type="primaryButtonType"
         @click="$emit('primary-click')"
         :disabled="primaryDisabled"
         class="inline-flex items-center rounded-md border border-emerald-500 bg-emerald-500 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-600 disabled:opacity-50"
@@ -31,20 +43,25 @@ const props = withDefaults(
     primaryLabel: string
     primaryDisabled?: boolean
     secondaryLabel?: string
+    cancelLabel?: string
     secondaryVariant?: 'default' | 'success' | 'danger'
     stickyBottom?: boolean
+    primaryButtonType?: 'button' | 'submit'
   }>(),
   {
     primaryDisabled: false,
     secondaryLabel: '',
+    cancelLabel: '',
     secondaryVariant: 'default',
     stickyBottom: false,
+    primaryButtonType: 'button',
   },
 )
 
 defineEmits<{
   (event: 'primary-click'): void
   (event: 'secondary-click'): void
+  (event: 'cancel-click'): void
 }>()
 
 const secondaryButtonClass = computed(() => {
