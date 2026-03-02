@@ -1,7 +1,7 @@
 <template>
   <button 
     @click="handleLogin" 
-    class="button login"
+    class="inline-flex items-center rounded-md border border-emerald-500 bg-emerald-500 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-600 dark:border-emerald-400 dark:bg-emerald-600 dark:hover:bg-emerald-500"
     :disabled="isLoading"
   >
     {{ isLoading ? 'Loading...' : 'Log In' }}

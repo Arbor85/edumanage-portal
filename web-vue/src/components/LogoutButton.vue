@@ -2,7 +2,7 @@
   <button
     v-if="isAuthenticated"
     @click="handleLogout"
-    class="inline-flex items-center rounded-md border border-red-300 bg-red-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-600 disabled:opacity-60"
+    class="inline-flex items-center rounded-md border border-red-300 bg-red-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-600 disabled:opacity-60 dark:border-red-400 dark:bg-red-600 dark:hover:bg-red-500"
     :disabled="isLoading"
   >
     {{ isLoading ? 'Loading...' : 'Log Out' }}
