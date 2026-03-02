@@ -3,15 +3,16 @@ from __future__ import annotations
 import base64
 import json
 from collections.abc import Generator
+from pathlib import Path
 
 from fastapi import Depends, FastAPI, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy import select, text
+from sqlalchemy import func, select, text
 from sqlalchemy.orm import Session
 
 from .db import Base, SessionLocal, engine
-from .models import Client, User
-from .schemas import AcceptClientInvitationRequest, ClientCreate, ClientOut, ClientUpdate
+from .models import Client, Excercise, User
+from .schemas import AcceptClientInvitationRequest, ClientCreate, ClientOut, ClientUpdate, ExcerciseOut
 
 app = FastAPI(
     title="EduManage API",
@@ -32,6 +33,7 @@ app.add_middleware(
 def on_startup() -> None:
     Base.metadata.create_all(bind=engine)
     ensure_clients_columns()
+    seed_excercises()
 
 
 def ensure_clients_columns() -> None:
@@ -50,6 +52,59 @@ def get_db() -> Generator[Session, None, None]:
     db = SessionLocal()
     try:
         yield db
+    finally:
+        db.close()
+
+
+def _excercises_file_path() -> Path:
+    backend_dir = Path(__file__).resolve().parents[1]
+    return backend_dir / "excercises.json"
+
+
+def seed_excercises() -> None:
+    data_path = _excercises_file_path()
+    if not data_path.exists():
+        return
+
+    db = SessionLocal()
+    try:
+        existing = db.execute(select(func.count(Excercise.id))).scalar_one()
+        if existing > 0:
+            return
+
+        with data_path.open("r", encoding="utf-8") as data_file:
+            payload = json.load(data_file)
+
+        if not isinstance(payload, list):
+            return
+
+        entities: list[Excercise] = []
+        for item in payload:
+            if not isinstance(item, dict):
+                continue
+
+            name = str(item.get("Name") or "").strip()
+            if not name:
+                continue
+
+            short_description = str(item.get("ShortDescription") or "").strip()
+            primary_muscle = str(item.get("PrimaryMuscle") or "").strip()
+            muscles = item.get("Muscles")
+            tags = item.get("Tags")
+
+            entities.append(
+                Excercise(
+                    name=name,
+                    short_description=short_description,
+                    primary_muscle=primary_muscle,
+                    muscles=muscles if isinstance(muscles, list) else [],
+                    tags=tags if isinstance(tags, list) else [],
+                )
+            )
+
+        if entities:
+            db.add_all(entities)
+            db.commit()
     finally:
         db.close()
 
@@ -86,6 +141,12 @@ def get_current_token_claims(authorization: str | None = Header(default=None)) -
 def list_clients(db: Session = Depends(get_db)) -> list[ClientOut]:
     clients = db.execute(select(Client).order_by(Client.id.desc())).scalars().all()
     return [ClientOut.model_validate(client) for client in clients]
+
+
+@app.get("/api/excercises", response_model=list[ExcerciseOut], tags=["Excercises"])
+def list_excercises(db: Session = Depends(get_db)) -> list[ExcerciseOut]:
+    excercises = db.execute(select(Excercise).order_by(Excercise.name.asc())).scalars().all()
+    return [ExcerciseOut.model_validate(excercise) for excercise in excercises]
 
 
 @app.post("/api/clients", response_model=ClientOut, status_code=201, tags=["Clients"])

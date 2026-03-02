@@ -1,0 +1,158 @@
+[
+  {
+    "Name": "Barbell Bench Press",
+    "ShortDescription": "A heavy chest press performed on a flat bench to build upper body power.",
+    "PrimaryMuscle": "Chest",
+    "Muscles": [
+      { "MuscleName": "Chest", "Involvement(%)": 70 },
+      { "MuscleName": "Triceps", "Involvement(%)": 15 },
+      { "MuscleName": "Shoulders", "Involvement(%)": 15 }
+    ],
+    "Tags": ["Push", "Gym", "Free weight"]
+  },
+  {
+    "Name": "Push-up",
+    "ShortDescription": "A classic bodyweight movement for chest and arm strength.",
+    "PrimaryMuscle": "Chest",
+    "Muscles": [
+      { "MuscleName": "Chest", "Involvement(%)": 60 },
+      { "MuscleName": "Triceps", "Involvement(%)": 20 },
+      { "MuscleName": "Shoulders", "Involvement(%)": 20 }
+    ],
+    "Tags": ["Push", "Bodyweight"]
+  },
+  {
+    "Name": "Lat Pulldown",
+    "ShortDescription": "A machine-based pull that targets back width and lat development.",
+    "PrimaryMuscle": "Back",
+    "Muscles": [
+      { "MuscleName": "Back", "Involvement(%)": 75 },
+      { "MuscleName": "Biceps", "Involvement(%)": 20 },
+      { "MuscleName": "Shoulders", "Involvement(%)": 5 }
+    ],
+    "Tags": ["Pull", "Gym", "Machine"]
+  },
+  {
+    "Name": "Pull-up",
+    "ShortDescription": "A high-intensity bodyweight pull that builds a wide, strong back.",
+    "PrimaryMuscle": "Back",
+    "Muscles": [
+      { "MuscleName": "Back", "Involvement(%)": 65 },
+      { "MuscleName": "Biceps", "Involvement(%)": 20 },
+      { "MuscleName": "Shoulders", "Involvement(%)": 15 }
+    ],
+    "Tags": ["Pull", "Bodyweight"]
+  },
+  {
+    "Name": "Barbell Back Squat",
+    "ShortDescription": "The fundamental lower body exercise for overall leg size.",
+    "PrimaryMuscle": "Quads",
+    "Muscles": [
+      { "MuscleName": "Quads", "Involvement(%)": 60 },
+      { "MuscleName": "Glutes", "Involvement(%)": 25 },
+      { "MuscleName": "Hamstrings", "Involvement(%)": 15 }
+    ],
+    "Tags": ["Legs", "Gym", "Free weight"]
+  },
+  {
+    "Name": "Leg Press",
+    "ShortDescription": "A machine-based press allowing for heavy loading of the legs with back support.",
+    "PrimaryMuscle": "Quads",
+    "Muscles": [
+      { "MuscleName": "Quads", "Involvement(%)": 70 },
+      { "MuscleName": "Glutes", "Involvement(%)": 20 },
+      { "MuscleName": "Hamstrings", "Involvement(%)": 10 }
+    ],
+    "Tags": ["Legs", "Gym", "Machine"]
+  },
+  {
+    "Name": "Conventional Deadlift",
+    "ShortDescription": "A heavy lift focused on pulling weight from the floor using the entire posterior chain.",
+    "PrimaryMuscle": "Glutes",
+    "Muscles": [
+      { "MuscleName": "Glutes", "Involvement(%)": 35 },
+      { "MuscleName": "Hamstrings", "Involvement(%)": 30 },
+      { "MuscleName": "Lower Back", "Involvement(%)": 35 }
+    ],
+    "Tags": ["Pull", "Legs", "Gym", "Free weight"]
+  },
+  {
+    "Name": "Overhead Press",
+    "ShortDescription": "A vertical press to build strong, functional shoulders.",
+    "PrimaryMuscle": "Shoulders",
+    "Muscles": [
+      { "MuscleName": "Shoulders", "Involvement(%)": 75 },
+      { "MuscleName": "Triceps", "Involvement(%)": 20 },
+      { "MuscleName": "Abs", "Involvement(%)": 5 }
+    ],
+    "Tags": ["Push", "Gym", "Free weight"]
+  },
+  {
+    "Name": "Cable Chest Fly",
+    "ShortDescription": "An isolation movement using cables to provide constant tension on the chest.",
+    "PrimaryMuscle": "Chest",
+    "Muscles": [
+      { "MuscleName": "Chest", "Involvement(%)": 90 },
+      { "MuscleName": "Shoulders", "Involvement(%)": 10 }
+    ],
+    "Tags": ["Push", "Gym", "Machine"]
+  },
+  {
+    "Name": "Triceps Pushdown",
+    "ShortDescription": "A cable exercise that isolates the back of the arms.",
+    "PrimaryMuscle": "Triceps",
+    "Muscles": [
+      { "MuscleName": "Triceps", "Involvement(%)": 100 }
+    ],
+    "Tags": ["Push", "Gym", "Machine"]
+  },
+  {
+    "Name": "Bicep Curl",
+    "ShortDescription": "The standard isolation move for building arm size.",
+    "PrimaryMuscle": "Biceps",
+    "Muscles": [
+      { "MuscleName": "Biceps", "Involvement(%)": 100 }
+    ],
+    "Tags": ["Pull", "Gym", "Free weight"]
+  },
+  {
+    "Name": "Running",
+    "ShortDescription": "Continuous steady-state or interval running for heart health.",
+    "PrimaryMuscle": "Legs",
+    "Muscles": [
+      { "MuscleName": "Legs", "Involvement(%)": 80 },
+      { "MuscleName": "Abs", "Involvement(%)": 20 }
+    ],
+    "Tags": ["Legs", "Cardio", "Bodyweight"]
+  },
+  {
+    "Name": "Burpees",
+    "ShortDescription": "A full-body explosive movement that raises the heart rate quickly.",
+    "PrimaryMuscle": "Full Body",
+    "Muscles": [
+      { "MuscleName": "Legs", "Involvement(%)": 40 },
+      { "MuscleName": "Chest", "Involvement(%)": 30 },
+      { "MuscleName": "Abs", "Involvement(%)": 30 }
+    ],
+    "Tags": ["Push", "Legs", "Cardio", "Bodyweight"]
+  },
+  {
+    "Name": "Plank",
+    "ShortDescription": "An isometric hold that builds total-core stability.",
+    "PrimaryMuscle": "Abs",
+    "Muscles": [
+      { "MuscleName": "Abs", "Involvement(%)": 70 },
+      { "MuscleName": "Shoulders", "Involvement(%)": 30 }
+    ],
+    "Tags": ["Bodyweight"]
+  },
+  {
+    "Name": "Leg Curl",
+    "ShortDescription": "A machine exercise that isolates the back of the legs.",
+    "PrimaryMuscle": "Hamstrings",
+    "Muscles": [
+      { "MuscleName": "Hamstrings", "Involvement(%)": 100 }
+    ],
+    "Tags": ["Legs", "Gym", "Machine"]
+  }
+]

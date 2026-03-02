@@ -24,3 +24,14 @@ class User(Base):
 	name = Column(String(200), nullable=False)
 	email = Column(String(255), nullable=False, unique=True, index=True)
 	external_id = Column(String(255), nullable=False, unique=True, index=True)
+
+
+class Excercise(Base):
+	__tablename__ = "excercises"
+
+	id = Column(Integer, primary_key=True, index=True)
+	name = Column(String(255), nullable=False, unique=True, index=True)
+	short_description = Column(String(2000), nullable=False)
+	primary_muscle = Column(String(255), nullable=False)
+	muscles = Column(JSON, nullable=False, default=list)
+	tags = Column(JSON, nullable=False, default=list)

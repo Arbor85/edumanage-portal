@@ -56,3 +56,14 @@ class UserOut(UserBase):
 
 class AcceptClientInvitationRequest(BaseModel):
     imageUrl: str = Field(min_length=1)
+
+
+class ExcerciseOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+
+    id: int
+    name: str
+    shortDescription: str = Field(validation_alias="short_description")
+    primaryMuscle: str = Field(validation_alias="primary_muscle")
+    muscles: list[dict[str, object]]
+    tags: list[str]

@@ -50,6 +50,7 @@ export default defineComponent({
     const linkCollection = [
       { label: 'Home', to: '/', requiresAuth: false, guestOnly: false },
       { label: 'Clients', to: '/clients', requiresAuth: true, guestOnly: false },
+      { label: 'Excercises', to: '/excercises', requiresAuth: false, guestOnly: false },
       { label: 'Profile', to: '/profile', requiresAuth: true, guestOnly: false },
       { label: 'Login', to: '/login', requiresAuth: false, guestOnly: true }
     ];
