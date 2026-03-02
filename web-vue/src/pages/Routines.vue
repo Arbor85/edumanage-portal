@@ -342,6 +342,8 @@ const formExcercises = ref<RoutineExcercise[]>([])
 const draggedSet = ref<{ excerciseIndex: number; setIndex: number } | null>(null)
 const dropInsertTarget = ref<{ excerciseIndex: number; insertIndex: number } | null>(null)
 const dropActionTarget = ref<{ excerciseIndex: number; action: 'remove' | 'copy' } | null>(null)
+const isPointerDragging = ref(false)
+const dragStartPoint = ref<{ x: number; y: number } | null>(null)
 
 const excerciseOptions = computed(() => {
   return excercises.value.map((excercise) => excercise.name)
@@ -479,11 +481,15 @@ const removeSet = (excerciseIndex: number, setIndex: number) => {
 }
 
 const isDragActiveForExcercise = (excerciseIndex: number) => {
-  return draggedSet.value?.excerciseIndex === excerciseIndex
+  return isPointerDragging.value && draggedSet.value?.excerciseIndex === excerciseIndex
 }
 
 const isDraggedSet = (excerciseIndex: number, setIndex: number) => {
-  return draggedSet.value?.excerciseIndex === excerciseIndex && draggedSet.value.setIndex === setIndex
+  return (
+    isPointerDragging.value &&
+    draggedSet.value?.excerciseIndex === excerciseIndex &&
+    draggedSet.value.setIndex === setIndex
+  )
 }
 
 const isRemoveDropActive = (excerciseIndex: number) => {
@@ -564,6 +570,8 @@ const clearDragState = () => {
   draggedSet.value = null
   dropInsertTarget.value = null
   dropActionTarget.value = null
+  isPointerDragging.value = false
+  dragStartPoint.value = null
 }
 
 const handleSetPointerMove = (event: PointerEvent) => {
@@ -571,6 +579,22 @@ const handleSetPointerMove = (event: PointerEvent) => {
 
   if (!source) {
     return
+  }
+
+  if (!isPointerDragging.value) {
+    const startPoint = dragStartPoint.value
+
+    if (!startPoint) {
+      return
+    }
+
+    const distance = Math.hypot(event.clientX - startPoint.x, event.clientY - startPoint.y)
+
+    if (distance < 4) {
+      return
+    }
+
+    isPointerDragging.value = true
   }
 
   const elementAtPointer = document.elementFromPoint(event.clientX, event.clientY) as HTMLElement | null
@@ -647,6 +671,11 @@ const handleSetPointerUp = () => {
     return
   }
 
+  if (!isPointerDragging.value) {
+    clearDragState()
+    return
+  }
+
   if (dropActionTarget.value?.excerciseIndex === source.excerciseIndex) {
     if (dropActionTarget.value.action === 'remove') {
       removeDraggedSet(source.excerciseIndex)
@@ -671,8 +700,10 @@ const handleSetPointerDown = (excerciseIndex: number, setIndex: number, event: P
   }
 
   draggedSet.value = { excerciseIndex, setIndex }
-  dropInsertTarget.value = { excerciseIndex, insertIndex: setIndex }
+  dropInsertTarget.value = null
   dropActionTarget.value = null
+  isPointerDragging.value = false
+  dragStartPoint.value = { x: event.clientX, y: event.clientY }
 
   window.addEventListener('pointermove', handleSetPointerMove)
   window.addEventListener('pointerup', handleSetPointerUp)
