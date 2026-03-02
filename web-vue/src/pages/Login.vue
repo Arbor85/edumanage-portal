@@ -30,7 +30,8 @@ const { loginWithRedirect } = useAuth0();
 function loginWith(connection: string) {
   loginWithRedirect({
     authorizationParams: {
-      connection
+      connection,
+      scope: 'openid profile email',
     }
   });
 }
