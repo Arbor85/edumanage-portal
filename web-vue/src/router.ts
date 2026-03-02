@@ -1,9 +1,10 @@
 import { createRouter, createWebHistory } from 'vue-router'
-// import { authGuard } from '@auth0/auth0-vue'
+import { authGuard } from '@auth0/auth0-vue'
 
 import Home from './pages/Home.vue'
 import Profile from './pages/Profile.vue'
 import Login from './pages/Login.vue'
+import Clients from './pages/Clients.vue'
 
 const routes = [
   {
@@ -16,6 +17,12 @@ const routes = [
     name: 'Profile',
     component: Profile,
     // beforeEnter: authGuard
+  },
+  {
+    path: '/clients',
+    name: 'Clients',
+    component: Clients,
+    beforeEnter: authGuard,
   },
   {
     path: '/login',
