@@ -1,9 +1,9 @@
 <template>
   <nav
-    class="fixed inset-y-0 left-0 z-30 h-screen w-56 overflow-y-auto bg-slate-700 text-white shadow-xl"
+    class="h-screen w-56 shrink-0 overflow-y-auto bg-slate-700 text-white shadow-xl"
   >
     <!-- Side navigation content here -->
-    <ul class="list-none p-0 bg-slate-600 flex flex-col gap-2 h-screen">
+    <ul class="list-none p-0 bg-slate-600 flex flex-col gap-2 min-h-full">
       <li v-for="link in navLinks" :key="link.to">
         <router-link
           :to="link.to"
@@ -31,7 +31,7 @@ export default defineComponent({
     const route = useRoute();
     const linkCollection = [
       { label: 'Home', to: '/', requiresAuth: false, guestOnly: false },
-      { label: 'Profile', to: '/profile', requiresAuth: false, guestOnly: false },
+      { label: 'Profile', to: '/profile', requiresAuth: true, guestOnly: false },
       { label: 'Login', to: '/login', requiresAuth: false, guestOnly: true }
     ];
 
