@@ -6,7 +6,7 @@
 
     <div class="mb-4 flex items-center justify-end">
       <div class="inline-flex overflow-hidden rounded-md border border-slate-300 dark:border-slate-600">
-        <button
+          <button
           type="button"
           @click="viewMode = 'tile'"
           class="px-3 py-1.5 text-xs font-medium"
@@ -58,7 +58,7 @@
               <td class="px-4 py-3 font-medium text-slate-900 dark:text-slate-100">{{ routine.name }}</td>
               <td class="px-4 py-3">
                 <div class="flex flex-wrap gap-1.5">
-                  <span
+                    <span
                     v-for="excercise in routine.excercises"
                     :key="`${routine.id}-${excercise.name}`"
                     class="rounded-full bg-slate-200 px-2 py-0.5 text-[11px] text-slate-700 dark:bg-slate-700 dark:text-slate-200"
@@ -68,6 +68,18 @@
                 </div>
               </td>
               <td class="px-4 py-3 text-right">
+                <div class="inline-flex items-center gap-2">
+                <button
+                  type="button"
+                  @click="requestDeleteRoutine(routine)"
+                  class="inline-flex items-center rounded-md bg-white p-1.5 text-rose-700 hover:bg-rose-50 dark:bg-slate-700 dark:text-rose-300 dark:hover:bg-rose-900/30"
+                  title="Delete routine"
+                  aria-label="Delete routine"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
+                    <path fill-rule="evenodd" d="M9 3.75A1.5 1.5 0 0 1 10.5 2.25h3A1.5 1.5 0 0 1 15 3.75V4.5h3.75a.75.75 0 0 1 0 1.5h-.518l-.824 12.36A2.25 2.25 0 0 1 15.164 20.5H8.836a2.25 2.25 0 0 1-2.244-2.14L5.768 6H5.25a.75.75 0 0 1 0-1.5H9v-.75Zm1.5 0V4.5h3v-.75h-3Zm-2.49 2.25.807 12.11a.75.75 0 0 0 .748.64h6.87a.75.75 0 0 0 .748-.64L15.99 6H8.01Zm2.24 2.25a.75.75 0 0 1 .75.75v6a.75.75 0 0 1-1.5 0V9a.75.75 0 0 1 .75-.75Zm4.5.75a.75.75 0 0 0-1.5 0v6a.75.75 0 0 0 1.5 0V9Z" clip-rule="evenodd" />
+                  </svg>
+                </button>
                 <button
                   type="button"
                   @click="openEditDialog(routine)"
@@ -75,6 +87,7 @@
                 >
                   Edit
                 </button>
+                </div>
               </td>
             </tr>
           </tbody>
@@ -107,7 +120,18 @@
           </span>
         </div>
 
-        <div class="mt-4 flex justify-end">
+        <div class="mt-4 flex items-center justify-between gap-2">
+          <button
+            type="button"
+            @click="requestDeleteRoutine(routine)"
+            class="inline-flex items-center rounded-md bg-white p-1.5 text-rose-700 hover:bg-rose-50 dark:bg-slate-700 dark:text-rose-300 dark:hover:bg-rose-900/30"
+            title="Delete routine"
+            aria-label="Delete routine"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
+              <path fill-rule="evenodd" d="M9 3.75A1.5 1.5 0 0 1 10.5 2.25h3A1.5 1.5 0 0 1 15 3.75V4.5h3.75a.75.75 0 0 1 0 1.5h-.518l-.824 12.36A2.25 2.25 0 0 1 15.164 20.5H8.836a2.25 2.25 0 0 1-2.244-2.14L5.768 6H5.25a.75.75 0 0 1 0-1.5H9v-.75Zm1.5 0V4.5h3v-.75h-3Zm-2.49 2.25.807 12.11a.75.75 0 0 0 .748.64h6.87a.75.75 0 0 0 .748-.64L15.99 6H8.01Zm2.24 2.25a.75.75 0 0 1 .75.75v6a.75.75 0 0 1-1.5 0V9a.75.75 0 0 1 .75-.75Zm4.5.75a.75.75 0 0 0-1.5 0v6a.75.75 0 0 0 1.5 0V9Z" clip-rule="evenodd" />
+            </svg>
+          </button>
           <button
             type="button"
             @click="openEditDialog(routine)"
@@ -162,7 +186,7 @@
 
             <div>
               <p class="mb-2 text-sm font-medium text-slate-700 dark:text-slate-200">Excercises</p>
-              <SelectExcercise v-model="formExcerciseNames" :options="excerciseOptions" button-text="Add excercises" />
+              <SelectExcercise v-model="formExcerciseNames" :options="excercises" button-text="Add excercises" />
 
               <p v-if="formExcercises.length === 0" class="mt-2 text-xs text-slate-500 dark:text-slate-300">
                 No excercises selected.
@@ -170,26 +194,60 @@
             </div>
 
             <div class="space-y-3" v-if="formExcercises.length > 0">
-              <article
-                v-for="(excercise, excerciseIndex) in formExcercises"
-                :key="excercise.name"
-                class="rounded-md border border-slate-200 p-3 dark:border-slate-700"
-              >
-                <div class="mb-3 flex items-center justify-between gap-2">
-                  <div>
-                    <p class="text-sm font-semibold text-slate-900 dark:text-slate-100">{{ excercise.name }}</p>
-                    <p class="text-xs text-slate-500 dark:text-slate-300">
-                      {{ excercise.isBodyweight ? 'Bodyweight: reps only' : 'Weighted: reps + weight' }}
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    @click="addSet(excerciseIndex)"
-                    class="rounded-md border border-slate-300 px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:text-slate-100 dark:hover:bg-slate-700"
-                  >
-                    Add set
-                  </button>
+              <template v-for="(excercise, excerciseIndex) in formExcercises" :key="excercise.name">
+                <div
+                  v-if="isExcerciseInsertPlaceholderVisible(excerciseIndex)"
+                  class="flex h-8 items-center justify-center rounded-md border border-dashed border-emerald-500 bg-emerald-50/60 text-[11px] font-medium text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300"
+                  :data-excercise-insert="excerciseIndex"
+                >
+                  {{ getExcerciseInsertPlaceholderText(excerciseIndex) }}
                 </div>
+
+                <article
+                  class="rounded-md border border-slate-200 p-3 dark:border-slate-700"
+                  :class="isDraggedExcercise(excerciseIndex) ? 'opacity-60 ring-2 ring-emerald-500/60' : ''"
+                  :data-excercise-row="excerciseIndex"
+                >
+                  <div class="mb-3 flex items-center justify-between gap-2">
+                    <div class="flex items-center gap-2">
+                      <button
+                        type="button"
+                        @pointerdown.prevent="handleExcercisePointerDown(excerciseIndex, $event)"
+                        class="cursor-grab rounded-md border border-slate-300 px-2 py-1 text-xs text-slate-600 hover:bg-slate-200 active:cursor-grabbing dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-600"
+                        title="Drag to reorder excercise"
+                      >
+                        ⋮⋮
+                      </button>
+
+                      <div>
+                        <p class="text-sm font-semibold text-slate-900 dark:text-slate-100">{{ excercise.name }}</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-300">
+                          {{ excercise.isBodyweight ? 'Bodyweight: reps only' : 'Weighted: reps + weight' }}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                      <button
+                        type="button"
+                        @click="removeExcercise(excerciseIndex)"
+                        class="rounded-md p-1.5 text-rose-700 hover:bg-rose-50 dark:text-rose-300 dark:hover:bg-rose-900/30"
+                        title="Remove excercise"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
+                          <path fill-rule="evenodd" d="M9 3.75A1.5 1.5 0 0 1 10.5 2.25h3A1.5 1.5 0 0 1 15 3.75V4.5h3.75a.75.75 0 0 1 0 1.5h-.518l-.824 12.36A2.25 2.25 0 0 1 15.164 20.5H8.836a2.25 2.25 0 0 1-2.244-2.14L5.768 6H5.25a.75.75 0 0 1 0-1.5H9v-.75Zm1.5 0V4.5h3v-.75h-3Zm-2.49 2.25.807 12.11a.75.75 0 0 0 .748.64h6.87a.75.75 0 0 0 .748-.64L15.99 6H8.01Zm2.24 2.25a.75.75 0 0 1 .75.75v6a.75.75 0 0 1-1.5 0V9a.75.75 0 0 1 .75-.75Zm4.5.75a.75.75 0 0 0-1.5 0v6a.75.75 0 0 0 1.5 0V9Z" clip-rule="evenodd" />
+                        </svg>
+                      </button>
+
+                      <button
+                        type="button"
+                        @click="addSet(excerciseIndex)"
+                        class="rounded-md border border-slate-300 px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:text-slate-100 dark:hover:bg-slate-700"
+                      >
+                        Add set
+                      </button>
+                    </div>
+                  </div>
 
                 <div v-if="excercise.sets.length === 0" class="text-xs text-slate-500 dark:text-slate-300">
                   No sets yet.
@@ -206,27 +264,29 @@
                     </div>
 
                     <div
-                      class="flex flex-wrap items-center gap-2 rounded-md bg-slate-100/70 p-2 dark:bg-slate-700/40"
+                      class="flex flex-wrap items-center justify-between gap-2 rounded-md bg-slate-100/70 p-2 dark:bg-slate-700/40"
                       :class="isDraggedSet(excerciseIndex, setIndex) ? 'opacity-60 ring-2 ring-emerald-500/60' : ''"
                       :data-set-row="`${excerciseIndex}:${setIndex}`"
                     >
-                      <button
-                        type="button"
-                        @pointerdown.prevent="handleSetPointerDown(excerciseIndex, setIndex, $event)"
-                        class="cursor-grab rounded-md border border-slate-300 px-2 py-1 text-xs text-slate-600 hover:bg-slate-200 active:cursor-grabbing dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-600"
-                        title="Drag to reorder"
-                      >
-                        ⋮⋮
-                      </button>
+                      <div class="flex items-center gap-2">
+                        <button
+                          type="button"
+                          @pointerdown.prevent="handleSetPointerDown(excerciseIndex, setIndex, $event)"
+                          class="cursor-grab rounded-md border border-slate-300 px-2 py-1 text-xs text-slate-600 hover:bg-slate-200 active:cursor-grabbing dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-600"
+                          title="Drag to reorder"
+                        >
+                          ⋮⋮
+                        </button>
 
-                      <select
-                        v-model="setItem.type"
-                        class="w-24 rounded-md border border-slate-300 bg-white px-2 py-1 text-xs text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
-                      >
-                        <option value="warmup">warmup</option>
-                        <option value="normal">normal</option>
-                        <option value="fail">fail</option>
-                      </select>
+                        <select
+                          v-model="setItem.type"
+                          class="w-24 rounded-md border border-slate-300 bg-white px-2 py-1 text-xs text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+                        >
+                          <option value="warmup">warmup</option>
+                          <option value="normal">normal</option>
+                          <option value="fail">fail</option>
+                        </select>
+                      </div>
 
                       <input
                         v-model.number="setItem.reps"
@@ -246,11 +306,11 @@
                         class="w-24 rounded-md border border-slate-300 bg-white px-2 py-1 text-xs text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
                       />
 
-                      <div class="ml-auto flex items-center gap-1">
+                      <div class="flex items-center gap-1">
                         <button
                           type="button"
                           @click="removeSet(excerciseIndex, setIndex)"
-                          class="rounded-md border border-rose-300 p-1.5 text-rose-700 hover:bg-rose-50 dark:border-rose-700 dark:text-rose-300 dark:hover:bg-rose-900/30"
+                          class="rounded-md p-1.5 text-rose-700 hover:bg-rose-50 dark:text-rose-300 dark:hover:bg-rose-900/30"
                           title="Remove set"
                         >
                           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
@@ -293,7 +353,30 @@
                     </div>
                   </div>
                 </div>
-              </article>
+                </article>
+              </template>
+
+              <div
+                v-if="isExcerciseDragActive"
+                class="flex h-8 items-center justify-center rounded-md border border-dashed text-[11px] font-medium"
+                :class="isExcerciseInsertPlaceholderVisible(formExcercises.length)
+                  ? 'border-emerald-500 bg-emerald-50/60 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300'
+                  : 'border-slate-300 bg-transparent text-slate-500 dark:border-slate-600 dark:text-slate-300'"
+                data-excercise-end="true"
+              >
+                {{ getExcerciseEndPlaceholderText() }}
+              </div>
+
+              <div
+                v-if="isExcerciseDragActive"
+                class="flex h-10 items-center justify-center rounded-md border border-dashed text-xs font-medium"
+                :class="isExcerciseRemoveDropActive
+                  ? 'border-rose-500 bg-rose-100 text-rose-800 dark:border-rose-500 dark:bg-rose-900/50 dark:text-rose-200'
+                  : 'border-rose-400 bg-rose-50 text-rose-700 dark:border-rose-700 dark:bg-rose-900/30 dark:text-rose-300'"
+                data-excercise-action-remove="true"
+              >
+                {{ isExcerciseRemoveDropHovered ? 'Release to remove excercise' : 'Remove excercise' }}
+              </div>
             </div>
           </div>
 
@@ -304,34 +387,47 @@
               cancel-label="Cancel"
               primary-button-type="submit"
               @cancel-click="closeDialog"
-              @primary-click="submitRoutine"
             />
           </div>
         </form>
       </div>
     </div>
+
+    <ConfirmDialog
+      :open="showDeleteDialog"
+      title="Delete routine"
+      :message="deleteDialogMessage"
+      confirm-label="Delete"
+      cancel-label="Cancel"
+      @confirm="confirmDeleteRoutine"
+      @cancel="closeDeleteDialog"
+    />
   </div>
 </template>
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import ConfirmDialog from '../components/ConfirmDialog.vue'
 import DialogActionPanel from '../components/DialogActionPanel.vue'
 import SelectExcercise from '../components/SelectExcercise.vue'
 import { useLocalStorageState } from '../composables/useLocalStorageState'
 import { usePageTitle } from '../composables/usePageTitle'
 import { useExcercisesApi } from '../services/excercisesApi'
-import { routinesApi } from '../services/routinesApi'
+import { useRoutinesApi } from '../services/routinesApi'
 import type { Excercise } from '../types/excercise'
 import type { Routine, RoutineExcercise, RoutineSet } from '../types/routine'
 
 usePageTitle('Routines')
 
 const excercisesApi = useExcercisesApi()
+const routinesApi = useRoutinesApi()
 
 const routines = ref<Routine[]>([])
 const viewMode = useLocalStorageState<'tile' | 'list'>('routines:viewMode', 'list')
 const excercises = ref<Excercise[]>([])
 const isLoading = ref(false)
 const errorMessage = ref('')
+const showDeleteDialog = ref(false)
+const pendingDeleteRoutine = ref<Routine | null>(null)
 
 const showDialog = ref(false)
 const dialogMode = ref<'create' | 'edit'>('create')
@@ -351,10 +447,22 @@ const hoveredDropTarget = ref<
 >(null)
 const isPointerDragging = ref(false)
 const dragStartPoint = ref<{ x: number; y: number } | null>(null)
+const draggedExcerciseIndex = ref<number | null>(null)
+const excerciseDropInsertIndex = ref<number | null>(null)
+const excerciseDropAction = ref<'remove' | null>(null)
+const hoveredExcerciseDropTarget = ref<{ type: 'insert'; insertIndex: number } | { type: 'end' } | { type: 'remove' } | null>(null)
+const isExcercisePointerDragging = ref(false)
+const excerciseDragStartPoint = ref<{ x: number; y: number } | null>(null)
 
-const excerciseOptions = computed(() => {
-  return excercises.value.map((excercise) => excercise.name)
-})
+const dragCursorClassName = 'routine-set-dragging-cursor'
+
+const setDragCursorActive = (isActive: boolean) => {
+  document.body.classList.toggle(dragCursorClassName, isActive)
+}
+
+const updateDragCursor = () => {
+  setDragCursorActive(isPointerDragging.value || isExcercisePointerDragging.value)
+}
 
 const canSave = computed(() => {
   return formName.value.length > 0 && formExcercises.value.length > 0
@@ -454,6 +562,47 @@ const openEditDialog = (routine: Routine) => {
   showDialog.value = true
 }
 
+const deleteDialogMessage = computed(() => {
+  if (!pendingDeleteRoutine.value) {
+    return 'Are you sure you want to delete this routine?'
+  }
+
+  return `Are you sure you want to delete "${pendingDeleteRoutine.value.name}"?`
+})
+
+const requestDeleteRoutine = (routine: Routine) => {
+  pendingDeleteRoutine.value = routine
+  showDeleteDialog.value = true
+}
+
+const closeDeleteDialog = () => {
+  showDeleteDialog.value = false
+  pendingDeleteRoutine.value = null
+}
+
+const confirmDeleteRoutine = async () => {
+  const routine = pendingDeleteRoutine.value
+
+  if (!routine) {
+    return
+  }
+
+  errorMessage.value = ''
+
+  try {
+    await routinesApi.deleteRoutine(routine.id)
+    routines.value = routines.value.filter((entry) => entry.id !== routine.id)
+
+    if (dialogMode.value === 'edit' && editingRoutineId.value === routine.id) {
+      closeDialog()
+    }
+
+    closeDeleteDialog()
+  } catch {
+    errorMessage.value = 'Failed to delete routine'
+  }
+}
+
 const closeDialog = () => {
   showDialog.value = false
   dialogMode.value = 'create'
@@ -463,8 +612,20 @@ const closeDialog = () => {
   formExcercises.value = []
   window.removeEventListener('pointermove', handleSetPointerMove)
   window.removeEventListener('pointerup', handleSetPointerUp)
-  draggedSet.value = null
-  dropInsertTarget.value = null
+  window.removeEventListener('pointermove', handleExcercisePointerMove)
+  window.removeEventListener('pointerup', handleExcercisePointerUp)
+  clearDragState()
+  clearExcerciseDragState()
+}
+
+const removeExcercise = (excerciseIndex: number) => {
+  const [removedExcercise] = formExcercises.value.splice(excerciseIndex, 1)
+
+  if (!removedExcercise) {
+    return
+  }
+
+  formExcerciseNames.value = formExcercises.value.map((excercise) => excercise.name)
 }
 
 const addSet = (excerciseIndex: number) => {
@@ -601,6 +762,75 @@ const copyDraggedSet = (targetExcerciseIndex: number) => {
   excercise.sets.push({ ...sourceSet })
 }
 
+const isExcerciseDragActive = computed(() => {
+  return isExcercisePointerDragging.value && draggedExcerciseIndex.value !== null
+})
+
+const isDraggedExcercise = (excerciseIndex: number) => {
+  return isExcercisePointerDragging.value && draggedExcerciseIndex.value === excerciseIndex
+}
+
+const isExcerciseInsertPlaceholderVisible = (insertIndex: number) => {
+  return excerciseDropInsertIndex.value === insertIndex
+}
+
+const getExcerciseInsertPlaceholderText = (insertIndex: number) => {
+  if (hoveredExcerciseDropTarget.value?.type === 'insert' && hoveredExcerciseDropTarget.value.insertIndex === insertIndex) {
+    return 'Release to move excercise here'
+  }
+
+  return ''
+}
+
+const getExcerciseEndPlaceholderText = () => {
+  if (hoveredExcerciseDropTarget.value?.type === 'end') {
+    return 'Release to move excercise to end'
+  }
+
+  return ''
+}
+
+const isExcerciseRemoveDropActive = computed(() => {
+  return excerciseDropAction.value === 'remove'
+})
+
+const isExcerciseRemoveDropHovered = computed(() => {
+  return hoveredExcerciseDropTarget.value?.type === 'remove'
+})
+
+const moveExcerciseToInsertIndex = (insertIndex: number) => {
+  const sourceIndex = draggedExcerciseIndex.value
+
+  if (sourceIndex === null || sourceIndex < 0 || sourceIndex >= formExcercises.value.length) {
+    return
+  }
+
+  if (insertIndex < 0 || insertIndex > formExcercises.value.length) {
+    return
+  }
+
+  const [movedExcercise] = formExcercises.value.splice(sourceIndex, 1)
+
+  if (!movedExcercise) {
+    return
+  }
+
+  const nextIndex = sourceIndex < insertIndex ? insertIndex - 1 : insertIndex
+  formExcercises.value.splice(nextIndex, 0, movedExcercise)
+  formExcerciseNames.value = formExcercises.value.map((excercise) => excercise.name)
+  draggedExcerciseIndex.value = nextIndex
+}
+
+const removeDraggedExcercise = () => {
+  const sourceIndex = draggedExcerciseIndex.value
+
+  if (sourceIndex === null) {
+    return
+  }
+
+  removeExcercise(sourceIndex)
+}
+
 const clearDragState = () => {
   draggedSet.value = null
   dropInsertTarget.value = null
@@ -608,6 +838,17 @@ const clearDragState = () => {
   hoveredDropTarget.value = null
   isPointerDragging.value = false
   dragStartPoint.value = null
+  updateDragCursor()
+}
+
+const clearExcerciseDragState = () => {
+  draggedExcerciseIndex.value = null
+  excerciseDropInsertIndex.value = null
+  excerciseDropAction.value = null
+  hoveredExcerciseDropTarget.value = null
+  isExcercisePointerDragging.value = false
+  excerciseDragStartPoint.value = null
+  updateDragCursor()
 }
 
 const handleSetPointerMove = (event: PointerEvent) => {
@@ -631,6 +872,7 @@ const handleSetPointerMove = (event: PointerEvent) => {
     }
 
     isPointerDragging.value = true
+    updateDragCursor()
   }
 
   const elementAtPointer = document.elementFromPoint(event.clientX, event.clientY) as HTMLElement | null
@@ -727,6 +969,85 @@ const handleSetPointerMove = (event: PointerEvent) => {
   hoveredDropTarget.value = null
 }
 
+const handleExcercisePointerMove = (event: PointerEvent) => {
+  const sourceIndex = draggedExcerciseIndex.value
+
+  if (sourceIndex === null) {
+    return
+  }
+
+  if (!isExcercisePointerDragging.value) {
+    const startPoint = excerciseDragStartPoint.value
+
+    if (!startPoint) {
+      return
+    }
+
+    const distance = Math.hypot(event.clientX - startPoint.x, event.clientY - startPoint.y)
+
+    if (distance < 4) {
+      return
+    }
+
+    isExcercisePointerDragging.value = true
+    updateDragCursor()
+  }
+
+  const elementAtPointer = document.elementFromPoint(event.clientX, event.clientY) as HTMLElement | null
+
+  if (!elementAtPointer) {
+    excerciseDropAction.value = null
+    hoveredExcerciseDropTarget.value = null
+    return
+  }
+
+  const removeTarget = elementAtPointer.closest('[data-excercise-action-remove]') as HTMLElement | null
+
+  if (removeTarget) {
+    hoveredExcerciseDropTarget.value = { type: 'remove' }
+    excerciseDropAction.value = 'remove'
+    return
+  }
+
+  excerciseDropAction.value = null
+
+  const insertTarget = elementAtPointer.closest('[data-excercise-insert]') as HTMLElement | null
+
+  if (insertTarget) {
+    const targetInsertIndex = Number(insertTarget.dataset.excerciseInsert)
+
+    if (Number.isFinite(targetInsertIndex)) {
+      hoveredExcerciseDropTarget.value = { type: 'insert', insertIndex: targetInsertIndex }
+      excerciseDropInsertIndex.value = targetInsertIndex
+      return
+    }
+  }
+
+  const endTarget = elementAtPointer.closest('[data-excercise-end]') as HTMLElement | null
+
+  if (endTarget) {
+    hoveredExcerciseDropTarget.value = { type: 'end' }
+    excerciseDropInsertIndex.value = formExcercises.value.length
+    return
+  }
+
+  const rowTarget = elementAtPointer.closest('[data-excercise-row]') as HTMLElement | null
+
+  if (rowTarget) {
+    const targetExcerciseIndex = Number(rowTarget.dataset.excerciseRow)
+
+    if (Number.isFinite(targetExcerciseIndex)) {
+      const rowBounds = rowTarget.getBoundingClientRect()
+      const insertIndex = event.clientY >= rowBounds.top + rowBounds.height / 2 ? targetExcerciseIndex + 1 : targetExcerciseIndex
+      hoveredExcerciseDropTarget.value = null
+      excerciseDropInsertIndex.value = insertIndex
+      return
+    }
+  }
+
+  hoveredExcerciseDropTarget.value = null
+}
+
 const handleSetPointerUp = () => {
   const source = draggedSet.value
 
@@ -773,6 +1094,50 @@ const handleSetPointerDown = (excerciseIndex: number, setIndex: number, event: P
 
   window.addEventListener('pointermove', handleSetPointerMove)
   window.addEventListener('pointerup', handleSetPointerUp)
+}
+
+const handleExcercisePointerUp = () => {
+  const sourceIndex = draggedExcerciseIndex.value
+
+  window.removeEventListener('pointermove', handleExcercisePointerMove)
+  window.removeEventListener('pointerup', handleExcercisePointerUp)
+
+  if (sourceIndex === null) {
+    return
+  }
+
+  if (!isExcercisePointerDragging.value) {
+    clearExcerciseDragState()
+    return
+  }
+
+  if (excerciseDropAction.value === 'remove') {
+    removeDraggedExcercise()
+    clearExcerciseDragState()
+    return
+  }
+
+  if (excerciseDropInsertIndex.value !== null) {
+    moveExcerciseToInsertIndex(excerciseDropInsertIndex.value)
+  }
+
+  clearExcerciseDragState()
+}
+
+const handleExcercisePointerDown = (excerciseIndex: number, event: PointerEvent) => {
+  if (event.button !== 0) {
+    return
+  }
+
+  draggedExcerciseIndex.value = excerciseIndex
+  excerciseDropInsertIndex.value = null
+  excerciseDropAction.value = null
+  hoveredExcerciseDropTarget.value = null
+  isExcercisePointerDragging.value = false
+  excerciseDragStartPoint.value = { x: event.clientX, y: event.clientY }
+
+  window.addEventListener('pointermove', handleExcercisePointerMove)
+  window.addEventListener('pointerup', handleExcercisePointerUp)
 }
 
 const submitRoutine = async () => {
@@ -834,5 +1199,15 @@ onMounted(() => {
 onBeforeUnmount(() => {
   window.removeEventListener('pointermove', handleSetPointerMove)
   window.removeEventListener('pointerup', handleSetPointerUp)
+  window.removeEventListener('pointermove', handleExcercisePointerMove)
+  window.removeEventListener('pointerup', handleExcercisePointerUp)
+  setDragCursorActive(false)
 })
 </script>
+
+<style scoped>
+:global(body.routine-set-dragging-cursor),
+:global(body.routine-set-dragging-cursor *) {
+  cursor: grabbing !important;
+}
+</style>

@@ -1,157 +1,88 @@
 import type { Routine } from '../types/routine'
+import { useAuth0 } from '@auth0/auth0-vue'
 
-const ROUTINES_STORAGE_KEY = 'routines:data'
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 
-const normalizeRoutine = (value: unknown): Routine | null => {
-  if (!value || typeof value !== 'object') {
-    return null
+if (!API_BASE_URL) {
+  throw new Error('Missing VITE_API_BASE_URL in environment configuration')
+}
+
+const ROUTINES_ENDPOINT = `${API_BASE_URL}/api/routines`
+
+const parseJsonResponse = async <T>(response: Response): Promise<T> => {
+  if (!response.ok) {
+    const message = await response.text()
+    throw new Error(message || 'Routine API request failed')
   }
 
-  const parsedRoutine = value as { id?: unknown; name?: unknown; excercises?: unknown }
+  return response.json() as Promise<T>
+}
 
-  if (typeof parsedRoutine.id !== 'string' || typeof parsedRoutine.name !== 'string' || !Array.isArray(parsedRoutine.excercises)) {
-    return null
+export const useRoutinesApi = () => {
+  const { getAccessTokenSilently } = useAuth0()
+
+  const fetchWithAuth = async (input: RequestInfo | URL, init?: RequestInit) => {
+    const headers = new Headers(init?.headers)
+    const token = await getAccessTokenSilently()
+
+    headers.set('Authorization', `Bearer ${token}`)
+
+    return fetch(input, {
+      ...init,
+      headers,
+    })
   }
 
-  const normalizedExcercises = parsedRoutine.excercises
-    .map((excercise) => {
-      if (typeof excercise === 'string') {
-        return {
-          name: excercise,
-          isBodyweight: false,
-          sets: [],
-        }
-      }
+  const listRoutines = async (): Promise<Routine[]> => {
+    const response = await fetchWithAuth(ROUTINES_ENDPOINT)
+    return parseJsonResponse<Routine[]>(response)
+  }
 
-      if (!excercise || typeof excercise !== 'object') {
-        return null
-      }
-
-      const parsedExcercise = excercise as {
-        name?: unknown
-        isBodyweight?: unknown
-        sets?: unknown
-      }
-
-      if (typeof parsedExcercise.name !== 'string' || !Array.isArray(parsedExcercise.sets)) {
-        return null
-      }
-
-      const normalizedSets = parsedExcercise.sets
-        .map((setValue) => {
-          if (!setValue || typeof setValue !== 'object') {
-            return null
-          }
-
-          const parsedSet = setValue as { type?: unknown; reps?: unknown; weight?: unknown }
-          const isTypeValid = parsedSet.type === 'warmup' || parsedSet.type === 'normal' || parsedSet.type === 'fail'
-
-          if (!isTypeValid) {
-            return null
-          }
-
-          return {
-            type: parsedSet.type,
-            reps: typeof parsedSet.reps === 'number' && Number.isFinite(parsedSet.reps) ? parsedSet.reps : null,
-            weight: typeof parsedSet.weight === 'number' && Number.isFinite(parsedSet.weight) ? parsedSet.weight : null,
-          }
-        })
-        .filter((setValue): setValue is { type: 'warmup' | 'normal' | 'fail'; reps: number | null; weight: number | null } => {
-          return setValue !== null
-        })
-
-      return {
-        name: parsedExcercise.name,
-        isBodyweight: Boolean(parsedExcercise.isBodyweight),
-        sets: normalizedSets,
-      }
+  const addRoutine = async (payload: Omit<Routine, 'id'>): Promise<Routine> => {
+    const response = await fetchWithAuth(ROUTINES_ENDPOINT, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        name: payload.name,
+        excercises: payload.excercises,
+      }),
     })
-    .filter((excercise): excercise is Routine['excercises'][number] => {
-      return excercise !== null
+
+    return parseJsonResponse<Routine>(response)
+  }
+
+  const editRoutine = async (routineId: string, payload: Omit<Routine, 'id'>): Promise<Routine> => {
+    const response = await fetchWithAuth(`${ROUTINES_ENDPOINT}/${encodeURIComponent(routineId)}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        name: payload.name,
+        excercises: payload.excercises,
+      }),
     })
+
+    return parseJsonResponse<Routine>(response)
+  }
+
+  const deleteRoutine = async (routineId: string): Promise<void> => {
+    const response = await fetchWithAuth(`${ROUTINES_ENDPOINT}/${encodeURIComponent(routineId)}`, {
+      method: 'DELETE',
+    })
+
+    if (!response.ok) {
+      const message = await response.text()
+      throw new Error(message || 'Routine API request failed')
+    }
+  }
 
   return {
-    id: parsedRoutine.id,
-    name: parsedRoutine.name,
-    excercises: normalizedExcercises,
+    listRoutines,
+    addRoutine,
+    editRoutine,
+    deleteRoutine,
   }
-}
-
-const readRoutines = (): Routine[] => {
-  const rawValue = localStorage.getItem(ROUTINES_STORAGE_KEY)
-
-  if (!rawValue) {
-    return []
-  }
-
-  try {
-    const parsedValue = JSON.parse(rawValue)
-
-    if (!Array.isArray(parsedValue)) {
-      return []
-    }
-
-    return parsedValue
-      .map((routine) => normalizeRoutine(routine))
-      .filter((routine): routine is Routine => {
-        return routine !== null
-      })
-  } catch {
-    return []
-  }
-}
-
-const writeRoutines = (routines: Routine[]) => {
-  localStorage.setItem(ROUTINES_STORAGE_KEY, JSON.stringify(routines))
-}
-
-const createRoutineId = () => {
-  return `routine-${Math.random().toString(36).slice(2, 10)}`
-}
-
-export const routinesApi = {
-  async listRoutines(): Promise<Routine[]> {
-    return readRoutines()
-  },
-
-  async addRoutine(payload: Omit<Routine, 'id'>): Promise<Routine> {
-    const newRoutine: Routine = {
-      id: createRoutineId(),
-      name: payload.name,
-      excercises: [...payload.excercises],
-    }
-
-    const currentRoutines = readRoutines()
-    const nextRoutines = [newRoutine, ...currentRoutines]
-    writeRoutines(nextRoutines)
-
-    return newRoutine
-  },
-
-  async editRoutine(routineId: string, payload: Omit<Routine, 'id'>): Promise<Routine> {
-    const currentRoutines = readRoutines()
-    const targetRoutine = currentRoutines.find((routine) => routine.id === routineId)
-
-    if (!targetRoutine) {
-      throw new Error('Routine not found')
-    }
-
-    const updatedRoutine: Routine = {
-      ...targetRoutine,
-      name: payload.name,
-      excercises: [...payload.excercises],
-    }
-
-    const nextRoutines = currentRoutines.map((routine) => {
-      if (routine.id !== routineId) {
-        return routine
-      }
-
-      return updatedRoutine
-    })
-
-    writeRoutines(nextRoutines)
-
-    return updatedRoutine
-  },
 }

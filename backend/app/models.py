@@ -14,6 +14,7 @@ class Client(Base):
 	image_url = Column(String(1000), nullable=False)
 	status = Column(String(50), nullable=False)
 	invitation_code = Column(String(100), nullable=False, unique=True, index=True)
+	user_id = Column(String(255), nullable=True, index=True)
 	current_user_id = Column(Integer, nullable=True, index=True)
 
 
@@ -35,3 +36,12 @@ class Excercise(Base):
 	primary_muscle = Column(String(255), nullable=False)
 	muscles = Column(JSON, nullable=False, default=list)
 	tags = Column(JSON, nullable=False, default=list)
+
+
+class Routine(Base):
+	__tablename__ = "routines"
+
+	id = Column(String(100), primary_key=True, index=True)
+	name = Column(String(255), nullable=False)
+	user_id = Column(String(255), nullable=True, index=True)
+	excercises = Column(JSON, nullable=False, default=list)

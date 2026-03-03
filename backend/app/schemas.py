@@ -39,6 +39,7 @@ class ClientOut(ClientBase):
 
     imageUrl: str = Field(validation_alias="image_url")
     invitationCode: str = Field(validation_alias="invitation_code")
+    userId: str | None = Field(default=None, validation_alias="user_id")
     currentUserId: int | None = Field(default=None, validation_alias="current_user_id")
 
 
@@ -67,3 +68,38 @@ class ExcerciseOut(BaseModel):
     primaryMuscle: str = Field(validation_alias="primary_muscle")
     muscles: list[dict[str, object]]
     tags: list[str]
+
+
+RoutineSetType = Literal["warmup", "normal", "fail"]
+
+
+class RoutineSet(BaseModel):
+    type: RoutineSetType
+    reps: int | None
+    weight: float | None
+
+
+class RoutineExcercise(BaseModel):
+    name: str = Field(min_length=1)
+    isBodyweight: bool
+    sets: list[RoutineSet]
+
+
+class RoutineBase(BaseModel):
+    name: str = Field(min_length=1)
+
+
+class RoutineCreate(RoutineBase):
+    pass
+
+
+class RoutineUpdate(RoutineBase):
+    excercises: list[RoutineExcercise]
+
+
+class RoutineOut(RoutineBase):
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+
+    id: str
+    userId: str | None = Field(default=None, validation_alias="user_id")
+    excercises: list[RoutineExcercise]
