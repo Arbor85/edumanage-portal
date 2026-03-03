@@ -479,6 +479,7 @@ def accept_client_invitation(
 
     client.current_user_id = user.id
     client.image_url = payload.imageUrl
+    client.status = "Active"
 
     db.commit()
     db.refresh(client)
