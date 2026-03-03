@@ -240,4 +240,8 @@ const applySelection = () => {
   emit('update:modelValue', draftSelection.value)
   closeDialog()
 }
+
+defineExpose({
+  openDialog
+})
 </script>

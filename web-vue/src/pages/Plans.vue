@@ -198,18 +198,12 @@
             <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
               Client
             </label>
-            <div class="flex items-center gap-2">
-              <div v-if="formData.clientName" class="flex-1">
-                <div class="rounded-md border border-slate-300 bg-slate-50 px-3 py-2 text-sm text-slate-900 dark:border-slate-600 dark:bg-slate-700/50 dark:text-slate-100">
-                  {{ formData.clientName }}
-                </div>
-              </div>
-              <SelectClient
-                v-model="formData.clientName"
-                :options="clients"
-                :button-text="formData.clientName ? 'Change client' : 'Select client'"
-              />
-            </div>
+            <SelectClient
+              ref="clientSelectorRef"
+              v-model="formData.clientName"
+              :options="clients"
+              @update:modelValue="formData.clientName = $event"
+            />
           </div>
 
           <div>
@@ -312,6 +306,9 @@ const isLoading = ref(false)
 const errorMessage = ref('')
 const viewMode = ref<'list' | 'calendar'>('list')
 
+// Component refs
+const clientSelectorRef = ref<InstanceType<typeof SelectClient> | null>(null)
+
 // Calendar state
 const currentDate = ref(new Date())
 
@@ -333,6 +330,11 @@ const formData = ref<{
 
 const canSave = computed(() => {
   return formData.value.name.trim() && formData.value.clientName.trim()
+})
+
+const selectedClient = computed(() => {
+  if (!formData.value.clientName) return null
+  return clients.value.find(client => client.name === formData.value.clientName) || null
 })
 
 const formatDate = (dateString: string) => {
@@ -455,6 +457,10 @@ const cancelDialog = () => {
   showDialog.value = false
   isEditing.value = false
   editingPlanId.value = null
+}
+
+const openClientSelector = () => {
+  clientSelectorRef.value?.openDialog()
 }
 
 const addWorkout = (workout: PlanWorkout) => {
