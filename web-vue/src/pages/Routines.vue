@@ -202,7 +202,7 @@
                       class="flex h-8 items-center justify-center rounded-md border border-dashed border-emerald-500 bg-emerald-50/60 text-[11px] font-medium text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300"
                       :data-set-insert="`${excerciseIndex}:${setIndex}`"
                     >
-                      Drop here
+                      {{ getInsertPlaceholderText(excerciseIndex, setIndex) }}
                     </div>
 
                     <div
@@ -269,7 +269,7 @@
                       : 'border-slate-300 bg-transparent text-slate-500 dark:border-slate-600 dark:text-slate-300'"
                     :data-set-end="excerciseIndex"
                   >
-                    Drop at end
+                    {{ getEndPlaceholderText(excerciseIndex) }}
                   </div>
 
                   <div class="mt-1 grid grid-cols-1 gap-2 md:grid-cols-2" v-if="isDragActiveForExcercise(excerciseIndex)">
@@ -280,7 +280,7 @@
                         : 'border-rose-400 bg-rose-50 text-rose-700 dark:border-rose-700 dark:bg-rose-900/30 dark:text-rose-300'"
                       :data-set-action-remove="excerciseIndex"
                     >
-                      Drop here to remove set
+                      {{ isRemoveDropHovered(excerciseIndex) ? 'Release to remove set' : 'Remove set' }}
                     </div>
                     <div
                       class="flex h-10 items-center justify-center rounded-md border border-dashed text-xs font-medium"
@@ -289,7 +289,7 @@
                         : 'border-sky-400 bg-sky-50 text-sky-700 dark:border-sky-700 dark:bg-sky-900/30 dark:text-sky-300'"
                       :data-set-action-copy="excerciseIndex"
                     >
-                      Drop here to copy set
+                      {{ isCopyDropHovered(excerciseIndex) ? 'Release to copy set' : 'Copy set' }}
                     </div>
                   </div>
                 </div>
@@ -342,6 +342,13 @@ const formExcercises = ref<RoutineExcercise[]>([])
 const draggedSet = ref<{ excerciseIndex: number; setIndex: number } | null>(null)
 const dropInsertTarget = ref<{ excerciseIndex: number; insertIndex: number } | null>(null)
 const dropActionTarget = ref<{ excerciseIndex: number; action: 'remove' | 'copy' } | null>(null)
+const hoveredDropTarget = ref<
+  | { type: 'insert'; excerciseIndex: number; insertIndex: number }
+  | { type: 'end'; excerciseIndex: number }
+  | { type: 'remove'; excerciseIndex: number }
+  | { type: 'copy'; excerciseIndex: number }
+  | null
+>(null)
 const isPointerDragging = ref(false)
 const dragStartPoint = ref<{ x: number; y: number } | null>(null)
 
@@ -500,6 +507,34 @@ const isCopyDropActive = (excerciseIndex: number) => {
   return dropActionTarget.value?.excerciseIndex === excerciseIndex && dropActionTarget.value.action === 'copy'
 }
 
+const isRemoveDropHovered = (excerciseIndex: number) => {
+  return hoveredDropTarget.value?.type === 'remove' && hoveredDropTarget.value.excerciseIndex === excerciseIndex
+}
+
+const isCopyDropHovered = (excerciseIndex: number) => {
+  return hoveredDropTarget.value?.type === 'copy' && hoveredDropTarget.value.excerciseIndex === excerciseIndex
+}
+
+const getInsertPlaceholderText = (excerciseIndex: number, insertIndex: number) => {
+  if (
+    hoveredDropTarget.value?.type === 'insert' &&
+    hoveredDropTarget.value.excerciseIndex === excerciseIndex &&
+    hoveredDropTarget.value.insertIndex === insertIndex
+  ) {
+    return 'Release to move set here'
+  }
+
+  return ''
+}
+
+const getEndPlaceholderText = (excerciseIndex: number) => {
+  if (hoveredDropTarget.value?.type === 'end' && hoveredDropTarget.value.excerciseIndex === excerciseIndex) {
+    return 'Release to move set to end'
+  }
+
+  return ''
+}
+
 const isInsertPlaceholderVisible = (excerciseIndex: number, insertIndex: number) => {
   return dropInsertTarget.value?.excerciseIndex === excerciseIndex && dropInsertTarget.value.insertIndex === insertIndex
 }
@@ -570,6 +605,7 @@ const clearDragState = () => {
   draggedSet.value = null
   dropInsertTarget.value = null
   dropActionTarget.value = null
+  hoveredDropTarget.value = null
   isPointerDragging.value = false
   dragStartPoint.value = null
 }
@@ -601,6 +637,7 @@ const handleSetPointerMove = (event: PointerEvent) => {
 
   if (!elementAtPointer) {
     dropActionTarget.value = null
+    hoveredDropTarget.value = null
     return
   }
 
@@ -610,6 +647,7 @@ const handleSetPointerMove = (event: PointerEvent) => {
     const targetExcerciseIndex = Number(removeTarget.dataset.setActionRemove)
 
     if (Number.isFinite(targetExcerciseIndex) && targetExcerciseIndex === source.excerciseIndex) {
+      hoveredDropTarget.value = { type: 'remove', excerciseIndex: targetExcerciseIndex }
       dropActionTarget.value = { excerciseIndex: targetExcerciseIndex, action: 'remove' }
       return
     }
@@ -621,12 +659,36 @@ const handleSetPointerMove = (event: PointerEvent) => {
     const targetExcerciseIndex = Number(copyTarget.dataset.setActionCopy)
 
     if (Number.isFinite(targetExcerciseIndex) && targetExcerciseIndex === source.excerciseIndex) {
+      hoveredDropTarget.value = { type: 'copy', excerciseIndex: targetExcerciseIndex }
       dropActionTarget.value = { excerciseIndex: targetExcerciseIndex, action: 'copy' }
       return
     }
   }
 
   dropActionTarget.value = null
+
+  const insertTarget = elementAtPointer.closest('[data-set-insert]') as HTMLElement | null
+
+  if (insertTarget) {
+    const rawInsert = insertTarget.dataset.setInsert ?? ''
+    const [excerciseIndexPart, insertIndexPart] = rawInsert.split(':')
+    const targetExcerciseIndex = Number(excerciseIndexPart)
+    const targetInsertIndex = Number(insertIndexPart)
+
+    if (
+      Number.isFinite(targetExcerciseIndex) &&
+      Number.isFinite(targetInsertIndex) &&
+      targetExcerciseIndex === source.excerciseIndex
+    ) {
+      hoveredDropTarget.value = {
+        type: 'insert',
+        excerciseIndex: targetExcerciseIndex,
+        insertIndex: targetInsertIndex,
+      }
+      dropInsertTarget.value = { excerciseIndex: targetExcerciseIndex, insertIndex: targetInsertIndex }
+      return
+    }
+  }
 
   const endTarget = elementAtPointer.closest('[data-set-end]') as HTMLElement | null
 
@@ -635,6 +697,7 @@ const handleSetPointerMove = (event: PointerEvent) => {
     const excercise = formExcercises.value[targetExcerciseIndex]
 
     if (Number.isFinite(targetExcerciseIndex) && targetExcerciseIndex === source.excerciseIndex && excercise) {
+      hoveredDropTarget.value = { type: 'end', excerciseIndex: targetExcerciseIndex }
       dropInsertTarget.value = { excerciseIndex: targetExcerciseIndex, insertIndex: excercise.sets.length }
       return
     }
@@ -655,10 +718,13 @@ const handleSetPointerMove = (event: PointerEvent) => {
     ) {
       const rowBounds = rowTarget.getBoundingClientRect()
       const insertIndex = event.clientY >= rowBounds.top + rowBounds.height / 2 ? targetSetIndex + 1 : targetSetIndex
+      hoveredDropTarget.value = null
       dropInsertTarget.value = { excerciseIndex: targetExcerciseIndex, insertIndex }
       return
     }
   }
+
+  hoveredDropTarget.value = null
 }
 
 const handleSetPointerUp = () => {
