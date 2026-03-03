@@ -128,7 +128,11 @@ const acceptInvite = async () => {
   successMessage.value = ''
 
   try {
-    const updatedClient = await clientsApi.acceptInvitation(invitationCode.value)
+    const updatedClient = await clientsApi.acceptInvitation(invitationCode.value, {
+      name: user.value?.name || user.value?.nickname || 'User',
+      email: user.value?.email || 'unknown@example.com',
+      imageUrl: user.value?.picture || fallbackUserAvatar.value,
+    })
     invitedClient.value = updatedClient
     await router.replace('/')
   } catch {

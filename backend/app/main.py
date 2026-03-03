@@ -299,7 +299,7 @@ def add_routine(
         id=str(uuid4()),
         name=payload.name,
         user_id=user_id,
-        excercises=[],
+        excercises=[item.model_dump() for item in payload.excercises],
     )
     db.add(routine)
     db.commit()
@@ -444,12 +444,7 @@ def accept_client_invitation(
     db: Session = Depends(get_db),
 ) -> ClientOut:
     user_id = get_current_user_id(claims)
-    client = db.execute(
-        select(Client).where(
-            Client.invitation_code == invitation_code,
-            Client.user_id == user_id,
-        )
-    ).scalar_one_or_none()
+    client = db.execute(select(Client).where(Client.invitation_code == invitation_code)).scalar_one_or_none()
     if not client:
         raise HTTPException(status_code=404, detail="Client not found.")
 
@@ -457,17 +452,30 @@ def accept_client_invitation(
     if not external_id:
         raise HTTPException(status_code=401, detail="Token does not include user identifier.")
 
-    token_name = str(claims.get("name") or claims.get("nickname") or external_id)
-    token_email = str(claims.get("email") or f"{external_id}@local.invalid")
+    name = payload.name.strip()
+    email = payload.email.strip()
+    if not name or not email:
+        raise HTTPException(status_code=400, detail="name and email are required.")
 
     user = db.execute(select(User).where(User.external_id == external_id)).scalar_one_or_none()
     if not user:
-        user = User(name=token_name, email=token_email, external_id=external_id)
+        email_owner = db.execute(select(User).where(User.email == email)).scalar_one_or_none()
+        if email_owner and email_owner.external_id != external_id:
+            raise HTTPException(status_code=400, detail="Email is already associated with another user.")
+
+        user = User(name=name, email=email, external_id=external_id)
         db.add(user)
         db.flush()
     else:
-        user.name = token_name
-        user.email = token_email
+        email_owner = db.execute(select(User).where(User.email == email)).scalar_one_or_none()
+        if email_owner and email_owner.id != user.id:
+            raise HTTPException(status_code=400, detail="Email is already associated with another user.")
+
+        user.name = name
+        user.email = email
+
+    if client.current_user_id and client.current_user_id != user.id:
+        raise HTTPException(status_code=400, detail="Invitation already accepted by another user.")
 
     client.current_user_id = user.id
     client.image_url = payload.imageUrl

@@ -195,7 +195,7 @@
               </div>
               <DialogActionPanel :primary-label="dialogMode === 'edit' ? 'Save changes' : 'Create invitation'"
                 :primary-disabled="!canCreate" cancel-label="Cancel" :secondary-label="secondaryActionLabel"
-                :secondary-variant="secondaryActionVariant" primary-button-type="submit" @primary-click="submitDialog"
+                :secondary-variant="secondaryActionVariant" primary-button-type="submit"
                 @secondary-click="runSecondaryDialogAction" @cancel-click="closeDialog" />
             </form>
           </template>

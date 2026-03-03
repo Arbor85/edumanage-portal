@@ -75,19 +75,23 @@ export const useClientsApi = () => {
     return clients.find((client) => client.invitationCode === invitationCode) || null
   }
 
-  const acceptInvitation = async (invitationCode: string): Promise<Client> => {
-    const client = await getClientByInvitationCode(invitationCode)
+  const acceptInvitation = async (
+    invitationCode: string,
+    payload: { name: string; email: string; imageUrl: string },
+  ): Promise<Client> => {
+    const response = await fetchWithAuth(`${CLIENTS_ENDPOINT}/${encodeURIComponent(invitationCode)}/accept`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        name: payload.name,
+        email: payload.email,
+        imageUrl: payload.imageUrl,
+      }),
+    })
 
-    if (!client) {
-      throw new Error('Invitation not found')
-    }
-
-    const payload: Client = {
-      ...client,
-      status: 'Active',
-    }
-
-    return editClient(invitationCode, payload)
+    return parseJsonResponse<Client>(response)
   }
 
   return {

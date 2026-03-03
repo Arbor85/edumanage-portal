@@ -56,6 +56,8 @@ class UserOut(UserBase):
 
 
 class AcceptClientInvitationRequest(BaseModel):
+    name: str = Field(min_length=1)
+    email: str = Field(min_length=1)
     imageUrl: str = Field(min_length=1)
 
 
@@ -90,7 +92,7 @@ class RoutineBase(BaseModel):
 
 
 class RoutineCreate(RoutineBase):
-    pass
+    excercises: list[RoutineExcercise] = Field(default_factory=list)
 
 
 class RoutineUpdate(RoutineBase):
