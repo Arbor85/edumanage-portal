@@ -559,7 +559,11 @@ const addSet = (excerciseIndex: number) => {
     return
   }
 
-  excercise.sets.push(createEmptySet())
+  // Clone the last set if it exists, otherwise create an empty set
+  const lastSet = excercise.sets[excercise.sets.length - 1]
+  const newSet = lastSet ? { ...lastSet } : createEmptySet()
+  
+  excercise.sets.push(newSet)
 }
 
 const removeSet = (excerciseIndex: number, setIndex: number) => {

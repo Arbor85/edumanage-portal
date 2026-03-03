@@ -7,6 +7,7 @@ import Clients from './pages/Clients.vue'
 import Invite from './pages/Invite.vue'
 import Excercises from './pages/Excercises.vue'
 import Routines from './pages/Routines.vue'
+import Plans from './pages/Plans.vue'
 
 const hasAuth0CacheEntries = () => {
   return Object.keys(localStorage).some((key) => key.startsWith('@@auth0spajs@@'))
@@ -56,6 +57,12 @@ const routes = [
     path: '/routines',
     name: 'Routines',
     component: Routines,
+    beforeEnter: requireAuth,
+  },
+  {
+    path: '/plans',
+    name: 'Plans',
+    component: Plans,
     beforeEnter: requireAuth,
   },
   {
