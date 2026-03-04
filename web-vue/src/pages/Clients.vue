@@ -72,6 +72,15 @@
               class="inline-flex items-center rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600">
               Edit
             </button>
+            <button type="button" @click="requestRemoveClient(client.invitationCode)" aria-label="Remove client" title="Remove client"
+              class="inline-flex items-center justify-center rounded-md border border-rose-300 bg-white p-2 text-rose-700 hover:bg-rose-50 dark:border-rose-700 dark:bg-slate-700 dark:text-rose-300 dark:hover:bg-rose-900/30">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4">
+                <polyline points="3 6 5 6 21 6" />
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                <line x1="10" y1="11" x2="10" y2="17" />
+                <line x1="14" y1="11" x2="14" y2="17" />
+              </svg>
+            </button>
           </div>
         </article>
 
@@ -117,11 +126,23 @@
                     {{ client.status }}
                   </span>
                 </td>
-                <td class="px-4 py-3 text-right">
-                  <button type="button" @click="openEditDialog(client)"
-                    class="inline-flex items-center rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600">
-                    Edit
-                  </button>
+                <td class="px-4 py-3">
+                  <div class="flex justify-end gap-2">
+                    
+                    <button type="button" @click="requestRemoveClient(client.invitationCode)" aria-label="Remove client" title="Remove client"
+                      class="inline-flex items-center justify-center rounded-md border border-rose-300 bg-white p-2 text-rose-700 hover:bg-rose-50 dark:border-rose-700 dark:bg-slate-700 dark:text-rose-300 dark:hover:bg-rose-900/30">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4">
+                        <polyline points="3 6 5 6 21 6" />
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                        <line x1="10" y1="11" x2="10" y2="17" />
+                        <line x1="14" y1="11" x2="14" y2="17" />
+                      </svg>
+                    </button>
+                    <button type="button" @click="openEditDialog(client)"
+                      class="inline-flex items-center rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600">
+                      Edit
+                    </button>
+                  </div>
                 </td>
               </tr>
             </tbody>
@@ -170,7 +191,9 @@
                 <p class="mb-2 text-sm font-medium text-slate-700 dark:text-slate-200">Tags</p>
                 <div class="flex flex-wrap items-center gap-2">
                   <div v-for="group in tagGroups" :key="group.name">
-                    <div class="inline-flex overflow-hidden rounded-md border border-slate-300 dark:border-slate-600">
+                    <!-- Hide Gender tags if Group is selected -->
+                    <div v-if="!(group.name === 'Gender' && formTags.includes('Group'))"
+                      class="inline-flex overflow-hidden rounded-md border border-slate-300 dark:border-slate-600">
                       <button v-for="tag in group.tags" :key="tag" type="button" @click="toggleTag(tag)"
                         class="px-3 py-1 text-xs font-medium transition border-r border-slate-300 last:border-r-0 dark:border-slate-600"
                         :class="formTags.includes(tag)
@@ -202,12 +225,23 @@
         </div>
       </div>
     </div>
+
+    <ConfirmDialog
+      :open="showRemoveConfirmDialog"
+      title="Remove client"
+      message="Are you sure you want to remove this client? This action cannot be undone."
+      confirm-label="Remove"
+      cancel-label="Cancel"
+      @confirm="removeClient"
+      @cancel="cancelRemoveClient"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import type { Client, ClientStatus, ClientTag } from '../types/client'
+import ConfirmDialog from '../components/ConfirmDialog.vue'
 import DialogActionPanel from '../components/DialogActionPanel.vue'
 import { usePageTitle } from '../composables/usePageTitle'
 import { useLocalStorageState } from '../composables/useLocalStorageState'
@@ -237,6 +271,8 @@ const generatedInvitationUrl = ref('')
 const isInvitationUrlCopied = ref(false)
 const dialogMode = ref<'create' | 'edit'>('create')
 const editingClientCode = ref<string | null>(null)
+const showRemoveConfirmDialog = ref(false)
+const pendingRemoveClientCode = ref<string | null>(null)
 
 const canCreate = computed(() => formName.value.length > 0)
 
@@ -316,7 +352,16 @@ const toggleTag = (tag: ClientTag) => {
   }
 
   const selectedFromOtherGroups = formTags.value.filter(item => !group.tags.includes(item))
-  formTags.value = [...selectedFromOtherGroups, tag]
+
+  // If selecting 'Group' tag, remove all Gender tags
+  if (tag === 'Group') {
+    const genderTags = tagGroups.find(g => g.name === 'Gender')?.tags || []
+    formTags.value = selectedFromOtherGroups.filter(item => !genderTags.includes(item))
+  } else {
+    formTags.value = selectedFromOtherGroups
+  }
+
+  formTags.value = [...formTags.value, tag]
 }
 
 const loadClients = async () => {
@@ -340,6 +385,36 @@ const replaceClientInState = (nextClient: Client) => {
 
     return nextClient
   })
+}
+
+const requestRemoveClient = (invitationCode: string) => {
+  pendingRemoveClientCode.value = invitationCode
+  showRemoveConfirmDialog.value = true
+}
+
+const cancelRemoveClient = () => {
+  showRemoveConfirmDialog.value = false
+  pendingRemoveClientCode.value = null
+}
+
+const removeClient = async () => {
+  if (!pendingRemoveClientCode.value) {
+    return
+  }
+
+  try {
+    await clientsApi.deleteClient(pendingRemoveClientCode.value)
+    clients.value = clients.value.filter((client) => client.invitationCode !== pendingRemoveClientCode.value)
+
+    if (editingClientCode.value === pendingRemoveClientCode.value) {
+      closeDialog()
+    }
+
+    clientsError.value = ''
+    cancelRemoveClient()
+  } catch {
+    clientsError.value = 'Failed to remove client'
+  }
 }
 
 const openDialog = () => {
