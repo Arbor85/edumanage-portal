@@ -57,3 +57,21 @@ View your app in AI Studio: https://ai.studio/apps/temp/1
    ```bash
    npm run dev:all
    ```
+
+## Run with Docker (Web + Backend)
+
+From the repository root:
+
+```bash
+docker compose up --build
+```
+
+- Web: `http://localhost:3000`
+- Backend API: `http://localhost:8000`
+- Backend docs: `http://localhost:8000/docs`
+
+To stop:
+
+```bash
+docker compose down
+```

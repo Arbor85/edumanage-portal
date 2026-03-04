@@ -60,3 +60,18 @@ set DATABASE_URL=sqlite:///./app.db
 - Workout history is seeded on startup when the `workout_history` table is empty.
   - Seed data is read from `components/pages/fitnes/data/workouts.csv`.
   - To re-seed, delete `backend/app.db` (or clear the table) and restart the API.
+
+## Run with Docker Compose (from repo root)
+
+```bash
+docker compose up --build
+```
+
+- API: `http://localhost:8000`
+- Swagger UI: `http://localhost:8000/docs`
+
+Stop containers:
+
+```bash
+docker compose down
+```
