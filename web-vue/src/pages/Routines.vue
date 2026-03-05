@@ -66,16 +66,13 @@
               <td class="px-4 py-3 text-right">
                 <div class="inline-flex items-center gap-2">
                   <button type="button" @click="requestDeleteRoutine(routine)"
-                    class="inline-flex items-center rounded-md bg-white p-1.5 text-rose-700 hover:bg-rose-50 dark:bg-slate-700 dark:text-rose-300 dark:hover:bg-rose-900/30"
+                    class="inline-flex items-center gap-2 rounded-md bg-white p-1.5 text-rose-700 hover:bg-rose-50 dark:bg-slate-700 dark:text-rose-300 dark:hover:bg-rose-900/30"
                     title="Delete routine" aria-label="Delete routine">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
-                      <path fill-rule="evenodd"
-                        d="M9 3.75A1.5 1.5 0 0 1 10.5 2.25h3A1.5 1.5 0 0 1 15 3.75V4.5h3.75a.75.75 0 0 1 0 1.5h-.518l-.824 12.36A2.25 2.25 0 0 1 15.164 20.5H8.836a2.25 2.25 0 0 1-2.244-2.14L5.768 6H5.25a.75.75 0 0 1 0-1.5H9v-.75Zm1.5 0V4.5h3v-.75h-3Zm-2.49 2.25.807 12.11a.75.75 0 0 0 .748.64h6.87a.75.75 0 0 0 .748-.64L15.99 6H8.01Zm2.24 2.25a.75.75 0 0 1 .75.75v6a.75.75 0 0 1-1.5 0V9a.75.75 0 0 1 .75-.75Zm4.5.75a.75.75 0 0 0-1.5 0v6a.75.75 0 0 0 1.5 0V9Z"
-                        clip-rule="evenodd" />
-                    </svg>
+                    <Trash2 :size="16" />
                   </button>
                   <button type="button" @click="openEditDialog(routine)"
-                    class="inline-flex items-center rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600">
+                    class="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600">
+                    <Edit2 :size="14" />
                     Edit
                   </button>
                 </div>
@@ -105,16 +102,13 @@
 
         <div class="mt-4 flex items-center justify-between gap-2">
           <button type="button" @click="requestDeleteRoutine(routine)"
-            class="inline-flex items-center rounded-md bg-white p-1.5 text-rose-700 hover:bg-rose-50 dark:bg-slate-700 dark:text-rose-300 dark:hover:bg-rose-900/30"
+            class="inline-flex items-center gap-2 rounded-md bg-white p-1.5 text-rose-700 hover:bg-rose-50 dark:bg-slate-700 dark:text-rose-300 dark:hover:bg-rose-900/30"
             title="Delete routine" aria-label="Delete routine">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
-              <path fill-rule="evenodd"
-                d="M9 3.75A1.5 1.5 0 0 1 10.5 2.25h3A1.5 1.5 0 0 1 15 3.75V4.5h3.75a.75.75 0 0 1 0 1.5h-.518l-.824 12.36A2.25 2.25 0 0 1 15.164 20.5H8.836a2.25 2.25 0 0 1-2.244-2.14L5.768 6H5.25a.75.75 0 0 1 0-1.5H9v-.75Zm1.5 0V4.5h3v-.75h-3Zm-2.49 2.25.807 12.11a.75.75 0 0 0 .748.64h6.87a.75.75 0 0 0 .748-.64L15.99 6H8.01Zm2.24 2.25a.75.75 0 0 1 .75.75v6a.75.75 0 0 1-1.5 0V9a.75.75 0 0 1 .75-.75Zm4.5.75a.75.75 0 0 0-1.5 0v6a.75.75 0 0 0 1.5 0V9Z"
-                clip-rule="evenodd" />
-            </svg>
+            <Trash2 :size="16" />
           </button>
           <button type="button" @click="openEditDialog(routine)"
-            class="inline-flex items-center rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600">
+            class="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600">
+            <Edit2 :size="14" />
             Edit
           </button>
         </div>
@@ -128,7 +122,18 @@
 
     <div class="fixed bottom-0 left-56 right-0 z-30 px-6 pb-3">
       <div class="mx-auto w-full max-w-5xl">
-        <DialogActionPanel primary-label="Add routine" @primary-click="openCreateDialog" />
+        <div class="mt-4 border-t border-slate-200 pt-3 dark:border-slate-700">
+          <div class="flex items-center justify-end">
+            <button
+              type="button"
+              @click="openCreateDialog"
+              class="inline-flex items-center gap-2 rounded-md border border-emerald-500 bg-emerald-500 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-600 disabled:opacity-50"
+            >
+              <Plus :size="18" />
+              Add routine
+            </button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -195,15 +200,12 @@
                       <button type="button" @click="removeExcercise(excerciseIndex)"
                         class="rounded-md p-1.5 text-rose-700 hover:bg-rose-50 dark:text-rose-300 dark:hover:bg-rose-900/30"
                         title="Remove excercise">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
-                          <path fill-rule="evenodd"
-                            d="M9 3.75A1.5 1.5 0 0 1 10.5 2.25h3A1.5 1.5 0 0 1 15 3.75V4.5h3.75a.75.75 0 0 1 0 1.5h-.518l-.824 12.36A2.25 2.25 0 0 1 15.164 20.5H8.836a2.25 2.25 0 0 1-2.244-2.14L5.768 6H5.25a.75.75 0 0 1 0-1.5H9v-.75Zm1.5 0V4.5h3v-.75h-3Zm-2.49 2.25.807 12.11a.75.75 0 0 0 .748.64h6.87a.75.75 0 0 0 .748-.64L15.99 6H8.01Zm2.24 2.25a.75.75 0 0 1 .75.75v6a.75.75 0 0 1-1.5 0V9a.75.75 0 0 1 .75-.75Zm4.5.75a.75.75 0 0 0-1.5 0v6a.75.75 0 0 0 1.5 0V9Z"
-                            clip-rule="evenodd" />
-                        </svg>
+                        <Trash2 :size="16" />
                       </button>
 
                       <button type="button" @click="addSet(excerciseIndex)"
-                        class="rounded-md border border-slate-300 px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:text-slate-100 dark:hover:bg-slate-700">
+                        class="inline-flex items-center gap-2 rounded-md border border-slate-300 px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:text-slate-100 dark:hover:bg-slate-700">
+                        <Plus :size="14" />
                         Add set
                       </button>
                     </div>
@@ -252,12 +254,7 @@
                           <button type="button" @click="removeSet(excerciseIndex, setIndex)"
                             class="rounded-md p-1.5 text-rose-700 hover:bg-rose-50 dark:text-rose-300 dark:hover:bg-rose-900/30"
                             title="Remove set">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
-                              class="size-4">
-                              <path fill-rule="evenodd"
-                                d="M9 3.75A1.5 1.5 0 0 1 10.5 2.25h3A1.5 1.5 0 0 1 15 3.75V4.5h3.75a.75.75 0 0 1 0 1.5h-.518l-.824 12.36A2.25 2.25 0 0 1 15.164 20.5H8.836a2.25 2.25 0 0 1-2.244-2.14L5.768 6H5.25a.75.75 0 0 1 0-1.5H9v-.75Zm1.5 0V4.5h3v-.75h-3Zm-2.49 2.25.807 12.11a.75.75 0 0 0 .748.64h6.87a.75.75 0 0 0 .748-.64L15.99 6H8.01Zm2.24 2.25a.75.75 0 0 1 .75.75v6a.75.75 0 0 1-1.5 0V9a.75.75 0 0 1 .75-.75Zm4.5.75a.75.75 0 0 0-1.5 0v6a.75.75 0 0 0 1.5 0V9Z"
-                                clip-rule="evenodd" />
-                            </svg>
+                            <Trash2 :size="16" />
                           </button>
                         </div>
                       </div>
@@ -330,6 +327,7 @@
 </template>
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { Trash2, Edit2, Plus } from 'lucide-vue-next'
 import ConfirmDialog from '../components/ConfirmDialog.vue'
 import DialogActionPanel from '../components/DialogActionPanel.vue'
 import SelectExcercise from '../components/SelectExcercise.vue'
