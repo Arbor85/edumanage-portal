@@ -1,24 +1,40 @@
 <template>
   <nav
-    class="h-screen w-56 shrink-0 overflow-y-auto bg-slate-200 text-slate-900 shadow-xl dark:bg-slate-800 dark:text-slate-100"
+    class="h-screen w-56 shrink-0 overflow-y-auto text-slate-900 shadow-xl dark:text-slate-100 border-r border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl"
   >
     <!-- Side navigation content here -->
-    <ul ref="listRef" class="relative list-none p-0 bg-slate-300 flex flex-col gap-2 min-h-full dark:bg-slate-700">
+    <ul ref="listRef" class="relative list-none pt-8 flex flex-col gap-2 min-h-full">
       <li
-        v-for="(link, index) in navLinks"
+        v-for="(link, index) in mainNavLinks"
         :key="link.to"
         :ref="(el) => setItemRef(el, index)"
       >
         <router-link
           :to="link.to"
-          class="flex w-full items-center px-7 py-4 font-medium text-base transition-all duration-200 text-slate-900 dark:text-slate-100"
+          class="flex w-full items-center gap-3 px-7 py-4 font-medium text-base transition-all duration-200 text-slate-900 dark:text-slate-100"
           :class="isActive(link.to)
-            ? 'text-slate-900 dark:text-slate-100'
+            ? 'bg-slate-400 text-slate-900 dark:bg-slate-600 dark:text-slate-100'
             : 'hover:bg-slate-400 hover:text-slate-900 dark:hover:bg-slate-600 dark:hover:text-slate-100'"
           @click="handleLinkClick"
           :aria-current="isActive(link.to) ? 'page' : undefined"
         >
+          <component :is="link.icon" :size="20" />
           {{ link.label }}
+        </router-link>
+      </li>
+
+      <li class="mt-auto pb-8" v-if="loginLink">
+        <router-link
+          :to="loginLink.to"
+          class="flex w-full items-center gap-3 px-7 py-4 font-medium text-base transition-all duration-200 text-slate-900 dark:text-slate-100"
+          :class="isActive(loginLink.to)
+            ? 'bg-slate-400 text-slate-900 dark:bg-slate-600 dark:text-slate-100'
+            : 'hover:bg-slate-400 hover:text-slate-900 dark:hover:bg-slate-600 dark:hover:text-slate-100'"
+          @click="handleLinkClick"
+          :aria-current="isActive(loginLink.to) ? 'page' : undefined"
+        >
+          <component :is="loginLink.icon" :size="20" />
+          {{ loginLink.label }}
         </router-link>
       </li>
 
@@ -35,6 +51,7 @@
 import { computed, defineComponent, nextTick, onBeforeUnmount, onMounted, ref, watch, type ComponentPublicInstance } from 'vue';
 import { useAuth0 } from '@auth0/auth0-vue';
 import { useRoute } from 'vue-router';
+import { Home, Users, Dumbbell, CalendarDays, ClipboardList, User, LogIn } from 'lucide-vue-next';
 
 export default defineComponent({
   name: 'SideNavBar',
@@ -48,20 +65,28 @@ export default defineComponent({
     const showIndicator = ref(false);
 
     const linkCollection = [
-      { label: 'Home', to: '/', requiresAuth: false, guestOnly: false },
-      { label: 'Clients', to: '/clients', requiresAuth: true, guestOnly: false },
-      { label: 'Excercises', to: '/excercises', requiresAuth: false, guestOnly: false },
-      { label: 'Routines', to: '/routines', requiresAuth: true, guestOnly: false },
-      { label: 'Plans', to: '/plans', requiresAuth: true, guestOnly: false },
-      { label: 'Profile', to: '/profile', requiresAuth: true, guestOnly: false },
-      { label: 'Login', to: '/login', requiresAuth: false, guestOnly: true }
+      { label: 'Home', to: '/', icon: Home, requiresAuth: false, guestOnly: false },
+      { label: 'Clients', to: '/clients', icon: Users, requiresAuth: true, guestOnly: false },
+      { label: 'Excercises', to: '/excercises', icon: Dumbbell, requiresAuth: false, guestOnly: false },
+      { label: 'Routines', to: '/routines', icon: CalendarDays, requiresAuth: true, guestOnly: false },
+      { label: 'Plans', to: '/plans', icon: ClipboardList, requiresAuth: true, guestOnly: false },
+      { label: 'Profile', to: '/profile', icon: User, requiresAuth: true, guestOnly: false },
+      { label: 'Login', to: '/login', icon: LogIn, requiresAuth: false, guestOnly: true }
     ];
 
-    const navLinks = computed(() => linkCollection.filter(link => {
+    const mainNavLinks = computed(() => linkCollection.filter(link => {
+      if (link.to === '/login') return false; // Exclude login from main nav
       if (link.requiresAuth) return isAuthenticated.value;
       if (link.guestOnly) return !isAuthenticated.value;
       return true;
     }));
+
+    const loginLink = computed(() => {
+      const login = linkCollection.find(link => link.to === '/login');
+      if (!login) return null;
+      if (!isAuthenticated.value) return login; // Show only when not authenticated
+      return null;
+    });
 
     const handleLinkClick = () => {
       /* nav remains open */
@@ -79,7 +104,7 @@ export default defineComponent({
     };
 
     const updateIndicator = () => {
-      const activeIndex = navLinks.value.findIndex(link => isActive(link.to));
+      const activeIndex = mainNavLinks.value.findIndex(link => isActive(link.to));
       const activeItem = itemRefs.value[activeIndex];
 
       if (!listRef.value || !activeItem) {
@@ -103,7 +128,7 @@ export default defineComponent({
     };
 
     watch(
-      [() => route.path, navLinks],
+      [() => route.path, mainNavLinks],
       () => {
         syncIndicator();
       },
@@ -124,7 +149,8 @@ export default defineComponent({
     });
 
     return {
-      navLinks,
+      mainNavLinks,
+      loginLink,
       handleLinkClick,
       isActive,
       listRef,

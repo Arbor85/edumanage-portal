@@ -12,11 +12,12 @@ onMounted(() => {
   const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
   const isDarkTheme = savedTheme ? savedTheme === 'dark' : prefersDark;
   applyTheme(isDarkTheme);
+  //bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800
 });
 </script>
 
 <template>
-  <div class="flex w-full min-h-screen bg-slate-100 text-slate-900 dark:bg-slate-900 dark:text-slate-100">
+  <div class="flex w-full min-h-screen bg-white dark:bg-slate-900 shadow-sm border border-slate-200 dark:border-slate-800">
     <SideNavBar />
     
     <div class="p-6 w-full content">
