@@ -105,3 +105,29 @@ class RoutineOut(RoutineBase):
     id: str
     userId: str | None = Field(default=None, validation_alias="user_id")
     excercises: list[RoutineExcercise]
+
+
+class PlanWorkout(RoutineOut):
+    date: str = Field(min_length=1)
+
+
+class PlanBase(BaseModel):
+    name: str = Field(min_length=1)
+    clientId: str = Field(min_length=1)
+
+
+class PlanCreate(PlanBase):
+    workouts: list[PlanWorkout] = Field(default_factory=list)
+
+
+class PlanUpdate(PlanBase):
+    workouts: list[PlanWorkout]
+
+
+class PlanOut(PlanBase):
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+
+    id: str
+    clientId: str = Field(validation_alias="client_id")
+    workouts: list[PlanWorkout]
+    client: ClientOut | None = None

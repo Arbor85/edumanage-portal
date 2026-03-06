@@ -1,23 +1,44 @@
 from __future__ import annotations
 
 import json
+import os
+from collections.abc import Generator
 from pathlib import Path
+from typing import Any
+from uuid import uuid4
 
+import httpx
 from dotenv import load_dotenv
+from fastapi import Depends, FastAPI, HTTPException, Security
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from jose import JWTError, jwt
+from sqlalchemy import func, select, text
+from sqlalchemy.orm import Session
 
-# Load environment variables BEFORE importing any modules that need them
+from .db import Base, SessionLocal, engine
+from .models import Client, Excercise, Plan, Routine, User
+from .schemas import (
+    AcceptClientInvitationRequest,
+    ClientCreate,
+    ClientOut,
+    ClientUpdate,
+    ExcerciseOut,
+    RoutineCreate,
+    RoutineOut,
+    RoutineUpdate,
+)
+from .routers import plans as plans_router
+
 BACKEND_DIR = Path(__file__).resolve().parents[1]
 load_dotenv(BACKEND_DIR / ".env.local")
 
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy import func, select, text
+AUTH0_DOMAIN = os.getenv("AUTH0_DOMAIN", "").strip()
+AUTH0_AUDIENCE = os.getenv("AUTH0_AUDIENCE", "").strip()
+AUTH0_ISSUER = f"https://{AUTH0_DOMAIN}/" if AUTH0_DOMAIN else ""
+AUTH0_JWKS_URL = f"https://{AUTH0_DOMAIN}/.well-known/jwks.json" if AUTH0_DOMAIN else ""
 
-from .db import Base, SessionLocal, engine
-from .models import Excercise
-from .routers.clients import router as clients_router
-from .routers.exercises import router as exercises_router
-from .routers.routines import router as routines_router
+_jwks_cache: dict[str, Any] | None = None
 
 app = FastAPI(
     title="EduManage API",
@@ -25,23 +46,20 @@ app = FastAPI(
     description="Client CRUD API",
 )
 
+bearer_scheme = HTTPBearer(
+    bearerFormat="JWT",
+    description="Paste Auth0 access token here.",
+)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://localhost:3000/",
-        "http://localhost:5173",
-        "http://localhost:5173/",
-    ],
+    allow_origins=["http://localhost:5173", "http://localhost:5173/"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Register routers
-app.include_router(clients_router)
-app.include_router(exercises_router)
-app.include_router(routines_router)
+app.include_router(plans_router.router)
 
 
 @app.on_event("startup")
@@ -49,6 +67,7 @@ def on_startup() -> None:
     Base.metadata.create_all(bind=engine)
     ensure_clients_columns()
     ensure_routines_columns()
+    ensure_plans_columns()
     seed_excercises()
 
 
@@ -79,6 +98,29 @@ def ensure_routines_columns() -> None:
         if "user_id" not in column_names:
             connection.execute(text("ALTER TABLE routines ADD COLUMN user_id VARCHAR(255)"))
             connection.commit()
+
+
+def ensure_plans_columns() -> None:
+    if not engine.url.drivername.startswith("sqlite"):
+        return
+
+    with engine.connect() as connection:
+        columns = connection.execute(text("PRAGMA table_info('plans')")).fetchall()
+        if not columns:
+            return
+
+        column_names = {column[1] for column in columns}
+        if "user_id" not in column_names:
+            connection.execute(text("ALTER TABLE plans ADD COLUMN user_id VARCHAR(255)"))
+            connection.commit()
+
+
+def get_db() -> Generator[Session, None, None]:
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 
 def _excercises_file_path() -> Path:
@@ -131,3 +173,333 @@ def seed_excercises() -> None:
             db.commit()
     finally:
         db.close()
+
+
+def _require_auth0_domain() -> None:
+    if not AUTH0_DOMAIN:
+        raise HTTPException(
+            status_code=500,
+            detail="AUTH0_DOMAIN is not configured in environment.",
+        )
+
+
+def _get_jwks() -> dict[str, Any]:
+    global _jwks_cache
+
+    _require_auth0_domain()
+    if _jwks_cache is not None:
+        return _jwks_cache
+
+    response = httpx.get(AUTH0_JWKS_URL, timeout=5.0)
+    response.raise_for_status()
+    payload = response.json()
+    if not isinstance(payload, dict) or "keys" not in payload:
+        raise HTTPException(status_code=401, detail="Unable to load Auth0 signing keys.")
+
+    _jwks_cache = payload
+    return payload
+
+
+def _decode_auth0_jwt(token: str) -> dict[str, object]:
+    if token.count(".") != 2:
+        raise HTTPException(status_code=401, detail="Bearer token is not a JWT.")
+
+    try:
+        unverified_header = jwt.get_unverified_header(token)
+        kid = str(unverified_header.get("kid") or "")
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Invalid bearer token header.")
+
+    if not kid:
+        raise HTTPException(status_code=401, detail="Invalid bearer token header.")
+
+    jwks = _get_jwks()
+    jwk_key = next((key for key in jwks.get("keys", []) if key.get("kid") == kid), None)
+    if not jwk_key:
+        raise HTTPException(status_code=401, detail="Unable to match Auth0 signing key.")
+
+    options: dict[str, bool] = {"verify_aud": bool(AUTH0_AUDIENCE)}
+    decode_kwargs: dict[str, Any] = {
+        "key": jwk_key,
+        "algorithms": ["RS256"],
+        "issuer": AUTH0_ISSUER,
+        "options": options,
+    }
+    if AUTH0_AUDIENCE:
+        decode_kwargs["audience"] = AUTH0_AUDIENCE
+
+    try:
+        claims = jwt.decode(token, **decode_kwargs)
+    except JWTError as exc:
+        raise HTTPException(status_code=401, detail=f"Invalid bearer token: {str(exc)}")
+
+    if not isinstance(claims, dict):
+        raise HTTPException(status_code=401, detail="Invalid bearer token claims.")
+    return claims
+
+
+def _fetch_auth0_userinfo(token: str) -> dict[str, object]:
+    _require_auth0_domain()
+    response = httpx.get(
+        f"https://{AUTH0_DOMAIN}/userinfo",
+        headers={"Authorization": f"Bearer {token}"},
+        timeout=5.0,
+    )
+    if response.status_code != 200:
+        raise HTTPException(status_code=401, detail="Invalid bearer token.")
+
+    payload = response.json()
+    if not isinstance(payload, dict):
+        raise HTTPException(status_code=401, detail="Invalid bearer token claims.")
+    return payload
+
+
+def get_current_token_claims(
+    credentials: HTTPAuthorizationCredentials | None = Security(bearer_scheme),
+) -> dict[str, object]:
+    if not credentials:
+        raise HTTPException(status_code=401, detail="Authorization header is required.")
+
+    if credentials.scheme.lower() != "bearer" or not credentials.credentials:
+        raise HTTPException(status_code=401, detail="Bearer token is required.")
+
+    token = credentials.credentials
+    try:
+        return _decode_auth0_jwt(token)
+    except HTTPException:
+        return _fetch_auth0_userinfo(token)
+
+
+def get_current_user_id(claims: dict[str, object]) -> str:
+    user_id = str(claims.get("sub") or claims.get("user_id") or "").strip()
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Token does not include user identifier.")
+    return user_id
+
+
+@app.get("/api/clients", response_model=list[ClientOut], tags=["Clients"])
+def list_clients(
+    claims: dict[str, object] = Depends(get_current_token_claims),
+    db: Session = Depends(get_db),
+) -> list[ClientOut]:
+    user_id = get_current_user_id(claims)
+    clients = db.execute(
+        select(Client).where(Client.user_id == user_id).order_by(Client.id.desc())
+    ).scalars().all()
+    return [ClientOut.model_validate(client) for client in clients]
+
+
+@app.get("/api/excercises", response_model=list[ExcerciseOut], tags=["Excercises"])
+def list_excercises(db: Session = Depends(get_db)) -> list[ExcerciseOut]:
+    excercises = db.execute(select(Excercise).order_by(Excercise.name.asc())).scalars().all()
+    return [ExcerciseOut.model_validate(excercise) for excercise in excercises]
+
+
+@app.get("/api/routines", response_model=list[RoutineOut], tags=["Routines"])
+def list_routines(
+    claims: dict[str, object] = Depends(get_current_token_claims),
+    db: Session = Depends(get_db),
+) -> list[RoutineOut]:
+    user_id = get_current_user_id(claims)
+    routines = db.execute(
+        select(Routine).where(Routine.user_id == user_id).order_by(Routine.name.asc())
+    ).scalars().all()
+    return [RoutineOut.model_validate(routine) for routine in routines]
+
+
+@app.post("/api/routines", response_model=RoutineOut, status_code=201, tags=["Routines"])
+def add_routine(
+    payload: RoutineCreate,
+    claims: dict[str, object] = Depends(get_current_token_claims),
+    db: Session = Depends(get_db),
+) -> RoutineOut:
+    user_id = get_current_user_id(claims)
+    routine = Routine(
+        id=str(uuid4()),
+        name=payload.name,
+        user_id=user_id,
+        excercises=[item.model_dump() for item in payload.excercises],
+    )
+    db.add(routine)
+    db.commit()
+    db.refresh(routine)
+    return RoutineOut.model_validate(routine)
+
+
+@app.put("/api/routines/{routine_id}", response_model=RoutineOut, tags=["Routines"])
+def update_routine(
+    routine_id: str,
+    payload: RoutineUpdate,
+    claims: dict[str, object] = Depends(get_current_token_claims),
+    db: Session = Depends(get_db),
+) -> RoutineOut:
+    user_id = get_current_user_id(claims)
+    routine = db.execute(
+        select(Routine).where(Routine.id == routine_id, Routine.user_id == user_id)
+    ).scalar_one_or_none()
+    if not routine:
+        raise HTTPException(status_code=404, detail="Routine not found.")
+
+    routine.name = payload.name
+    routine.excercises = [item.model_dump() for item in payload.excercises]
+
+    db.commit()
+    db.refresh(routine)
+    return RoutineOut.model_validate(routine)
+
+
+@app.delete("/api/routines/{routine_id}", tags=["Routines"])
+def delete_routine(
+    routine_id: str,
+    claims: dict[str, object] = Depends(get_current_token_claims),
+    db: Session = Depends(get_db),
+) -> dict[str, str]:
+    user_id = get_current_user_id(claims)
+    routine = db.execute(
+        select(Routine).where(Routine.id == routine_id, Routine.user_id == user_id)
+    ).scalar_one_or_none()
+    if not routine:
+        raise HTTPException(status_code=404, detail="Routine not found.")
+
+    db.delete(routine)
+    db.commit()
+    return {"message": "Routine deleted successfully."}
+
+
+@app.post("/api/clients", response_model=ClientOut, status_code=201, tags=["Clients"])
+def add_client(
+    payload: ClientCreate,
+    claims: dict[str, object] = Depends(get_current_token_claims),
+    db: Session = Depends(get_db),
+) -> ClientOut:
+    user_id = get_current_user_id(claims)
+    existing = db.execute(
+        select(Client).where(
+            Client.invitation_code == payload.invitationCode,
+            Client.user_id == user_id,
+        )
+    ).scalar_one_or_none()
+    if existing:
+        raise HTTPException(status_code=400, detail="Client with this invitationCode already exists.")
+
+    client = Client(
+        name=payload.name,
+        tags=payload.tags,
+        image_url=payload.imageUrl,
+        status=payload.status,
+        invitation_code=payload.invitationCode,
+        user_id=user_id,
+    )
+    db.add(client)
+    db.commit()
+    db.refresh(client)
+    return ClientOut.model_validate(client)
+
+
+@app.put("/api/clients/{invitation_code}", response_model=ClientOut, tags=["Clients"])
+def edit_client(
+    invitation_code: str,
+    payload: ClientUpdate,
+    claims: dict[str, object] = Depends(get_current_token_claims),
+    db: Session = Depends(get_db),
+) -> ClientOut:
+    user_id = get_current_user_id(claims)
+    client = db.execute(
+        select(Client).where(
+            Client.invitation_code == invitation_code,
+            Client.user_id == user_id,
+        )
+    ).scalar_one_or_none()
+    if not client:
+        raise HTTPException(status_code=404, detail="Client not found.")
+
+    if payload.invitationCode != invitation_code:
+        conflict = db.execute(
+            select(Client).where(
+                Client.invitation_code == payload.invitationCode,
+                Client.user_id == user_id,
+            )
+        ).scalar_one_or_none()
+        if conflict:
+            raise HTTPException(status_code=400, detail="Client with this invitationCode already exists.")
+
+    client.name = payload.name
+    client.tags = payload.tags
+    client.image_url = payload.imageUrl
+    client.status = payload.status
+    client.invitation_code = payload.invitationCode
+
+    db.commit()
+    db.refresh(client)
+    return ClientOut.model_validate(client)
+
+
+@app.delete("/api/clients/{invitation_code}", tags=["Clients"])
+def delete_client(
+    invitation_code: str,
+    claims: dict[str, object] = Depends(get_current_token_claims),
+    db: Session = Depends(get_db),
+) -> dict[str, str]:
+    user_id = get_current_user_id(claims)
+    client = db.execute(
+        select(Client).where(
+            Client.invitation_code == invitation_code,
+            Client.user_id == user_id,
+        )
+    ).scalar_one_or_none()
+    if not client:
+        raise HTTPException(status_code=404, detail="Client not found.")
+
+    db.delete(client)
+    db.commit()
+    return {"message": "Client deleted successfully."}
+
+
+@app.post("/api/clients/{invitation_code}/accept", response_model=ClientOut, tags=["Clients"])
+def accept_client_invitation(
+    invitation_code: str,
+    payload: AcceptClientInvitationRequest,
+    claims: dict[str, object] = Depends(get_current_token_claims),
+    db: Session = Depends(get_db),
+) -> ClientOut:
+    user_id = get_current_user_id(claims)
+    client = db.execute(select(Client).where(Client.invitation_code == invitation_code)).scalar_one_or_none()
+    if not client:
+        raise HTTPException(status_code=404, detail="Client not found.")
+
+    external_id = user_id
+    if not external_id:
+        raise HTTPException(status_code=401, detail="Token does not include user identifier.")
+
+    name = payload.name.strip()
+    email = payload.email.strip()
+    if not name or not email:
+        raise HTTPException(status_code=400, detail="name and email are required.")
+
+    user = db.execute(select(User).where(User.external_id == external_id)).scalar_one_or_none()
+    if not user:
+        email_owner = db.execute(select(User).where(User.email == email)).scalar_one_or_none()
+        if email_owner and email_owner.external_id != external_id:
+            raise HTTPException(status_code=400, detail="Email is already associated with another user.")
+
+        user = User(name=name, email=email, external_id=external_id)
+        db.add(user)
+        db.flush()
+    else:
+        email_owner = db.execute(select(User).where(User.email == email)).scalar_one_or_none()
+        if email_owner and email_owner.id != user.id:
+            raise HTTPException(status_code=400, detail="Email is already associated with another user.")
+
+        user.name = name
+        user.email = email
+
+    if client.current_user_id and client.current_user_id != user.id:
+        raise HTTPException(status_code=400, detail="Invitation already accepted by another user.")
+
+    client.current_user_id = user.id
+    client.image_url = payload.imageUrl
+    client.status = "Active"
+
+    db.commit()
+    db.refresh(client)
+    return ClientOut.model_validate(client)

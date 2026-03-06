@@ -10,7 +10,7 @@
           : 'border-emerald-500 bg-emerald-500 text-white hover:bg-emerald-600 dark:bg-emerald-600 dark:hover:bg-emerald-700'
       ]"
     >
-      {{ buttonText }}
+      {{ selectedButtonText }}
     </button>
 
     <div
@@ -211,6 +211,14 @@ const filteredClients = computed(() => {
   })
 })
 
+const selectedButtonText = computed(() => {
+  if (props.modelValue) {
+    return props.modelValue
+  }
+
+  return props.buttonText
+})
+
 watch(
   () => props.modelValue,
   (value) => {
@@ -234,6 +242,8 @@ const closeDialog = () => {
 
 const selectClient = (client: Client) => {
   draftSelection.value = client.name
+  emit('update:modelValue', draftSelection.value)
+  closeDialog()
 }
 
 const applySelection = () => {

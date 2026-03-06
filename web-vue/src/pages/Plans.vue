@@ -199,10 +199,8 @@
               Client
             </label>
             <SelectClient
-              ref="clientSelectorRef"
               v-model="formData.clientName"
               :options="clients"
-              @update:modelValue="formData.clientName = $event"
             />
           </div>
 
@@ -211,10 +209,19 @@
               <label class="text-sm font-medium text-slate-700 dark:text-slate-300">
                 Workouts ({{ formData.workouts.length }})
               </label>
-              <ScheduleRoutine
-                :routines="routines"
-                @schedule="addWorkout"
-              />
+              <div class="flex items-center gap-2">
+                <button
+                  type="button"
+                  @click="openEmptyWorkoutDialog"
+                  class="inline-flex items-center rounded-md border border-slate-300 bg-white px-3 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600"
+                >
+                  Add empty workout
+                </button>
+                <ScheduleRoutine
+                  :routines="routines"
+                  @schedule="addWorkout"
+                />
+              </div>
             </div>
 
             <div class="space-y-3 max-h-96 overflow-y-auto">
@@ -277,6 +284,16 @@
       @confirm="deletePlan"
       @cancel="planToDelete = null"
     />
+
+    <RoutineEditorDialog
+      :open="showEmptyWorkoutDialog"
+      title="Add empty workout"
+      save-label="Add workout"
+      :excercises="excercises"
+      :show-schedule-date="true"
+      @cancel="showEmptyWorkoutDialog = false"
+      @save="addEmptyWorkout"
+    />
   </div>
 </template>
 
@@ -286,34 +303,37 @@ import { usePageTitle } from '../composables/usePageTitle'
 import { usePlansApi } from '../services/plansApi'
 import { useClientsApi } from '../services/clientsApi'
 import { useRoutinesApi } from '../services/routinesApi'
+import { useExcercisesApi } from '../services/excercisesApi'
 import type { Plan, PlanWorkout } from '../types/plan'
 import type { Client } from '../types/client'
-import type { Routine } from '../types/routine'
+import type { Excercise } from '../types/excercise'
+import type { Routine, RoutineExcercise } from '../types/routine'
 import ConfirmDialog from '../components/ConfirmDialog.vue'
 import SelectClient from '../components/SelectClient.vue'
 import ScheduleRoutine from '../components/ScheduleRoutine.vue'
+import RoutineEditorDialog from '../components/RoutineEditorDialog.vue'
 
 usePageTitle('Plans')
 
 const plansApi = usePlansApi()
 const clientsApi = useClientsApi()
 const routinesApi = useRoutinesApi()
+const excercisesApi = useExcercisesApi()
 
 const plans = ref<Plan[]>([])
 const clients = ref<Client[]>([])
 const routines = ref<Routine[]>([])
+const excercises = ref<Excercise[]>([])
 const isLoading = ref(false)
 const errorMessage = ref('')
 const viewMode = ref<'list' | 'calendar'>('list')
-
-// Component refs
-const clientSelectorRef = ref<InstanceType<typeof SelectClient> | null>(null)
 
 // Calendar state
 const currentDate = ref(new Date())
 
 // Dialog state
 const showDialog = ref(false)
+const showEmptyWorkoutDialog = ref(false)
 const isEditing = ref(false)
 const editingPlanId = ref<string | null>(null)
 const planToDelete = ref<Plan | null>(null)
@@ -330,11 +350,6 @@ const formData = ref<{
 
 const canSave = computed(() => {
   return formData.value.name.trim() && formData.value.clientName.trim()
-})
-
-const selectedClient = computed(() => {
-  if (!formData.value.clientName) return null
-  return clients.value.find(client => client.name === formData.value.clientName) || null
 })
 
 const formatDate = (dateString: string) => {
@@ -455,16 +470,33 @@ const openEditDialog = (plan: Plan) => {
 
 const cancelDialog = () => {
   showDialog.value = false
+  showEmptyWorkoutDialog.value = false
   isEditing.value = false
   editingPlanId.value = null
 }
 
-const openClientSelector = () => {
-  clientSelectorRef.value?.openDialog()
+const openEmptyWorkoutDialog = () => {
+  showEmptyWorkoutDialog.value = true
 }
 
 const addWorkout = (workout: PlanWorkout) => {
   formData.value.workouts.push(workout)
+}
+
+const addEmptyWorkout = (payload: { name: string; excercises: RoutineExcercise[]; date?: string }) => {
+  const generatedId = typeof crypto !== 'undefined' && 'randomUUID' in crypto
+    ? crypto.randomUUID()
+    : `workout-${Date.now()}-${Math.random().toString(16).slice(2)}`
+
+  const workout: PlanWorkout = {
+    id: generatedId,
+    name: payload.name,
+    excercises: payload.excercises,
+    date: payload.date || new Date().toISOString().split('T')[0] || '',
+  }
+
+  formData.value.workouts.push(workout)
+  showEmptyWorkoutDialog.value = false
 }
 
 const removeWorkout = (index: number) => {
@@ -548,9 +580,18 @@ const loadRoutines = async () => {
   }
 }
 
+const loadExcercises = async () => {
+  try {
+    excercises.value = await excercisesApi.listExcercises()
+  } catch {
+    // Silently fail, empty list disables building detailed workouts
+  }
+}
+
 onMounted(() => {
   loadPlans()
   loadClients()
   loadRoutines()
+  loadExcercises()
 })
 </script>

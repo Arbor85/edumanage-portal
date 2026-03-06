@@ -45,3 +45,13 @@ class Routine(Base):
 	name = Column(String(255), nullable=False)
 	user_id = Column(String(255), nullable=True, index=True)
 	excercises = Column(JSON, nullable=False, default=list)
+
+
+class Plan(Base):
+	__tablename__ = "plans"
+
+	id = Column(String(100), primary_key=True, index=True)
+	name = Column(String(255), nullable=False)
+	client_id = Column(String(100), nullable=False, index=True)
+	user_id = Column(String(255), nullable=True, index=True)
+	workouts = Column(JSON, nullable=False, default=list)
