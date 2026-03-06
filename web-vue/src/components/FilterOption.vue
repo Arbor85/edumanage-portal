@@ -33,20 +33,23 @@
         </div>
 
         <div class="max-h-72 overflow-y-auto rounded-md border border-slate-200 dark:border-slate-700">
-          <label
+          <div
             v-for="option in options"
             :key="option"
-            class="flex cursor-pointer items-center gap-2 border-b border-slate-200 px-3 py-2 text-sm text-slate-700 last:border-b-0 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-700"
+            class="flex items-center justify-between gap-3 border-b border-slate-200 px-3 py-2 text-sm text-slate-700 last:border-b-0 dark:border-slate-700 dark:text-slate-200"
           >
-            <input
-              type="checkbox"
-              :value="option"
-              :checked="draftSelection.includes(option)"
-              @change="toggleOption(option)"
-              class="h-4 w-4 rounded border-slate-300 text-emerald-500 focus:ring-emerald-500 dark:border-slate-600"
-            />
             <span>{{ option }}</span>
-          </label>
+            <button
+              type="button"
+              @click="toggleOption(option)"
+              class="inline-flex items-center rounded-md border px-2.5 py-1 text-xs font-medium"
+              :class="isOptionSelected(option)
+                ? 'border-emerald-500 bg-emerald-500 text-white hover:bg-emerald-600'
+                : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600'"
+            >
+              {{ isOptionSelected(option) ? 'Unselect' : 'Select' }}
+            </button>
+          </div>
 
           <div v-if="options.length === 0" class="px-3 py-3 text-sm text-slate-500 dark:text-slate-300">
             No options available.
@@ -144,6 +147,10 @@ const toggleOption = (option: string) => {
   }
 
   draftSelection.value = [...draftSelection.value, option]
+}
+
+const isOptionSelected = (option: string) => {
+  return draftSelection.value.includes(option)
 }
 
 const clearSelection = () => {

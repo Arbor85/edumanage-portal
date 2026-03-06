@@ -6,68 +6,40 @@
 
     <div class="mb-4 flex items-center justify-end gap-2">
       <div class="inline-flex overflow-hidden rounded-md border border-slate-300 dark:border-slate-600">
-        <button
-          type="button"
-          @click="viewMode = 'tile'"
-          class="px-3 py-1.5 text-xs font-medium"
+        <button type="button" @click="viewMode = 'tile'" class="px-3 py-1.5 text-xs font-medium"
           :class="viewMode === 'tile'
             ? 'bg-emerald-500 text-white'
-            : 'bg-white text-slate-700 hover:bg-slate-100 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600'"
-        >
+            : 'bg-white text-slate-700 hover:bg-slate-100 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600'">
           Tile
         </button>
-        <button
-          type="button"
-          @click="viewMode = 'list'"
+        <button type="button" @click="viewMode = 'list'"
           class="border-l border-slate-300 px-3 py-1.5 text-xs font-medium dark:border-slate-600"
           :class="viewMode === 'list'
             ? 'bg-emerald-500 text-white'
-            : 'bg-white text-slate-700 hover:bg-slate-100 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600'"
-        >
+            : 'bg-white text-slate-700 hover:bg-slate-100 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600'">
           List
         </button>
       </div>
-      <button
-        type="button"
-        @click="loadRoutines"
-        :disabled="isLoading"
-        aria-label="Refresh routines"
+      <button type="button" @click="loadRoutines" :disabled="isLoading" aria-label="Refresh routines"
         title="Refresh routines"
-        class="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white p-2 text-slate-700 hover:bg-slate-100 disabled:opacity-60 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          class="h-4 w-4"
-          :class="isLoading ? 'animate-spin' : ''"
-        >
+        class="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white p-2 text-slate-700 hover:bg-slate-100 disabled:opacity-60 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          class="h-4 w-4" :class="isLoading ? 'animate-spin' : ''">
           <path d="M21 12a9 9 0 1 1-2.64-6.36" />
           <polyline points="21 3 21 9 15 9" />
         </svg>
       </button>
     </div>
 
-    <div
-      v-if="errorMessage"
-      class="mb-3 rounded-md border border-rose-300 bg-rose-50 px-3 py-2 text-sm text-rose-700 dark:border-rose-700 dark:bg-rose-900/30 dark:text-rose-300"
-    >
+    <div v-if="errorMessage"
+      class="mb-3 rounded-md border border-rose-300 bg-rose-50 px-3 py-2 text-sm text-rose-700 dark:border-rose-700 dark:bg-rose-900/30 dark:text-rose-300">
       {{ errorMessage }}
     </div>
 
-    <div
-      v-if="isLoading"
-      class="mb-3 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
-    >
-      Loading routines...
-    </div>
+    <LoadingPanel v-if="isLoading" :is-loading="isLoading" label="Loading routines..." />
 
-    <div
-      v-else-if="viewMode === 'list'"
-      class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800"
-    >
+    <div v-else-if="viewMode === 'list'"
+      class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
       <div class="overflow-x-auto">
         <table class="min-w-full text-left text-sm">
           <thead class="bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200">
@@ -82,37 +54,21 @@
               <td class="px-4 py-3 font-medium text-slate-900 dark:text-slate-100">{{ routine.name }}</td>
               <td class="px-4 py-3">
                 <div class="flex flex-wrap gap-1.5">
-                  <span
-                    v-for="excercise in routine.excercises"
-                    :key="`${routine.id}-${excercise.name}`"
-                    class="rounded-full bg-slate-200 px-2 py-0.5 text-[11px] text-slate-700 dark:bg-slate-700 dark:text-slate-200"
-                  >
+                  <span v-for="excercise in routine.excercises" :key="`${routine.id}-${excercise.name}`"
+                    class="rounded-full bg-slate-200 px-2 py-0.5 text-[11px] text-slate-700 dark:bg-slate-700 dark:text-slate-200">
                     {{ excercise.name }} ({{ excercise.sets.length }})
                   </span>
                 </div>
               </td>
               <td class="px-4 py-3 text-right">
                 <div class="inline-flex items-center gap-2">
-                  <button
-                    type="button"
-                    @click="requestDeleteRoutine(routine)"
-                    class="inline-flex items-center rounded-md bg-white p-1.5 text-rose-700 hover:bg-rose-50 dark:bg-slate-700 dark:text-rose-300 dark:hover:bg-rose-900/30"
-                    title="Delete routine"
-                    aria-label="Delete routine"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
-                      <path
-                        fill-rule="evenodd"
-                        d="M9 3.75A1.5 1.5 0 0 1 10.5 2.25h3A1.5 1.5 0 0 1 15 3.75V4.5h3.75a.75.75 0 0 1 0 1.5h-.518l-.824 12.36A2.25 2.25 0 0 1 15.164 20.5H8.836a2.25 2.25 0 0 1-2.244-2.14L5.768 6H5.25a.75.75 0 0 1 0-1.5H9v-.75Zm1.5 0V4.5h3v-.75h-3Zm-2.49 2.25.807 12.11a.75.75 0 0 0 .748.64h6.87a.75.75 0 0 0 .748-.64L15.99 6H8.01Zm2.24 2.25a.75.75 0 0 1 .75.75v6a.75.75 0 0 1-1.5 0V9a.75.75 0 0 1 .75-.75Zm4.5.75a.75.75 0 0 0-1.5 0v6a.75.75 0 0 0 1.5 0V9Z"
-                        clip-rule="evenodd"
-                      />
-                    </svg>
+                  <button type="button" @click="requestDeleteRoutine(routine)" aria-label="Remove routine"
+                    title="Remove routine"
+                    class="inline-flex items-center justify-center gap-2 rounded-md border border-rose-300 bg-white p-2 text-rose-700 hover:bg-rose-50 dark:border-rose-700 dark:bg-slate-700 dark:text-rose-300 dark:hover:bg-rose-900/30">
+                    <Trash2 :size="16" />
                   </button>
-                  <button
-                    type="button"
-                    @click="openEditDialog(routine)"
-                    class="inline-flex items-center rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600"
-                  >
+                  <button type="button" @click="openEditDialog(routine)"
+                    class="inline-flex items-center justify-center gap-2 rounded-md border border-slate-300 bg-white p-2 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600">
                     Edit
                   </button>
                 </div>
@@ -122,62 +78,40 @@
         </table>
       </div>
 
-      <div
-        v-if="routines.length === 0"
-        class="border-t border-slate-200 px-4 py-4 text-sm text-slate-700 dark:border-slate-700 dark:text-slate-200"
-      >
+      <div v-if="routines.length === 0"
+        class="border-t border-slate-200 px-4 py-4 text-sm text-slate-700 dark:border-slate-700 dark:text-slate-200">
         No routines yet.
       </div>
     </div>
 
     <div v-else class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-      <article
-        v-for="routine in routines"
-        :key="routine.id"
-        class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800"
-      >
+      <article v-for="routine in routines" :key="routine.id"
+        class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
         <p class="mb-3 font-semibold text-slate-900 dark:text-slate-100">{{ routine.name }}</p>
 
         <div class="flex flex-wrap gap-2">
-          <span
-            v-for="excercise in routine.excercises"
-            :key="`${routine.id}-${excercise.name}`"
-            class="rounded-full bg-slate-200 px-2 py-1 text-xs text-slate-700 dark:bg-slate-700 dark:text-slate-200"
-          >
+          <span v-for="excercise in routine.excercises" :key="`${routine.id}-${excercise.name}`"
+            class="rounded-full bg-slate-200 px-2 py-1 text-xs text-slate-700 dark:bg-slate-700 dark:text-slate-200">
             {{ excercise.name }} ({{ excercise.sets.length }})
           </span>
         </div>
 
         <div class="mt-4 flex items-center justify-between gap-2">
-          <button
-            type="button"
-            @click="requestDeleteRoutine(routine)"
-            class="inline-flex items-center rounded-md bg-white p-1.5 text-rose-700 hover:bg-rose-50 dark:bg-slate-700 dark:text-rose-300 dark:hover:bg-rose-900/30"
-            title="Delete routine"
-            aria-label="Delete routine"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
-              <path
-                fill-rule="evenodd"
-                d="M9 3.75A1.5 1.5 0 0 1 10.5 2.25h3A1.5 1.5 0 0 1 15 3.75V4.5h3.75a.75.75 0 0 1 0 1.5h-.518l-.824 12.36A2.25 2.25 0 0 1 15.164 20.5H8.836a2.25 2.25 0 0 1-2.244-2.14L5.768 6H5.25a.75.75 0 0 1 0-1.5H9v-.75Zm1.5 0V4.5h3v-.75h-3Zm-2.49 2.25.807 12.11a.75.75 0 0 0 .748.64h6.87a.75.75 0 0 0 .748-.64L15.99 6H8.01Zm2.24 2.25a.75.75 0 0 1 .75.75v6a.75.75 0 0 1-1.5 0V9a.75.75 0 0 1 .75-.75Zm4.5.75a.75.75 0 0 0-1.5 0v6a.75.75 0 0 0 1.5 0V9Z"
-                clip-rule="evenodd"
-              />
-            </svg>
+
+          <button type="button" @click="requestDeleteRoutine(routine)" aria-label="Remove routine"
+            title="Remove routine"
+            class="inline-flex items-center justify-center gap-2 rounded-md border border-rose-300 bg-white p-2 text-rose-700 hover:bg-rose-50 dark:border-rose-700 dark:bg-slate-700 dark:text-rose-300 dark:hover:bg-rose-900/30">
+            <Trash2 :size="16" />
           </button>
-          <button
-            type="button"
-            @click="openEditDialog(routine)"
-            class="inline-flex items-center rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600"
-          >
+          <button type="button" @click="openEditDialog(routine)"
+            class="inline-flex items-center rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600">
             Edit
           </button>
         </div>
       </article>
 
-      <div
-        v-if="routines.length === 0"
-        class="md:col-span-2 lg:col-span-3 rounded-md border border-slate-300 bg-white p-4 text-sm text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
-      >
+      <div v-if="routines.length === 0"
+        class="md:col-span-2 lg:col-span-3 rounded-md border border-slate-300 bg-white p-4 text-sm text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
         No routines yet.
       </div>
     </div>
@@ -188,33 +122,22 @@
       </div>
     </div>
 
-    <RoutineEditorDialog
-      :open="showDialog"
-      :title="dialogMode === 'edit' ? 'Edit routine' : 'Add routine'"
-      :save-label="dialogMode === 'edit' ? 'Save changes' : 'Add routine'"
-      :excercises="excercises"
-      :initial-name="editingRoutineName"
-      :initial-excercises="editingRoutineExcercises"
-      @cancel="closeDialog"
-      @save="saveRoutineFromDialog"
-    />
+    <RoutineEditorDialog :open="showDialog" :title="dialogMode === 'edit' ? 'Edit routine' : 'Add routine'"
+      :save-label="dialogMode === 'edit' ? 'Save changes' : 'Add routine'" :excercises="excercises"
+      :initial-name="editingRoutineName" :initial-excercises="editingRoutineExcercises" @cancel="closeDialog"
+      @save="saveRoutineFromDialog" />
 
-    <ConfirmDialog
-      :open="showDeleteDialog"
-      title="Delete routine"
-      :message="deleteDialogMessage"
-      confirm-label="Delete"
-      cancel-label="Cancel"
-      @confirm="confirmDeleteRoutine"
-      @cancel="closeDeleteDialog"
-    />
+    <ConfirmDialog :open="showDeleteDialog" title="Delete routine" :message="deleteDialogMessage" confirm-label="Delete"
+      cancel-label="Cancel" @confirm="confirmDeleteRoutine" @cancel="closeDeleteDialog" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
+import { useAuth0 } from '@auth0/auth0-vue'
 import ConfirmDialog from '../components/ConfirmDialog.vue'
 import DialogActionPanel from '../components/DialogActionPanel.vue'
+import LoadingPanel from '../components/LoadingPanel.vue'
 import RoutineEditorDialog from '../components/RoutineEditorDialog.vue'
 import { useLocalStorageState } from '../composables/useLocalStorageState'
 import { usePageTitle } from '../composables/usePageTitle'
@@ -222,11 +145,13 @@ import { useExcercisesApi } from '../services/excercisesApi'
 import { useRoutinesApi } from '../services/routinesApi'
 import type { Excercise } from '../types/excercise'
 import type { Routine, RoutineExcercise } from '../types/routine'
+import { Trash2 } from 'lucide-vue-next'
 
 usePageTitle('Routines')
 
 const excercisesApi = useExcercisesApi()
 const routinesApi = useRoutinesApi()
+const { isLoading: isAuthLoading, isAuthenticated } = useAuth0()
 
 const routines = ref<Routine[]>([])
 const viewMode = useLocalStorageState<'tile' | 'list'>('routines:viewMode', 'list')
@@ -241,6 +166,7 @@ const dialogMode = ref<'create' | 'edit'>('create')
 const editingRoutineId = ref<string | null>(null)
 const editingRoutineName = ref('')
 const editingRoutineExcercises = ref<RoutineExcercise[]>([])
+const hasLoadedRoutinesInitially = ref(false)
 
 const loadRoutines = async () => {
   isLoading.value = true
@@ -354,8 +280,17 @@ const confirmDeleteRoutine = async () => {
   }
 }
 
-onMounted(() => {
-  loadRoutines()
-  loadExcercises()
-})
+watch(
+  [isAuthLoading, isAuthenticated],
+  async ([authLoading, authenticated]) => {
+    if (authLoading || !authenticated || hasLoadedRoutinesInitially.value) {
+      return
+    }
+
+    hasLoadedRoutinesInitially.value = true
+    await loadRoutines()
+    await loadExcercises()
+  },
+  { immediate: true },
+)
 </script>

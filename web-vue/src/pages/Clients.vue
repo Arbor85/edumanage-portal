@@ -32,22 +32,29 @@
       </div>
     </div>
 
+    <div class="mb-4 flex flex-col gap-3 md:flex-row md:items-center">
+      <FilterOption
+        v-model="selectedStatuses"
+        title="Status"
+        :options="statusOptions"
+        all-label="All statuses"
+      />
+
+      <FilterOption
+        v-model="selectedTags"
+        title="Tags"
+        :options="tagOptions"
+        all-label="All tags"
+      />
+    </div>
+
     <div>
       <div v-if="clientsError"
         class="mb-3 rounded-md border border-rose-300 bg-rose-50 px-3 py-2 text-sm text-rose-700 dark:border-rose-700 dark:bg-rose-900/30 dark:text-rose-300">
         {{ clientsError }}
       </div>
 
-      <div v-if="isLoadingClients"
-        class="mb-3 flex items-center justify-center rounded-lg border border-slate-300 bg-white px-3 py-8 dark:border-slate-700 dark:bg-slate-800">
-        <div class="inline-flex items-center gap-3 text-sm text-slate-600 dark:text-slate-300" role="status" aria-live="polite">
-          <svg class="h-5 w-5 animate-spin text-emerald-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
-          </svg>
-          <span>Loading clients...</span>
-        </div>
-      </div>
+      <LoadingPanel v-if="isLoadingClients" :is-loading="isLoadingClients" label="Loading clients..." />
 
       <div v-else-if="viewMode === 'tile'" class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         <article v-for="client in filteredClients" :key="client.invitationCode"
@@ -155,18 +162,7 @@
 
       <div class="fixed bottom-0 left-56 right-0 z-30 px-6 pb-3">
         <div class="mx-auto w-full max-w-5xl">
-          <div class="mt-4 border-t border-slate-200 pt-3 dark:border-slate-700">
-            <div class="flex items-center justify-end">
-              <button
-                type="button"
-                @click="openDialog"
-                class="inline-flex items-center gap-2 rounded-md border border-emerald-500 bg-emerald-500 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-600"
-              >
-                <Plus :size="18" />
-                Create invitation
-              </button>
-            </div>
-          </div>
+          <DialogActionPanel primary-label="Create invitation" @primary-click="openDialog" />
         </div>
       </div>
     </div>
@@ -248,11 +244,14 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
+import { useAuth0 } from '@auth0/auth0-vue'
 import type { Client, ClientStatus, ClientTag } from '../types/client'
-import { Trash2, Edit2, Plus } from 'lucide-vue-next'
+import { Trash2, Edit2 } from 'lucide-vue-next'
 import ConfirmDialog from '../components/ConfirmDialog.vue'
 import DialogActionPanel from '../components/DialogActionPanel.vue'
+import FilterOption from '../components/FilterOption.vue'
+import LoadingPanel from '../components/LoadingPanel.vue'
 import { usePageTitle } from '../composables/usePageTitle'
 import { useLocalStorageState } from '../composables/useLocalStorageState'
 import { useClientsApi } from '../services/clientsApi'
@@ -260,6 +259,7 @@ import { useClientsApi } from '../services/clientsApi'
 usePageTitle('Clients')
 
 const clientsApi = useClientsApi()
+const { isLoading: isAuthLoading, isAuthenticated } = useAuth0()
 
 const tagGroups: Array<{ name: string; tags: ClientTag[] }> = [
   { name: 'Session Type', tags: ['Online', 'Inperson', 'Group'] },
@@ -269,6 +269,8 @@ const tagGroups: Array<{ name: string; tags: ClientTag[] }> = [
 
 const clients = ref<Client[]>([])
 const searchQuery = ref('')
+const selectedStatuses = ref<string[]>([])
+const selectedTags = ref<string[]>([])
 const viewMode = useLocalStorageState<'tile' | 'list'>('clients:viewMode', 'tile')
 const isLoadingClients = ref(false)
 const clientsError = ref('')
@@ -283,6 +285,7 @@ const dialogMode = ref<'create' | 'edit'>('create')
 const editingClientCode = ref<string | null>(null)
 const showRemoveConfirmDialog = ref(false)
 const pendingRemoveClientCode = ref<string | null>(null)
+const hasLoadedClientsInitially = ref(false)
 
 const canCreate = computed(() => formName.value.length > 0)
 
@@ -330,22 +333,35 @@ const editingClient = computed(() => {
   return clients.value.find((client) => client.invitationCode === editingClientCode.value) || null
 })
 
+const statusOptions = computed(() => {
+  const statuses = new Set(clients.value.map((client) => client.status))
+  return Array.from(statuses).sort((left, right) => left.localeCompare(right))
+})
+
+const tagOptions = computed(() => {
+  const tags = new Set(clients.value.flatMap((client) => client.tags))
+  return Array.from(tags).sort((left, right) => left.localeCompare(right))
+})
+
 const filteredClients = computed(() => {
   const normalizedQuery = searchQuery.value.trim().toLowerCase()
-
-  if (!normalizedQuery) {
-    return clients.value
-  }
+  const normalizedStatuses = selectedStatuses.value.map((status) => status.toLowerCase())
+  const normalizedTags = selectedTags.value.map((tag) => tag.toLowerCase())
 
   return clients.value.filter((client) => {
     const tagsText = client.tags.join(' ').toLowerCase()
-
-    return (
+    const matchesSearch =
+      !normalizedQuery ||
       client.name.toLowerCase().includes(normalizedQuery) ||
       client.invitationCode.toLowerCase().includes(normalizedQuery) ||
       client.status.toLowerCase().includes(normalizedQuery) ||
       tagsText.includes(normalizedQuery)
-    )
+    const matchesStatus =
+      normalizedStatuses.length === 0 || normalizedStatuses.includes(client.status.toLowerCase())
+    const matchesTags =
+      normalizedTags.length === 0 || client.tags.some((tag) => normalizedTags.includes(tag.toLowerCase()))
+
+    return matchesSearch && matchesStatus && matchesTags
   })
 })
 
@@ -568,20 +584,17 @@ const toggleEditingClientProgress = (nextStatus: Extract<ClientStatus, 'Active' 
   return updateClientProgressStatus(editingClientCode.value, nextStatus)
 }
 
-onMounted(() => {
-  loadClients()
-})
-
 watch(
-  () => true,
-  (value) => {
-    if (value) {
-      loadClients()
+  [isAuthLoading, isAuthenticated],
+  async ([authLoading, authenticated]) => {
+    if (authLoading || !authenticated || hasLoadedClientsInitially.value) {
       return
     }
 
-    clients.value = []
+    hasLoadedClientsInitially.value = true
+    await loadClients()
   },
+  { immediate: true },
 )
 
 const copyInvitationUrl = async () => {

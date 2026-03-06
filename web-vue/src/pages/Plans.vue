@@ -256,18 +256,7 @@
 
     <div class="fixed bottom-0 left-56 right-0 z-30 px-6 pb-3">
       <div class="mx-auto w-full max-w-7xl">
-        <div class="mt-4 border-t border-slate-200 pt-3 dark:border-slate-700">
-          <div class="flex items-center justify-end">
-            <button
-              type="button"
-              @click="openCreateDialog"
-              class="inline-flex items-center gap-2 rounded-md border border-emerald-500 bg-emerald-500 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-600"
-            >
-              <Plus :size="18" />
-              Create plan
-            </button>
-          </div>
-        </div>
+        <DialogActionPanel primary-label="Create plan" @primary-click="openCreateDialog" />
       </div>
     </div>
 
@@ -401,8 +390,9 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { Plus, Edit2, Trash2 } from 'lucide-vue-next'
+import { Edit2, Trash2 } from 'lucide-vue-next'
 import ConfirmDialog from '../components/ConfirmDialog.vue'
+import DialogActionPanel from '../components/DialogActionPanel.vue'
 import FilterOption from '../components/FilterOption.vue'
 import RoutineEditorDialog from '../components/RoutineEditorDialog.vue'
 import ScheduleRoutine from '../components/ScheduleRoutine.vue'
