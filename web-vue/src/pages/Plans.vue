@@ -335,10 +335,26 @@
             <div
               v-for="entry in cell.workouts"
               :key="`${entry.planId}-${entry.workout.id}`"
-              class="truncate rounded bg-emerald-100 px-1.5 py-1 text-[10px] text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300"
-              :title="`${entry.planName}: ${entry.workout.name}`"
+              class="rounded bg-emerald-100 px-1.5 py-1 text-[10px] text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300"
+              :title="`${entry.clientName} • ${entry.planName} • ${entry.workout.name}`"
             >
-              {{ entry.planName }}: {{ entry.workout.name }}
+              <div class="mb-0.5 flex min-w-0 items-center gap-1">
+                <img
+                  v-if="entry.clientImageUrl"
+                  :src="entry.clientImageUrl"
+                  :alt="entry.clientName"
+                  class="h-3.5 w-3.5 rounded-full object-cover"
+                />
+                <span
+                  v-else
+                  class="inline-flex h-3.5 w-3.5 items-center justify-center rounded-full bg-emerald-200 text-[8px] font-semibold uppercase text-emerald-800 dark:bg-emerald-800 dark:text-emerald-200"
+                >
+                  {{ (entry.clientName[0] || '?').toUpperCase() }}
+                </span>
+                <span class="truncate font-medium">{{ entry.clientName }}</span>
+              </div>
+              <p class="truncate font-semibold">{{ entry.planName }}</p>
+              <p class="truncate">{{ entry.workout.name }}</p>
             </div>
           </div>
         </div>
@@ -426,13 +442,29 @@
                       {{ formatDate(workout.date) }} • {{ workout.excercises.length }} exercise{{ workout.excercises.length !== 1 ? 's' : '' }}
                     </p>
                   </div>
-                  <button
-                    type="button"
-                    @click="removeWorkout(index)"
-                    class="rounded-md bg-rose-100 px-2 py-1 text-xs font-medium text-rose-700 hover:bg-rose-200 dark:bg-rose-900/30 dark:text-rose-300 dark:hover:bg-rose-900/50"
-                  >
-                    Remove
-                  </button>
+                  <div class="flex items-center gap-2">
+                    <button
+                      type="button"
+                      @click="openEditWorkoutDialog(index)"
+                      class="rounded-md border border-slate-300 bg-white px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      type="button"
+                      @click="openCopyWorkoutDialog(index)"
+                      class="rounded-md border border-slate-300 bg-white px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600"
+                    >
+                      Copy
+                    </button>
+                    <button
+                      type="button"
+                      @click="removeWorkout(index)"
+                      class="rounded-md bg-rose-100 px-2 py-1 text-xs font-medium text-rose-700 hover:bg-rose-200 dark:bg-rose-900/30 dark:text-rose-300 dark:hover:bg-rose-900/50"
+                    >
+                      Remove
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -476,13 +508,127 @@
 
     <RoutineEditorDialog
       :open="showEmptyWorkoutDialog"
-      title="Add empty workout"
-      save-label="Add workout"
+      :title="workoutDialogMode === 'edit' ? 'Edit workout' : 'Add empty workout'"
+      :save-label="workoutDialogMode === 'edit' ? 'Save workout' : 'Add workout'"
       :excercises="excercises"
       :show-schedule-date="true"
-      @cancel="showEmptyWorkoutDialog = false"
-      @save="addEmptyWorkout"
+      :initial-name="workoutDialogInitialName"
+      :initial-excercises="workoutDialogInitialExcercises"
+      :initial-date="workoutDialogInitialDate"
+      @cancel="closeWorkoutDialog"
+      @save="saveWorkoutFromDialog"
     />
+
+    <div
+      v-if="showCopyWorkoutDialog"
+      class="fixed inset-0 z-[80] flex items-center justify-center bg-slate-900/50 p-4"
+      @click.self="closeCopyWorkoutDialog"
+    >
+      <div class="w-full max-w-md rounded-lg border border-slate-300 bg-white p-5 shadow-xl dark:border-slate-600 dark:bg-slate-800">
+        <h3 class="mb-4 text-lg font-semibold text-slate-900 dark:text-slate-100">Copy workout</h3>
+
+        <div class="space-y-4">
+          <div>
+            <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">New workout date</label>
+            <input
+              v-model="copyWorkoutDate"
+              type="date"
+              class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+            />
+          </div>
+
+          <div>
+            <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">Reps</label>
+            <div class="inline-flex overflow-hidden rounded-md border border-slate-300 dark:border-slate-600">
+              <button
+                type="button"
+                @click="copyRepsAdjustment = 'decrease'"
+                class="px-3 py-1.5 text-xs font-medium"
+                :class="copyRepsAdjustment === 'decrease'
+                  ? 'bg-emerald-500 text-white'
+                  : 'bg-white text-slate-700 hover:bg-slate-100 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600'"
+              >
+                Decrease
+              </button>
+              <button
+                type="button"
+                @click="copyRepsAdjustment = 'same'"
+                class="border-l border-slate-300 px-3 py-1.5 text-xs font-medium dark:border-slate-600"
+                :class="copyRepsAdjustment === 'same'
+                  ? 'bg-emerald-500 text-white'
+                  : 'bg-white text-slate-700 hover:bg-slate-100 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600'"
+              >
+                Keep same
+              </button>
+              <button
+                type="button"
+                @click="copyRepsAdjustment = 'increase'"
+                class="border-l border-slate-300 px-3 py-1.5 text-xs font-medium dark:border-slate-600"
+                :class="copyRepsAdjustment === 'increase'
+                  ? 'bg-emerald-500 text-white'
+                  : 'bg-white text-slate-700 hover:bg-slate-100 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600'"
+              >
+                Increase
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">Weight</label>
+            <div class="inline-flex overflow-hidden rounded-md border border-slate-300 dark:border-slate-600">
+              <button
+                type="button"
+                @click="copyWeightAdjustment = 'decrease'"
+                class="px-3 py-1.5 text-xs font-medium"
+                :class="copyWeightAdjustment === 'decrease'
+                  ? 'bg-emerald-500 text-white'
+                  : 'bg-white text-slate-700 hover:bg-slate-100 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600'"
+              >
+                Decrease
+              </button>
+              <button
+                type="button"
+                @click="copyWeightAdjustment = 'same'"
+                class="border-l border-slate-300 px-3 py-1.5 text-xs font-medium dark:border-slate-600"
+                :class="copyWeightAdjustment === 'same'
+                  ? 'bg-emerald-500 text-white'
+                  : 'bg-white text-slate-700 hover:bg-slate-100 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600'"
+              >
+                Keep same
+              </button>
+              <button
+                type="button"
+                @click="copyWeightAdjustment = 'increase'"
+                class="border-l border-slate-300 px-3 py-1.5 text-xs font-medium dark:border-slate-600"
+                :class="copyWeightAdjustment === 'increase'
+                  ? 'bg-emerald-500 text-white'
+                  : 'bg-white text-slate-700 hover:bg-slate-100 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600'"
+              >
+                Increase
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-5 flex items-center justify-end gap-2">
+          <button
+            type="button"
+            @click="closeCopyWorkoutDialog"
+            class="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            @click="confirmCopyWorkout"
+            :disabled="!copyWorkoutDate"
+            class="rounded-md border border-emerald-500 bg-emerald-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            Copy workout
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -527,6 +673,16 @@ const currentDate = ref(new Date())
 
 const showDialog = ref(false)
 const showEmptyWorkoutDialog = ref(false)
+const showCopyWorkoutDialog = ref(false)
+const workoutDialogMode = ref<'create' | 'edit'>('create')
+const editingWorkoutIndex = ref<number | null>(null)
+const workoutDialogInitialName = ref('')
+const workoutDialogInitialExcercises = ref<RoutineExcercise[]>([])
+const workoutDialogInitialDate = ref('')
+const copyingWorkoutIndex = ref<number | null>(null)
+const copyWorkoutDate = ref('')
+const copyRepsAdjustment = ref<'same' | 'increase' | 'decrease'>('same')
+const copyWeightAdjustment = ref<'same' | 'increase' | 'decrease'>('same')
 const isEditing = ref(false)
 const editingPlanId = ref<string | null>(null)
 const planToDelete = ref<Plan | null>(null)
@@ -603,7 +759,13 @@ type CalendarCell = {
   isCurrentMonth: boolean
   isToday: boolean
   dateString: string
-  workouts: Array<{ planId: string; planName: string; workout: PlanWorkout }>
+  workouts: Array<{
+    planId: string
+    clientName: string
+    clientImageUrl: string
+    planName: string
+    workout: PlanWorkout
+  }>
 }
 
 const currentMonthYear = computed(() => {
@@ -666,6 +828,8 @@ const calendarCells = computed((): CalendarCell[] => {
       if (cell) {
         cell.workouts.push({
           planId: plan.id,
+          clientName: getPlanClientName(plan),
+          clientImageUrl: getPlanClientImage(plan),
           planName: plan.name,
           workout,
         })
@@ -727,7 +891,7 @@ const openCloneDialog = (plan: Plan) => {
   isEditing.value = false
   editingPlanId.value = null
   formData.value = {
-    name: `${plan.name} (copy)`,
+    name: plan.name,
     clientId: getPlanClientId(plan),
     workouts: clonePlanWorkouts(plan.workouts),
   }
@@ -736,20 +900,180 @@ const openCloneDialog = (plan: Plan) => {
 
 const cancelDialog = () => {
   showDialog.value = false
-  showEmptyWorkoutDialog.value = false
+  closeWorkoutDialog()
+  closeCopyWorkoutDialog()
   isEditing.value = false
   editingPlanId.value = null
 }
 
 const openEmptyWorkoutDialog = () => {
+  workoutDialogMode.value = 'create'
+  editingWorkoutIndex.value = null
+  workoutDialogInitialName.value = ''
+  workoutDialogInitialExcercises.value = []
+  workoutDialogInitialDate.value = ''
   showEmptyWorkoutDialog.value = true
+}
+
+const openEditWorkoutDialog = (index: number) => {
+  const workout = formData.value.workouts[index]
+
+  if (!workout) {
+    return
+  }
+
+  workoutDialogMode.value = 'edit'
+  editingWorkoutIndex.value = index
+  workoutDialogInitialName.value = workout.name
+  workoutDialogInitialDate.value = workout.date
+  workoutDialogInitialExcercises.value = workout.excercises.map((excercise) => ({
+    ...excercise,
+    sets: excercise.sets.map((setItem) => ({ ...setItem })),
+  }))
+  showEmptyWorkoutDialog.value = true
+}
+
+const closeWorkoutDialog = () => {
+  showEmptyWorkoutDialog.value = false
+  workoutDialogMode.value = 'create'
+  editingWorkoutIndex.value = null
+  workoutDialogInitialName.value = ''
+  workoutDialogInitialExcercises.value = []
+  workoutDialogInitialDate.value = ''
 }
 
 const addWorkout = (workout: PlanWorkout) => {
   formData.value.workouts.push(workout)
 }
 
-const addEmptyWorkout = (payload: { name: string; excercises: RoutineExcercise[]; date?: string }) => {
+const closeCopyWorkoutDialog = () => {
+  showCopyWorkoutDialog.value = false
+  copyingWorkoutIndex.value = null
+  copyWorkoutDate.value = ''
+  copyRepsAdjustment.value = 'same'
+  copyWeightAdjustment.value = 'same'
+}
+
+const openCopyWorkoutDialog = (index: number) => {
+  const workout = formData.value.workouts[index]
+
+  if (!workout) {
+    return
+  }
+
+  copyingWorkoutIndex.value = index
+  copyWorkoutDate.value = getDateWithOffset(workout.date, 7)
+  copyRepsAdjustment.value = 'same'
+  copyWeightAdjustment.value = 'same'
+  showCopyWorkoutDialog.value = true
+}
+
+const formatDateForInput = (date: Date) => {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+const getDateWithOffset = (sourceDate: string, daysOffset: number) => {
+  const normalizedSourceDate = sourceDate.split('T')[0] || sourceDate
+
+  if (!normalizedSourceDate) {
+    return ''
+  }
+
+  const [yearPart, monthPart, dayPart] = normalizedSourceDate.split('-')
+  const year = Number(yearPart)
+  const month = Number(monthPart)
+  const day = Number(dayPart)
+
+  if (!year || !month || !day) {
+    return ''
+  }
+
+  const date = new Date(year, month - 1, day)
+
+  if (Number.isNaN(date.getTime())) {
+    return ''
+  }
+
+  date.setDate(date.getDate() + daysOffset)
+  return formatDateForInput(date)
+}
+
+const adjustNumericValue = (
+  value: number | null,
+  adjustment: 'same' | 'increase' | 'decrease',
+  step: number,
+) => {
+  if (value === null || adjustment === 'same') {
+    return value
+  }
+
+  if (adjustment === 'increase') {
+    return value + step
+  }
+
+  return Math.max(0, value - step)
+}
+
+const confirmCopyWorkout = () => {
+  if (copyingWorkoutIndex.value === null || !copyWorkoutDate.value) {
+    return
+  }
+
+  const sourceWorkout = formData.value.workouts[copyingWorkoutIndex.value]
+
+  if (!sourceWorkout) {
+    closeCopyWorkoutDialog()
+    return
+  }
+
+  const generatedId = typeof crypto !== 'undefined' && 'randomUUID' in crypto
+    ? crypto.randomUUID()
+    : `workout-${Date.now()}-${Math.random().toString(16).slice(2)}`
+
+  const copiedWorkout: PlanWorkout = {
+    ...sourceWorkout,
+    id: generatedId,
+    name: sourceWorkout.name,
+    date: copyWorkoutDate.value,
+    excercises: sourceWorkout.excercises.map((excercise) => ({
+      ...excercise,
+      sets: excercise.sets.map((setItem) => ({
+        ...setItem,
+        reps: adjustNumericValue(setItem.reps, copyRepsAdjustment.value, 1),
+        weight: excercise.isBodyweight
+          ? setItem.weight
+          : adjustNumericValue(setItem.weight, copyWeightAdjustment.value, 2.5),
+      })),
+    })),
+  }
+
+  formData.value.workouts.splice(copyingWorkoutIndex.value + 1, 0, copiedWorkout)
+  closeCopyWorkoutDialog()
+}
+
+const saveWorkoutFromDialog = (payload: { name: string; excercises: RoutineExcercise[]; date?: string }) => {
+  if (workoutDialogMode.value === 'edit' && editingWorkoutIndex.value !== null) {
+    const currentWorkout = formData.value.workouts[editingWorkoutIndex.value]
+
+    if (!currentWorkout) {
+      closeWorkoutDialog()
+      return
+    }
+
+    formData.value.workouts[editingWorkoutIndex.value] = {
+      ...currentWorkout,
+      name: payload.name,
+      excercises: payload.excercises,
+      date: payload.date || currentWorkout.date,
+    }
+
+    closeWorkoutDialog()
+    return
+  }
+
   const generatedId = typeof crypto !== 'undefined' && 'randomUUID' in crypto
     ? crypto.randomUUID()
     : `workout-${Date.now()}-${Math.random().toString(16).slice(2)}`
@@ -762,7 +1086,7 @@ const addEmptyWorkout = (payload: { name: string; excercises: RoutineExcercise[]
   }
 
   formData.value.workouts.push(workout)
-  showEmptyWorkoutDialog.value = false
+  closeWorkoutDialog()
 }
 
 const removeWorkout = (index: number) => {
