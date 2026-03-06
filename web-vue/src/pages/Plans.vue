@@ -31,8 +31,9 @@
         
         <button
           @click="openCreateDialog"
-          class="rounded-md bg-emerald-500 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-emerald-600 dark:bg-emerald-600 dark:hover:bg-emerald-700"
+          class="inline-flex items-center gap-2 rounded-md bg-emerald-500 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-emerald-600 dark:bg-emerald-600 dark:hover:bg-emerald-700"
         >
+          <Plus :size="18" />
           Create plan
         </button>
       </div>
@@ -67,14 +68,16 @@
           <div class="flex gap-2">
             <button
               @click="openEditDialog(plan)"
-              class="rounded-md bg-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600"
+              class="inline-flex items-center gap-2 rounded-md bg-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600"
             >
+              <Edit2 :size="16" />
               Edit
             </button>
             <button
               @click="confirmDelete(plan)"
-              class="rounded-md bg-rose-100 px-3 py-1.5 text-sm font-medium text-rose-700 hover:bg-rose-200 dark:bg-rose-900/30 dark:text-rose-300 dark:hover:bg-rose-900/50"
+              class="inline-flex items-center gap-2 rounded-md bg-rose-100 px-3 py-1.5 text-sm font-medium text-rose-700 hover:bg-rose-200 dark:bg-rose-900/30 dark:text-rose-300 dark:hover:bg-rose-900/50"
             >
+              <Trash2 :size="16" />
               Delete
             </button>
           </div>
@@ -299,6 +302,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import { Plus, Edit2, Trash2 } from 'lucide-vue-next'
 import { usePageTitle } from '../composables/usePageTitle'
 import { usePlansApi } from '../services/plansApi'
 import { useClientsApi } from '../services/clientsApi'
