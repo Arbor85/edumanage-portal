@@ -1,48 +1,44 @@
 <template>
   <nav
-    class="h-screen w-56 shrink-0 overflow-y-auto text-slate-900 shadow-xl dark:text-slate-100 border-r border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl"
-  >
+    class="h-screen min-h-full w-56 shrink-0 overflow-y-auto text-slate-900 shadow-xl dark:text-slate-100 border-r border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl">
+    <router-link to="/">
+      <span className="flex items-center gap-3 mb-2 p-8">
+        <span
+          className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center text-white shadow-lg shadow-emerald-500/20">
+          <TrendingUp size={20} />
+        </span>
+        <span className="text-xl font-bold tracking-tight dark:text-white">EduMan</span>
+      </span>
+    </router-link>
     <!-- Side navigation content here -->
-    <ul ref="listRef" class="relative list-none pt-8 flex flex-col gap-2 min-h-full">
-      <li
-        v-for="(link, index) in mainNavLinks"
-        :key="link.to"
-        :ref="(el) => setItemRef(el, index)"
-      >
-        <router-link
-          :to="link.to"
+    <ul ref="listRef" class="relative list-none flex flex-col gap-2">
+      <li v-for="(link, index) in mainNavLinks" :key="link.to" :ref="(el) => setItemRef(el, index)">
+        <router-link :to="link.to"
           class="flex w-full items-center gap-3 px-7 py-4 font-medium text-base transition-all duration-200 text-slate-900 dark:text-slate-100"
           :class="isActive(link.to)
             ? 'bg-slate-400 text-slate-900 dark:bg-slate-600 dark:text-slate-100'
             : 'hover:bg-slate-400 hover:text-slate-900 dark:hover:bg-slate-600 dark:hover:text-slate-100'"
-          @click="handleLinkClick"
-          :aria-current="isActive(link.to) ? 'page' : undefined"
-        >
+          @click="handleLinkClick" :aria-current="isActive(link.to) ? 'page' : undefined">
           <component :is="link.icon" :size="20" />
           {{ link.label }}
         </router-link>
       </li>
 
       <li class="mt-auto pb-8" v-if="loginLink">
-        <router-link
-          :to="loginLink.to"
+        <router-link :to="loginLink.to"
           class="flex w-full items-center gap-3 px-7 py-4 font-medium text-base transition-all duration-200 text-slate-900 dark:text-slate-100"
           :class="isActive(loginLink.to)
             ? 'bg-slate-400 text-slate-900 dark:bg-slate-600 dark:text-slate-100'
             : 'hover:bg-slate-400 hover:text-slate-900 dark:hover:bg-slate-600 dark:hover:text-slate-100'"
-          @click="handleLinkClick"
-          :aria-current="isActive(loginLink.to) ? 'page' : undefined"
-        >
+          @click="handleLinkClick" :aria-current="isActive(loginLink.to) ? 'page' : undefined">
           <component :is="loginLink.icon" :size="20" />
           {{ loginLink.label }}
         </router-link>
       </li>
 
-      <span
-        v-if="showIndicator"
+      <span v-if="showIndicator"
         class="pointer-events-none absolute right-0 w-1 rounded-l bg-emerald-500 transition-all duration-300 ease-in-out dark:bg-emerald-400"
-        :style="indicatorStyle"
-      />
+        :style="indicatorStyle" />
     </ul>
   </nav>
 </template>
@@ -65,7 +61,7 @@ export default defineComponent({
     const showIndicator = ref(false);
 
     const linkCollection = [
-      { label: 'Home', to: '/', icon: Home, requiresAuth: false, guestOnly: false },
+      { label: 'Feed', to: '/', icon: Home, requiresAuth: false, guestOnly: false },
       { label: 'Clients', to: '/clients', icon: Users, requiresAuth: true, guestOnly: false },
       { label: 'Excercises', to: '/excercises', icon: Dumbbell, requiresAuth: false, guestOnly: false },
       { label: 'Routines', to: '/routines', icon: CalendarDays, requiresAuth: true, guestOnly: false },
