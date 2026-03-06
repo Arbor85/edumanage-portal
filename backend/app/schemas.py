@@ -77,8 +77,8 @@ RoutineSetType = Literal["warmup", "normal", "fail"]
 
 class RoutineSet(BaseModel):
     type: RoutineSetType
-    reps: int | None
-    weight: float | None
+    reps: int | None = None
+    weight: float | None = None
 
 
 class RoutineExcercise(BaseModel):

@@ -1,6 +1,12 @@
 import type { Plan } from '../types/plan'
 import { useAuth0 } from '@auth0/auth0-vue'
 
+type PlanWritePayload = {
+  name: string
+  clientId: string
+  workouts: Plan['workouts']
+}
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 
 if (!API_BASE_URL) {
@@ -38,7 +44,7 @@ export const usePlansApi = () => {
     return parseJsonResponse<Plan[]>(response)
   }
 
-  const addPlan = async (payload: Omit<Plan, 'id'>): Promise<Plan> => {
+  const addPlan = async (payload: PlanWritePayload): Promise<Plan> => {
     const response = await fetchWithAuth(PLANS_ENDPOINT, {
       method: 'POST',
       headers: {
@@ -46,7 +52,7 @@ export const usePlansApi = () => {
       },
       body: JSON.stringify({
         name: payload.name,
-        clientName: payload.clientName,
+        clientId: payload.clientId,
         workouts: payload.workouts,
       }),
     })
@@ -54,7 +60,7 @@ export const usePlansApi = () => {
     return parseJsonResponse<Plan>(response)
   }
 
-  const editPlan = async (planId: string, payload: Omit<Plan, 'id'>): Promise<Plan> => {
+  const editPlan = async (planId: string, payload: PlanWritePayload): Promise<Plan> => {
     const response = await fetchWithAuth(`${PLANS_ENDPOINT}/${encodeURIComponent(planId)}`, {
       method: 'PUT',
       headers: {
@@ -62,7 +68,7 @@ export const usePlansApi = () => {
       },
       body: JSON.stringify({
         name: payload.name,
-        clientName: payload.clientName,
+        clientId: payload.clientId,
         workouts: payload.workouts,
       }),
     })

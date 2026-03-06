@@ -4,7 +4,6 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from ..core.auth import get_current_token_claims, get_current_user_id
 from ..core.dependencies import get_db
 from ..models import Client, Plan
 from ..schemas import ClientOut, PlanCreate, PlanOut, PlanUpdate
@@ -14,28 +13,16 @@ router = APIRouter()
 
 @router.get("/api/plans", response_model=list[PlanOut], tags=["Plans"])
 def list_plans(
-    claims: dict[str, object] = Depends(get_current_token_claims),
     db: Session = Depends(get_db),
 ) -> list[PlanOut]:
-    user_id = get_current_user_id(claims)
-    plans = db.execute(
-        select(Plan).where(Plan.user_id == user_id).order_by(Plan.name.asc())
-    ).scalars().all()
-
-    client_ids = {plan.client_id for plan in plans}
-    clients = (
+    rows = (
         db.execute(
-            select(Client).where(
-                Client.user_id == user_id,
-                Client.invitation_code.in_(client_ids),
-            )
+            select(Plan, Client)
+            .outerjoin(Client, Client.invitation_code == Plan.client_id)
+            .order_by(Plan.name.asc())
         )
-        .scalars()
         .all()
-        if client_ids
-        else []
     )
-    clients_by_invitation_code = {client.invitation_code: client for client in clients}
 
     return [
         PlanOut.model_validate(
@@ -44,36 +31,29 @@ def list_plans(
                 "name": plan.name,
                 "clientId": plan.client_id,
                 "workouts": plan.workouts,
-                "client": (
-                    ClientOut.model_validate(clients_by_invitation_code[plan.client_id])
-                    if plan.client_id in clients_by_invitation_code
-                    else None
-                ),
+                "client": ClientOut.model_validate(client) if client else None,
             }
         )
-        for plan in plans
+        for plan, client in rows
     ]
 
 
 @router.get("/api/plans/{plan_id}", response_model=PlanOut, tags=["Plans"])
 def get_plan(
     plan_id: str,
-    claims: dict[str, object] = Depends(get_current_token_claims),
     db: Session = Depends(get_db),
 ) -> PlanOut:
-    user_id = get_current_user_id(claims)
-    plan = db.execute(
-        select(Plan).where(Plan.id == plan_id, Plan.user_id == user_id)
-    ).scalar_one_or_none()
-    if not plan:
-        raise HTTPException(status_code=404, detail="Plan not found.")
-
-    client = db.execute(
-        select(Client).where(
-            Client.user_id == user_id,
-            Client.invitation_code == plan.client_id,
+    row = (
+        db.execute(
+            select(Plan, Client)
+            .outerjoin(Client, Client.invitation_code == Plan.client_id)
+            .where(Plan.id == plan_id)
         )
-    ).scalar_one_or_none()
+        .first()
+    )
+    if not row:
+        raise HTTPException(status_code=404, detail="Plan not found.")
+    plan, client = row
 
     return PlanOut.model_validate(
         {
@@ -89,13 +69,10 @@ def get_plan(
 @router.post("/api/plans", response_model=PlanOut, status_code=201, tags=["Plans"])
 def add_plan(
     payload: PlanCreate,
-    claims: dict[str, object] = Depends(get_current_token_claims),
     db: Session = Depends(get_db),
 ) -> PlanOut:
-    user_id = get_current_user_id(claims)
     client = db.execute(
         select(Client).where(
-            Client.user_id == user_id,
             Client.invitation_code == payload.clientId,
         )
     ).scalar_one_or_none()
@@ -106,8 +83,8 @@ def add_plan(
         id=str(uuid4()),
         name=payload.name,
         client_id=payload.clientId,
-        user_id=user_id,
-        workouts=[item.model_dump() for item in payload.workouts],
+        user_id=None,
+        workouts=[item.model_dump(by_alias=True) for item in payload.workouts],
     )
     db.add(plan)
     db.commit()
@@ -128,19 +105,14 @@ def add_plan(
 def update_plan(
     plan_id: str,
     payload: PlanUpdate,
-    claims: dict[str, object] = Depends(get_current_token_claims),
     db: Session = Depends(get_db),
 ) -> PlanOut:
-    user_id = get_current_user_id(claims)
-    plan = db.execute(
-        select(Plan).where(Plan.id == plan_id, Plan.user_id == user_id)
-    ).scalar_one_or_none()
+    plan = db.execute(select(Plan).where(Plan.id == plan_id)).scalar_one_or_none()
     if not plan:
         raise HTTPException(status_code=404, detail="Plan not found.")
 
     client = db.execute(
         select(Client).where(
-            Client.user_id == user_id,
             Client.invitation_code == payload.clientId,
         )
     ).scalar_one_or_none()
@@ -167,13 +139,9 @@ def update_plan(
 @router.delete("/api/plans/{plan_id}", tags=["Plans"])
 def delete_plan(
     plan_id: str,
-    claims: dict[str, object] = Depends(get_current_token_claims),
     db: Session = Depends(get_db),
 ) -> dict[str, str]:
-    user_id = get_current_user_id(claims)
-    plan = db.execute(
-        select(Plan).where(Plan.id == plan_id, Plan.user_id == user_id)
-    ).scalar_one_or_none()
+    plan = db.execute(select(Plan).where(Plan.id == plan_id)).scalar_one_or_none()
     if not plan:
         raise HTTPException(status_code=404, detail="Plan not found.")
 

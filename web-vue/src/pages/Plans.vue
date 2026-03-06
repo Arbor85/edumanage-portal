@@ -31,6 +31,14 @@
             >
               List
             </button>
+            <button
+              type="button"
+              @click="viewMode = 'calendar'"
+              class="border-l border-slate-300 px-3 py-1.5 text-xs font-medium dark:border-slate-600"
+              :class="viewMode === 'calendar' ? 'bg-emerald-500 text-white' : 'bg-white text-slate-700 hover:bg-slate-100 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600'"
+            >
+              Calendar
+            </button>
           </div>
 
           <button
@@ -96,7 +104,9 @@
         <div class="mb-3 flex items-start justify-between gap-3">
           <div>
             <p class="font-semibold text-slate-900 dark:text-slate-100">{{ plan.name }}</p>
-            <p class="text-xs text-slate-600 dark:text-slate-400">Client: {{ plan.clientName }}</p>
+            <div class="mt-1">
+              <CustomerDisplay :name="getPlanClientName(plan)" :image-url="getPlanClientImage(plan)" />
+            </div>
           </div>
           <span class="rounded-full bg-slate-200 px-2 py-0.5 text-[10px] font-medium text-slate-700 dark:bg-slate-700 dark:text-slate-200">
             {{ plan.workouts.length }} workout{{ plan.workouts.length === 1 ? '' : 's' }}
@@ -134,6 +144,15 @@
           </button>
           <button
             type="button"
+            @click="openCloneDialog(plan)"
+            class="inline-flex items-center justify-center gap-2 rounded-md border border-slate-300 bg-white p-2 text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600"
+            aria-label="Clone plan"
+            title="Clone plan"
+          >
+            <Copy :size="16" />
+          </button>
+          <button
+            type="button"
             @click="openEditDialog(plan)"
             class="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600"
           >
@@ -168,7 +187,7 @@
     </div>
 
     <div
-      v-else
+      v-else-if="viewMode === 'list'"
       class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800"
     >
       <div class="overflow-x-auto">
@@ -185,7 +204,9 @@
           <tbody>
             <tr v-for="plan in filteredPlans" :key="plan.id" class="border-t border-slate-200 dark:border-slate-700">
               <td class="px-4 py-3 font-medium text-slate-900 dark:text-slate-100">{{ plan.name }}</td>
-              <td class="px-4 py-3 text-slate-700 dark:text-slate-300">{{ plan.clientName }}</td>
+              <td class="px-4 py-3">
+                <CustomerDisplay :name="getPlanClientName(plan)" :image-url="getPlanClientImage(plan)" />
+              </td>
               <td class="px-4 py-3 text-slate-700 dark:text-slate-300">{{ plan.workouts.length }}</td>
               <td class="px-4 py-3">
                 <div class="flex flex-wrap gap-1.5">
@@ -214,6 +235,15 @@
                     title="Delete plan"
                   >
                     <Trash2 :size="16" />
+                  </button>
+                  <button
+                    type="button"
+                    @click="openCloneDialog(plan)"
+                    class="inline-flex items-center justify-center gap-2 rounded-md border border-slate-300 bg-white p-2 text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600"
+                    aria-label="Clone plan"
+                    title="Clone plan"
+                  >
+                    <Copy :size="16" />
                   </button>
                   <button
                     type="button"
@@ -254,6 +284,74 @@
       </div>
     </div>
 
+    <div
+      v-else
+      class="overflow-hidden rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800"
+    >
+      <div class="mb-4 flex items-center justify-between">
+        <button
+          type="button"
+          @click="changeMonth(-1)"
+          class="inline-flex items-center rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600"
+        >
+          Previous
+        </button>
+        <h2 class="text-base font-semibold text-slate-900 dark:text-slate-100">
+          {{ currentMonthYear }}
+        </h2>
+        <button
+          type="button"
+          @click="changeMonth(1)"
+          class="inline-flex items-center rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600"
+        >
+          Next
+        </button>
+      </div>
+
+      <div class="grid grid-cols-7 gap-2">
+        <div
+          v-for="day in ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']"
+          :key="day"
+          class="py-2 text-center text-xs font-medium text-slate-600 dark:text-slate-400"
+        >
+          {{ day }}
+        </div>
+
+        <div
+          v-for="(cell, index) in calendarCells"
+          :key="`calendar-cell-${index}`"
+          :class="[
+            'min-h-24 rounded border p-2',
+            cell.isCurrentMonth
+              ? 'border-slate-200 bg-white dark:border-slate-600 dark:bg-slate-800'
+              : 'border-slate-100 bg-slate-50 dark:border-slate-700 dark:bg-slate-900',
+            cell.isToday ? 'ring-2 ring-emerald-500 dark:ring-emerald-400' : ''
+          ]"
+        >
+          <div class="mb-1 text-xs font-medium text-slate-900 dark:text-slate-100">
+            {{ cell.day }}
+          </div>
+          <div class="space-y-1">
+            <div
+              v-for="entry in cell.workouts"
+              :key="`${entry.planId}-${entry.workout.id}`"
+              class="truncate rounded bg-emerald-100 px-1.5 py-1 text-[10px] text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300"
+              :title="`${entry.planName}: ${entry.workout.name}`"
+            >
+              {{ entry.planName }}: {{ entry.workout.name }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        v-if="calendarHasNoWorkouts"
+        class="mt-4 rounded-md border border-slate-300 bg-white p-4 text-sm text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+      >
+        No workouts scheduled in this month for selected filters.
+      </div>
+    </div>
+
     <div class="fixed bottom-0 left-56 right-0 z-30 px-6 pb-3">
       <div class="mx-auto w-full max-w-7xl">
         <DialogActionPanel primary-label="Create plan" @primary-click="openCreateDialog" />
@@ -288,7 +386,7 @@
               Client
             </label>
             <SelectClient
-              v-model="formData.clientName"
+              v-model="formData.clientId"
               :options="clients"
             />
           </div>
@@ -390,8 +488,9 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { Edit2, Trash2 } from 'lucide-vue-next'
+import { Copy, Edit2, Trash2 } from 'lucide-vue-next'
 import ConfirmDialog from '../components/ConfirmDialog.vue'
+import CustomerDisplay from '../components/CustomerDisplay.vue'
 import DialogActionPanel from '../components/DialogActionPanel.vue'
 import FilterOption from '../components/FilterOption.vue'
 import RoutineEditorDialog from '../components/RoutineEditorDialog.vue'
@@ -423,7 +522,8 @@ const isLoading = ref(false)
 const errorMessage = ref('')
 const searchQuery = ref('')
 const selectedClientNames = ref<string[]>([])
-const viewMode = useLocalStorageState<'tile' | 'list'>('plans:viewMode', 'list')
+const viewMode = useLocalStorageState<'tile' | 'list' | 'calendar'>('plans:viewMode', 'list')
+const currentDate = ref(new Date())
 
 const showDialog = ref(false)
 const showEmptyWorkoutDialog = ref(false)
@@ -433,20 +533,41 @@ const planToDelete = ref<Plan | null>(null)
 
 const formData = ref<{
   name: string
-  clientName: string
+  clientId: string
   workouts: PlanWorkout[]
 }>({
   name: '',
-  clientName: '',
+  clientId: '',
   workouts: [],
 })
 
 const canSave = computed(() => {
-  return formData.value.name.trim() && formData.value.clientName.trim()
+  return formData.value.name.trim() && formData.value.clientId.trim()
 })
 
+const getPlanClientName = (plan: Plan) => {
+  return plan.client?.name || plan.clientName
+}
+
+const getPlanClientImage = (plan: Plan) => {
+  return plan.client?.imageUrl || ''
+}
+
+const getPlanClientId = (plan: Plan) => {
+  if (plan.clientId) {
+    return plan.clientId
+  }
+
+  if (plan.client?.id) {
+    return plan.client.id
+  }
+
+  const clientName = getPlanClientName(plan)
+  return clients.value.find((client) => client.name === clientName)?.invitationCode || ''
+}
+
 const clientFilterOptions = computed(() => {
-  const fromPlans = plans.value.map((plan) => plan.clientName)
+  const fromPlans = plans.value.map((plan) => getPlanClientName(plan))
   const fromClients = clients.value.map((client) => client.name)
   return Array.from(new Set([...fromPlans, ...fromClients])).sort((left, right) => left.localeCompare(right))
 })
@@ -467,15 +588,103 @@ const filteredPlans = computed(() => {
     const matchesSearch =
       !normalizedQuery ||
       plan.name.toLowerCase().includes(normalizedQuery) ||
-      plan.clientName.toLowerCase().includes(normalizedQuery) ||
+      getPlanClientName(plan).toLowerCase().includes(normalizedQuery) ||
       workoutsText.includes(normalizedQuery)
 
     const matchesClient =
-      normalizedClientNames.length === 0 || normalizedClientNames.includes(plan.clientName.toLowerCase())
+      normalizedClientNames.length === 0 || normalizedClientNames.includes(getPlanClientName(plan).toLowerCase())
 
     return matchesSearch && matchesClient
   })
 })
+
+type CalendarCell = {
+  day: number
+  isCurrentMonth: boolean
+  isToday: boolean
+  dateString: string
+  workouts: Array<{ planId: string; planName: string; workout: PlanWorkout }>
+}
+
+const currentMonthYear = computed(() => {
+  return currentDate.value.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+})
+
+const calendarCells = computed((): CalendarCell[] => {
+  const year = currentDate.value.getFullYear()
+  const month = currentDate.value.getMonth()
+
+  const firstDay = new Date(year, month, 1)
+  const lastDay = new Date(year, month + 1, 0)
+  const firstDayOfWeek = firstDay.getDay()
+  const daysInMonth = lastDay.getDate()
+
+  const cells: CalendarCell[] = []
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+
+  const prevMonthLastDay = new Date(year, month, 0).getDate()
+  for (let i = firstDayOfWeek - 1; i >= 0; i--) {
+    const day = prevMonthLastDay - i
+    const cellDate = new Date(year, month - 1, day)
+    cells.push({
+      day,
+      isCurrentMonth: false,
+      isToday: false,
+      dateString: cellDate.toISOString().split('T')[0] || '',
+      workouts: [],
+    })
+  }
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    const cellDate = new Date(year, month, day)
+    cells.push({
+      day,
+      isCurrentMonth: true,
+      isToday: cellDate.getTime() === today.getTime(),
+      dateString: cellDate.toISOString().split('T')[0] || '',
+      workouts: [],
+    })
+  }
+
+  const remainingCells = 42 - cells.length
+  for (let day = 1; day <= remainingCells; day++) {
+    const cellDate = new Date(year, month + 1, day)
+    cells.push({
+      day,
+      isCurrentMonth: false,
+      isToday: false,
+      dateString: cellDate.toISOString().split('T')[0] || '',
+      workouts: [],
+    })
+  }
+
+  filteredPlans.value.forEach((plan) => {
+    plan.workouts.forEach((workout) => {
+      const workoutDate = workout.date.split('T')[0]
+      const cell = cells.find((entry) => entry.dateString === workoutDate)
+      if (cell) {
+        cell.workouts.push({
+          planId: plan.id,
+          planName: plan.name,
+          workout,
+        })
+      }
+    })
+  })
+
+  return cells
+})
+
+const calendarHasNoWorkouts = computed(() => {
+  return calendarCells.value.every((cell) => cell.workouts.length === 0)
+})
+
+const changeMonth = (offset: number) => {
+  const nextDate = new Date(currentDate.value)
+  nextDate.setMonth(nextDate.getMonth() + offset)
+  currentDate.value = nextDate
+}
 
 const formatDate = (dateString: string) => {
   const date = new Date(dateString)
@@ -487,7 +696,7 @@ const openCreateDialog = () => {
   editingPlanId.value = null
   formData.value = {
     name: '',
-    clientName: '',
+    clientId: '',
     workouts: [],
   }
   showDialog.value = true
@@ -498,8 +707,29 @@ const openEditDialog = (plan: Plan) => {
   editingPlanId.value = plan.id
   formData.value = {
     name: plan.name,
-    clientName: plan.clientName,
+    clientId: getPlanClientId(plan),
     workouts: [...plan.workouts],
+  }
+  showDialog.value = true
+}
+
+const clonePlanWorkouts = (workouts: PlanWorkout[]): PlanWorkout[] => {
+  return workouts.map((workout) => ({
+    ...workout,
+    excercises: workout.excercises.map((excercise) => ({
+      ...excercise,
+      sets: excercise.sets.map((setItem) => ({ ...setItem })),
+    })),
+  }))
+}
+
+const openCloneDialog = (plan: Plan) => {
+  isEditing.value = false
+  editingPlanId.value = null
+  formData.value = {
+    name: `${plan.name} (copy)`,
+    clientId: getPlanClientId(plan),
+    workouts: clonePlanWorkouts(plan.workouts),
   }
   showDialog.value = true
 }
@@ -549,7 +779,7 @@ const savePlan = async () => {
   try {
     const payload = {
       name: formData.value.name.trim(),
-      clientName: formData.value.clientName.trim(),
+      clientId: formData.value.clientId.trim(),
       workouts: formData.value.workouts,
     }
 

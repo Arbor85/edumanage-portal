@@ -65,7 +65,7 @@
             @click="selectClient(client)"
             :class="[
               'flex cursor-pointer items-center gap-3 rounded px-3 py-2 transition-colors',
-              draftSelection === client.name
+              draftSelection === client.invitationCode
                 ? 'bg-emerald-100 dark:bg-emerald-900/30'
                 : 'hover:bg-slate-100 dark:hover:bg-slate-700'
             ]"
@@ -107,7 +107,7 @@
             </div>
 
             <div
-              v-if="draftSelection === client.name"
+              v-if="draftSelection === client.invitationCode"
               class="text-emerald-600 dark:text-emerald-400"
             >
               ✓
@@ -211,9 +211,17 @@ const filteredClients = computed(() => {
   })
 })
 
+const selectedClientName = computed(() => {
+  if (!props.modelValue) {
+    return ''
+  }
+
+  return props.options.find((client) => client.invitationCode === props.modelValue)?.name || ''
+})
+
 const selectedButtonText = computed(() => {
-  if (props.modelValue) {
-    return props.modelValue
+  if (selectedClientName.value) {
+    return selectedClientName.value
   }
 
   return props.buttonText
@@ -241,7 +249,7 @@ const closeDialog = () => {
 }
 
 const selectClient = (client: Client) => {
-  draftSelection.value = client.name
+  draftSelection.value = client.invitationCode
   emit('update:modelValue', draftSelection.value)
   closeDialog()
 }
