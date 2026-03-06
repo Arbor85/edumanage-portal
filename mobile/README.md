@@ -1,13 +1,14 @@
 # EduManage Mobile App 📚
 
-An Expo-based mobile application with Auth0 authentication supporting Google and GitHub login.
+An Expo-based mobile application with Google and GitHub OAuth authentication.
 
 ## Prerequisites
 
 - Node.js (v18+)
 - Expo CLI: `npm install -g expo-cli`
 - Expo Go app (for testing on device)
-- Auth0 account (free tier available at https://auth0.com)
+- Google Cloud Console account (for Google sign-in)
+- GitHub account (for GitHub sign-in)
 
 ## Setup Instructions
 
@@ -17,45 +18,41 @@ An Expo-based mobile application with Auth0 authentication supporting Google and
 npm install
 ```
 
-### 2. Configure Auth0
+### 2. Configure OAuth Providers
 
-#### Step A: Create Auth0 Application
+#### Quick Start
 
-1. Go to [Auth0 Dashboard](https://manage.auth0.com)
-2. Create a new Native application
-3. Note your **Domain** and **Client ID**
+1. **Copy environment template:**
 
-#### Step B: Enable Social Connections
+   ```bash
+   cp .env.example .env
+   ```
 
-1. Go to **Connections** → **Social**
-2. Enable **Google** and **GitHub**
-3. Configure your credentials (optional - Auth0 provides defaults)
+2. **Set up Google OAuth:**
+   - Go to [Google Cloud Console](https://console.cloud.google.com/apis/credentials)
+   - Create OAuth 2.0 Client ID (Web application type)
+   - Copy Client ID to `.env`
 
-#### Step C: Configure Redirect URLs
+3. **Set up GitHub OAuth:**
+   - Go to [GitHub Developer Settings](https://github.com/settings/developers)
+   - Create New OAuth App
+   - Copy Client ID and Client Secret to `.env`
 
-In your Auth0 app settings, add:
+4. **Update `.env` with your credentials:**
 
-- **Allowed Callback URLs**: `mobile://callback`
-- **Allowed Logout URLs**: `mobile://`
-- **Allowed Web Origins**: `http://localhost:*, https://localhost:*`
+   ```env
+   EXPO_PUBLIC_GOOGLE_CLIENT_ID=your_google_client_id_here
+   EXPO_PUBLIC_GITHUB_CLIENT_ID=your_github_client_id_here
+   EXPO_PUBLIC_GITHUB_CLIENT_SECRET=your_github_client_secret_here
+   ```
 
-#### Step D: Set Environment Variables
+5. **Configure redirect URIs:**
+   - Run `npm start` and note the redirect URI in the console
+   - Add it to both Google and GitHub OAuth app settings
 
-Copy the `.env.example` to `.env`:
+> **📖 Detailed Setup:** See [OAUTH_SETUP.md](OAUTH_SETUP.md) for complete step-by-step instructions.
 
-```bash
-cp .env.example .env
-```
-
-Then update `.env` with your Auth0 credentials:
-
-```env
-EXPO_PUBLIC_AUTH0_DOMAIN=your-app.us.auth0.com
-EXPO_PUBLIC_AUTH0_CLIENT_ID=your_client_id_here
-EXPO_PUBLIC_AUTH0_AUDIENCE=https://your-api.example.com
-```
-
-> **Note**: The `.env` file is ignored by git. Keep your credentials secure!
+> **🔒 Security:** The `.env` file is in `.gitignore`. Never commit credentials!
 
 ### 3. Start the App
 
@@ -89,7 +86,7 @@ components/
 └── ...other components
 
 config/
-└── auth0Config.ts       # Auth0 configuration (reads from .env)
+└── auth0Config.ts       # OAuth configuration (reads from .env)
 
 context/
 └── AuthContext.tsx      # Authentication provider & hooks
@@ -97,12 +94,13 @@ context/
 
 ## Features
 
-✅ **Auth0 Integration** - Secure OAuth/OIDC authentication  
-✅ **Social Login** - Google and GitHub shortcuts  
+✅ **Google OAuth** - Sign in with your Google account  
+✅ **GitHub OAuth** - Sign in with your GitHub account  
 ✅ **Token Management** - Secure token storage with expo-secure-store  
 ✅ **Profile Screen** - View user info and sign out  
 ✅ **Dark Mode Support** - Fully themed components  
-✅ **Environment Variables** - Secure credential management
+✅ **Environment Variables** - Secure credential management  
+✅ **Expo Go Compatible** - Works in Expo Go for easy development
 
 ## Available Scripts
 
@@ -128,12 +126,14 @@ npm run reset-project
 2. App checks for stored authentication token
 3. If no token → Show login screen
 4. User clicks "Sign in with Google" or "Sign in with GitHub"
-5. Browser opens Auth0 login page
-6. User authenticates with their provider
-7. Redirected back to app with access token
-8. Token stored securely
-9. User sees main app (tabs)
-10. User can sign out from Profile tab
+5. Browser opens OAuth provider's login page
+6. User authenticates with Google or GitHub
+7. OAuth provider redirects back to app with authorization code
+8. App exchanges code for access token
+9. Token stored securely in expo-secure-store
+10. User profile fetched from provider
+11. User sees main app (tabs)
+12. User can sign out from Profile tab
 
 ## Using Auth Hooks
 
@@ -168,26 +168,44 @@ npm start -- --clear
 
 ### "AsyncStorageError: Native module is null"
 
-This is handled gracefully - the app will fall back to mock storage. For full functionality:
+This is handled gracefully on web. For native platforms, expo-secure-store is used automatically.
 
-1. Rebuild the native modules: `expo prebuild`
-2. Or use Expo Go which includes all native modules
+### "Invalid redirect URI" or "redirect_uri_mismatch"
 
-### "Auth0 login fails"
+1. Run `npm start` and check console for the redirect URI
+2. Add that exact URI to:
+   - Google Cloud Console → OAuth Client → Authorized redirect URIs
+   - GitHub OAuth App → Authorization callback URL
+3. Common formats:
+   - Development: `exp://192.168.1.x:8081`
+   - Expo Go: `https://auth.expo.io/@your-username/mobile`
+   - Production: `mobile://callback`
 
-- Verify your Auth0 domain and Client ID in `.env`
-- Check that callback URLs match in Auth0 dashboard
-- Ensure social connections are enabled
-- Check browser console for specific errors
+### "OAuth login fails"
+
+- Verify credentials in `.env` file
+- Check redirect URIs match exactly
+- Review console logs for specific errors
+- Ensure OAuth apps are configured correctly
+- For Google: Add your account as a test user in OAuth consent screen
+- For GitHub: Verify client secret is correct
+
+### User profile shows "User" / "user@example.com"
+
+- Check console for API errors
+- Verify OAuth scopes are correct
+- Ensure access token is valid
 
 ### Setup Guide
 
-For detailed Auth0 setup instructions, see [AUTH0_SETUP.md](AUTH0_SETUP.md)
+For detailed OAuth setup instructions, see [OAUTH_SETUP.md](OAUTH_SETUP.md)
 
 ## Learn More
 
 - [Expo Documentation](https://docs.expo.dev/)
-- [Auth0 Documentation](https://auth0.com/docs)
+- [Expo AuthSession](https://docs.expo.dev/versions/latest/sdk/auth-session/)
+- [Google OAuth 2.0](https://developers.google.com/identity/protocols/oauth2)
+- [GitHub OAuth](https://docs.github.com/en/developers/apps/building-oauth-apps)
 - [React Navigation](https://reactnavigation.org/)
 - [Expo Router](https://docs.expo.dev/routing/introduction/)
 
@@ -195,10 +213,11 @@ For detailed Auth0 setup instructions, see [AUTH0_SETUP.md](AUTH0_SETUP.md)
 
 For issues or questions:
 
-1. Check [AUTH0_SETUP.md](AUTH0_SETUP.md) for detailed setup
-2. Review error messages in the terminal
-3. Check Auth0 Dashboard for configuration issues
-4. Consult [Expo documentation](https://docs.expo.dev)
+1. Check [OAUTH_SETUP.md](OAUTH_SETUP.md) for detailed setup
+2. Review error messages in the terminal and console
+3. Verify OAuth app configurations in Google Cloud Console and GitHub
+4. Check redirect URIs match exactly
+5. Consult [Expo documentation](https://docs.expo.dev)
 
 ---
 

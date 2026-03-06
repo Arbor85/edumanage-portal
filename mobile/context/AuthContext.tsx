@@ -1,4 +1,4 @@
-import { AUTH0_CONFIG } from '@/config/auth0Config';
+import { OAUTH_CONFIG, OAUTH_ENDPOINTS } from '@/config/auth0Config';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as AuthSession from 'expo-auth-session';
 import * as SecureStore from 'expo-secure-store';
@@ -89,9 +89,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
 
       if (userToken) {
-        userProfile = await fetchAuth0User(userToken);
+        let authProvider = 'google';
+        try {
+          authProvider = (await SecureStore.getItemAsync('authProvider')) || 'google';
+        } catch (e) {
+          if (Platform.OS === 'web') {
+            authProvider = (await AsyncStorage.getItem('authProvider')) || 'google';
+          }
+        }
+        
+        if (authProvider === 'google') {
+          userProfile = await fetchGoogleUser(userToken);
+        } else if (authProvider === 'github') {
+          userProfile = await fetchGithubUser(userToken);
+        }
+        
         if (!userProfile) {
-          console.warn('Auth0 user profile missing after restore. Check Auth0 configuration and token scope.');
+          console.warn('User profile missing after restore.');
         }
       }
 
@@ -105,11 +119,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     () => ({
       signInWithGoogle: async () => {
         try {
-          const result = await performOAuthLogin('google-oauth2');
+          const result = await performGoogleLogin();
           if (result) {
-            const userProfile = await fetchAuth0User(result.accessToken);
+            const userProfile = await fetchGoogleUser(result.accessToken);
             if (!userProfile) {
-              console.warn('Auth0 user profile missing after Google sign-in. Check Auth0 domain, scopes, and /userinfo access.');
+              console.warn('Google user profile missing after sign-in.');
             }
             dispatch({
               type: 'SIGN_IN',
@@ -117,8 +131,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             });
             // Store token securely
             await SecureStore.setItemAsync('userToken', result.accessToken);
+            await SecureStore.setItemAsync('authProvider', 'google');
             if (Platform.OS === 'web') {
               await AsyncStorage.setItem('userToken', result.accessToken);
+              await AsyncStorage.setItem('authProvider', 'google');
             }
           }
         } catch (e) {
@@ -127,11 +143,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       },
       signInWithGithub: async () => {
         try {
-          const result = await performOAuthLogin('github');
+          const result = await performGithubLogin();
           if (result) {
-            const userProfile = await fetchAuth0User(result.accessToken);
+            const userProfile = await fetchGithubUser(result.accessToken);
             if (!userProfile) {
-              console.warn('Auth0 user profile missing after GitHub sign-in. Check Auth0 domain, scopes, and /userinfo access.');
+              console.warn('GitHub user profile missing after sign-in.');
             }
             dispatch({
               type: 'SIGN_IN',
@@ -139,8 +155,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             });
             // Store token securely
             await SecureStore.setItemAsync('userToken', result.accessToken);
+            await SecureStore.setItemAsync('authProvider', 'github');
             if (Platform.OS === 'web') {
               await AsyncStorage.setItem('userToken', result.accessToken);
+              await AsyncStorage.setItem('authProvider', 'github');
             }
           }
         } catch (e) {
@@ -150,12 +168,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       signOut: async () => {
         try {
           await SecureStore.deleteItemAsync('userToken');
+          await SecureStore.deleteItemAsync('authProvider');
         } catch (e) {
           console.warn('Failed to delete token from SecureStore', e);
         }
         if (Platform.OS === 'web') {
           try {
             await AsyncStorage.removeItem('userToken');
+            await AsyncStorage.removeItem('authProvider');
           } catch (asyncStorageError) {
             console.warn('Failed to delete token from AsyncStorage', asyncStorageError);
           }
@@ -163,26 +183,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         dispatch({ type: 'SIGN_OUT' });
       },
       signUp: async () => {
-        try {
-          const result = await performOAuthLogin('google-oauth2', true);
-          if (result) {
-            const userProfile = await fetchAuth0User(result.accessToken);
-            if (!userProfile) {
-              console.warn('Auth0 user profile missing after sign-up. Check Auth0 domain, scopes, and /userinfo access.');
-            }
-            dispatch({
-              type: 'SIGN_UP',
-              payload: { token: result.accessToken, user: userProfile },
-            });
-            // Store token securely
-            await SecureStore.setItemAsync('userToken', result.accessToken);
-            if (Platform.OS === 'web') {
-              await AsyncStorage.setItem('userToken', result.accessToken);
-            }
-          }
-        } catch (e) {
-          console.error('Sign up error:', e);
-        }
+        // Just redirect to Google sign-in (Google doesn't distinguish between sign-in and sign-up)
+        return authContext.signInWithGoogle();
       },
     }),
     []
@@ -208,68 +210,105 @@ export const useAuth = () => {
   return context;
 };
 
-async function fetchAuth0User(accessToken: string) {
+/**
+ * Fetch Google user profile
+ */
+async function fetchGoogleUser(accessToken: string) {
   if (!accessToken) {
-    console.warn('Auth0 /userinfo skipped: missing access token.');
-    return null;
-  }
-
-  if (!AUTH0_CONFIG.domain || AUTH0_CONFIG.domain.includes('YOUR_AUTH0_DOMAIN')) {
-    console.warn('Auth0 /userinfo skipped: missing or placeholder AUTH0 domain.');
+    console.warn('Google userinfo skipped: missing access token.');
     return null;
   }
 
   try {
-    const response = await fetch(`https://${AUTH0_CONFIG.domain}/userinfo`, {
+    const response = await fetch(OAUTH_ENDPOINTS.google.userInfoEndpoint, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
     });
 
     if (!response.ok) {
-      console.warn('Auth0 /userinfo request failed:', response.status, response.statusText);
+      console.warn('Google userinfo request failed:', response.status, response.statusText);
       return null;
     }
 
-    return await response.json();
+    const data = await response.json();
+    return {
+      name: data.name,
+      email: data.email,
+      picture: data.picture,
+      sub: data.id,
+    };
   } catch (error) {
-    console.warn('Failed to fetch Auth0 user profile', error);
+    console.warn('Failed to fetch Google user profile', error);
     return null;
   }
 }
 
 /**
- * Performs OAuth login with Auth0
- * @param connection - Auth0 connection type (google-oauth2, github, etc.)
- * @param isSignup - Whether this is a signup flow
+ * Fetch GitHub user profile
  */
-async function performOAuthLogin(
-  connection: string,
-  isSignup: boolean = false
-) {
+async function fetchGithubUser(accessToken: string) {
+  if (!accessToken) {
+    console.warn('GitHub user API skipped: missing access token.');
+    return null;
+  }
+
   try {
-    if (!AUTH0_CONFIG.domain || !AUTH0_CONFIG.clientId) {
-      console.error('Auth0 configuration is missing. Check .env values.');
+    const response = await fetch(OAUTH_ENDPOINTS.github.userInfoEndpoint, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        Accept: 'application/vnd.github.v3+json',
+      },
+    });
+
+    if (!response.ok) {
+      console.warn('GitHub user API request failed:', response.status, response.statusText);
       return null;
     }
 
-    const issuer = `https://${AUTH0_CONFIG.domain}`;
-    const discovery = await AuthSession.fetchDiscoveryAsync(issuer);
+    const data = await response.json();
+    return {
+      name: data.name || data.login,
+      email: data.email,
+      picture: data.avatar_url,
+      sub: data.id.toString(),
+      username: data.login,
+    };
+  } catch (error) {
+    console.warn('Failed to fetch GitHub user profile', error);
+    return null;
+  }
+}
+
+/**
+ * Performs OAuth login with Google
+ */
+async function performGoogleLogin() {
+  try {
+    if (!OAUTH_CONFIG.google.clientId) {
+      console.error('Google OAuth configuration is missing. Check .env for EXPO_PUBLIC_GOOGLE_CLIENT_ID.');
+      return null;
+    }
+
     const redirectUri = AuthSession.makeRedirectUri({
-      scheme: AUTH0_CONFIG.scheme,
+      scheme: OAUTH_CONFIG.scheme,
       path: 'callback',
     });
 
+    console.log('Google OAuth Redirect URI:', redirectUri);
+
+    const discovery = {
+      authorizationEndpoint: OAUTH_ENDPOINTS.google.authorizationEndpoint,
+      tokenEndpoint: OAUTH_ENDPOINTS.google.tokenEndpoint,
+      revocationEndpoint: OAUTH_ENDPOINTS.google.revocationEndpoint,
+    };
+
     const request = new AuthSession.AuthRequest({
-      clientId: AUTH0_CONFIG.clientId,
+      clientId: OAUTH_CONFIG.google.clientId,
       scopes: ['openid', 'profile', 'email'],
       redirectUri,
       usePKCE: true,
-      extraParams: {
-        connection,
-        ...(AUTH0_CONFIG.audience ? { audience: AUTH0_CONFIG.audience } : {}),
-        ...(isSignup ? { screen_hint: 'signup' } : {}),
-      },
+      responseType: AuthSession.ResponseType.Code,
     });
 
     const authResult = await request.promptAsync(discovery, {
@@ -277,18 +316,18 @@ async function performOAuthLogin(
     });
 
     if (authResult.type !== 'success') {
-      console.warn('Auth0 authorization did not succeed:', authResult.type);
+      console.warn('Google authorization did not succeed:', authResult.type);
       return null;
     }
 
     if (!authResult.params?.code) {
-      console.warn('Auth0 authorization missing code.');
+      console.warn('Google authorization missing code.');
       return null;
     }
 
     const tokenResult = await AuthSession.exchangeCodeAsync(
       {
-        clientId: AUTH0_CONFIG.clientId,
+        clientId: OAUTH_CONFIG.google.clientId,
         code: authResult.params.code,
         redirectUri,
         extraParams: {
@@ -299,7 +338,7 @@ async function performOAuthLogin(
     );
 
     if (!tokenResult?.accessToken) {
-      console.warn('Auth0 token exchange did not return access token.');
+      console.warn('Google token exchange did not return access token.');
       return null;
     }
 
@@ -307,7 +346,77 @@ async function performOAuthLogin(
       accessToken: tokenResult.accessToken,
     };
   } catch (error) {
-    console.error(`OAuth login failed for ${connection}:`, error);
+    console.error('Google OAuth login failed:', error);
+    throw error;
+  }
+}
+
+/**
+ * Performs OAuth login with GitHub
+ */
+async function performGithubLogin() {
+  try {
+    if (!OAUTH_CONFIG.github.clientId || !OAUTH_CONFIG.github.clientSecret) {
+      console.error('GitHub OAuth configuration is missing. Check .env for EXPO_PUBLIC_GITHUB_CLIENT_ID and EXPO_PUBLIC_GITHUB_CLIENT_SECRET.');
+      return null;
+    }
+
+    const redirectUri = AuthSession.makeRedirectUri({
+      scheme: OAUTH_CONFIG.scheme,
+      path: 'callback',
+    });
+
+    console.log('GitHub OAuth Redirect URI:', redirectUri);
+
+    const discovery = {
+      authorizationEndpoint: OAUTH_ENDPOINTS.github.authorizationEndpoint,
+      tokenEndpoint: OAUTH_ENDPOINTS.github.tokenEndpoint,
+      revocationEndpoint: OAUTH_ENDPOINTS.github.revocationEndpoint,
+    };
+
+    const request = new AuthSession.AuthRequest({
+      clientId: OAUTH_CONFIG.github.clientId,
+      scopes: ['read:user', 'user:email'],
+      redirectUri,
+      responseType: AuthSession.ResponseType.Code,
+    });
+
+    const authResult = await request.promptAsync(discovery, {
+      useProxy: false,
+    });
+
+    if (authResult.type !== 'success') {
+      console.warn('GitHub authorization did not succeed:', authResult.type);
+      return null;
+    }
+
+    if (!authResult.params?.code) {
+      console.warn('GitHub authorization missing code.');
+      return null;
+    }
+
+    const tokenResult = await AuthSession.exchangeCodeAsync(
+      {
+        clientId: OAUTH_CONFIG.github.clientId,
+        code: authResult.params.code,
+        redirectUri,
+        extraParams: {
+          client_secret: OAUTH_CONFIG.github.clientSecret,
+        },
+      },
+      discovery
+    );
+
+    if (!tokenResult?.accessToken) {
+      console.warn('GitHub token exchange did not return access token.');
+      return null;
+    }
+
+    return {
+      accessToken: tokenResult.accessToken,
+    };
+  } catch (error) {
+    console.error('GitHub OAuth login failed:', error);
     throw error;
   }
 }
