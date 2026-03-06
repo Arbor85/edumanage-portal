@@ -28,7 +28,7 @@
         </div>
 
         <div class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
-            <div class="mb-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
+            <div class="mb-4 grid grid-cols-1 gap-2 sm:grid-cols-4">
                 <button
                     type="button"
                     @click="openStartWorkout('empty')"
@@ -48,6 +48,15 @@
                     button-text="Start defined routine"
                     @select="startRoutineWorkout"
                 />
+
+                <button
+                    v-if="hasStartedWorkout"
+                    type="button"
+                    @click="continueWorkout"
+                    class="inline-flex items-center justify-center rounded-md border border-sky-500 bg-sky-500 px-4 py-2 text-sm font-medium text-white hover:bg-sky-600"
+                >
+                    Continue workout
+                </button>
             </div>
 
             <div class="grid grid-cols-1 gap-2 text-xs text-slate-600 dark:text-slate-300 sm:grid-cols-3">
@@ -64,27 +73,67 @@
             :routines="routines"
             :excercises="excercises"
             :initial-workout="prefilledWorkout"
+            :initial-session="resumeSession"
             @close="closeStartWorkout"
+            @session-change="handleSessionChange"
+            @finish="finishWorkout"
+            @abandon="abandonWorkout"
         />
     </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import SelectPlanRoutineButton from '../components/SelectPlanRoutineButton.vue'
 import SelectRoutineButton from '../components/SelectRoutineButton.vue'
 import StartWorkout from '../components/StartWorkout.vue'
+import { useLocalStorageState } from '../composables/useLocalStorageState'
 import { usePageTitle } from '../composables/usePageTitle'
 import { useExcercisesApi } from '../services/excercisesApi'
 import { usePlansApi } from '../services/plansApi'
 import { useRoutinesApi } from '../services/routinesApi'
 import type { Excercise } from '../types/excercise'
 import type { Plan, PlanWorkout } from '../types/plan'
-import type { Routine } from '../types/routine'
+import type { Routine, RoutineSet, RoutineSetType } from '../types/routine'
 
 usePageTitle('Home')
 
 type StartWorkoutMode = 'empty' | 'plan' | 'routine'
+
+type StartedWorkoutSet = {
+    type: RoutineSetType
+    reps: RoutineSet['reps']
+    weight: RoutineSet['weight']
+    completed: boolean
+}
+
+type StartedWorkoutExcercise = {
+    name: string
+    isBodyweight: boolean
+    sets: StartedWorkoutSet[]
+}
+
+type StartedWorkoutSession = {
+    mode: StartWorkoutMode
+    excercises: StartedWorkoutExcercise[]
+    startedAt?: string
+    updatedAt: string
+}
+
+type CompletedWorkoutPayload = {
+    mode: StartWorkoutMode
+    startedAt: string
+    completedAt: string
+    durationSeconds: number
+    totalSets: number
+    completedSets: number
+    excercises: StartedWorkoutExcercise[]
+    sourceWorkout?: {
+        id: string
+        name: string
+        date: string
+    }
+}
 
 const plansApi = usePlansApi()
 const routinesApi = useRoutinesApi()
@@ -99,15 +148,23 @@ const errorMessage = ref('')
 const showStartWorkout = ref(false)
 const startMode = ref<StartWorkoutMode>('empty')
 const prefilledWorkout = ref<PlanWorkout | null>(null)
+const resumeSession = ref<StartedWorkoutSession | null>(null)
+const startedWorkoutSession = useLocalStorageState<StartedWorkoutSession | null>('home:started-workout', null)
+
+const hasStartedWorkout = computed(() => {
+    return !!startedWorkoutSession.value
+})
 
 const openStartWorkout = (mode: StartWorkoutMode) => {
     prefilledWorkout.value = null
+    resumeSession.value = null
     startMode.value = mode
     showStartWorkout.value = true
 }
 
 const startPlannedWorkout = (workout: PlanWorkout) => {
     prefilledWorkout.value = workout
+    resumeSession.value = null
     startMode.value = 'plan'
     showStartWorkout.value = true
 }
@@ -126,13 +183,44 @@ const startRoutineWorkout = (routine: Routine) => {
         excercises: routine.excercises,
         date: formatDateForInput(new Date()),
     }
+    resumeSession.value = null
     startMode.value = 'routine'
     showStartWorkout.value = true
+}
+
+const continueWorkout = () => {
+    if (!startedWorkoutSession.value) {
+        return
+    }
+
+    prefilledWorkout.value = null
+    resumeSession.value = startedWorkoutSession.value
+    startMode.value = startedWorkoutSession.value.mode
+    showStartWorkout.value = true
+}
+
+const handleSessionChange = (session: StartedWorkoutSession) => {
+    startedWorkoutSession.value = session
 }
 
 const closeStartWorkout = () => {
     showStartWorkout.value = false
     prefilledWorkout.value = null
+    resumeSession.value = null
+}
+
+const finishWorkout = async (payload: CompletedWorkoutPayload) => {
+    try {
+        await routinesApi.completeRoutine(payload)
+        startedWorkoutSession.value = null
+        errorMessage.value = ''
+    } catch (error) {
+        errorMessage.value = error instanceof Error ? error.message : 'Failed to finish workout'
+    }
+}
+
+const abandonWorkout = () => {
+    startedWorkoutSession.value = null
 }
 
 const loadData = async () => {

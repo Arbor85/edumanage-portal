@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import AliasChoices, BaseModel, ConfigDict, Field, field_validator
 
 ClientTag = Literal[
     "Online",
@@ -131,3 +131,58 @@ class PlanOut(PlanBase):
     clientId: str = Field(validation_alias="client_id")
     workouts: list[PlanWorkout]
     client: ClientOut | None = None
+
+
+RoutineCompleteMode = Literal["plan", "routine"]
+
+
+class CompletedRoutineSet(RoutineSet):
+    completed: bool = False
+
+
+class CompletedRoutineExcercise(BaseModel):
+    name: str = Field(min_length=1)
+    isBodyweight: bool
+    sets: list[CompletedRoutineSet]
+
+
+class CompletedSourceWorkout(BaseModel):
+    id: str = Field(min_length=1)
+    name: str = Field(min_length=1)
+    date: str = Field(min_length=1)
+
+
+class CompleteRoutineCreate(BaseModel):
+    mode: RoutineCompleteMode
+    startedAt: str = Field(min_length=1)
+    completedAt: str = Field(min_length=1)
+    durationSeconds: int = Field(ge=0)
+    totalSets: int = Field(ge=0)
+    completedSets: int = Field(ge=0)
+    excercises: list[CompletedRoutineExcercise] = Field(
+        default_factory=list,
+        validation_alias=AliasChoices("excercises", "exercises"),
+    )
+    sourceWorkout: CompletedSourceWorkout
+
+    @field_validator("mode", mode="before")
+    @classmethod
+    def normalize_mode(cls, value: object) -> object:
+        if isinstance(value, str):
+            return value.strip().lower()
+        return value
+
+
+class WorkoutHistoryOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+
+    id: str
+    currentUserId: str = Field(validation_alias="current_user_id")
+    mode: RoutineCompleteMode
+    startedAt: str = Field(validation_alias="started_at")
+    completedAt: str = Field(validation_alias="completed_at")
+    durationSeconds: int = Field(validation_alias="duration_seconds")
+    totalSets: int = Field(validation_alias="total_sets")
+    completedSets: int = Field(validation_alias="completed_sets")
+    excercises: list[CompletedRoutineExcercise]
+    sourceWorkout: CompletedSourceWorkout = Field(validation_alias="source_workout")

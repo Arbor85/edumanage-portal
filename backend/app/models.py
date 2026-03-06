@@ -55,3 +55,18 @@ class Plan(Base):
 	client_id = Column(String(100), nullable=False, index=True)
 	user_id = Column(String(255), nullable=True, index=True)
 	workouts = Column(JSON, nullable=False, default=list)
+
+
+class WorkoutHistory(Base):
+	__tablename__ = "workoutHistory"
+
+	id = Column(String(100), primary_key=True, index=True)
+	current_user_id = Column(String(255), nullable=False, index=True)
+	mode = Column(String(50), nullable=False)
+	started_at = Column(String(64), nullable=False)
+	completed_at = Column(String(64), nullable=False)
+	duration_seconds = Column(Integer, nullable=False)
+	total_sets = Column(Integer, nullable=False)
+	completed_sets = Column(Integer, nullable=False)
+	excercises = Column(JSON, nullable=False, default=list)
+	source_workout = Column(JSON, nullable=False, default=dict)

@@ -1,5 +1,5 @@
 <template>
-  <div class="fixed bottom-0 left-56 right-0 z-30 bg-slate-100 px-6 pb-3 shadow-[0_-6px_16px_-14px_rgba(15,23,42,0.32)] transition-shadow duration-200 hover:shadow-[0_-10px_24px_-14px_rgba(15,23,42,0.45)] dark:bg-slate-900 dark:shadow-[0_-6px_16px_-14px_rgba(2,6,23,0.7)] dark:hover:shadow-[0_-10px_24px_-14px_rgba(2,6,23,0.9)]">
+  <div :class="containerClass">
     <div class="mx-auto w-full max-w-5xl">
       <div :class="panelClass">
         <div class="flex items-center justify-between">
@@ -38,6 +38,7 @@ const props = withDefaults(
     secondaryVariant?: 'default' | 'success' | 'danger'
     stickyBottom?: boolean
     primaryButtonType?: 'button' | 'submit'
+    dialogMode?: boolean
   }>(),
   {
     primaryDisabled: false,
@@ -46,6 +47,7 @@ const props = withDefaults(
     secondaryVariant: 'default',
     stickyBottom: false,
     primaryButtonType: 'button',
+    dialogMode: false,
   },
 )
 
@@ -75,5 +77,15 @@ const panelClass = computed(() => {
   }
 
   return `${base} sticky bottom-0 z-20 bg-white/95 px-2 pb-2 backdrop-blur dark:bg-slate-900/95`
+})
+
+const containerClass = computed(() => {
+  const base = 'fixed bottom-0 right-0 bg-slate-100 px-6 pb-3 shadow-[0_-6px_16px_-14px_rgba(15,23,42,0.32)] transition-shadow duration-200 hover:shadow-[0_-10px_24px_-14px_rgba(15,23,42,0.45)] dark:bg-slate-900 dark:shadow-[0_-6px_16px_-14px_rgba(2,6,23,0.7)] dark:hover:shadow-[0_-10px_24px_-14px_rgba(2,6,23,0.9)]'
+
+  if (props.dialogMode) {
+    return `${base} left-0 z-[95]`
+  }
+
+  return `${base} left-56 z-30`
 })
 </script>

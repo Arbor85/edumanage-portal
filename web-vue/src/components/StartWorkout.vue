@@ -11,28 +11,30 @@
             <h2 class="text-xl font-bold text-slate-900 dark:text-slate-100">{{ dialogTitle }}</h2>
             <p class="text-sm text-slate-600 dark:text-slate-300">Build your workout, track sets, and mark completed sets.</p>
           </div>
-          <button
-            type="button"
-            @click="emitClose"
-            class="inline-flex items-center rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600"
-          >
-            Close
-          </button>
         </div>
 
-        <div class="mb-3 rounded-lg border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-800">
-          <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div class="relative mb-3 overflow-hidden rounded-lg border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-800">
+          <div
+            class="pointer-events-none absolute inset-y-0 left-0 bg-emerald-200/60 transition-[width] duration-300 dark:bg-emerald-900/30"
+            :style="{ width: `${progressPercent}%` }"
+            aria-hidden="true"
+          />
+
+          <div class="relative z-10 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p class="text-sm font-semibold text-slate-900 dark:text-slate-100">Progress</p>
               <p class="text-xs text-slate-600 dark:text-slate-300">
                 {{ completedSets }} / {{ totalSets }} sets completed
+              </p>
+              <p class="text-xs font-medium text-slate-700 dark:text-slate-200">
+                Elapsed: {{ elapsedTimeLabel }}
               </p>
             </div>
             <SelectExcercise v-model="selectedExcerciseNames" :options="excercises" button-text="Add excercises" />
           </div>
         </div>
 
-        <div class="min-h-0 flex-1 overflow-y-auto rounded-lg border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-800">
+        <div class="min-h-0 flex-1 overflow-y-auto rounded-lg border border-slate-200 bg-white p-3 pb-24 dark:border-slate-700 dark:bg-slate-800">
           <div v-if="workoutExcercises.length === 0" class="rounded-md border border-dashed border-slate-300 p-6 text-center text-sm text-slate-500 dark:border-slate-600 dark:text-slate-300">
             No excercises yet. Use "Add excercises" to build this workout.
           </div>
@@ -62,7 +64,7 @@
                     v-if="hasIncompleteSets(excercise)"
                     type="button"
                     @click="skipRemainingSets(excerciseIndex)"
-                    class="inline-flex items-center rounded-md border border-slate-300 bg-white px-1 py-0.5 text-[10px] font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600"
+                    class="inline-flex items-center rounded-md border border-slate-300 bg-white px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600"
                   >
                     <SkipForward :size="12" class="mr-1" />
                     Skip
@@ -140,14 +142,54 @@
             </article>
           </div>
         </div>
+
+        <DialogActionPanel
+          primary-label="Finish workout"
+          secondary-label="Abandon"
+          secondary-variant="default"
+          :dialog-mode="true"
+          @primary-click="finishWorkout"
+          @secondary-click="requestAbandonWorkout"
+        />
+      </div>
+    </div>
+
+    <div
+      v-if="showAbandonConfirm"
+      class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 p-4"
+      @click.self="showAbandonConfirm = false"
+    >
+      <div class="w-full max-w-md rounded-lg border border-slate-200 bg-white p-5 shadow-lg dark:border-slate-700 dark:bg-slate-800">
+        <h3 class="text-base font-semibold text-slate-900 dark:text-slate-100">Abandon workout?</h3>
+        <p class="mt-2 text-sm text-slate-700 dark:text-slate-200">
+          You have completed {{ completedSets }} set{{ completedSets === 1 ? '' : 's' }}. This progress will be discarded.
+        </p>
+
+        <div class="mt-4 flex items-center justify-end gap-2">
+          <button
+            type="button"
+            @click="showAbandonConfirm = false"
+            class="inline-flex items-center rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            @click="confirmAbandonWorkout"
+            class="inline-flex items-center rounded-md border border-rose-500 bg-rose-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-rose-600"
+          >
+            Abandon
+          </button>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { Check, SkipForward } from 'lucide-vue-next'
+import DialogActionPanel from './DialogActionPanel.vue'
 import SelectExcercise from './SelectExcercise.vue'
 import type { Excercise } from '../types/excercise'
 import type { Plan, PlanWorkout } from '../types/plan'
@@ -165,6 +207,28 @@ type WorkoutExcercise = {
   sets: WorkoutSet[]
 }
 
+type StartedWorkoutSession = {
+  mode: StartWorkoutMode
+  excercises: WorkoutExcercise[]
+  startedAt?: string
+  updatedAt: string
+}
+
+type CompletedWorkoutPayload = {
+  mode: StartWorkoutMode
+  startedAt: string
+  completedAt: string
+  durationSeconds: number
+  totalSets: number
+  completedSets: number
+  excercises: WorkoutExcercise[]
+  sourceWorkout?: {
+    id: string
+    name: string
+    date: string
+  }
+}
+
 const props = withDefaults(
   defineProps<{
     open: boolean
@@ -173,23 +237,32 @@ const props = withDefaults(
     routines?: Routine[]
     excercises?: Excercise[]
     initialWorkout?: PlanWorkout | null
+    initialSession?: StartedWorkoutSession | null
   }>(),
   {
     plans: () => [],
     routines: () => [],
     excercises: () => [],
     initialWorkout: null,
+    initialSession: null,
   },
 )
 
 const emit = defineEmits<{
   (event: 'close'): void
+  (event: 'session-change', payload: StartedWorkoutSession): void
+  (event: 'finish', payload: CompletedWorkoutPayload): void
+  (event: 'abandon'): void
 }>()
 
 const selectedPlanId = ref('')
 const selectedWorkoutId = ref('')
 const selectedExcerciseNames = ref<string[]>([])
 const workoutExcercises = ref<WorkoutExcercise[]>([])
+const showAbandonConfirm = ref(false)
+const workoutStartedAt = ref('')
+const timerNow = ref(Date.now())
+let timerHandle: ReturnType<typeof setInterval> | null = null
 
 const selectedPlan = computed(() => {
   return props.plans.find((plan) => plan.id === selectedPlanId.value)
@@ -220,6 +293,56 @@ const completedSets = computed(() => {
     return total + excercise.sets.filter((setItem) => setItem.completed).length
   }, 0)
 })
+
+const progressPercent = computed(() => {
+  if (totalSets.value === 0) {
+    return 0
+  }
+
+  return Math.round((completedSets.value / totalSets.value) * 100)
+})
+
+const elapsedSeconds = computed(() => {
+  if (!workoutStartedAt.value) {
+    return 0
+  }
+
+  const startedAtMs = new Date(workoutStartedAt.value).getTime()
+
+  if (Number.isNaN(startedAtMs)) {
+    return 0
+  }
+
+  return Math.max(0, Math.floor((timerNow.value - startedAtMs) / 1000))
+})
+
+const elapsedTimeLabel = computed(() => {
+  const total = elapsedSeconds.value
+  const hours = Math.floor(total / 3600)
+  const minutes = Math.floor((total % 3600) / 60)
+  const seconds = total % 60
+
+  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
+})
+
+const startTimer = () => {
+  timerNow.value = Date.now()
+
+  if (timerHandle) {
+    clearInterval(timerHandle)
+  }
+
+  timerHandle = setInterval(() => {
+    timerNow.value = Date.now()
+  }, 1000)
+}
+
+const stopTimer = () => {
+  if (timerHandle) {
+    clearInterval(timerHandle)
+    timerHandle = null
+  }
+}
 
 const toWorkoutSet = (setItem: RoutineSet): WorkoutSet => {
   return {
@@ -263,10 +386,25 @@ const createExcerciseFromName = (name: string): WorkoutExcercise => {
   }
 }
 
+const cloneWorkoutExcercises = (excercises: WorkoutExcercise[]): WorkoutExcercise[] => {
+  return excercises.map((excercise) => ({
+    ...excercise,
+    sets: excercise.sets.map((setItem) => ({ ...setItem })),
+  }))
+}
+
 const resetForMode = () => {
   selectedPlanId.value = ''
   selectedWorkoutId.value = ''
   selectedExcerciseNames.value = []
+  workoutStartedAt.value = props.initialSession?.startedAt || new Date().toISOString()
+  startTimer()
+
+  if (props.initialSession) {
+    workoutExcercises.value = cloneWorkoutExcercises(props.initialSession.excercises)
+    selectedExcerciseNames.value = props.initialSession.excercises.map((excercise) => excercise.name)
+    return
+  }
 
   if (props.initialWorkout) {
     applySourceWorkout(props.initialWorkout)
@@ -346,7 +484,46 @@ const applySourceWorkout = (workout: PlanWorkout | null) => {
 }
 
 const emitClose = () => {
+  showAbandonConfirm.value = false
+  stopTimer()
   emit('close')
+}
+
+const finishWorkout = () => {
+  const normalizedExcercises = cloneWorkoutExcercises(workoutExcercises.value)
+
+  emit('finish', {
+    mode: props.mode,
+    startedAt: workoutStartedAt.value || new Date().toISOString(),
+    completedAt: new Date().toISOString(),
+    durationSeconds: elapsedSeconds.value,
+    totalSets: totalSets.value,
+    completedSets: completedSets.value,
+    excercises: normalizedExcercises,
+    sourceWorkout: props.initialWorkout
+      ? {
+        id: props.initialWorkout.id,
+        name: props.initialWorkout.name,
+        date: props.initialWorkout.date,
+      }
+      : undefined,
+  })
+  emitClose()
+}
+
+const requestAbandonWorkout = () => {
+  if (completedSets.value > 0) {
+    showAbandonConfirm.value = true
+    return
+  }
+
+  confirmAbandonWorkout()
+}
+
+const confirmAbandonWorkout = () => {
+  showAbandonConfirm.value = false
+  emit('abandon')
+  emitClose()
 }
 
 watch(
@@ -354,7 +531,10 @@ watch(
   ([isOpen]) => {
     if (isOpen) {
       resetForMode()
+      return
     }
+
+    stopTimer()
   },
 )
 
@@ -387,7 +567,22 @@ watch(
         }
       })
     })
+
+    if (props.open) {
+      const normalizedExcercises = cloneWorkoutExcercises(list)
+
+      emit('session-change', {
+        mode: props.mode,
+        excercises: normalizedExcercises,
+        startedAt: workoutStartedAt.value,
+        updatedAt: new Date().toISOString(),
+      })
+    }
   },
   { deep: true },
 )
+
+onBeforeUnmount(() => {
+  stopTimer()
+})
 </script>

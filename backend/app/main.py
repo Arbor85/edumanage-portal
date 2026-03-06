@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import logging
 import os
 from collections.abc import Generator
 from pathlib import Path
@@ -9,24 +10,27 @@ from uuid import uuid4
 
 import httpx
 from dotenv import load_dotenv
-from fastapi import Depends, FastAPI, HTTPException, Security
+from fastapi import Body, Depends, FastAPI, HTTPException, Security
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
+from pydantic import ValidationError
 from sqlalchemy import func, select, text
 from sqlalchemy.orm import Session
 
 from .db import Base, SessionLocal, engine
-from .models import Client, Excercise, Plan, Routine, User
+from .models import Client, Excercise, Plan, Routine, User, WorkoutHistory
 from .schemas import (
     AcceptClientInvitationRequest,
     ClientCreate,
     ClientOut,
     ClientUpdate,
+    CompleteRoutineCreate,
     ExcerciseOut,
     RoutineCreate,
     RoutineOut,
     RoutineUpdate,
+    WorkoutHistoryOut,
 )
 from .routers import plans as plans_router
 
@@ -39,6 +43,7 @@ AUTH0_ISSUER = f"https://{AUTH0_DOMAIN}/" if AUTH0_DOMAIN else ""
 AUTH0_JWKS_URL = f"https://{AUTH0_DOMAIN}/.well-known/jwks.json" if AUTH0_DOMAIN else ""
 
 _jwks_cache: dict[str, Any] | None = None
+logger = logging.getLogger("edumanage.routines")
 
 app = FastAPI(
     title="EduManage API",
@@ -68,6 +73,7 @@ def on_startup() -> None:
     ensure_clients_columns()
     ensure_routines_columns()
     ensure_plans_columns()
+    ensure_workout_history_table()
     seed_excercises()
 
 
@@ -113,6 +119,61 @@ def ensure_plans_columns() -> None:
         if "user_id" not in column_names:
             connection.execute(text("ALTER TABLE plans ADD COLUMN user_id VARCHAR(255)"))
             connection.commit()
+
+
+def ensure_workout_history_table() -> None:
+    if not engine.url.drivername.startswith("sqlite"):
+        return
+
+    with engine.connect() as connection:
+        columns = connection.execute(text("PRAGMA table_info('workoutHistory')")).fetchall()
+        if not columns:
+            connection.execute(
+                text(
+                    """
+                    CREATE TABLE IF NOT EXISTS workoutHistory (
+                        id VARCHAR(100) PRIMARY KEY,
+                        current_user_id VARCHAR(255) NOT NULL,
+                        mode VARCHAR(50) NOT NULL,
+                        started_at VARCHAR(64) NOT NULL,
+                        completed_at VARCHAR(64) NOT NULL,
+                        duration_seconds INTEGER NOT NULL,
+                        total_sets INTEGER NOT NULL,
+                        completed_sets INTEGER NOT NULL,
+                        excercises JSON NOT NULL,
+                        source_workout JSON NOT NULL
+                    )
+                    """
+                )
+            )
+            connection.execute(text("CREATE INDEX IF NOT EXISTS ix_workoutHistory_id ON workoutHistory (id)"))
+            connection.execute(
+                text(
+                    "CREATE INDEX IF NOT EXISTS ix_workoutHistory_current_user_id ON workoutHistory (current_user_id)"
+                )
+            )
+            connection.commit()
+            logger.info("Created missing workoutHistory table on startup")
+            return
+
+        column_names = {column[1] for column in columns}
+        required_columns: list[tuple[str, str]] = [
+            ("current_user_id", "VARCHAR(255)"),
+            ("mode", "VARCHAR(50)"),
+            ("started_at", "VARCHAR(64)"),
+            ("completed_at", "VARCHAR(64)"),
+            ("duration_seconds", "INTEGER"),
+            ("total_sets", "INTEGER"),
+            ("completed_sets", "INTEGER"),
+            ("excercises", "JSON"),
+            ("source_workout", "JSON"),
+        ]
+        for column_name, column_type in required_columns:
+            if column_name not in column_names:
+                connection.execute(
+                    text(f"ALTER TABLE workoutHistory ADD COLUMN {column_name} {column_type}")
+                )
+        connection.commit()
 
 
 def get_db() -> Generator[Session, None, None]:
@@ -364,6 +425,104 @@ def delete_routine(
     db.delete(routine)
     db.commit()
     return {"message": "Routine deleted successfully."}
+
+
+@app.post("/api/routines/complete", response_model=WorkoutHistoryOut, status_code=201, tags=["Routines"])
+def complete_routine(
+    payload: dict[str, Any] = Body(...),
+    claims: dict[str, object] = Depends(get_current_token_claims),
+    db: Session = Depends(get_db),
+) -> WorkoutHistoryOut:
+    logger.info("/api/routines/complete request received")
+    normalized_payload: dict[str, Any] = {
+        "mode": payload.get("mode"),
+        "startedAt": payload.get("startedAt", payload.get("started_at")),
+        "completedAt": payload.get("completedAt", payload.get("completed_at")),
+        "durationSeconds": payload.get("durationSeconds", payload.get("duration_seconds")),
+        "totalSets": payload.get("totalSets", payload.get("total_sets")),
+        "completedSets": payload.get("completedSets", payload.get("completed_sets")),
+        "excercises": payload.get("excercises", payload.get("exercises", [])),
+        "sourceWorkout": payload.get(
+            "sourceWorkout",
+            payload.get("source_workout", payload.get("sourceRoutine", payload.get("sourcePlan"))),
+        ),
+    }
+    mode_value = normalized_payload.get("mode")
+    if isinstance(mode_value, str):
+        normalized_payload["mode"] = mode_value.strip().lower()
+
+    raw_excercises = normalized_payload.get("excercises")
+    if isinstance(raw_excercises, list):
+        for excercise in raw_excercises:
+            if not isinstance(excercise, dict):
+                continue
+            if "isBodyweight" not in excercise and "isBodyWeight" in excercise:
+                excercise["isBodyweight"] = excercise.get("isBodyWeight")
+            sets = excercise.get("sets")
+            if isinstance(sets, list):
+                for set_item in sets:
+                    if isinstance(set_item, dict) and "completed" not in set_item and "isCompleted" in set_item:
+                        set_item["completed"] = set_item.get("isCompleted")
+
+    if normalized_payload.get("sourceWorkout") is None:
+        started_at = normalized_payload.get("startedAt")
+        fallback_date = "1970-01-01"
+        if isinstance(started_at, str) and len(started_at) >= 10:
+            fallback_date = started_at[:10]
+        normalized_payload["sourceWorkout"] = {
+            "id": "ad-hoc",
+            "name": "Ad-hoc workout",
+            "date": fallback_date,
+        }
+        logger.info(
+            "Routine completion payload missing sourceWorkout; using fallback sourceWorkout=%s",
+            normalized_payload["sourceWorkout"],
+        )
+
+    try:
+        validated_payload = CompleteRoutineCreate.model_validate(normalized_payload)
+    except ValidationError as exc:
+        logger.warning(
+            "Routine completion payload validation failed. errors=%s normalized_payload=%s",
+            exc.errors(),
+            normalized_payload,
+        )
+        raise HTTPException(status_code=422, detail=exc.errors())
+
+    current_user_id = get_current_user_id(claims)
+    history = WorkoutHistory(
+        id=str(uuid4()),
+        current_user_id=current_user_id,
+        mode=validated_payload.mode,
+        started_at=validated_payload.startedAt,
+        completed_at=validated_payload.completedAt,
+        duration_seconds=validated_payload.durationSeconds,
+        total_sets=validated_payload.totalSets,
+        completed_sets=validated_payload.completedSets,
+        excercises=[item.model_dump(by_alias=True) for item in validated_payload.excercises],
+        source_workout=validated_payload.sourceWorkout.model_dump(by_alias=True),
+    )
+    try:
+        db.add(history)
+        db.commit()
+        db.refresh(history)
+    except Exception as exc:
+        db.rollback()
+        logger.exception(
+            "Routine completion persistence failed. current_user_id=%s mode=%s source_workout=%s",
+            current_user_id,
+            validated_payload.mode,
+            validated_payload.sourceWorkout.model_dump(by_alias=True),
+        )
+        raise HTTPException(status_code=500, detail=f"Failed to save completed routine: {str(exc)}")
+
+    logger.info(
+        "Routine completion saved. history_id=%s current_user_id=%s duration_seconds=%s",
+        history.id,
+        history.current_user_id,
+        history.duration_seconds,
+    )
+    return WorkoutHistoryOut.model_validate(history)
 
 
 @app.post("/api/clients", response_model=ClientOut, status_code=201, tags=["Clients"])

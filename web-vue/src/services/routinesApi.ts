@@ -9,6 +9,8 @@ if (!API_BASE_URL) {
 
 const ROUTINES_ENDPOINT = `${API_BASE_URL}/api/routines`
 
+export type CompleteRoutinePayload = Record<string, unknown>
+
 const parseJsonResponse = async <T>(response: Response): Promise<T> => {
   if (!response.ok) {
     const message = await response.text()
@@ -79,10 +81,26 @@ export const useRoutinesApi = () => {
     }
   }
 
+  const completeRoutine = async (payload: CompleteRoutinePayload): Promise<void> => {
+    const response = await fetchWithAuth(`${ROUTINES_ENDPOINT}/complete`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    })
+
+    if (!response.ok) {
+      const message = await response.text()
+      throw new Error(message || 'Routine completion request failed')
+    }
+  }
+
   return {
     listRoutines,
     addRoutine,
     editRoutine,
     deleteRoutine,
+    completeRoutine,
   }
 }
