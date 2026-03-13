@@ -20,25 +20,12 @@
 
         <div>
           <label for="meeting-start" class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">Time slot</label>
-          <input
-            id="meeting-start"
-            v-model="startsAt"
-            type="datetime-local"
-            class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
-          />
+          <DateTimePicker id="meeting-start" v-model="startsAt" />
         </div>
 
         <div>
           <label for="meeting-price" class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">Price ($)</label>
-          <input
-            id="meeting-price"
-            v-model.number="price"
-            type="number"
-            min="0"
-            step="0.01"
-            class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
-            placeholder="0.00"
-          />
+          <PriceInput id="meeting-price" v-model="price" :min="0" step="0.01" currency="$" placeholder="0.00" />
         </div>
 
         <p v-if="errorMessage" class="rounded-md border border-rose-300 bg-rose-50 px-3 py-2 text-sm text-rose-700 dark:border-rose-700 dark:bg-rose-900/30 dark:text-rose-300">
@@ -67,6 +54,8 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
+import DateTimePicker from '../../../components/DateTimePicker.vue'
+import PriceInput from '../../../components/PriceInput.vue'
 import SelectClient from '../../../components/SelectClient.vue'
 import type { Client } from '../../../types/client'
 import type { MeetingWritePayload } from '../../../types/meeting'
@@ -94,13 +83,13 @@ const emit = defineEmits<{
 }>()
 
 const clientId = ref('')
-const startsAt = ref('')
+const startsAt = ref<Date | null>(null)
 const price = ref(0)
 const errorMessage = ref('')
 
 const applyInitialValues = () => {
   clientId.value = props.initialClientId
-  startsAt.value = props.initialStartsAt ? toLocalDateTimeInput(props.initialStartsAt) : ''
+  startsAt.value = props.initialStartsAt ? toDate(props.initialStartsAt) : null
   price.value = props.initialPrice
   errorMessage.value = ''
 }
@@ -115,15 +104,14 @@ watch(
   { immediate: true },
 )
 
-const toLocalDateTimeInput = (isoDate: string) => {
-  const date = new Date(isoDate)
+const toDate = (isoDate: string) => {
+  const parsedDate = new Date(isoDate)
 
-  if (Number.isNaN(date.getTime())) {
-    return ''
+  if (Number.isNaN(parsedDate.getTime())) {
+    return null
   }
 
-  const timezoneOffset = date.getTimezoneOffset() * 60000
-  return new Date(date.getTime() - timezoneOffset).toISOString().slice(0, 16)
+  return parsedDate
 }
 
 const submit = () => {
@@ -132,7 +120,7 @@ const submit = () => {
     return
   }
 
-  if (!startsAt.value) {
+  if (!startsAt.value || Number.isNaN(startsAt.value.getTime())) {
     errorMessage.value = 'Please select a meeting time slot.'
     return
   }
@@ -145,7 +133,7 @@ const submit = () => {
   errorMessage.value = ''
   emit('save', {
     clientId: clientId.value,
-    startsAt: new Date(startsAt.value).toISOString(),
+    startsAt: startsAt.value.toISOString(),
     price: Number(price.value.toFixed(2)),
   })
 }

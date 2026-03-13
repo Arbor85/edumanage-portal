@@ -155,53 +155,46 @@
       </div>
     </div>
 
-    <div v-else class="space-y-4">
-      <article
-        v-for="(dailyMeetings, dayKey) in meetingsByDay"
-        :key="dayKey"
-        class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800"
-      >
-        <header class="border-b border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-700 dark:bg-slate-700/30">
-          <h2 class="text-sm font-semibold text-slate-800 dark:text-slate-100">{{ formatDayLabel(dayKey) }}</h2>
-        </header>
-        <ul class="divide-y divide-slate-200 dark:divide-slate-700">
-          <li v-for="meeting in dailyMeetings" :key="meeting.id" class="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
-            <div>
-              <p class="text-sm font-medium text-slate-900 dark:text-slate-100">{{ getClientName(meeting.clientId) }}</p>
-              <p class="text-xs text-slate-600 dark:text-slate-300">
-                {{ formatTime(meeting.startsAt) }} • {{ formatPrice(meeting.price) }}
-              </p>
-            </div>
-            <div class="flex items-center gap-2">
-              <button
-                type="button"
-                @click="requestDeleteMeeting(meeting)"
-                class="inline-flex items-center justify-center gap-2 rounded-md border border-rose-300 bg-white p-2 text-rose-700 hover:bg-rose-50 dark:border-rose-700 dark:bg-slate-700 dark:text-rose-300 dark:hover:bg-rose-900/30"
-                aria-label="Delete meeting"
-                title="Delete meeting"
-              >
-                <Trash2 :size="16" />
-              </button>
-              <button
-                type="button"
-                @click="openEditDialog(meeting)"
-                class="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600"
-              >
-                <Edit2 :size="14" />
-                Edit
-              </button>
-            </div>
-          </li>
-        </ul>
-      </article>
+    <CalendarView v-else>
+      <template #day="{ day, date }">
+        <div class="flex h-full min-h-[96px] flex-col">
+          <div class="mb-1 flex items-center justify-between">
+            <span class="text-xs font-semibold text-slate-700 dark:text-slate-200">{{ day }}</span>
+            <button
+              type="button"
+              @click.stop="openCreateDialogForDay(date)"
+              class="inline-flex h-5 w-5 items-center justify-center rounded border border-emerald-300 text-xs font-semibold leading-none text-emerald-700 hover:bg-emerald-50 dark:border-emerald-700 dark:text-emerald-300 dark:hover:bg-emerald-900/30"
+              title="Add meeting on this day"
+              aria-label="Add meeting on this day"
+            >
+              +
+            </button>
+          </div>
 
-      <div
-        v-if="filteredMeetings.length === 0"
-        class="rounded-md border border-slate-300 bg-white p-4 text-sm text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
-      >
-        No meetings found.
-      </div>
-    </div>
+          <ul class="space-y-1 overflow-hidden">
+            <li
+              v-for="meeting in getMeetingsForDay(date).slice(0, 2)"
+              :key="meeting.id"
+            >
+              <button
+                type="button"
+                @click.stop="openEditDialog(meeting)"
+                class="w-full truncate rounded bg-emerald-50 px-1.5 py-1 text-left text-[11px] text-emerald-800 hover:bg-emerald-100 dark:bg-emerald-900/40 dark:text-emerald-200 dark:hover:bg-emerald-900/60"
+              >
+                {{ formatTime(meeting.startsAt) }} {{ getClientName(meeting.clientId) }}
+              </button>
+            </li>
+          </ul>
+
+          <p
+            v-if="getMeetingsForDay(date).length > 2"
+            class="mt-1 text-[11px] text-slate-500 dark:text-slate-400"
+          >
+            +{{ getMeetingsForDay(date).length - 2 }} more
+          </p>
+        </div>
+      </template>
+    </CalendarView>
 
     <div class="fixed bottom-0 left-56 right-0 z-30 px-6 pb-3">
       <div class="mx-auto w-full max-w-7xl">
@@ -245,6 +238,7 @@ import { useClientsApi } from '../../services/clientsApi'
 import { useMeetingsApi } from '../../services/meetingsApi'
 import type { Client } from '../../types/client'
 import type { Meeting, MeetingWritePayload } from '../../types/meeting'
+import CalendarView from '../../components/CalendarView.vue'
 import MeetingEditorDialog from './components/MeetingEditorDialog.vue'
 
 usePageTitle('Meetings')
@@ -339,7 +333,7 @@ const meetingsByDay = computed<Record<string, Meeting[]>>(() => {
   const grouped: Record<string, Meeting[]> = {}
 
   for (const meeting of filteredMeetings.value) {
-    const dayKey = meeting.startsAt.slice(0, 10)
+    const dayKey = toDayKey(new Date(meeting.startsAt))
 
     if (!grouped[dayKey]) {
       grouped[dayKey] = []
@@ -389,19 +383,15 @@ const formatTime = (isoDate: string) => {
   })
 }
 
-const formatDayLabel = (dayKey: string) => {
-  const date = new Date(`${dayKey}T00:00:00`)
-
+const toDayKey = (date: Date) => {
   if (Number.isNaN(date.getTime())) {
-    return dayKey
+    return ''
   }
 
-  return date.toLocaleDateString(undefined, {
-    weekday: 'long',
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric',
-  })
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
 }
 
 const formatPrice = (price: number) => {
@@ -418,6 +408,23 @@ const goToNextPage = () => {
   if (currentPage.value < totalPages.value) {
     currentPage.value += 1
   }
+}
+
+const getMeetingsForDay = (date: Date) => {
+  const dayKey = toDayKey(date)
+  return dayKey ? meetingsByDay.value[dayKey] ?? [] : []
+}
+
+const openCreateDialogForDay = (date: Date) => {
+  const prefilledDate = new Date(date)
+  prefilledDate.setHours(9, 0, 0, 0)
+
+  dialogMode.value = 'create'
+  editingMeetingId.value = null
+  editingClientId.value = ''
+  editingStartsAt.value = prefilledDate.toISOString()
+  editingPrice.value = 0
+  showDialog.value = true
 }
 
 const openCreateDialog = () => {

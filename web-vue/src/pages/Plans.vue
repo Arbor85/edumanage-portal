@@ -284,89 +284,48 @@
       </div>
     </div>
 
-    <div
-      v-else
-      class="overflow-hidden rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800"
-    >
-      <div class="mb-4 flex items-center justify-between">
-        <button
-          type="button"
-          @click="changeMonth(-1)"
-          class="inline-flex items-center rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600"
-        >
-          Previous
-        </button>
-        <h2 class="text-base font-semibold text-slate-900 dark:text-slate-100">
-          {{ currentMonthYear }}
-        </h2>
-        <button
-          type="button"
-          @click="changeMonth(1)"
-          class="inline-flex items-center rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600"
-        >
-          Next
-        </button>
-      </div>
-
-      <div class="grid grid-cols-7 gap-2">
-        <div
-          v-for="day in ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']"
-          :key="day"
-          class="py-2 text-center text-xs font-medium text-slate-600 dark:text-slate-400"
-        >
+    <CalendarView v-else v-model="currentDate">
+      <template #day="{ day, date }">
+        <div class="mb-1 text-xs font-medium text-slate-900 dark:text-slate-100">
           {{ day }}
         </div>
-
-        <div
-          v-for="(cell, index) in calendarCells"
-          :key="`calendar-cell-${index}`"
-          :class="[
-            'min-h-24 rounded border p-2',
-            cell.isCurrentMonth
-              ? 'border-slate-200 bg-white dark:border-slate-600 dark:bg-slate-800'
-              : 'border-slate-100 bg-slate-50 dark:border-slate-700 dark:bg-slate-900',
-            cell.isToday ? 'ring-2 ring-emerald-500 dark:ring-emerald-400' : ''
-          ]"
-        >
-          <div class="mb-1 text-xs font-medium text-slate-900 dark:text-slate-100">
-            {{ cell.day }}
-          </div>
-          <div class="space-y-1">
-            <div
-              v-for="entry in cell.workouts"
-              :key="`${entry.planId}-${entry.workout.id}`"
-              class="rounded bg-emerald-100 px-1.5 py-1 text-[10px] text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300"
-              :title="`${entry.clientName} • ${entry.planName} • ${entry.workout.name}`"
-            >
-              <div class="mb-0.5 flex min-w-0 items-center gap-1">
-                <img
-                  v-if="entry.clientImageUrl"
-                  :src="entry.clientImageUrl"
-                  :alt="entry.clientName"
-                  class="h-3.5 w-3.5 rounded-full object-cover"
-                />
-                <span
-                  v-else
-                  class="inline-flex h-3.5 w-3.5 items-center justify-center rounded-full bg-emerald-200 text-[8px] font-semibold uppercase text-emerald-800 dark:bg-emerald-800 dark:text-emerald-200"
-                >
-                  {{ (entry.clientName[0] || '?').toUpperCase() }}
-                </span>
-                <span class="truncate font-medium">{{ entry.clientName }}</span>
-              </div>
-              <p class="truncate font-semibold">{{ entry.planName }}</p>
-              <p class="truncate">{{ entry.workout.name }}</p>
+        <div class="space-y-1">
+          <div
+            v-for="entry in getWorkoutsForDay(date)"
+            :key="`${entry.planId}-${entry.workout.id}`"
+            class="rounded bg-emerald-100 px-1.5 py-1 text-[10px] text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300"
+            :title="`${entry.clientName} • ${entry.planName} • ${entry.workout.name}`"
+          >
+            <div class="mb-0.5 flex min-w-0 items-center gap-1">
+              <img
+                v-if="entry.clientImageUrl"
+                :src="entry.clientImageUrl"
+                :alt="entry.clientName"
+                class="h-3.5 w-3.5 rounded-full object-cover"
+              />
+              <span
+                v-else
+                class="inline-flex h-3.5 w-3.5 items-center justify-center rounded-full bg-emerald-200 text-[8px] font-semibold uppercase text-emerald-800 dark:bg-emerald-800 dark:text-emerald-200"
+              >
+                {{ (entry.clientName[0] || '?').toUpperCase() }}
+              </span>
+              <span class="truncate font-medium">{{ entry.clientName }}</span>
             </div>
+            <p class="truncate font-semibold">{{ entry.planName }}</p>
+            <p class="truncate">{{ entry.workout.name }}</p>
           </div>
         </div>
-      </div>
+      </template>
 
-      <div
-        v-if="calendarHasNoWorkouts"
-        class="mt-4 rounded-md border border-slate-300 bg-white p-4 text-sm text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
-      >
-        No workouts scheduled in this month for selected filters.
-      </div>
-    </div>
+      <template #footer>
+        <div
+          v-if="planCalendarEmpty"
+          class="mt-4 rounded-md border border-slate-300 bg-white p-4 text-sm text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+        >
+          No workouts scheduled in this month for selected filters.
+        </div>
+      </template>
+    </CalendarView>
 
     <div class="fixed bottom-0 left-56 right-0 z-30 px-6 pb-3">
       <div class="mx-auto w-full max-w-7xl">
@@ -641,6 +600,7 @@ import DialogActionPanel from '../components/DialogActionPanel.vue'
 import FilterOption from '../components/FilterOption.vue'
 import RoutineEditorDialog from '../components/RoutineEditorDialog.vue'
 import ScheduleRoutine from '../components/ScheduleRoutine.vue'
+import CalendarView from '../components/CalendarView.vue'
 import SelectClient from '../components/SelectClient.vue'
 import { useLocalStorageState } from '../composables/useLocalStorageState'
 import { usePageTitle } from '../composables/usePageTitle'
@@ -754,79 +714,14 @@ const filteredPlans = computed(() => {
   })
 })
 
-type CalendarCell = {
-  day: number
-  isCurrentMonth: boolean
-  isToday: boolean
-  dateString: string
-  workouts: Array<{
-    planId: string
-    clientName: string
-    clientImageUrl: string
-    planName: string
-    workout: PlanWorkout
-  }>
-}
+const getWorkoutsForDay = (date: Date) => {
+  const dateKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+  const result: Array<{ planId: string; clientName: string; clientImageUrl: string; planName: string; workout: PlanWorkout }> = []
 
-const currentMonthYear = computed(() => {
-  return currentDate.value.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
-})
-
-const calendarCells = computed((): CalendarCell[] => {
-  const year = currentDate.value.getFullYear()
-  const month = currentDate.value.getMonth()
-
-  const firstDay = new Date(year, month, 1)
-  const lastDay = new Date(year, month + 1, 0)
-  const firstDayOfWeek = firstDay.getDay()
-  const daysInMonth = lastDay.getDate()
-
-  const cells: CalendarCell[] = []
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-
-  const prevMonthLastDay = new Date(year, month, 0).getDate()
-  for (let i = firstDayOfWeek - 1; i >= 0; i--) {
-    const day = prevMonthLastDay - i
-    const cellDate = new Date(year, month - 1, day)
-    cells.push({
-      day,
-      isCurrentMonth: false,
-      isToday: false,
-      dateString: cellDate.toISOString().split('T')[0] || '',
-      workouts: [],
-    })
-  }
-
-  for (let day = 1; day <= daysInMonth; day++) {
-    const cellDate = new Date(year, month, day)
-    cells.push({
-      day,
-      isCurrentMonth: true,
-      isToday: cellDate.getTime() === today.getTime(),
-      dateString: cellDate.toISOString().split('T')[0] || '',
-      workouts: [],
-    })
-  }
-
-  const remainingCells = 42 - cells.length
-  for (let day = 1; day <= remainingCells; day++) {
-    const cellDate = new Date(year, month + 1, day)
-    cells.push({
-      day,
-      isCurrentMonth: false,
-      isToday: false,
-      dateString: cellDate.toISOString().split('T')[0] || '',
-      workouts: [],
-    })
-  }
-
-  filteredPlans.value.forEach((plan) => {
-    plan.workouts.forEach((workout) => {
-      const workoutDate = workout.date.split('T')[0]
-      const cell = cells.find((entry) => entry.dateString === workoutDate)
-      if (cell) {
-        cell.workouts.push({
+  for (const plan of filteredPlans.value) {
+    for (const workout of plan.workouts) {
+      if (workout.date.split('T')[0] === dateKey) {
+        result.push({
           planId: plan.id,
           clientName: getPlanClientName(plan),
           clientImageUrl: getPlanClientImage(plan),
@@ -834,21 +729,23 @@ const calendarCells = computed((): CalendarCell[] => {
           workout,
         })
       }
-    })
-  })
+    }
+  }
 
-  return cells
-})
-
-const calendarHasNoWorkouts = computed(() => {
-  return calendarCells.value.every((cell) => cell.workouts.length === 0)
-})
-
-const changeMonth = (offset: number) => {
-  const nextDate = new Date(currentDate.value)
-  nextDate.setMonth(nextDate.getMonth() + offset)
-  currentDate.value = nextDate
+  return result
 }
+
+const planCalendarEmpty = computed(() => {
+  const year = currentDate.value.getFullYear()
+  const month = currentDate.value.getMonth()
+
+  return filteredPlans.value.every((plan) =>
+    plan.workouts.every((workout) => {
+      const d = new Date(workout.date)
+      return d.getFullYear() !== year || d.getMonth() !== month
+    }),
+  )
+})
 
 const formatDate = (dateString: string) => {
   const date = new Date(dateString)
