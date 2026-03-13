@@ -20,34 +20,42 @@ These rules apply to all future changes in this repository.
 - Keep UI responsive for desktop and mobile.
 - Avoid layout shifts and flashing empty states during loading.
 
-## Data and State Rules
-- Keep API calls in `src/services/`.
-- Keep page-specific view state in the page component unless reused.
-- Validate assumptions for nullable/optional API fields.
-
-## Safety Rules
-- Do not remove unrelated code.
-- Do not rename files/functions unless requested.
-- Do not add dependencies unless necessary.
-- Keep changes backward-compatible when possible.
-
 ## Validation Before Finishing
 - Run or check TypeScript/Vue errors for changed files.
 - Ensure no obvious lint/type errors are introduced.
-- Summarize what changed and why.
 
 ## Task-Specific Notes
 - Add temporary rules for a specific task here, then remove them later.
 - Example: "Use spinner instead of empty table while fetching clients."
 
-## Rules for Web-Vue Project
-- Follow the existing code style and patterns in `src/`.
-- Always display a loading spinner when fetching data from the API.
-- Handle empty states with a user-friendly message and an optional call-to-action.
-- Ensure all API interactions are done through the existing services in `src/services/`.
-- Keep the UI consistent with the current design, using Tailwind CSS classes as needed.
-- Add refresh button
-- Generate list and tile views
-- Keep search input, view type toggle, and refresh button on the same row.
-- Add "Create {entity}" button on bottom of page 
-- For list-page filters, use the `FilterOption` component with a dialog and multi-select behavior (allow 0 or many selected options).
+# Frontend Structure Rules
+
+Use these rules for all React/TypeScript code in this workspace.
+
+1. Pages must be created in `src/pages`.
+2. Prefer extracting custom components when a section is reusable or improves page readability.
+3. Shared custom components must be created in `src/components`.
+4. If a custom component is specific to one page, place it in `src/pages/{page}/components`.
+5. Keep page-level orchestration in page files and move isolated UI blocks to components.
+6. Pages must be created in `src/services`.
+7. Select{entity} components must be created in `src/components/Select{Entity}` and support searching and selecting from existing entities.
+
+# New page rules
+1. List view should be created first, then details view if needed.
+2. Always include loading and empty states in the list view.
+3. Add open text search on top of list view
+4. Add pagination if the list can grow beyond 20 items.
+5. Add loading indicator when fetching data, and avoid showing empty states during loading.
+6. Add refresh button if the list can be updated by external events or user actions.
+7. For pages that are time rlelated generate List and Calendar views, and allow users to switch between them.
+8. For pages that are not time related, generate List and Kanban views, and allow users to switch between them.
+9. On list item add edit and delete buttons, and handle those actions with modals or inline editing.
+10. Include new page in navigation menu. On creating ask for url path and menu label.
+
+# New page details view rules
+1. Details should open in responsive dialog on desktop and mobile.
+2. Include all relevant information about the item, and allow editing if applicable.
+3. Selecting an related entity should be done by using custom component specialized for that entity, and should allow searching and selecting from existing entities.
+
+When unsure whether a component is shared or page-specific, default to page-specific first and move to `src/components` once reuse appears in multiple pages.
+
