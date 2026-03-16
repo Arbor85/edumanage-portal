@@ -1,8 +1,9 @@
 from __future__ import annotations
 
+from datetime import date
 from typing import Literal
 
-from pydantic import AliasChoices, BaseModel, ConfigDict, Field, field_validator
+from pydantic import AliasChoices, BaseModel, ConfigDict, Field, field_validator, model_validator
 
 ClientTag = Literal[
     "Online",
@@ -197,3 +198,88 @@ class WorkoutHistoryOut(BaseModel):
     completedSets: int = Field(validation_alias="completed_sets")
     excercises: list[CompletedRoutineExcercise]
     sourceWorkout: CompletedSourceWorkout = Field(validation_alias="source_workout")
+
+
+# --- Meetings ---
+
+class MeetingBase(BaseModel):
+    clientId: str = Field(min_length=1)
+    startsAt: str = Field(min_length=1)
+    price: float = Field(ge=0)
+
+    @field_validator("startsAt")
+    @classmethod
+    def validate_starts_at(cls, value: str) -> str:
+        try:
+            date.fromisoformat(value)
+        except ValueError:
+            raise ValueError("startsAt must be a valid ISO 8601 date (e.g. 2026-03-16)")
+        return value
+
+
+class MeetingCreate(MeetingBase):
+    pass
+
+
+class MeetingUpdate(MeetingBase):
+    pass
+
+
+class MeetingOut(MeetingBase):
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+
+    id: str
+    clientId: str = Field(validation_alias="client_id")
+    startsAt: str = Field(validation_alias="starts_at")
+    userId: str | None = Field(default=None, validation_alias="user_id")
+
+    @field_validator("price", mode="before")
+    @classmethod
+    def coerce_price(cls, value: object) -> float:
+        return float(value)  # type: ignore[arg-type]
+
+
+# --- Courses ---
+
+CourseType = Literal["Individual", "Group"]
+
+
+class CoursePrice(BaseModel):
+    value: float = Field(ge=0)
+    currency: str = Field(min_length=1)
+
+
+class CourseBase(BaseModel):
+    name: str = Field(min_length=1)
+    type: CourseType
+    size: int | None = None
+    price: CoursePrice
+    description: str | None = None
+
+    @model_validator(mode="after")
+    def validate_group_size(self) -> "CourseBase":
+        if self.type == "Group":
+            if self.size is None or self.size < 2:
+                raise ValueError("size must be >= 2 when type is Group")
+        return self
+
+
+class CourseCreate(CourseBase):
+    pass
+
+
+class CourseUpdate(CourseBase):
+    pass
+
+
+class CourseOut(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
+    id: str
+    userId: str | None = None
+    name: str
+    type: CourseType
+    size: int | None = None
+    price: CoursePrice
+    description: str | None = None
+

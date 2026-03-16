@@ -2,12 +2,16 @@
 from __future__ import annotations
 
 import os
+from pathlib import Path
 from typing import Any
 
 import httpx
+from dotenv import load_dotenv
 from fastapi import HTTPException, Security
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
+
+load_dotenv(Path(__file__).resolve().parents[2] / ".env.local")
 
 bearer_scheme = HTTPBearer(
     bearerFormat="JWT",
@@ -93,7 +97,7 @@ def _fetch_auth0_userinfo(token: str) -> dict[str, object]:
         timeout=5.0,
     )
     if response.status_code != 200:
-        raise HTTPException(status_code=401, detail="Invalid bearer token.")
+        raise HTTPException(status_code=401, detail="Invalid bearer token (userinfo rejected).")
 
     payload = response.json()
     if not isinstance(payload, dict):
@@ -111,10 +115,18 @@ def get_current_token_claims(
         raise HTTPException(status_code=401, detail="Bearer token is required.")
 
     token = credentials.credentials
+    jwt_exc: HTTPException | None = None
     try:
         return _decode_auth0_jwt(token)
-    except HTTPException:
+    except HTTPException as exc:
+        jwt_exc = exc
+
+    try:
         return _fetch_auth0_userinfo(token)
+    except HTTPException:
+        # Re-raise the original JWT error so the caller sees the real reason.
+        assert jwt_exc is not None
+        raise jwt_exc
 
 
 def get_current_user_id(claims: dict[str, object]) -> str:

@@ -19,6 +19,11 @@
         </div>
 
         <div>
+          <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">Course <span class="text-slate-400 font-normal">(optional)</span></label>
+          <SelectCourse v-model="courseId" :options="courses" button-text="Select course" />
+        </div>
+
+        <div>
           <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">Date</label>
           <SelectDate v-model="startsAt" />
         </div>
@@ -55,9 +60,11 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import SelectClient from '../../../components/Select/SelectClient.vue'
+import SelectCourse from '../../../components/Select/SelectCourse.vue'
 import SelectDate from '../../../components/SelectDate.vue'
 import PriceInput from '../../../components/PriceInput.vue'
 import type { Client } from '../../../types/client'
+import type { Course } from '../../../types/course'
 import type { MeetingWritePayload } from '../../../types/meeting'
 
 const props = withDefaults(
@@ -66,14 +73,17 @@ const props = withDefaults(
     title: string
     saveLabel: string
     clients: Client[]
+    courses: Course[]
     initialClientId?: string
     initialStartsAt?: string
     initialPrice?: number
+    initialCourseId?: string
   }>(),
   {
     initialClientId: '',
     initialStartsAt: '',
     initialPrice: 0,
+    initialCourseId: '',
   },
 )
 
@@ -85,17 +95,19 @@ const emit = defineEmits<{
 const clientId = ref('')
 const startsAt = ref('')
 const price = ref(0)
+const courseId = ref('')
 const errorMessage = ref('')
 
 const applyInitialValues = () => {
   clientId.value = props.initialClientId
   startsAt.value = props.initialStartsAt ? props.initialStartsAt.split('T')[0] ?? '' : ''
   price.value = props.initialPrice
+  courseId.value = props.initialCourseId
   errorMessage.value = ''
 }
 
 watch(
-  () => [props.open, props.initialClientId, props.initialStartsAt, props.initialPrice],
+  () => [props.open, props.initialClientId, props.initialStartsAt, props.initialPrice, props.initialCourseId],
   () => {
     if (props.open) {
       applyInitialValues()
@@ -125,6 +137,7 @@ const submit = () => {
     clientId: clientId.value,
     startsAt: startsAt.value,
     price: Number(price.value.toFixed(2)),
+    courseId: courseId.value || undefined,
   })
 }
 </script>

@@ -202,9 +202,11 @@
       :title="dialogMode === 'edit' ? 'Edit meeting' : 'Add meeting'"
       :save-label="dialogMode === 'edit' ? 'Save changes' : 'Add meeting'"
       :clients="clients"
+      :courses="courses"
       :initial-client-id="editingClientId"
       :initial-starts-at="editingStartsAt"
       :initial-price="editingPrice"
+      :initial-course-id="editingCourseId"
       @cancel="closeDialog"
       @save="saveMeeting"
     />
@@ -232,7 +234,9 @@ import { useLocalStorageState } from '../../composables/useLocalStorageState'
 import { usePageTitle } from '../../composables/usePageTitle'
 import { useClientsApi } from '../../services/clientsApi'
 import { useMeetingsApi } from '../../services/meetingsApi'
+import { useCoursesApi } from '../../services/coursesApi'
 import type { Client } from '../../types/client'
+import type { Course } from '../../types/course'
 import type { Meeting, MeetingWritePayload } from '../../types/meeting'
 import CalendarView from '../../components/CalendarView.vue'
 import MeetingEditorDialog from './components/MeetingEditorDialog.vue'
@@ -241,10 +245,12 @@ usePageTitle('Meetings')
 
 const clientsApi = useClientsApi()
 const meetingsApi = useMeetingsApi()
+const coursesApi = useCoursesApi()
 const { isLoading: isAuthLoading, isAuthenticated } = useAuth0()
 
 const meetings = ref<Meeting[]>([])
 const clients = ref<Client[]>([])
+const courses = ref<Course[]>([])
 const searchQuery = ref('')
 const viewMode = useLocalStorageState<'list' | 'calendar'>('meetings:viewMode', 'list')
 const isLoading = ref(false)
@@ -257,6 +263,7 @@ const editingMeetingId = ref<string | null>(null)
 const editingClientId = ref('')
 const editingStartsAt = ref('')
 const editingPrice = ref(0)
+const editingCourseId = ref('')
 
 const showDeleteDialog = ref(false)
 const pendingDeleteMeeting = ref<Meeting | null>(null)
@@ -287,6 +294,14 @@ const loadClients = async () => {
     clients.value = await clientsApi.listClients()
   } catch {
     clients.value = []
+  }
+}
+
+const loadCourses = async () => {
+  try {
+    courses.value = await coursesApi.listCourses()
+  } catch {
+    courses.value = []
   }
 }
 
@@ -420,6 +435,7 @@ const openCreateDialogForDay = (date: Date) => {
   editingClientId.value = ''
   editingStartsAt.value = prefilledDate.toISOString()
   editingPrice.value = 0
+  editingCourseId.value = ''
   showDialog.value = true
 }
 
@@ -429,6 +445,7 @@ const openCreateDialog = () => {
   editingClientId.value = ''
   editingStartsAt.value = ''
   editingPrice.value = 0
+  editingCourseId.value = ''
   showDialog.value = true
 }
 
@@ -438,6 +455,7 @@ const openEditDialog = (meeting: Meeting) => {
   editingClientId.value = meeting.clientId
   editingStartsAt.value = meeting.startsAt
   editingPrice.value = meeting.price
+  editingCourseId.value = meeting.courseId ?? ''
   showDialog.value = true
 }
 
@@ -448,6 +466,7 @@ const closeDialog = () => {
   editingClientId.value = ''
   editingStartsAt.value = ''
   editingPrice.value = 0
+  editingCourseId.value = ''
 }
 
 const saveMeeting = async (payload: MeetingWritePayload) => {
@@ -519,6 +538,7 @@ watch(
 
     hasLoadedInitially.value = true
     await loadClients()
+    await loadCourses()
     await loadMeetings()
   },
   { immediate: true },

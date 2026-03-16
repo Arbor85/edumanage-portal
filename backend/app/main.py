@@ -8,10 +8,13 @@ from pathlib import Path
 from typing import Any
 from uuid import uuid4
 
+import traceback
+
 import httpx
 from dotenv import load_dotenv
-from fastapi import Body, Depends, FastAPI, HTTPException, Security
+from fastapi import Body, Depends, FastAPI, HTTPException, Request, Security
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
 from pydantic import ValidationError
@@ -19,7 +22,7 @@ from sqlalchemy import func, select, text
 from sqlalchemy.orm import Session
 
 from .db import Base, SessionLocal, engine
-from .models import Client, Excercise, Plan, Routine, User, WorkoutHistory
+from .models import Client, Course, Excercise, Meeting, Plan, Routine, User, WorkoutHistory
 from .schemas import (
     AcceptClientInvitationRequest,
     ClientCreate,
@@ -33,6 +36,8 @@ from .schemas import (
     WorkoutHistoryOut,
 )
 from .routers import plans as plans_router
+from .routers import meetings as meetings_router
+from .routers import courses as courses_router
 
 BACKEND_DIR = Path(__file__).resolve().parents[1]
 load_dotenv(BACKEND_DIR / ".env.local")
@@ -65,6 +70,18 @@ app.add_middleware(
 )
 
 app.include_router(plans_router.router)
+app.include_router(meetings_router.router)
+app.include_router(courses_router.router)
+
+
+@app.exception_handler(Exception)
+async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+    tb = traceback.format_exc()
+    logger.error("Unhandled exception on %s %s\n%s", request.method, request.url.path, tb)
+    return JSONResponse(
+        status_code=500,
+        content={"detail": f"{type(exc).__name__}: {exc}", "traceback": tb},
+    )
 
 
 @app.on_event("startup")
@@ -73,6 +90,8 @@ def on_startup() -> None:
     ensure_clients_columns()
     ensure_routines_columns()
     ensure_plans_columns()
+    ensure_meetings_table()
+    ensure_courses_table()
     ensure_workout_history_table()
     seed_excercises()
 
@@ -125,6 +144,60 @@ def ensure_plans_columns() -> None:
         if "status" not in column_names:
             connection.execute(text("ALTER TABLE plans ADD COLUMN status VARCHAR(50) NOT NULL DEFAULT 'Draft'"))
         connection.commit()
+
+
+def ensure_meetings_table() -> None:
+    if not engine.url.drivername.startswith("sqlite"):
+        return
+
+    with engine.connect() as connection:
+        columns = connection.execute(text("PRAGMA table_info('meetings')")).fetchall()
+        if not columns:
+            connection.execute(
+                text(
+                    """
+                    CREATE TABLE IF NOT EXISTS meetings (
+                        id VARCHAR(100) PRIMARY KEY,
+                        user_id VARCHAR(255) NOT NULL,
+                        client_id VARCHAR(255) NOT NULL,
+                        starts_at VARCHAR(64) NOT NULL,
+                        price REAL NOT NULL
+                    )
+                    """
+                )
+            )
+            connection.execute(text("CREATE INDEX IF NOT EXISTS ix_meetings_id ON meetings (id)"))
+            connection.execute(text("CREATE INDEX IF NOT EXISTS ix_meetings_user_id ON meetings (user_id)"))
+            connection.execute(text("CREATE INDEX IF NOT EXISTS ix_meetings_client_id ON meetings (client_id)"))
+            connection.commit()
+
+
+def ensure_courses_table() -> None:
+    if not engine.url.drivername.startswith("sqlite"):
+        return
+
+    with engine.connect() as connection:
+        columns = connection.execute(text("PRAGMA table_info('courses')")).fetchall()
+        if not columns:
+            connection.execute(
+                text(
+                    """
+                    CREATE TABLE IF NOT EXISTS courses (
+                        id VARCHAR(100) PRIMARY KEY,
+                        user_id VARCHAR(255) NOT NULL,
+                        name VARCHAR(255) NOT NULL,
+                        type VARCHAR(50) NOT NULL,
+                        size INTEGER,
+                        price_value VARCHAR(50) NOT NULL,
+                        price_currency VARCHAR(10) NOT NULL,
+                        description TEXT
+                    )
+                    """
+                )
+            )
+            connection.execute(text("CREATE INDEX IF NOT EXISTS ix_courses_id ON courses (id)"))
+            connection.execute(text("CREATE INDEX IF NOT EXISTS ix_courses_user_id ON courses (user_id)"))
+            connection.commit()
 
 
 def ensure_workout_history_table() -> None:

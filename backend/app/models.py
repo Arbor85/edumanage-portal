@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from sqlalchemy import JSON, Column, Integer, String
+from sqlalchemy import JSON, Column, Float, Integer, String
 
 from .db import Base
 
@@ -58,6 +58,29 @@ class Plan(Base):
 	client_id = Column(String(100), nullable=False, index=True)
 	user_id = Column(String(255), nullable=True, index=True)
 	workouts = Column(JSON, nullable=False, default=list)
+
+
+class Meeting(Base):
+	__tablename__ = "meetings"
+
+	id = Column(String(100), primary_key=True, index=True)
+	user_id = Column(String(255), nullable=False, index=True)
+	client_id = Column(String(255), nullable=False, index=True)
+	starts_at = Column(String(64), nullable=False)
+	price = Column(Float, nullable=False)
+
+
+class Course(Base):
+	__tablename__ = "courses"
+
+	id = Column(String(100), primary_key=True, index=True)
+	user_id = Column(String(255), nullable=False, index=True)
+	name = Column(String(255), nullable=False)
+	type = Column(String(50), nullable=False)
+	size = Column(Integer, nullable=True)
+	price_value = Column(String(50), nullable=False)
+	price_currency = Column(String(10), nullable=False)
+	description = Column(String, nullable=True)
 
 
 class WorkoutHistory(Base):

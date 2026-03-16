@@ -14,6 +14,7 @@ These rules apply to all future changes in this repository.
 - Reuse existing services/composables before creating new ones.
 - Keep naming consistent with current files (`clientsApi`, `routinesApi`, etc.).
 - Do not introduce breaking API changes unless requested.
+- When making changes that require backend support, generate file `src/services/prompts.md` with AI prompts to create necessary backend endpoints, and include instructions for testing them.
 
 ## UI and UX Rules
 - Match existing Tailwind styles and component look-and-feel.

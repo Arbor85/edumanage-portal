@@ -78,7 +78,7 @@
 import { computed, defineComponent, nextTick, onBeforeUnmount, onMounted, ref, watch, type ComponentPublicInstance } from 'vue';
 import { useAuth0 } from '@auth0/auth0-vue';
 import { useRoute } from 'vue-router';
-import { Home, Users, Dumbbell, CalendarDays, ClipboardList, User, LogIn, CalendarClock, Menu, X  } from 'lucide-vue-next';
+import { Home, Users, Dumbbell, CalendarDays, ClipboardList, User, LogIn, CalendarClock, BookOpen, Menu, X  } from 'lucide-vue-next';
 
 export default defineComponent({
   name: 'SideNavBar',
@@ -102,6 +102,7 @@ export default defineComponent({
       { label: 'Routines', to: '/routines', icon: CalendarDays, requiresAuth: true, guestOnly: false },
       { label: 'Plans', to: '/plans', icon: ClipboardList, requiresAuth: true, guestOnly: false },
       { label: 'Meetings', to: '/meetings', icon: CalendarClock, requiresAuth: true, guestOnly: false },
+      { label: 'Courses', to: '/courses', icon: BookOpen, requiresAuth: true, guestOnly: false },
       { label: 'Profile', to: '/profile', icon: User, requiresAuth: true, guestOnly: false },
       { label: 'Login', to: '/login', icon: LogIn, requiresAuth: false, guestOnly: true }
     ];
