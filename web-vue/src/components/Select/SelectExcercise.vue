@@ -102,7 +102,7 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import type { Excercise } from '../types/excercise'
+import type { Excercise } from '../../types/excercise'
 
 const props = withDefaults(
   defineProps<{

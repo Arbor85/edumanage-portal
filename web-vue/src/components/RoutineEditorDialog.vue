@@ -268,7 +268,7 @@
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
-import SelectExcercise from './SelectExcercise.vue'
+import SelectExcercise from './Select/SelectExcercise.vue'
 import type { Excercise } from '../types/excercise'
 import type { RoutineExcercise, RoutineSet } from '../types/routine'
 

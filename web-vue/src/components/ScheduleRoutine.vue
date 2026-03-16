@@ -68,7 +68,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import SelectRoutine from './SelectRoutine.vue'
+import SelectRoutine from './Select/SelectRoutine.vue'
 import type { Routine } from '../types/routine'
 import type { PlanWorkout } from '../types/plan'
 

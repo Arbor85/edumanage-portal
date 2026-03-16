@@ -100,7 +100,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import type { Plan, PlanWorkout } from '../types/plan'
+import type { Plan, PlanWorkout } from '../../types/plan'
 
 type ScheduledWorkoutEntry = {
   key: string

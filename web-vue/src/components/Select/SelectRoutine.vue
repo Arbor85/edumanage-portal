@@ -74,7 +74,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import type { Routine } from '../types/routine'
+import type { Routine } from '../../types/routine'
 
 const props = withDefaults(
   defineProps<{

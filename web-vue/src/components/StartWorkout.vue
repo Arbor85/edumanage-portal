@@ -190,7 +190,7 @@
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { Check, SkipForward } from 'lucide-vue-next'
 import DialogActionPanel from './DialogActionPanel.vue'
-import SelectExcercise from './SelectExcercise.vue'
+import SelectExcercise from './Select/SelectExcercise.vue'
 import type { Excercise } from '../types/excercise'
 import type { Plan, PlanWorkout } from '../types/plan'
 import type { Routine, RoutineExcercise, RoutineSet } from '../types/routine'

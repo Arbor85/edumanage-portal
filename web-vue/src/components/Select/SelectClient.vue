@@ -150,7 +150,7 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import type { Client } from '../types/client'
+import type { Client } from '../../types/client'
 
 const props = withDefaults(
   defineProps<{

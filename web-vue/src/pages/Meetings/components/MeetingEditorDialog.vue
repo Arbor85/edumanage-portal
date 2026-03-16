@@ -67,7 +67,7 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import SelectClient from '../../../components/SelectClient.vue'
+import SelectClient from '../../../components/Select/SelectClient.vue'
 import type { Client } from '../../../types/client'
 import type { MeetingWritePayload } from '../../../types/meeting'
 

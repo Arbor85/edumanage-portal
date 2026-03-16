@@ -57,7 +57,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import SelectRoutine from './SelectRoutine.vue'
-import type { Routine } from '../types/routine'
+import type { Routine } from '../../types/routine'
 
 const props = withDefaults(
   defineProps<{

@@ -84,8 +84,8 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import SelectPlanRoutineButton from '../components/SelectPlanRoutineButton.vue'
-import SelectRoutineButton from '../components/SelectRoutineButton.vue'
+import SelectPlanRoutineButton from '../components/Select/SelectPlanRoutineButton.vue'
+import SelectRoutineButton from '../components/Select/SelectRoutineButton.vue'
 import StartWorkout from '../components/StartWorkout.vue'
 import { useLocalStorageState } from '../composables/useLocalStorageState'
 import { usePageTitle } from '../composables/usePageTitle'
