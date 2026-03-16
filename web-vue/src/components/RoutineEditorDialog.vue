@@ -91,13 +91,7 @@
                       class="rounded-md p-1.5 text-rose-700 hover:bg-rose-50 dark:text-rose-300 dark:hover:bg-rose-900/30"
                       title="Remove excercise"
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
-                        <path
-                          fill-rule="evenodd"
-                          d="M9 3.75A1.5 1.5 0 0 1 10.5 2.25h3A1.5 1.5 0 0 1 15 3.75V4.5h3.75a.75.75 0 0 1 0 1.5h-.518l-.824 12.36A2.25 2.25 0 0 1 15.164 20.5H8.836a2.25 2.25 0 0 1-2.244-2.14L5.768 6H5.25a.75.75 0 0 1 0-1.5H9v-.75Zm1.5 0V4.5h3v-.75h-3Zm-2.49 2.25.807 12.11a.75.75 0 0 0 .748.64h6.87a.75.75 0 0 0 .748-.64L15.99 6H8.01Zm2.24 2.25a.75.75 0 0 1 .75.75v6a.75.75 0 0 1-1.5 0V9a.75.75 0 0 1 .75-.75Zm4.5.75a.75.75 0 0 0-1.5 0v6a.75.75 0 0 0 1.5 0V9Z"
-                          clip-rule="evenodd"
-                        />
-                      </svg>
+                      <Trash2 class="size-4" />
                     </button>
 
                     <button
@@ -124,11 +118,12 @@
                       {{ getInsertPlaceholderText(excerciseIndex, setIndex) }}
                     </div>
 
-                    <div
-                      class="flex flex-wrap items-center justify-between gap-2 rounded-md bg-slate-100/70 p-2 dark:bg-slate-700/40"
-                      :class="isDraggedSet(excerciseIndex, setIndex) ? 'opacity-60 ring-2 ring-emerald-500/60' : ''"
-                      :data-set-row="`${excerciseIndex}:${setIndex}`"
-                    >
+                      <div
+                        class="group relative flex flex-wrap items-center justify-between gap-2 rounded-md bg-slate-100/70 p-2 dark:bg-slate-700/40"
+                        :class="isDraggedSet(excerciseIndex, setIndex) ? 'opacity-60 ring-2 ring-emerald-500/60' : ''"
+                        :data-set-row="`${excerciseIndex}:${setIndex}`"
+                      >
+
                       <div class="flex items-center gap-2">
                         <button
                           type="button"
@@ -139,14 +134,7 @@
                           ⋮⋮
                         </button>
 
-                        <select
-                          v-model="setItem.type"
-                          class="w-24 rounded-md border border-slate-300 bg-white px-2 py-1 text-xs text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
-                        >
-                          <option value="warmup">warmup</option>
-                          <option value="normal">normal</option>
-                          <option value="fail">fail</option>
-                        </select>
+                        <SetTypePicker v-model="setItem.type" />
                       </div>
 
                       <input
@@ -167,6 +155,20 @@
                         class="w-24 rounded-md border border-slate-300 bg-white px-2 py-1 text-xs text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
                       />
 
+                      <div
+                        class="w-16 text-center text-[11px] font-medium"
+                        title="Volume change vs previous set"
+                        :class="setIndex === 0 || getVolumeDiff(excercise, setIndex) === null
+                          ? 'text-slate-400 dark:text-slate-500'
+                          : getVolumeDiff(excercise, setIndex)?.startsWith('+')
+                          ? 'text-emerald-600 dark:text-emerald-400'
+                          : getVolumeDiff(excercise, setIndex) === '0%'
+                          ? 'text-slate-400 dark:text-slate-500'
+                          : 'text-rose-600 dark:text-rose-400'"
+                      >
+                        {{ setIndex === 0 ? '' : getVolumeDiff(excercise, setIndex) === null ? 'vol --' : `vol ${getVolumeDiff(excercise, setIndex)}` }}
+                      </div>
+
                       <div class="flex items-center gap-1">
                         <button
                           type="button"
@@ -174,14 +176,26 @@
                           class="rounded-md p-1.5 text-rose-700 hover:bg-rose-50 dark:text-rose-300 dark:hover:bg-rose-900/30"
                           title="Remove set"
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
-                            <path
-                              fill-rule="evenodd"
-                              d="M9 3.75A1.5 1.5 0 0 1 10.5 2.25h3A1.5 1.5 0 0 1 15 3.75V4.5h3.75a.75.75 0 0 1 0 1.5h-.518l-.824 12.36A2.25 2.25 0 0 1 15.164 20.5H8.836a2.25 2.25 0 0 1-2.244-2.14L5.768 6H5.25a.75.75 0 0 1 0-1.5H9v-.75Zm1.5 0V4.5h3v-.75h-3Zm-2.49 2.25.807 12.11a.75.75 0 0 0 .748.64h6.87a.75.75 0 0 0 .748-.64L15.99 6H8.01Zm2.24 2.25a.75.75 0 0 1 .75.75v6a.75.75 0 0 1-1.5 0V9a.75.75 0 0 1 .75-.75Zm4.5.75a.75.75 0 0 0-1.5 0v6a.75.75 0 0 0 1.5 0V9Z"
-                              clip-rule="evenodd"
-                            />
-                          </svg>
+                          <Trash2 class="size-4" />
                         </button>
+                      </div>
+
+                      <div
+                        v-if="!isDragActiveForExcercise(excerciseIndex)"
+                        class="absolute bottom-0 left-1/2 z-10 flex -translate-x-1/2 translate-y-1/2 items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100"
+                      >
+                        <button
+                          type="button"
+                          @click="openProgressionDialog(excerciseIndex, setIndex, 'increase')"
+                          class="h-5 w-5 rounded border border-slate-200 bg-white text-[13px] leading-none text-slate-500 shadow-sm hover:border-emerald-400 hover:bg-emerald-50 hover:text-emerald-700 dark:border-slate-600 dark:bg-slate-800 dark:hover:border-emerald-500 dark:hover:bg-emerald-900/20 dark:hover:text-emerald-300"
+                          title="Add increased set after"
+                        >+</button>
+                        <button
+                          type="button"
+                          @click="openProgressionDialog(excerciseIndex, setIndex, 'decrease')"
+                          class="h-5 w-5 rounded border border-slate-200 bg-white text-[13px] leading-none text-slate-500 shadow-sm hover:border-rose-400 hover:bg-rose-50 hover:text-rose-700 dark:border-slate-600 dark:bg-slate-800 dark:hover:border-rose-500 dark:hover:bg-rose-900/20 dark:hover:text-rose-300"
+                          title="Add decreased set after"
+                        >−</button>
                       </div>
                     </div>
                   </template>
@@ -263,12 +277,115 @@
         </div>
       </form>
     </div>
+
+    <div
+      v-if="progressionDialog"
+      class="fixed inset-0 z-[80] flex items-center justify-center bg-slate-900/50 p-4"
+      @click.self="progressionDialog = null"
+    >
+      <div class="w-full max-w-xs rounded-lg border border-slate-200 bg-white p-5 shadow-xl dark:border-slate-700 dark:bg-slate-800">
+        <div class="mb-4 flex items-center justify-between">
+          <h3 class="text-base font-semibold text-slate-900 dark:text-slate-100">
+            {{ progressionDialog.direction === 'increase' ? '↑ Increase next set' : '↓ Decrease next set' }}
+          </h3>
+          <button
+            type="button"
+            @click="progressionDialog = null"
+            class="rounded px-2 py-1 text-slate-500 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700"
+          >✕</button>
+        </div>
+
+        <div class="space-y-4">
+          <div class="flex gap-1 rounded-md border border-slate-200 p-0.5 dark:border-slate-700">
+            <button
+              type="button"
+              @click="progressionStrategy = 'percentage'; saveProgressionPrefs()"
+              :class="progressionStrategy === 'percentage'
+                ? 'flex-1 rounded py-1.5 text-xs font-medium bg-white shadow text-slate-900 dark:bg-slate-600 dark:text-slate-100'
+                : 'flex-1 rounded py-1.5 text-xs font-medium text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'"
+            >By %</button>
+            <button
+              type="button"
+              @click="progressionStrategy = 'manual'; saveProgressionPrefs()"
+              :class="progressionStrategy === 'manual'
+                ? 'flex-1 rounded py-1.5 text-xs font-medium bg-white shadow text-slate-900 dark:bg-slate-600 dark:text-slate-100'
+                : 'flex-1 rounded py-1.5 text-xs font-medium text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'"
+            >Manual</button>
+          </div>
+
+          <div v-if="progressionStrategy === 'percentage'" class="space-y-3">
+            <div class="flex gap-2">
+              <button
+                v-for="pct in [5, 10, 15]"
+                :key="pct"
+                type="button"
+                @click="progressionPercent = pct; saveProgressionPrefs()"
+                :class="progressionPercent === pct
+                  ? 'flex-1 rounded-md border border-emerald-500 bg-emerald-500 py-2 text-sm font-semibold text-white'
+                  : 'flex-1 rounded-md border border-slate-300 bg-white py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700'"
+              >{{ pct }}%</button>
+            </div>
+
+            <div v-if="!isCurrentSetBodyweight" class="flex gap-1 rounded-md border border-slate-200 p-0.5 dark:border-slate-700">
+              <button
+                v-for="target in progressionTargets"
+                :key="target.value"
+                type="button"
+                @click="progressionTarget = target.value; saveProgressionPrefs()"
+                :class="progressionTarget === target.value
+                  ? 'flex-1 rounded py-1.5 text-xs font-medium bg-white shadow text-slate-900 dark:bg-slate-600 dark:text-slate-100'
+                  : 'flex-1 rounded py-1.5 text-xs font-medium text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'"
+              >{{ target.label }}</button>
+            </div>
+          </div>
+
+          <div v-else class="space-y-3">
+            <div>
+              <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Reps</label>
+              <input
+                v-model.number="progressionManualReps"
+                type="number"
+                min="0"
+                placeholder="Reps"
+                class="w-full rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+              />
+            </div>
+            <div v-if="!isCurrentSetBodyweight">
+              <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Weight</label>
+              <input
+                v-model.number="progressionManualWeight"
+                type="number"
+                min="0"
+                step="0.25"
+                placeholder="Weight"
+                class="w-full rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-5 flex items-center justify-end gap-2">
+          <button
+            type="button"
+            @click="progressionDialog = null"
+            class="inline-flex items-center rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600"
+          >Cancel</button>
+          <button
+            type="button"
+            @click="applyProgression()"
+            class="inline-flex items-center rounded-md border border-emerald-500 bg-emerald-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-emerald-600"
+          >Apply</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
+import { Trash2 } from 'lucide-vue-next'
 import SelectExcercise from './Select/SelectExcercise.vue'
+import SetTypePicker from './SetTypePicker.vue'
 import type { Excercise } from '../types/excercise'
 import type { RoutineExcercise, RoutineSet } from '../types/routine'
 
@@ -460,6 +577,127 @@ const removeSet = (excerciseIndex: number, setIndex: number) => {
   }
 
   excercise.sets.splice(setIndex, 1)
+}
+
+const getVolumeDiff = (excercise: RoutineExcercise, setIndex: number): string | null => {
+  if (setIndex === 0) return null
+  const prev = excercise.sets[setIndex - 1]
+  const curr = excercise.sets[setIndex]
+  if (!prev || !curr) return null
+
+  const prevVol = excercise.isBodyweight
+    ? (typeof prev.reps === 'number' ? prev.reps : null)
+    : (typeof prev.reps === 'number' && typeof prev.weight === 'number' ? prev.reps * prev.weight : null)
+  const currVol = excercise.isBodyweight
+    ? (typeof curr.reps === 'number' ? curr.reps : null)
+    : (typeof curr.reps === 'number' && typeof curr.weight === 'number' ? curr.reps * curr.weight : null)
+
+  if (prevVol === null || currVol === null || prevVol === 0) return null
+
+  const diff = Math.round(((currVol - prevVol) / prevVol) * 100)
+  return diff > 0 ? `+${diff}%` : `${diff}%`
+}
+
+type ProgressionStrategy = 'percentage' | 'manual'
+type ProgressionDirection = 'increase' | 'decrease'
+
+const PROGRESSION_STRATEGY_KEY = 'set-progression-strategy'
+const PROGRESSION_PERCENT_KEY = 'set-progression-percent'
+const PROGRESSION_TARGET_KEY = 'set-progression-target'
+
+type ProgressionTarget = 'weight' | 'reps' | 'volume'
+
+const progressionTargets: { value: ProgressionTarget; label: string }[] = [
+  { value: 'weight', label: 'Weight' },
+  { value: 'reps', label: 'Reps' },
+  { value: 'volume', label: 'Volume' },
+]
+
+const progressionDialog = ref<{
+  direction: ProgressionDirection
+  excerciseIndex: number
+  setIndex: number
+} | null>(null)
+
+const progressionStrategy = ref<ProgressionStrategy>(
+  (localStorage.getItem(PROGRESSION_STRATEGY_KEY) as ProgressionStrategy | null) ?? 'percentage',
+)
+const progressionPercent = ref<number>(Number(localStorage.getItem(PROGRESSION_PERCENT_KEY)) || 5)
+const progressionTarget = ref<ProgressionTarget>(
+  (localStorage.getItem(PROGRESSION_TARGET_KEY) as ProgressionTarget | null) ?? 'volume',
+)
+const progressionManualReps = ref<number | null>(null)
+const progressionManualWeight = ref<number | null>(null)
+
+const isCurrentSetBodyweight = computed(() => {
+  if (!progressionDialog.value) return false
+  return formExcercises.value[progressionDialog.value.excerciseIndex]?.isBodyweight ?? false
+})
+
+const saveProgressionPrefs = () => {
+  localStorage.setItem(PROGRESSION_STRATEGY_KEY, progressionStrategy.value)
+  localStorage.setItem(PROGRESSION_PERCENT_KEY, String(progressionPercent.value))
+  localStorage.setItem(PROGRESSION_TARGET_KEY, progressionTarget.value)
+}
+
+const openProgressionDialog = (
+  excerciseIndex: number,
+  setIndex: number,
+  direction: ProgressionDirection,
+) => {
+  const set = formExcercises.value[excerciseIndex]?.sets[setIndex]
+  progressionManualReps.value = set?.reps ?? null
+  progressionManualWeight.value = set?.weight ?? null
+  progressionDialog.value = { direction, excerciseIndex, setIndex }
+}
+
+const applyProgression = () => {
+  if (!progressionDialog.value) return
+  const { direction, excerciseIndex, setIndex } = progressionDialog.value
+  const excercise = formExcercises.value[excerciseIndex]
+  const sourceSet = excercise?.sets[setIndex]
+
+  if (!excercise || !sourceSet) {
+    progressionDialog.value = null
+    return
+  }
+
+  let newSet: RoutineSet
+
+  if (progressionStrategy.value === 'manual') {
+    newSet = {
+      type: sourceSet.type,
+      reps: typeof progressionManualReps.value === 'number' ? progressionManualReps.value : sourceSet.reps,
+      weight: excercise.isBodyweight
+        ? null
+        : typeof progressionManualWeight.value === 'number'
+        ? progressionManualWeight.value
+        : sourceSet.weight,
+    }
+  } else {
+    const factor =
+      direction === 'increase'
+        ? 1 + progressionPercent.value / 100
+        : 1 - progressionPercent.value / 100
+
+    if (excercise.isBodyweight) {
+      const baseReps = typeof sourceSet.reps === 'number' ? sourceSet.reps : 0
+      newSet = { type: sourceSet.type, reps: Math.max(1, Math.round(baseReps * factor)), weight: null }
+    } else {
+      const target = progressionTarget.value
+      const baseWeight = typeof sourceSet.weight === 'number' ? sourceSet.weight : 0
+      const baseReps = typeof sourceSet.reps === 'number' ? sourceSet.reps : 0
+      newSet = {
+        type: sourceSet.type,
+        reps: (target === 'reps' || target === 'volume') ? Math.max(1, Math.round(baseReps * factor)) : sourceSet.reps,
+        weight: (target === 'weight' || target === 'volume') ? Math.max(0, Math.round(baseWeight * factor * 4) / 4) : sourceSet.weight,
+      }
+    }
+  }
+
+  excercise.sets.splice(setIndex + 1, 0, newSet)
+  saveProgressionPrefs()
+  progressionDialog.value = null
 }
 
 const isDragActiveForExcercise = (excerciseIndex: number) => {
