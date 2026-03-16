@@ -4,12 +4,7 @@
       {{ label }}
     </label>
 
-    <input
-      v-model.trim="searchQuery"
-      type="text"
-      placeholder="Search routines..."
-      class="mb-2 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
-    />
+    <SearchInput v-model="searchQuery" placeholder="Search routines..." class="mb-2" />
 
     <div class="custom-scrollbar max-h-64 space-y-2 overflow-auto rounded-md border border-slate-300 p-2 dark:border-slate-600">
       <div
@@ -74,6 +69,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import SearchInput from '../SearchInput.vue'
 import type { Routine } from '../../types/routine'
 
 const props = withDefaults(

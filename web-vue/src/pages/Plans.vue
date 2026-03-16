@@ -7,12 +7,7 @@
     <div class="mb-4 flex flex-col gap-3">
       <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
 
-        <input
-          v-model.trim="searchQuery"
-          type="text"
-          placeholder="Search by plan, client, workout or excercise"
-          class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 sm:flex-1"
-        />
+        <SearchInput v-model="searchQuery" placeholder="Search by plan, client, workout or excercise" />
 
         <div class="flex items-center gap-2 sm:shrink-0">
           <div class="inline-flex overflow-hidden rounded-md border border-slate-300 dark:border-slate-600">
@@ -352,6 +347,7 @@
             </label>
             <input
               v-model="formData.name"
+              @input="nameManuallyEdited = true"
               type="text"
               class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
               placeholder="Enter plan name"
@@ -595,7 +591,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { Copy, Edit2, Trash2 } from 'lucide-vue-next'
 import ConfirmDialog from '../components/ConfirmDialog.vue'
 import CustomerDisplay from '../components/CustomerDisplay.vue'
@@ -604,6 +600,7 @@ import FilterOption from '../components/FilterOption.vue'
 import RoutineEditorDialog from '../components/RoutineEditorDialog.vue'
 import ScheduleRoutine from '../components/ScheduleRoutine.vue'
 import CalendarView from '../components/CalendarView.vue'
+import SearchInput from '../components/SearchInput.vue'
 import SelectClient from '../components/Select/SelectClient.vue'
 import { useLocalStorageState } from '../composables/useLocalStorageState'
 import { usePageTitle } from '../composables/usePageTitle'
@@ -650,6 +647,7 @@ const copyWeightAdjustment = ref<'same' | 'increase' | 'decrease'>('same')
 const isEditing = ref(false)
 const editingPlanId = ref<string | null>(null)
 const planToDelete = ref<Plan | null>(null)
+const nameManuallyEdited = ref(false)
 
 const formData = ref<{
   name: string
@@ -662,8 +660,21 @@ const formData = ref<{
 })
 
 const canSave = computed(() => {
-  return formData.value.name.trim() && formData.value.clientId.trim()
+  return formData.value.clientId.trim() && (formData.value.name.trim() || formData.value.workouts.length > 0)
 })
+
+const autoGenerateName = () => {
+  if (isEditing.value || nameManuallyEdited.value) return
+  const workoutNames = formData.value.workouts.map(w => w.name).join(' + ')
+  const clientName = clients.value.find(c => c.invitationCode === formData.value.clientId)?.name || ''
+  if (workoutNames) {
+    formData.value.name = clientName ? `${workoutNames} for ${clientName}` : workoutNames
+  } else {
+    formData.value.name = ''
+  }
+}
+
+watch(() => [formData.value.workouts.map(w => w.name).join(','), formData.value.clientId], autoGenerateName)
 
 const getPlanClientName = (plan: Plan) => {
   return plan.client?.name || plan.clientName
@@ -759,6 +770,7 @@ const formatDate = (dateString: string) => {
 const openCreateDialog = () => {
   isEditing.value = false
   editingPlanId.value = null
+  nameManuallyEdited.value = false
   formData.value = {
     name: '',
     clientId: '',
@@ -1007,8 +1019,11 @@ const savePlan = async () => {
   errorMessage.value = ''
 
   try {
+    const derivedName = formData.value.name.trim() ||
+      formData.value.workouts.map(w => w.name).join(' + ') ||
+      'Untitled Plan'
     const payload = {
-      name: formData.value.name.trim(),
+      name: derivedName,
       clientId: formData.value.clientId.trim(),
       workouts: formData.value.workouts,
     }

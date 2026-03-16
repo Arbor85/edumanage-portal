@@ -31,13 +31,7 @@
         </div>
 
         <div class="mb-3">
-          <input
-            v-model.trim="searchQuery"
-            type="text"
-            placeholder="Search clients by name..."
-            class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
-            autofocus
-          />
+          <SearchInput v-model="searchQuery" placeholder="Search clients by name..." :autofocus="true" />
         </div>
 
         <div class="mb-3 grid grid-cols-2 gap-2">
@@ -150,6 +144,7 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
+import SearchInput from '../SearchInput.vue'
 import type { Client } from '../../types/client'
 
 const props = withDefaults(

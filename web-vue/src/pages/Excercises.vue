@@ -6,8 +6,7 @@
 
     <div class="mb-4 flex flex-col gap-3">
       <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <input v-model.trim="searchQuery" type="text" placeholder="Search by name, muscle or tag"
-          class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 sm:flex-1" />
+        <SearchInput v-model="searchQuery" placeholder="Search by name, muscle or tag" />
 
         <div class="flex items-center gap-2 sm:shrink-0">
           <div class="inline-flex overflow-hidden rounded-md border border-slate-300 dark:border-slate-600">
@@ -129,6 +128,7 @@ import { computed, onMounted, ref } from 'vue'
 import DialogActionPanel from '../components/DialogActionPanel.vue'
 import FilterOption from '../components/FilterOption.vue'
 import LoadingPanel from '../components/LoadingPanel.vue'
+import SearchInput from '../components/SearchInput.vue'
 import { useLocalStorageState } from '../composables/useLocalStorageState'
 import { usePageTitle } from '../composables/usePageTitle'
 import { useExcercisesApi } from '../services/excercisesApi'

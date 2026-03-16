@@ -26,12 +26,7 @@
           </button>
         </div>
 
-        <input
-          v-model.trim="searchQuery"
-          type="text"
-          placeholder="Search by plan, workout, or client..."
-          class="mb-3 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
-        />
+        <SearchInput v-model="searchQuery" placeholder="Search by plan, workout, or client..." class="mb-3" />
 
         <div class="custom-scrollbar max-h-80 space-y-2 overflow-auto rounded-md border border-slate-300 p-2 dark:border-slate-600">
           <button
@@ -100,6 +95,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import SearchInput from '../SearchInput.vue'
 import type { Plan, PlanWorkout } from '../../types/plan'
 
 type ScheduledWorkoutEntry = {

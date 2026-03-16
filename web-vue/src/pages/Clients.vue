@@ -5,8 +5,7 @@
     </div>
 
     <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center">
-      <input v-model.trim="searchQuery" type="text" placeholder="Search by name, status or tag"
-        class="w-full sm:flex-1 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100" />
+      <SearchInput v-model="searchQuery" placeholder="Search by name, status or tag" />
       <div class="flex items-center gap-2">
         <div class="inline-flex overflow-hidden rounded-md border border-slate-300 dark:border-slate-600">
           <button type="button" @click="viewMode = 'tile'" class="px-3 py-1.5 text-xs font-medium"
@@ -252,6 +251,7 @@ import ConfirmDialog from '../components/ConfirmDialog.vue'
 import DialogActionPanel from '../components/DialogActionPanel.vue'
 import FilterOption from '../components/FilterOption.vue'
 import LoadingPanel from '../components/LoadingPanel.vue'
+import SearchInput from '../components/SearchInput.vue'
 import { usePageTitle } from '../composables/usePageTitle'
 import { useLocalStorageState } from '../composables/useLocalStorageState'
 import { useClientsApi } from '../services/clientsApi'

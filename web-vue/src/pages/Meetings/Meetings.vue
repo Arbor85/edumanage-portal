@@ -5,12 +5,7 @@
     </div>
 
     <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center">
-      <input
-        v-model.trim="searchQuery"
-        type="text"
-        placeholder="Search by client, date or price"
-        class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 sm:flex-1"
-      />
+      <SearchInput v-model="searchQuery" placeholder="Search by client, date or price" />
 
       <div class="flex items-center gap-2 sm:shrink-0">
         <div class="inline-flex overflow-hidden rounded-md border border-slate-300 dark:border-slate-600">
@@ -232,6 +227,7 @@ import { useAuth0 } from '@auth0/auth0-vue'
 import { Edit2, Trash2 } from 'lucide-vue-next'
 import ConfirmDialog from '../../components/ConfirmDialog.vue'
 import DialogActionPanel from '../../components/DialogActionPanel.vue'
+import SearchInput from '../../components/SearchInput.vue'
 import { useLocalStorageState } from '../../composables/useLocalStorageState'
 import { usePageTitle } from '../../composables/usePageTitle'
 import { useClientsApi } from '../../services/clientsApi'
