@@ -43,6 +43,7 @@ class Routine(Base):
 
 	id = Column(String(100), primary_key=True, index=True)
 	name = Column(String(255), nullable=False)
+	notes = Column(String, nullable=True)
 	user_id = Column(String(255), nullable=True, index=True)
 	excercises = Column(JSON, nullable=False, default=list)
 
@@ -52,6 +53,8 @@ class Plan(Base):
 
 	id = Column(String(100), primary_key=True, index=True)
 	name = Column(String(255), nullable=False)
+	notes = Column(String, nullable=True)
+	status = Column(String(50), nullable=False, default="Draft")
 	client_id = Column(String(100), nullable=False, index=True)
 	user_id = Column(String(255), nullable=True, index=True)
 	workouts = Column(JSON, nullable=False, default=list)

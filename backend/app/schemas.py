@@ -79,6 +79,7 @@ class RoutineSet(BaseModel):
     type: RoutineSetType
     reps: int | None = None
     weight: float | None = None
+    notes: str | None = None
 
 
 class RoutineExcercise(BaseModel):
@@ -89,6 +90,7 @@ class RoutineExcercise(BaseModel):
 
 class RoutineBase(BaseModel):
     name: str = Field(min_length=1)
+    notes: str | None = None
 
 
 class RoutineCreate(RoutineBase):
@@ -111,9 +113,14 @@ class PlanWorkout(RoutineOut):
     date: str = Field(min_length=1)
 
 
+PlanStatus = Literal["Draft", "Published", "Revoked"]
+
+
 class PlanBase(BaseModel):
     name: str = Field(min_length=1)
     clientId: str = Field(min_length=1)
+    notes: str | None = None
+    status: PlanStatus = "Draft"
 
 
 class PlanCreate(PlanBase):
@@ -131,6 +138,10 @@ class PlanOut(PlanBase):
     clientId: str = Field(validation_alias="client_id")
     workouts: list[PlanWorkout]
     client: ClientOut | None = None
+
+
+class PlanStatusUpdate(BaseModel):
+    status: PlanStatus
 
 
 RoutineCompleteMode = Literal["plan", "routine"]

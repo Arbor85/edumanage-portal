@@ -36,11 +36,7 @@
             <label class="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
               Schedule date
             </label>
-            <input
-              v-model="draftDate"
-              type="date"
-              class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
-            />
+            <SelectDate v-model="draftDate" />
           </div>
         </div>
 
@@ -68,6 +64,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import SelectDate from './SelectDate.vue'
 import SelectRoutine from './Select/SelectRoutine.vue'
 import type { Routine } from '../types/routine'
 import type { PlanWorkout } from '../types/plan'

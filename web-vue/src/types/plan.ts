@@ -10,6 +10,8 @@ export type PlanClient = {
   imageUrl?: string
 }
 
+export type PlanStatus = 'Draft' | 'Published' | 'Revoked'
+
 export type Plan = {
   id: string
   name: string
@@ -17,4 +19,5 @@ export type Plan = {
   client?: PlanClient
   clientName: string // Reference to client by name
   workouts: PlanWorkout[]
+  status?: PlanStatus
 }

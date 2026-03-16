@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from ..core.dependencies import get_db
 from ..models import Client, Plan
-from ..schemas import ClientOut, PlanCreate, PlanOut, PlanUpdate
+from ..schemas import ClientOut, PlanCreate, PlanOut, PlanStatusUpdate, PlanUpdate
 
 router = APIRouter()
 
@@ -29,6 +29,8 @@ def list_plans(
             {
                 "id": plan.id,
                 "name": plan.name,
+                "notes": plan.notes,
+                "status": plan.status,
                 "clientId": plan.client_id,
                 "workouts": plan.workouts,
                 "client": ClientOut.model_validate(client) if client else None,
@@ -59,6 +61,8 @@ def get_plan(
         {
             "id": plan.id,
             "name": plan.name,
+            "notes": plan.notes,
+            "status": plan.status,
             "clientId": plan.client_id,
             "workouts": plan.workouts,
             "client": ClientOut.model_validate(client) if client else None,
@@ -82,6 +86,8 @@ def add_plan(
     plan = Plan(
         id=str(uuid4()),
         name=payload.name,
+        notes=payload.notes,
+        status=payload.status,
         client_id=payload.clientId,
         user_id=None,
         workouts=[item.model_dump(by_alias=True) for item in payload.workouts],
@@ -94,6 +100,8 @@ def add_plan(
         {
             "id": plan.id,
             "name": plan.name,
+            "notes": plan.notes,
+            "status": plan.status,
             "clientId": plan.client_id,
             "workouts": plan.workouts,
             "client": ClientOut.model_validate(client),
@@ -120,6 +128,8 @@ def update_plan(
         raise HTTPException(status_code=404, detail="Client not found.")
 
     plan.name = payload.name
+    plan.notes = payload.notes
+    plan.status = payload.status
     plan.client_id = payload.clientId
     plan.workouts = [item.model_dump() for item in payload.workouts]
     db.commit()
@@ -129,6 +139,8 @@ def update_plan(
         {
             "id": plan.id,
             "name": plan.name,
+            "notes": plan.notes,
+            "status": plan.status,
             "clientId": plan.client_id,
             "workouts": plan.workouts,
             "client": ClientOut.model_validate(client),
@@ -148,3 +160,42 @@ def delete_plan(
     db.delete(plan)
     db.commit()
     return {"message": "Plan deleted successfully."}
+
+
+@router.patch("/api/plans/{plan_id}/status", response_model=PlanOut, tags=["Plans"])
+def update_plan_status(
+    plan_id: str,
+    payload: PlanStatusUpdate,
+    db: Session = Depends(get_db),
+) -> PlanOut:
+    plan = db.execute(select(Plan).where(Plan.id == plan_id)).scalar_one_or_none()
+    if not plan:
+        raise HTTPException(status_code=404, detail="Plan not found.")
+
+    new_status = payload.status
+    current_status = plan.status
+
+    if new_status == "Revoked" and current_status != "Published":
+        raise HTTPException(status_code=400, detail="Only a Published plan can be revoked.")
+    if new_status == "Published" and current_status == "Published":
+        raise HTTPException(status_code=400, detail="Plan is already published.")
+
+    plan.status = new_status
+    db.commit()
+    db.refresh(plan)
+
+    client = db.execute(
+        select(Client).where(Client.invitation_code == plan.client_id)
+    ).scalar_one_or_none()
+
+    return PlanOut.model_validate(
+        {
+            "id": plan.id,
+            "name": plan.name,
+            "notes": plan.notes,
+            "status": plan.status,
+            "clientId": plan.client_id,
+            "workouts": plan.workouts,
+            "client": ClientOut.model_validate(client) if client else None,
+        }
+    )

@@ -103,7 +103,9 @@ def ensure_routines_columns() -> None:
         column_names = {column[1] for column in columns}
         if "user_id" not in column_names:
             connection.execute(text("ALTER TABLE routines ADD COLUMN user_id VARCHAR(255)"))
-            connection.commit()
+        if "notes" not in column_names:
+            connection.execute(text("ALTER TABLE routines ADD COLUMN notes TEXT"))
+        connection.commit()
 
 
 def ensure_plans_columns() -> None:
@@ -118,7 +120,11 @@ def ensure_plans_columns() -> None:
         column_names = {column[1] for column in columns}
         if "user_id" not in column_names:
             connection.execute(text("ALTER TABLE plans ADD COLUMN user_id VARCHAR(255)"))
-            connection.commit()
+        if "notes" not in column_names:
+            connection.execute(text("ALTER TABLE plans ADD COLUMN notes TEXT"))
+        if "status" not in column_names:
+            connection.execute(text("ALTER TABLE plans ADD COLUMN status VARCHAR(50) NOT NULL DEFAULT 'Draft'"))
+        connection.commit()
 
 
 def ensure_workout_history_table() -> None:

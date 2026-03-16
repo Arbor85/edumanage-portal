@@ -1,6 +1,7 @@
 <template>
   <div>
     <button
+      v-if="!hideButton"
       type="button"
       @click="openDialog"
       class="inline-flex w-full items-center justify-between rounded-md border border-slate-300 bg-white px-3 py-2 text-left text-sm text-slate-900 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
@@ -79,7 +80,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 
 type CalendarCell = {
   key: string
@@ -91,15 +92,20 @@ const props = withDefaults(
   defineProps<{
     modelValue?: string
     placeholder?: string
+    autoOpen?: boolean
+    hideButton?: boolean
   }>(),
   {
     modelValue: '',
     placeholder: 'Select date',
+    autoOpen: false,
+    hideButton: false,
   },
 )
 
 const emit = defineEmits<{
   (event: 'update:modelValue', value: string): void
+  (event: 'close'): void
 }>()
 
 const isOpen = ref(false)
@@ -223,6 +229,11 @@ const openDialog = () => {
 
 const closeDialog = () => {
   isOpen.value = false
+  emit('close')
 }
+
+onMounted(() => {
+  if (props.autoOpen) openDialog()
+})
 
 </script>

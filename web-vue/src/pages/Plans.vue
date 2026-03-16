@@ -104,9 +104,14 @@
               <CustomerDisplay :name="getPlanClientName(plan)" :image-url="getPlanClientImage(plan)" />
             </div>
           </div>
-          <span class="rounded-full bg-slate-200 px-2 py-0.5 text-[10px] font-medium text-slate-700 dark:bg-slate-700 dark:text-slate-200">
-            {{ plan.workouts.length }} workout{{ plan.workouts.length === 1 ? '' : 's' }}
-          </span>
+          <div class="flex shrink-0 flex-col items-end gap-1">
+            <span :class="statusBadgeClass(plan)" class="rounded-full px-2 py-0.5 text-[10px] font-medium">
+              {{ plan.status ?? 'Draft' }}
+            </span>
+            <span class="rounded-full bg-slate-200 px-2 py-0.5 text-[10px] font-medium text-slate-700 dark:bg-slate-700 dark:text-slate-200">
+              {{ plan.workouts.length }} workout{{ plan.workouts.length === 1 ? '' : 's' }}
+            </span>
+          </div>
         </div>
 
         <div class="space-y-2">
@@ -146,6 +151,16 @@
             title="Clone plan"
           >
             <Copy :size="16" />
+          </button>
+          <button
+            v-if="(plan.status ?? 'Draft') !== 'Published'"
+            type="button"
+            :disabled="updatingStatusPlanId === plan.id"
+            @click="planToPublish = plan"
+            class="inline-flex items-center gap-1.5 rounded-md border border-emerald-500 bg-white px-3 py-1.5 text-xs font-medium text-emerald-600 hover:bg-emerald-50 disabled:opacity-50 dark:bg-slate-700 dark:hover:bg-emerald-900/20"
+          >
+            <Send :size="13" />
+            Publish
           </button>
           <button
             type="button"
@@ -192,6 +207,7 @@
             <tr>
               <th class="px-4 py-3 font-semibold">Plan</th>
               <th class="px-4 py-3 font-semibold">Client</th>
+              <th class="px-4 py-3 font-semibold">Status</th>
               <th class="px-4 py-3 font-semibold">Workouts</th>
               <th class="px-4 py-3 font-semibold">Details</th>
               <th class="px-4 py-3 font-semibold text-right">Actions</th>
@@ -202,6 +218,11 @@
               <td class="px-4 py-3 font-medium text-slate-900 dark:text-slate-100">{{ plan.name }}</td>
               <td class="px-4 py-3">
                 <CustomerDisplay :name="getPlanClientName(plan)" :image-url="getPlanClientImage(plan)" />
+              </td>
+              <td class="px-4 py-3">
+                <span :class="statusBadgeClass(plan)" class="rounded-full px-2 py-0.5 text-[11px] font-medium">
+                  {{ plan.status ?? 'Draft' }}
+                </span>
               </td>
               <td class="px-4 py-3 text-slate-700 dark:text-slate-300">{{ plan.workouts.length }}</td>
               <td class="px-4 py-3">
@@ -240,6 +261,16 @@
                     title="Clone plan"
                   >
                     <Copy :size="16" />
+                  </button>
+                  <button
+                    v-if="(plan.status ?? 'Draft') !== 'Published'"
+                    type="button"
+                    :disabled="updatingStatusPlanId === plan.id"
+                    @click="planToPublish = plan"
+                    class="inline-flex items-center gap-1.5 rounded-md border border-emerald-500 bg-white px-3 py-1.5 text-xs font-medium text-emerald-600 hover:bg-emerald-50 disabled:opacity-50 dark:bg-slate-700 dark:hover:bg-emerald-900/20"
+                  >
+                    <Send :size="13" />
+                    Publish
                   </button>
                   <button
                     type="button"
@@ -444,6 +475,26 @@
             Cancel
           </button>
           <button
+            v-if="isEditing && plans.find(p => p.id === editingPlanId)?.status === 'Published'"
+            type="button"
+            :disabled="updatingStatusPlanId === editingPlanId"
+            @click="updatePlanStatus(plans.find(p => p.id === editingPlanId)!, 'Revoked')"
+            class="inline-flex items-center gap-1.5 rounded-md border border-orange-400 bg-white px-4 py-2 text-sm font-medium text-orange-600 hover:bg-orange-50 disabled:opacity-50 dark:bg-slate-800 dark:hover:bg-orange-900/20"
+          >
+            <Ban :size="15" />
+            Revoke
+          </button>
+          <button
+            v-if="isEditing && (plans.find(p => p.id === editingPlanId)?.status ?? 'Draft') !== 'Published'"
+            type="button"
+            @click="saveAndPublish"
+            :disabled="!canSave || updatingStatusPlanId === editingPlanId"
+            class="inline-flex items-center gap-1.5 rounded-md border border-emerald-500 bg-white px-4 py-2 text-sm font-medium text-emerald-600 hover:bg-emerald-50 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-slate-800 dark:hover:bg-emerald-900/20"
+          >
+            <Send :size="15" />
+            Save + Publish
+          </button>
+          <button
             type="button"
             @click="savePlan"
             :disabled="!canSave"
@@ -463,6 +514,16 @@
       @cancel="planToDelete = null"
     />
 
+    <ConfirmDialog
+      :open="!!planToPublish"
+      title="Publish plan"
+      :message="planToPublish ? `Send '${planToPublish.name}' to ${getPlanClientName(planToPublish)}? The client will be able to see this plan.` : ''"
+      confirm-label="Publish"
+      confirm-variant="primary"
+      @confirm="confirmPublish"
+      @cancel="planToPublish = null"
+    />
+
     <RoutineEditorDialog
       :open="showEmptyWorkoutDialog"
       :title="workoutDialogMode === 'edit' ? 'Edit workout' : 'Add empty workout'"
@@ -477,122 +538,20 @@
       @save="saveWorkoutFromDialog"
     />
 
-    <div
-      v-if="showCopyWorkoutDialog"
-      class="fixed inset-0 z-[80] flex items-center justify-center bg-slate-900/50 p-4"
-      @click.self="closeCopyWorkoutDialog"
-    >
-      <div class="w-full max-w-md rounded-lg border border-slate-300 bg-white p-5 shadow-xl dark:border-slate-600 dark:bg-slate-800">
-        <h3 class="mb-4 text-lg font-semibold text-slate-900 dark:text-slate-100">Copy workout</h3>
-
-        <div class="space-y-4">
-          <div>
-            <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">New workout date</label>
-            <input
-              v-model="copyWorkoutDate"
-              type="date"
-              class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
-            />
-          </div>
-
-          <div>
-            <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">Reps</label>
-            <div class="inline-flex overflow-hidden rounded-md border border-slate-300 dark:border-slate-600">
-              <button
-                type="button"
-                @click="copyRepsAdjustment = 'decrease'"
-                class="px-3 py-1.5 text-xs font-medium"
-                :class="copyRepsAdjustment === 'decrease'
-                  ? 'bg-emerald-500 text-white'
-                  : 'bg-white text-slate-700 hover:bg-slate-100 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600'"
-              >
-                Decrease
-              </button>
-              <button
-                type="button"
-                @click="copyRepsAdjustment = 'same'"
-                class="border-l border-slate-300 px-3 py-1.5 text-xs font-medium dark:border-slate-600"
-                :class="copyRepsAdjustment === 'same'
-                  ? 'bg-emerald-500 text-white'
-                  : 'bg-white text-slate-700 hover:bg-slate-100 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600'"
-              >
-                Keep same
-              </button>
-              <button
-                type="button"
-                @click="copyRepsAdjustment = 'increase'"
-                class="border-l border-slate-300 px-3 py-1.5 text-xs font-medium dark:border-slate-600"
-                :class="copyRepsAdjustment === 'increase'
-                  ? 'bg-emerald-500 text-white'
-                  : 'bg-white text-slate-700 hover:bg-slate-100 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600'"
-              >
-                Increase
-              </button>
-            </div>
-          </div>
-
-          <div>
-            <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">Weight</label>
-            <div class="inline-flex overflow-hidden rounded-md border border-slate-300 dark:border-slate-600">
-              <button
-                type="button"
-                @click="copyWeightAdjustment = 'decrease'"
-                class="px-3 py-1.5 text-xs font-medium"
-                :class="copyWeightAdjustment === 'decrease'
-                  ? 'bg-emerald-500 text-white'
-                  : 'bg-white text-slate-700 hover:bg-slate-100 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600'"
-              >
-                Decrease
-              </button>
-              <button
-                type="button"
-                @click="copyWeightAdjustment = 'same'"
-                class="border-l border-slate-300 px-3 py-1.5 text-xs font-medium dark:border-slate-600"
-                :class="copyWeightAdjustment === 'same'
-                  ? 'bg-emerald-500 text-white'
-                  : 'bg-white text-slate-700 hover:bg-slate-100 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600'"
-              >
-                Keep same
-              </button>
-              <button
-                type="button"
-                @click="copyWeightAdjustment = 'increase'"
-                class="border-l border-slate-300 px-3 py-1.5 text-xs font-medium dark:border-slate-600"
-                :class="copyWeightAdjustment === 'increase'
-                  ? 'bg-emerald-500 text-white'
-                  : 'bg-white text-slate-700 hover:bg-slate-100 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600'"
-              >
-                Increase
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div class="mt-5 flex items-center justify-end gap-2">
-          <button
-            type="button"
-            @click="closeCopyWorkoutDialog"
-            class="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600"
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            @click="confirmCopyWorkout"
-            :disabled="!copyWorkoutDate"
-            class="rounded-md border border-emerald-500 bg-emerald-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            Copy workout
-          </button>
-        </div>
-      </div>
-    </div>
+    <SelectDate
+      v-if="copyingWorkoutIndex !== null"
+      :model-value="copyWorkoutDate"
+      :auto-open="true"
+      :hide-button="true"
+      @update:modelValue="onCopyDateSelected"
+      @close="closeCopyWorkoutDialog"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
-import { Copy, Edit2, Trash2 } from 'lucide-vue-next'
+import { Ban, Copy, Edit2, Send, Trash2 } from 'lucide-vue-next'
 import ConfirmDialog from '../components/ConfirmDialog.vue'
 import CustomerDisplay from '../components/CustomerDisplay.vue'
 import DialogActionPanel from '../components/DialogActionPanel.vue'
@@ -602,6 +561,7 @@ import ScheduleRoutine from '../components/ScheduleRoutine.vue'
 import CalendarView from '../components/CalendarView.vue'
 import SearchInput from '../components/SearchInput.vue'
 import SelectClient from '../components/Select/SelectClient.vue'
+import SelectDate from '../components/SelectDate.vue'
 import { useLocalStorageState } from '../composables/useLocalStorageState'
 import { usePageTitle } from '../composables/usePageTitle'
 import { useClientsApi } from '../services/clientsApi'
@@ -610,7 +570,7 @@ import { usePlansApi } from '../services/plansApi'
 import { useRoutinesApi } from '../services/routinesApi'
 import type { Client } from '../types/client'
 import type { Excercise } from '../types/excercise'
-import type { Plan, PlanWorkout } from '../types/plan'
+import type { Plan, PlanStatus, PlanWorkout } from '../types/plan'
 import type { Routine, RoutineExcercise } from '../types/routine'
 
 usePageTitle('Plans')
@@ -633,7 +593,6 @@ const currentDate = ref(new Date())
 
 const showDialog = ref(false)
 const showEmptyWorkoutDialog = ref(false)
-const showCopyWorkoutDialog = ref(false)
 const workoutDialogMode = ref<'create' | 'edit'>('create')
 const editingWorkoutIndex = ref<number | null>(null)
 const workoutDialogInitialName = ref('')
@@ -642,12 +601,12 @@ const workoutDialogInitialExcercises = ref<RoutineExcercise[]>([])
 const workoutDialogInitialDate = ref('')
 const copyingWorkoutIndex = ref<number | null>(null)
 const copyWorkoutDate = ref('')
-const copyRepsAdjustment = ref<'same' | 'increase' | 'decrease'>('same')
-const copyWeightAdjustment = ref<'same' | 'increase' | 'decrease'>('same')
 const isEditing = ref(false)
 const editingPlanId = ref<string | null>(null)
 const planToDelete = ref<Plan | null>(null)
 const nameManuallyEdited = ref(false)
+const updatingStatusPlanId = ref<string | null>(null)
+const planToPublish = ref<Plan | null>(null)
 
 const formData = ref<{
   name: string
@@ -863,25 +822,15 @@ const addWorkout = (workout: PlanWorkout) => {
 }
 
 const closeCopyWorkoutDialog = () => {
-  showCopyWorkoutDialog.value = false
   copyingWorkoutIndex.value = null
   copyWorkoutDate.value = ''
-  copyRepsAdjustment.value = 'same'
-  copyWeightAdjustment.value = 'same'
 }
 
 const openCopyWorkoutDialog = (index: number) => {
   const workout = formData.value.workouts[index]
-
-  if (!workout) {
-    return
-  }
-
+  if (!workout) return
   copyingWorkoutIndex.value = index
   copyWorkoutDate.value = getDateWithOffset(workout.date, 7)
-  copyRepsAdjustment.value = 'same'
-  copyWeightAdjustment.value = 'same'
-  showCopyWorkoutDialog.value = true
 }
 
 const formatDateForInput = (date: Date) => {
@@ -917,29 +866,10 @@ const getDateWithOffset = (sourceDate: string, daysOffset: number) => {
   return formatDateForInput(date)
 }
 
-const adjustNumericValue = (
-  value: number | null,
-  adjustment: 'same' | 'increase' | 'decrease',
-  step: number,
-) => {
-  if (value === null || adjustment === 'same') {
-    return value
-  }
-
-  if (adjustment === 'increase') {
-    return value + step
-  }
-
-  return Math.max(0, value - step)
-}
-
-const confirmCopyWorkout = () => {
-  if (copyingWorkoutIndex.value === null || !copyWorkoutDate.value) {
-    return
-  }
+const onCopyDateSelected = (date: string) => {
+  if (copyingWorkoutIndex.value === null || !date) return
 
   const sourceWorkout = formData.value.workouts[copyingWorkoutIndex.value]
-
   if (!sourceWorkout) {
     closeCopyWorkoutDialog()
     return
@@ -952,17 +882,10 @@ const confirmCopyWorkout = () => {
   const copiedWorkout: PlanWorkout = {
     ...sourceWorkout,
     id: generatedId,
-    name: sourceWorkout.name,
-    date: copyWorkoutDate.value,
+    date,
     excercises: sourceWorkout.excercises.map((excercise) => ({
       ...excercise,
-      sets: excercise.sets.map((setItem) => ({
-        ...setItem,
-        reps: adjustNumericValue(setItem.reps, copyRepsAdjustment.value, 1),
-        weight: excercise.isBodyweight
-          ? setItem.weight
-          : adjustNumericValue(setItem.weight, copyWeightAdjustment.value, 2.5),
-      })),
+      sets: excercise.sets.map((setItem) => ({ ...setItem })),
     })),
   }
 
@@ -1045,6 +968,38 @@ const savePlan = async () => {
   }
 }
 
+const saveAndPublish = async () => {
+  if (!canSave.value) return
+
+  errorMessage.value = ''
+
+  try {
+    const derivedName = formData.value.name.trim() ||
+      formData.value.workouts.map(w => w.name).join(' + ') ||
+      'Untitled Plan'
+    const payload = {
+      name: derivedName,
+      clientId: formData.value.clientId.trim(),
+      workouts: formData.value.workouts,
+    }
+
+    let savedPlan: Plan
+    if (isEditing.value && editingPlanId.value) {
+      savedPlan = await plansApi.editPlan(editingPlanId.value, payload)
+      const index = plans.value.findIndex((plan) => plan.id === savedPlan.id)
+      if (index !== -1) plans.value[index] = savedPlan
+    } else {
+      savedPlan = await plansApi.addPlan(payload)
+      plans.value.push(savedPlan)
+    }
+
+    cancelDialog()
+    await updatePlanStatus(savedPlan, 'Published')
+  } catch (error) {
+    errorMessage.value = error instanceof Error ? error.message : 'Failed to save plan'
+  }
+}
+
 const confirmDelete = (plan: Plan) => {
   planToDelete.value = plan
 }
@@ -1106,6 +1061,33 @@ const loadExcercises = async () => {
 const openEditDialogById = (planId: string) => {
   const plan = filteredPlans.value.find(p => p.id === planId)
   if (plan) openEditDialog(plan)
+}
+
+const statusBadgeClass = (plan: Plan) => {
+  const status = plan.status ?? 'Draft'
+  if (status === 'Published') return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
+  if (status === 'Revoked') return 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300'
+  return 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300'
+}
+
+const updatePlanStatus = async (plan: Plan, status: PlanStatus) => {
+  updatingStatusPlanId.value = plan.id
+  try {
+    const updated = await plansApi.updatePlanStatus(plan.id, status)
+    const index = plans.value.findIndex(p => p.id === plan.id)
+    if (index !== -1) plans.value[index] = updated
+  } catch (error) {
+    errorMessage.value = error instanceof Error ? error.message : 'Failed to update plan status'
+  } finally {
+    updatingStatusPlanId.value = null
+  }
+}
+
+const confirmPublish = () => {
+  if (!planToPublish.value) return
+  const plan = planToPublish.value
+  planToPublish.value = null
+  updatePlanStatus(plan, 'Published')
 }
 
 onMounted(() => {

@@ -6,6 +6,7 @@ These rules apply to all future changes in this repository.
 - Keep changes focused and minimal.
 - Preserve existing behavior unless explicitly asked to change it.
 - Prefer maintainable, readable code over clever shortcuts.
+- When working copilot can be silent. No need for explaining what is happening. Just display progress and ask for clarifications when needed.
 
 ## Coding Rules
 - Follow existing Vue 3 + TypeScript patterns already used in `src/`.

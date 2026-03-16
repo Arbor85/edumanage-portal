@@ -19,8 +19,8 @@
         </div>
 
         <div>
-          <label for="meeting-start" class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">Time slot</label>
-          <DateTimePicker id="meeting-start" v-model="startsAt" />
+          <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">Date</label>
+          <SelectDate v-model="startsAt" />
         </div>
 
         <div>
@@ -55,7 +55,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import SelectClient from '../../../components/Select/SelectClient.vue'
-import DateTimePicker from '../../../components/DateTimePicker.vue'
+import SelectDate from '../../../components/SelectDate.vue'
 import PriceInput from '../../../components/PriceInput.vue'
 import type { Client } from '../../../types/client'
 import type { MeetingWritePayload } from '../../../types/meeting'
@@ -83,13 +83,13 @@ const emit = defineEmits<{
 }>()
 
 const clientId = ref('')
-const startsAt = ref<Date | null>(null)
+const startsAt = ref('')
 const price = ref(0)
 const errorMessage = ref('')
 
 const applyInitialValues = () => {
   clientId.value = props.initialClientId
-  startsAt.value = props.initialStartsAt ? toDate(props.initialStartsAt) : null
+  startsAt.value = props.initialStartsAt ? props.initialStartsAt.split('T')[0] ?? '' : ''
   price.value = props.initialPrice
   errorMessage.value = ''
 }
@@ -104,24 +104,14 @@ watch(
   { immediate: true },
 )
 
-const toDate = (isoDate: string) => {
-  const parsedDate = new Date(isoDate)
-
-  if (Number.isNaN(parsedDate.getTime())) {
-    return null
-  }
-
-  return parsedDate
-}
-
 const submit = () => {
   if (!clientId.value) {
     errorMessage.value = 'Please select a client.'
     return
   }
 
-  if (!startsAt.value || Number.isNaN(startsAt.value.getTime())) {
-    errorMessage.value = 'Please select a meeting time slot.'
+  if (!startsAt.value) {
+    errorMessage.value = 'Please select a meeting date.'
     return
   }
 
@@ -133,7 +123,7 @@ const submit = () => {
   errorMessage.value = ''
   emit('save', {
     clientId: clientId.value,
-    startsAt: startsAt.value.toISOString(),
+    startsAt: startsAt.value,
     price: Number(price.value.toFixed(2)),
   })
 }

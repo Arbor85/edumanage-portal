@@ -15,7 +15,10 @@
         <button
           type="button"
           @click="$emit('confirm')"
-          class="inline-flex items-center rounded-md border border-rose-500 bg-rose-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-rose-600"
+          :class="confirmVariant === 'primary'
+            ? 'border-emerald-500 bg-emerald-500 hover:bg-emerald-600'
+            : 'border-rose-500 bg-rose-500 hover:bg-rose-600'"
+          class="inline-flex items-center rounded-md border px-3 py-1.5 text-xs font-medium text-white"
         >
           {{ confirmLabel }}
         </button>
@@ -32,10 +35,12 @@ withDefaults(
     message: string
     confirmLabel?: string
     cancelLabel?: string
+    confirmVariant?: 'danger' | 'primary'
   }>(),
   {
     confirmLabel: 'Confirm',
     cancelLabel: 'Cancel',
+    confirmVariant: 'danger',
   },
 )
 

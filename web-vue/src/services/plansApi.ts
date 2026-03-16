@@ -1,4 +1,4 @@
-import type { Plan } from '../types/plan'
+import type { Plan, PlanStatus } from '../types/plan'
 import { useAuth0 } from '@auth0/auth0-vue'
 
 type PlanWritePayload = {
@@ -87,10 +87,21 @@ export const usePlansApi = () => {
     }
   }
 
+  const updatePlanStatus = async (planId: string, status: PlanStatus): Promise<Plan> => {
+    const response = await fetchWithAuth(`${PLANS_ENDPOINT}/${encodeURIComponent(planId)}/status`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status }),
+    })
+
+    return parseJsonResponse<Plan>(response)
+  }
+
   return {
     listPlans,
     addPlan,
     editPlan,
     deletePlan,
+    updatePlanStatus,
   }
 }
