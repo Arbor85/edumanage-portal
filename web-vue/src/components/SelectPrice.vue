@@ -18,7 +18,7 @@
       </span>
     </div>
 
-    <div class="inline-flex overflow-hidden rounded-md border border-slate-300 dark:border-slate-600">
+    <div v-if="currencies.length > 1" class="inline-flex overflow-hidden rounded-md border border-slate-300 dark:border-slate-600">
       <button
         v-for="(currency, index) in currencies"
         :key="currency"

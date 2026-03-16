@@ -144,3 +144,5 @@ vite.config.ts.timestamp-*
 /backend/app/__pycache__
 /backend/app/__pycache__
 web-vue/src/services/prompts.md
+/backend/app/__pycache__
+/backend/app/__pycache__
