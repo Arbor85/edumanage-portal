@@ -37,11 +37,7 @@
 
           <div v-if="showScheduleDate">
             <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">Workout date</label>
-            <input
-              v-model="formDate"
-              type="date"
-              class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
-            />
+            <SelectDate v-model="formDate" />
           </div>
 
           <div>
@@ -397,6 +393,7 @@
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { Trash2 } from 'lucide-vue-next'
 import AddNoteButton from './AddNoteButton.vue'
+import SelectDate from './SelectDate.vue'
 import SelectExcercise from './Select/SelectExcercise.vue'
 import SetTypePicker from './SetTypePicker.vue'
 import type { Excercise } from '../types/excercise'
