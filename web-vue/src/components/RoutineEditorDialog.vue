@@ -146,15 +146,17 @@
                         class="w-20 rounded-md border border-slate-300 bg-white px-2 py-1 text-xs text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
                       />
 
-                      <input
-                        v-if="!excercise.isBodyweight"
-                        v-model.number="setItem.weight"
-                        type="number"
-                        min="0"
-                        step="0.25"
-                        placeholder="Weight"
-                        class="w-24 rounded-md border border-slate-300 bg-white px-2 py-1 text-xs text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
-                      />
+                      <div v-if="!excercise.isBodyweight" class="flex items-center gap-1">
+                        <input
+                          v-model.number="setItem.weight"
+                          type="number"
+                          min="0"
+                          step="0.25"
+                          placeholder="Weight"
+                          class="w-24 rounded-md border border-slate-300 bg-white px-2 py-1 text-xs text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+                        />
+                        <BarbellWeightPicker v-model="setItem.weight" />
+                      </div>
 
                       <div
                         class="w-16 text-center text-[11px] font-medium"
@@ -393,6 +395,7 @@
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { Trash2 } from 'lucide-vue-next'
 import AddNoteButton from './AddNoteButton.vue'
+import BarbellWeightPicker from './BarbellWeightPicker.vue'
 import SelectDate from './SelectDate.vue'
 import SelectExcercise from './Select/SelectExcercise.vue'
 import SetTypePicker from './SetTypePicker.vue'

@@ -6,6 +6,7 @@
 
     <div class="mb-4 flex flex-col gap-3">
       <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+
         <input
           v-model.trim="searchQuery"
           type="text"
@@ -293,8 +294,9 @@
           <div
             v-for="entry in getWorkoutsForDay(date)"
             :key="`${entry.planId}-${entry.workout.id}`"
-            class="rounded bg-emerald-100 px-1.5 py-1 text-[10px] text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300"
+            class="cursor-pointer rounded bg-emerald-100 px-1.5 py-1 text-[10px] text-emerald-800 hover:bg-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-300 dark:hover:bg-emerald-800"
             :title="`${entry.clientName} • ${entry.planName} • ${entry.workout.name}`"
+            @click="openEditDialogById(entry.planId)"
           >
             <div class="mb-0.5 flex min-w-0 items-center gap-1">
               <img
@@ -1084,6 +1086,11 @@ const loadExcercises = async () => {
   } catch {
     excercises.value = []
   }
+}
+
+const openEditDialogById = (planId: string) => {
+  const plan = filteredPlans.value.find(p => p.id === planId)
+  if (plan) openEditDialog(plan)
 }
 
 onMounted(() => {
