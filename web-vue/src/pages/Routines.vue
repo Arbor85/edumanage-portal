@@ -124,7 +124,7 @@
 
     <RoutineEditorDialog :open="showDialog" :title="dialogMode === 'edit' ? 'Edit routine' : 'Add routine'"
       :save-label="dialogMode === 'edit' ? 'Save changes' : 'Add routine'" :excercises="excercises"
-      :initial-name="editingRoutineName" :initial-excercises="editingRoutineExcercises" @cancel="closeDialog"
+      :initial-name="editingRoutineName" :initial-note="editingRoutineNote" :initial-excercises="editingRoutineExcercises" @cancel="closeDialog"
       @save="saveRoutineFromDialog" />
 
     <ConfirmDialog :open="showDeleteDialog" title="Delete routine" :message="deleteDialogMessage" confirm-label="Delete"
@@ -165,6 +165,7 @@ const showDialog = ref(false)
 const dialogMode = ref<'create' | 'edit'>('create')
 const editingRoutineId = ref<string | null>(null)
 const editingRoutineName = ref('')
+const editingRoutineNote = ref('')
 const editingRoutineExcercises = ref<RoutineExcercise[]>([])
 const hasLoadedRoutinesInitially = ref(false)
 
@@ -193,6 +194,7 @@ const openCreateDialog = () => {
   dialogMode.value = 'create'
   editingRoutineId.value = null
   editingRoutineName.value = ''
+  editingRoutineNote.value = ''
   editingRoutineExcercises.value = []
   showDialog.value = true
 }
@@ -201,9 +203,11 @@ const openEditDialog = (routine: Routine) => {
   dialogMode.value = 'edit'
   editingRoutineId.value = routine.id
   editingRoutineName.value = routine.name
+  editingRoutineNote.value = routine.note || ''
   editingRoutineExcercises.value = routine.excercises.map((excercise) => ({
     name: excercise.name,
     isBodyweight: excercise.isBodyweight,
+    note: excercise.note,
     sets: excercise.sets.map((setItem) => ({ ...setItem })),
   }))
   showDialog.value = true
@@ -214,10 +218,11 @@ const closeDialog = () => {
   dialogMode.value = 'create'
   editingRoutineId.value = null
   editingRoutineName.value = ''
+  editingRoutineNote.value = ''
   editingRoutineExcercises.value = []
 }
 
-const saveRoutineFromDialog = async (payload: { name: string; excercises: RoutineExcercise[] }) => {
+const saveRoutineFromDialog = async (payload: { name: string; note?: string; excercises: RoutineExcercise[] }) => {
   try {
     if (dialogMode.value === 'edit' && editingRoutineId.value) {
       const updatedRoutine = await routinesApi.editRoutine(editingRoutineId.value, payload)

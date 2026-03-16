@@ -21,7 +21,7 @@
       </div>
 
       <form class="flex h-[calc(100%-3rem)] flex-col" @submit.prevent="submit">
-        <div class="flex-1 space-y-4 overflow-y-auto pr-1">
+        <div class="custom-scrollbar flex-1 space-y-4 overflow-y-auto pr-1">
           <div>
             <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">Name</label>
             <input
@@ -30,6 +30,9 @@
               placeholder="Routine name"
               class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
             />
+            <div class="mt-2">
+              <AddNoteButton v-model="formNote" dialog-title="Workout note" />
+            </div>
           </div>
 
           <div v-if="showScheduleDate">
@@ -85,6 +88,8 @@
                   </div>
 
                   <div class="flex items-center gap-2">
+                    <AddNoteButton v-model="excercise.note" dialog-title="Excercise note" />
+
                     <button
                       type="button"
                       @click="removeExcercise(excerciseIndex)"
@@ -168,6 +173,8 @@
                       >
                         {{ setIndex === 0 ? '' : getVolumeDiff(excercise, setIndex) === null ? 'vol --' : `vol ${getVolumeDiff(excercise, setIndex)}` }}
                       </div>
+
+                      <AddNoteButton v-model="setItem.note" button-label="Add" dialog-title="Set note" />
 
                       <div class="flex items-center gap-1">
                         <button
@@ -372,6 +379,11 @@
           >Cancel</button>
           <button
             type="button"
+            @click="applyProgression(true)"
+            class="inline-flex items-center rounded-md border border-sky-500 bg-sky-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-sky-600"
+          >For all</button>
+          <button
+            type="button"
             @click="applyProgression()"
             class="inline-flex items-center rounded-md border border-emerald-500 bg-emerald-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-emerald-600"
           >Apply</button>
@@ -384,6 +396,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { Trash2 } from 'lucide-vue-next'
+import AddNoteButton from './AddNoteButton.vue'
 import SelectExcercise from './Select/SelectExcercise.vue'
 import SetTypePicker from './SetTypePicker.vue'
 import type { Excercise } from '../types/excercise'
@@ -407,12 +420,14 @@ const props = withDefaults(
     saveLabel: string
     excercises: Excercise[]
     initialName?: string
+    initialNote?: string
     initialExcercises?: RoutineExcercise[]
     showScheduleDate?: boolean
     initialDate?: string
   }>(),
   {
     initialName: '',
+    initialNote: '',
     initialExcercises: () => [],
     showScheduleDate: false,
     initialDate: '',
@@ -421,10 +436,11 @@ const props = withDefaults(
 
 const emit = defineEmits<{
   (event: 'cancel'): void
-  (event: 'save', payload: { name: string; excercises: RoutineExcercise[]; date?: string }): void
+  (event: 'save', payload: { name: string; note?: string; excercises: RoutineExcercise[]; date?: string }): void
 }>()
 
 const formName = ref('')
+const formNote = ref('')
 const formDate = ref('')
 const formExcerciseNames = ref<string[]>([])
 const formExcercises = ref<RoutineExcercise[]>([])
@@ -480,6 +496,7 @@ const createEmptySet = (): RoutineSet => {
     type: 'normal',
     reps: null,
     weight: null,
+    note: '',
   }
 }
 
@@ -501,6 +518,7 @@ const syncFormExcercisesFromNames = (names: string[]) => {
       return {
         name,
         isBodyweight: currentExcercise.isBodyweight,
+        note: currentExcercise.note,
         sets: [...currentExcercise.sets],
       }
     }
@@ -508,6 +526,7 @@ const syncFormExcercisesFromNames = (names: string[]) => {
     return {
       name,
       isBodyweight: isBodyweightExcercise(name),
+      note: '',
       sets: [],
     }
   })
@@ -523,9 +542,15 @@ watch(
 
 const resetFormState = () => {
   formName.value = props.initialName
+  formNote.value = props.initialNote
   formExcercises.value = cloneExcercises(props.initialExcercises)
   formExcerciseNames.value = props.initialExcercises.map((excercise) => excercise.name)
   formDate.value = props.initialDate || new Date().toISOString().split('T')[0] || ''
+}
+
+const normalizeNote = (note: string | null | undefined): string | undefined => {
+  const normalized = (note ?? '').trim()
+  return normalized.length > 0 ? normalized : undefined
 }
 
 watch(
@@ -651,7 +676,52 @@ const openProgressionDialog = (
   progressionDialog.value = { direction, excerciseIndex, setIndex }
 }
 
-const applyProgression = () => {
+const buildProgressedSet = (
+  excercise: RoutineExcercise,
+  sourceSet: RoutineSet,
+  direction: ProgressionDirection,
+): RoutineSet => {
+  if (progressionStrategy.value === 'manual') {
+    return {
+      type: sourceSet.type,
+      reps: typeof progressionManualReps.value === 'number' ? progressionManualReps.value : sourceSet.reps,
+      weight: excercise.isBodyweight
+        ? null
+        : typeof progressionManualWeight.value === 'number'
+        ? progressionManualWeight.value
+        : sourceSet.weight,
+      note: sourceSet.note,
+    }
+  }
+
+  const factor =
+    direction === 'increase'
+      ? 1 + progressionPercent.value / 100
+      : 1 - progressionPercent.value / 100
+
+  if (excercise.isBodyweight) {
+    const baseReps = typeof sourceSet.reps === 'number' ? sourceSet.reps : 0
+    return {
+      type: sourceSet.type,
+      reps: Math.max(1, Math.round(baseReps * factor)),
+      weight: null,
+      note: sourceSet.note,
+    }
+  }
+
+  const target = progressionTarget.value
+  const baseWeight = typeof sourceSet.weight === 'number' ? sourceSet.weight : 0
+  const baseReps = typeof sourceSet.reps === 'number' ? sourceSet.reps : 0
+
+  return {
+    type: sourceSet.type,
+    reps: (target === 'reps' || target === 'volume') ? Math.max(1, Math.round(baseReps * factor)) : sourceSet.reps,
+    weight: (target === 'weight' || target === 'volume') ? Math.max(0, Math.round(baseWeight * factor * 4) / 4) : sourceSet.weight,
+    note: sourceSet.note,
+  }
+}
+
+const applyProgression = (applyForAll = false) => {
   if (!progressionDialog.value) return
   const { direction, excerciseIndex, setIndex } = progressionDialog.value
   const excercise = formExcercises.value[excerciseIndex]
@@ -662,40 +732,28 @@ const applyProgression = () => {
     return
   }
 
-  let newSet: RoutineSet
+  if (applyForAll) {
+    let currentSource = sourceSet
 
-  if (progressionStrategy.value === 'manual') {
-    newSet = {
-      type: sourceSet.type,
-      reps: typeof progressionManualReps.value === 'number' ? progressionManualReps.value : sourceSet.reps,
-      weight: excercise.isBodyweight
-        ? null
-        : typeof progressionManualWeight.value === 'number'
-        ? progressionManualWeight.value
-        : sourceSet.weight,
-    }
-  } else {
-    const factor =
-      direction === 'increase'
-        ? 1 + progressionPercent.value / 100
-        : 1 - progressionPercent.value / 100
+    for (let nextIndex = setIndex + 1; nextIndex < excercise.sets.length; nextIndex += 1) {
+      const targetSet = excercise.sets[nextIndex]
 
-    if (excercise.isBodyweight) {
-      const baseReps = typeof sourceSet.reps === 'number' ? sourceSet.reps : 0
-      newSet = { type: sourceSet.type, reps: Math.max(1, Math.round(baseReps * factor)), weight: null }
-    } else {
-      const target = progressionTarget.value
-      const baseWeight = typeof sourceSet.weight === 'number' ? sourceSet.weight : 0
-      const baseReps = typeof sourceSet.reps === 'number' ? sourceSet.reps : 0
-      newSet = {
-        type: sourceSet.type,
-        reps: (target === 'reps' || target === 'volume') ? Math.max(1, Math.round(baseReps * factor)) : sourceSet.reps,
-        weight: (target === 'weight' || target === 'volume') ? Math.max(0, Math.round(baseWeight * factor * 4) / 4) : sourceSet.weight,
+      if (!targetSet) {
+        continue
+      }
+
+      const progressedSet = buildProgressedSet(excercise, currentSource, direction)
+      targetSet.reps = progressedSet.reps
+      targetSet.weight = progressedSet.weight
+      currentSource = {
+        ...targetSet,
       }
     }
+  } else {
+    const newSet = buildProgressedSet(excercise, sourceSet, direction)
+    excercise.sets.splice(setIndex + 1, 0, newSet)
   }
 
-  excercise.sets.splice(setIndex + 1, 0, newSet)
   saveProgressionPrefs()
   progressionDialog.value = null
 }
@@ -1206,6 +1264,7 @@ const submit = () => {
 
   const payload = {
     name: formName.value,
+    note: normalizeNote(formNote.value),
     excercises: formExcercises.value.map((excercise) => {
       const sanitizedSets = excercise.sets.map((setItem) => {
         const reps = typeof setItem.reps === 'number' && Number.isFinite(setItem.reps) ? setItem.reps : null
@@ -1218,19 +1277,23 @@ const submit = () => {
           type: setItem.type,
           reps,
           weight,
+          note: normalizeNote(setItem.note),
         }
       })
 
       return {
         name: excercise.name,
         isBodyweight: excercise.isBodyweight,
+        note: normalizeNote(excercise.note),
         sets: sanitizedSets,
       }
     }),
     date: formDate.value,
   }
 
-  emit('save', props.showScheduleDate ? payload : { name: payload.name, excercises: payload.excercises })
+  emit('save', props.showScheduleDate
+    ? payload
+    : { name: payload.name, note: payload.note, excercises: payload.excercises })
 }
 
 onBeforeUnmount(() => {

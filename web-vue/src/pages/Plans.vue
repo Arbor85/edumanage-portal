@@ -386,7 +386,7 @@
               </div>
             </div>
 
-            <div class="max-h-96 space-y-3 overflow-y-auto">
+            <div class="custom-scrollbar max-h-96 space-y-3 overflow-y-auto">
               <div
                 v-for="(workout, index) in formData.workouts"
                 :key="`workout-${index}`"
@@ -472,6 +472,7 @@
       :excercises="excercises"
       :show-schedule-date="true"
       :initial-name="workoutDialogInitialName"
+      :initial-note="workoutDialogInitialNote"
       :initial-excercises="workoutDialogInitialExcercises"
       :initial-date="workoutDialogInitialDate"
       @cancel="closeWorkoutDialog"
@@ -637,6 +638,7 @@ const showCopyWorkoutDialog = ref(false)
 const workoutDialogMode = ref<'create' | 'edit'>('create')
 const editingWorkoutIndex = ref<number | null>(null)
 const workoutDialogInitialName = ref('')
+const workoutDialogInitialNote = ref('')
 const workoutDialogInitialExcercises = ref<RoutineExcercise[]>([])
 const workoutDialogInitialDate = ref('')
 const copyingWorkoutIndex = ref<number | null>(null)
@@ -807,6 +809,7 @@ const openEmptyWorkoutDialog = () => {
   workoutDialogMode.value = 'create'
   editingWorkoutIndex.value = null
   workoutDialogInitialName.value = ''
+  workoutDialogInitialNote.value = ''
   workoutDialogInitialExcercises.value = []
   workoutDialogInitialDate.value = ''
   showEmptyWorkoutDialog.value = true
@@ -822,6 +825,7 @@ const openEditWorkoutDialog = (index: number) => {
   workoutDialogMode.value = 'edit'
   editingWorkoutIndex.value = index
   workoutDialogInitialName.value = workout.name
+  workoutDialogInitialNote.value = workout.note || ''
   workoutDialogInitialDate.value = workout.date
   workoutDialogInitialExcercises.value = workout.excercises.map((excercise) => ({
     ...excercise,
@@ -835,6 +839,7 @@ const closeWorkoutDialog = () => {
   workoutDialogMode.value = 'create'
   editingWorkoutIndex.value = null
   workoutDialogInitialName.value = ''
+  workoutDialogInitialNote.value = ''
   workoutDialogInitialExcercises.value = []
   workoutDialogInitialDate.value = ''
 }
@@ -951,7 +956,7 @@ const confirmCopyWorkout = () => {
   closeCopyWorkoutDialog()
 }
 
-const saveWorkoutFromDialog = (payload: { name: string; excercises: RoutineExcercise[]; date?: string }) => {
+const saveWorkoutFromDialog = (payload: { name: string; note?: string; excercises: RoutineExcercise[]; date?: string }) => {
   if (workoutDialogMode.value === 'edit' && editingWorkoutIndex.value !== null) {
     const currentWorkout = formData.value.workouts[editingWorkoutIndex.value]
 
@@ -963,6 +968,7 @@ const saveWorkoutFromDialog = (payload: { name: string; excercises: RoutineExcer
     formData.value.workouts[editingWorkoutIndex.value] = {
       ...currentWorkout,
       name: payload.name,
+      note: payload.note,
       excercises: payload.excercises,
       date: payload.date || currentWorkout.date,
     }
@@ -978,6 +984,7 @@ const saveWorkoutFromDialog = (payload: { name: string; excercises: RoutineExcer
   const workout: PlanWorkout = {
     id: generatedId,
     name: payload.name,
+    note: payload.note,
     excercises: payload.excercises,
     date: payload.date || new Date().toISOString().split('T')[0] || '',
   }

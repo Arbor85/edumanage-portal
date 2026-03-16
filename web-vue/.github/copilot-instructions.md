@@ -39,6 +39,7 @@ Use these rules for all React/TypeScript code in this workspace.
 5. Keep page-level orchestration in page files and move isolated UI blocks to components.
 6. Pages must be created in `src/services`.
 7. Select{entity} components must be created in `src/components/Select{Entity}` and support searching and selecting from existing entities.
+8. Use custom scrollbar styles for all scrollable divs to ensure consistent look across browsers.
 
 # New page rules
 1. List view should be created first, then details view if needed.

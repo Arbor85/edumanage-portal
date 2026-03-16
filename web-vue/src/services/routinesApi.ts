@@ -48,6 +48,7 @@ export const useRoutinesApi = () => {
       },
       body: JSON.stringify({
         name: payload.name,
+        note: payload.note,
         excercises: payload.excercises,
       }),
     })
@@ -63,6 +64,7 @@ export const useRoutinesApi = () => {
       },
       body: JSON.stringify({
         name: payload.name,
+        note: payload.note,
         excercises: payload.excercises,
       }),
     })

@@ -58,7 +58,7 @@
           </select>
         </div>
 
-        <div class="max-h-96 space-y-2 overflow-auto rounded-md border border-slate-300 p-2 dark:border-slate-600">
+        <div class="custom-scrollbar max-h-96 space-y-2 overflow-auto rounded-md border border-slate-300 p-2 dark:border-slate-600">
           <div
             v-for="client in filteredClients"
             :key="client.invitationCode"

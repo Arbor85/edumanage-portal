@@ -32,7 +32,7 @@
           </button>
         </div>
 
-        <div class="max-h-72 overflow-y-auto rounded-md border border-slate-200 dark:border-slate-700">
+        <div class="custom-scrollbar max-h-72 overflow-y-auto rounded-md border border-slate-200 dark:border-slate-700">
           <div
             v-for="option in options"
             :key="option"

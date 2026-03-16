@@ -1,7 +1,7 @@
 <template>
   <button
     type="button"
-    class="rounded-md border px-2 py-1 text-xs font-medium transition-colors"
+    class="w-8 rounded-md border px-2 py-1 text-center text-xs font-medium transition-colors"
     :class="triggerClass"
     @click="isOpen = true"
   >
@@ -64,7 +64,10 @@ const options: { value: SetType; label: string }[] = [
 ]
 
 const currentLabel = computed(() => {
-  return options.find((option) => option.value === props.modelValue)?.label ?? 'Type'
+  if (props.modelValue === 'warmup') return 'W'
+  if (props.modelValue === 'normal') return 'N'
+  if (props.modelValue === 'fail') return 'F'
+  return 'N'
 })
 
 const triggerClass = computed(() => {

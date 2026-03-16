@@ -43,7 +43,7 @@
           </select>
         </div>
 
-        <div class="max-h-64 space-y-2 overflow-auto rounded-md border border-slate-300 p-2 dark:border-slate-600">
+        <div class="custom-scrollbar max-h-64 space-y-2 overflow-auto rounded-md border border-slate-300 p-2 dark:border-slate-600">
           <div
             v-for="excercise in filteredOptions"
             :key="excercise.id"
