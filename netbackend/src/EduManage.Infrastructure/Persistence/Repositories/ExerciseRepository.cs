@@ -1,4 +1,3 @@
-using System.Text.Json.Nodes;
 using EduManage.Application.Contracts;
 using Microsoft.EntityFrameworkCore;
 
@@ -21,23 +20,8 @@ internal sealed class ExerciseRepository : IExerciseRepository
             e.Name,
             e.ShortDescription,
             e.PrimaryMuscle,
-            ParseJsonObjects(e.MusclesJson),
+            e.Muscles,
             e.Tags
         )).ToList();
-    }
-
-    private static IReadOnlyList<JsonObject> ParseJsonObjects(string json)
-    {
-        try
-        {
-            var parsed = JsonNode.Parse(json);
-            if (parsed is JsonArray arr)
-            {
-                return arr.OfType<JsonObject>().ToList();
-            }
-        }
-        catch { }
-
-        return [];
     }
 }

@@ -1,3 +1,4 @@
+using System.Text.Json.Nodes;
 using EduManage.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -15,6 +16,12 @@ public class ExerciseConfiguration : IEntityTypeConfiguration<Exercise>
                 v => string.Join(",", v),
                 v => v.Split(",", StringSplitOptions.None).ToList());
 
+        // Configure Muscles property: stored as JSON string in database, converted automatically by EF
+        builder.Property(e => e.Muscles)
+            .HasConversion(
+                muscles => muscles.Any() ? "[" + string.Join(",", muscles.Select(m => m.ToJsonString())) + "]" : "[]",
+                json => ParseJsonObjects(json));
+
         // Seed exercise data
         builder.HasData(
             new Exercise
@@ -23,7 +30,7 @@ public class ExerciseConfiguration : IEntityTypeConfiguration<Exercise>
                 Name = "Squat",
                 ShortDescription = "Back squat pattern",
                 PrimaryMuscle = "Quadriceps",
-                MusclesJson = "[{\"name\":\"Quadriceps\"}]",
+                Muscles = new List<JsonObject> { JsonNode.Parse("{\"name\":\"Quadriceps\"}")!.AsObject() }.AsReadOnly(),
                 Tags = ["Legs", "Strength"]
             },
             new Exercise
@@ -32,7 +39,7 @@ public class ExerciseConfiguration : IEntityTypeConfiguration<Exercise>
                 Name = "Bench Press",
                 ShortDescription = "Barbell horizontal press",
                 PrimaryMuscle = "Chest",
-                MusclesJson = "[{\"name\":\"Pectorals\"}]",
+                Muscles = new List<JsonObject> { JsonNode.Parse("{\"name\":\"Pectorals\"}")!.AsObject() }.AsReadOnly(),
                 Tags = ["Chest", "Strength"]
             },
             new Exercise
@@ -41,9 +48,24 @@ public class ExerciseConfiguration : IEntityTypeConfiguration<Exercise>
                 Name = "Deadlift",
                 ShortDescription = "Hip hinge pull",
                 PrimaryMuscle = "Posterior Chain",
-                MusclesJson = "[{\"name\":\"Hamstrings\"}]",
+                Muscles = new List<JsonObject> { JsonNode.Parse("{\"name\":\"Hamstrings\"}")!.AsObject() }.AsReadOnly(),
                 Tags = ["Back", "Strength"]
             }
         );
+    }
+
+    private static IReadOnlyList<JsonObject> ParseJsonObjects(string json)
+    {
+        try
+        {
+            var parsed = JsonNode.Parse(json);
+            if (parsed is JsonArray arr)
+            {
+                return arr.OfType<JsonObject>().ToList().AsReadOnly();
+            }
+        }
+        catch { }
+
+        return [];
     }
 }
