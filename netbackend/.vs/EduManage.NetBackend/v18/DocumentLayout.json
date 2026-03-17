@@ -1,0 +1,49 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\arbor\\edumanage-portal\\netbackend\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{A6C2521A-FCC1-4364-BBD5-88B1EAE01A65}|src\\EduManage.Api\\EduManage.Api.csproj|c:\\users\\arbor\\edumanage-portal\\netbackend\\src\\edumanage.api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A6C2521A-FCC1-4364-BBD5-88B1EAE01A65}|src\\EduManage.Api\\EduManage.Api.csproj|solutionrelative:src\\edumanage.api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 3,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:128:0:{75188d03-9892-4ae2-abf1-207126247ce5}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:129:0:{13b12e3e-c1b4-4539-9371-4fe9a0d523fc}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:128:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\arbor\\edumanage-portal\\netbackend\\src\\EduManage.Api\\Program.cs",
+              "RelativeDocumentMoniker": "src\\EduManage.Api\\Program.cs",
+              "ToolTip": "C:\\Users\\arbor\\edumanage-portal\\netbackend\\src\\EduManage.Api\\Program.cs",
+              "RelativeToolTip": "src\\EduManage.Api\\Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAiAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-17T08:35:00.42Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

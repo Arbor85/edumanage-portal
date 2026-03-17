@@ -1,5 +1,9 @@
 {
     "chat.tools.terminal.autoApprove": {
-        "npm install": true
+        "npm install": true,
+        "/^Get-Location; Get-ChildItem -Force; dotnet --version$/": {
+            "approve": true,
+            "matchCommandLine": true
+        }
     }
 }
