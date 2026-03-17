@@ -89,6 +89,10 @@ public class CreateOrderHandler : IRequestHandler<CreateOrderCommand, Guid>
 * Define repository interfaces in **Domain or Application layer**.
 * Implement repositories in **Infrastructure layer**.
 * Do not include business logic in repositories.
+* Keep repository methods focused on data access.
+* Each entity should have its own repository interface.
+* Each repository should have a clear, limited set of methods (e.g., `AddAsync`, `GetByIdAsync`, `FindAsync`).
+* Each entity should have a separate repository kept in its own file but ingherited from a common base repository interface if needed.
 
 ```csharp
 public interface IOrderRepository

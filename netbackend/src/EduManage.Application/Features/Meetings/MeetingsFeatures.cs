@@ -8,22 +8,22 @@ public sealed record AddMeetingCommand(MeetingCreate Request) : IRequest<Meeting
 public sealed record UpdateMeetingCommand(string MeetingId, MeetingUpdate Request) : IRequest<MeetingOut>;
 public sealed record DeleteMeetingCommand(string MeetingId) : IRequest<Dictionary<string, string>>;
 
-public sealed class ListMeetingsHandler(IEduManageRepository repository) : IRequestHandler<ListMeetingsQuery, IReadOnlyList<MeetingOut>>
+public sealed class ListMeetingsHandler(IMeetingRepository repository) : IRequestHandler<ListMeetingsQuery, IReadOnlyList<MeetingOut>>
 {
     public Task<IReadOnlyList<MeetingOut>> Handle(ListMeetingsQuery request, CancellationToken cancellationToken) => repository.ListMeetingsAsync(cancellationToken);
 }
 
-public sealed class AddMeetingHandler(IEduManageRepository repository) : IRequestHandler<AddMeetingCommand, MeetingOut>
+public sealed class AddMeetingHandler(IMeetingRepository repository) : IRequestHandler<AddMeetingCommand, MeetingOut>
 {
     public Task<MeetingOut> Handle(AddMeetingCommand request, CancellationToken cancellationToken) => repository.AddMeetingAsync(request.Request, cancellationToken);
 }
 
-public sealed class UpdateMeetingHandler(IEduManageRepository repository) : IRequestHandler<UpdateMeetingCommand, MeetingOut>
+public sealed class UpdateMeetingHandler(IMeetingRepository repository) : IRequestHandler<UpdateMeetingCommand, MeetingOut>
 {
     public Task<MeetingOut> Handle(UpdateMeetingCommand request, CancellationToken cancellationToken) => repository.UpdateMeetingAsync(request.MeetingId, request.Request, cancellationToken);
 }
 
-public sealed class DeleteMeetingHandler(IEduManageRepository repository) : IRequestHandler<DeleteMeetingCommand, Dictionary<string, string>>
+public sealed class DeleteMeetingHandler(IMeetingRepository repository) : IRequestHandler<DeleteMeetingCommand, Dictionary<string, string>>
 {
     public Task<Dictionary<string, string>> Handle(DeleteMeetingCommand request, CancellationToken cancellationToken) => repository.DeleteMeetingAsync(request.MeetingId, cancellationToken);
 }
