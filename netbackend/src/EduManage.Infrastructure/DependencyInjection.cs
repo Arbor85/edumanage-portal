@@ -1,5 +1,6 @@
 using EduManage.Application.Contracts;
 using EduManage.Infrastructure.Persistence;
+using EduManage.Infrastructure.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -12,7 +13,14 @@ public static class DependencyInjection
         services.AddDbContext<EduManageDbContext>(options =>
             options.UseInMemoryDatabase("EduManageDb"));
 
-        services.AddScoped<IEduManageRepository, EduManageRepository>();
+        // Register individual repositories
+        services.AddScoped<IClientRepository, ClientRepository>();
+        services.AddScoped<IPlanRepository, PlanRepository>();
+        services.AddScoped<IMeetingRepository, MeetingRepository>();
+        services.AddScoped<ICourseRepository, CourseRepository>();
+        services.AddScoped<IExerciseRepository, ExerciseRepository>();
+        services.AddScoped<IRoutineRepository, RoutineRepository>();
+        services.AddScoped<IWorkoutHistoryRepository, WorkoutHistoryRepository>();
 
         return services;
     }

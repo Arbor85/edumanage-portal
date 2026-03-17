@@ -1,0 +1,16 @@
+C:\Users\arbor\edumanage-portal\netbackend\src\EduManage.Application\bin\Debug\net10.0\EduManage.Application.deps.json
+C:\Users\arbor\edumanage-portal\netbackend\src\EduManage.Application\bin\Debug\net10.0\EduManage.Application.dll
+C:\Users\arbor\edumanage-portal\netbackend\src\EduManage.Application\bin\Debug\net10.0\EduManage.Application.pdb
+C:\Users\arbor\edumanage-portal\netbackend\src\EduManage.Application\bin\Debug\net10.0\EduManage.Domain.dll
+C:\Users\arbor\edumanage-portal\netbackend\src\EduManage.Application\bin\Debug\net10.0\EduManage.Domain.pdb
+C:\Users\arbor\edumanage-portal\netbackend\src\EduManage.Application\obj\Debug\net10.0\EduManage.Application.csproj.AssemblyReference.cache
+C:\Users\arbor\edumanage-portal\netbackend\src\EduManage.Application\obj\Debug\net10.0\EduManage.Application.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\arbor\edumanage-portal\netbackend\src\EduManage.Application\obj\Debug\net10.0\EduManage.Application.AssemblyInfoInputs.cache
+C:\Users\arbor\edumanage-portal\netbackend\src\EduManage.Application\obj\Debug\net10.0\EduManage.Application.AssemblyInfo.cs
+C:\Users\arbor\edumanage-portal\netbackend\src\EduManage.Application\obj\Debug\net10.0\EduManage.Application.csproj.CoreCompileInputs.cache
+C:\Users\arbor\edumanage-portal\netbackend\src\EduManage.Application\obj\Debug\net10.0\EduManage.Application.sourcelink.json
+C:\Users\arbor\edumanage-portal\netbackend\src\EduManage.Application\obj\Debug\net10.0\EduManag.65C6F1F2.Up2Date
+C:\Users\arbor\edumanage-portal\netbackend\src\EduManage.Application\obj\Debug\net10.0\EduManage.Application.dll
+C:\Users\arbor\edumanage-portal\netbackend\src\EduManage.Application\obj\Debug\net10.0\refint\EduManage.Application.dll
+C:\Users\arbor\edumanage-portal\netbackend\src\EduManage.Application\obj\Debug\net10.0\EduManage.Application.pdb
+C:\Users\arbor\edumanage-portal\netbackend\src\EduManage.Application\obj\Debug\net10.0\ref\EduManage.Application.dll
