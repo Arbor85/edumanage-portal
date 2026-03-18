@@ -70,18 +70,21 @@ These rules apply to all future changes in this catalog repository.
 
   * `Command` / `Query`
   * `Handler`
+* Keep **one MediatR command/query per file**.
+* Implement each handler as a **nested internal `Handler` class** inside its owning command/query.
 * Keep handlers **small, focused, and single-purpose**.
 
 Example:
 
 ```csharp
-public record CreateOrderCommand(string CustomerName) : IRequest<Guid>;
-
-public class CreateOrderHandler : IRequestHandler<CreateOrderCommand, Guid>
+public record CreateOrderCommand(string CustomerName) : IRequest<Guid>
 {
+  internal sealed class Handler : IRequestHandler<CreateOrderCommand, Guid>
+    {
     public async Task<Guid> Handle(CreateOrderCommand request, CancellationToken ct)
     {
-        // business logic
+      // business logic
+    }
     }
 }
 ```
