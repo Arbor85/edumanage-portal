@@ -1,3 +1,5 @@
+using EduManage.Api.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
 const string frontendCorsPolicy = "FrontendCors";
