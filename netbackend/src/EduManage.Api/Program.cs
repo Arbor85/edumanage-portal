@@ -1,4 +1,7 @@
 using EduManage.Api.Services;
+using EduManage.Api.Validators;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.OpenApi.Models;
 using Scalar.AspNetCore;
@@ -17,6 +20,8 @@ var auth0Audience = builder.Configuration[auth0AudienceConfigKey]
 var auth0Authority = $"https://{auth0Domain.TrimEnd('/')}/";
 
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddValidatorsFromAssemblyContaining<ExcerciseWriteRequestValidator>();
 builder.Services
 	.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 	.AddJwtBearer(options =>

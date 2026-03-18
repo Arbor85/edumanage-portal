@@ -123,6 +123,8 @@ All routes are relative to API base URL.
 
 Validation rules for `POST` and `PUT`:
 
+Validation is enforced with FluentValidation for all controller write payloads in `src/EduManage.Api/Validators`.
+
 - `name`: required, max 200 chars
 - `primaryMuscle`: required, max 120 chars
 - `secondaryMuscles`: optional array, can be empty

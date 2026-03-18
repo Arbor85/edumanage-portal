@@ -18,12 +18,6 @@ public sealed class ExcercisesController(ISender mediator) : ControllerBase
     [ProducesResponseType(StatusCodes.Status201Created)]
     public async Task<ActionResult<ExcerciseOut>> AddExcercise([FromBody] ExcerciseWriteRequest request, CancellationToken cancellationToken)
     {
-        ValidateTags(request.Tags);
-        if (!ModelState.IsValid)
-        {
-            return ValidationProblem(ModelState);
-        }
-
         var created = await mediator.Send(new AddExcerciseCommand(request), cancellationToken);
         return Created($"/api/excercises/{created.Id}", created);
     }
@@ -31,12 +25,6 @@ public sealed class ExcercisesController(ISender mediator) : ControllerBase
     [HttpPut("{id:int}")]
     public async Task<ActionResult<ExcerciseOut>> UpdateExcercise([FromRoute] int id, [FromBody] ExcerciseWriteRequest request, CancellationToken cancellationToken)
     {
-        ValidateTags(request.Tags);
-        if (!ModelState.IsValid)
-        {
-            return ValidationProblem(ModelState);
-        }
-
         try
         {
             return Ok(await mediator.Send(new UpdateExcerciseCommand(id, request), cancellationToken));
@@ -60,21 +48,4 @@ public sealed class ExcercisesController(ISender mediator) : ControllerBase
             return NotFound(new { detail = ex.Message });
         }
     }
-
-    private void ValidateTags(IReadOnlyList<string>? tags)
-    {
-        if (tags is null)
-        {
-            return;
-        }
-
-        for (var index = 0; index < tags.Count; index++)
-        {
-            if (tags[index].Length > 50)
-            {
-                ModelState.AddModelError($"tags[{index}]", "Each tag must be at most 50 characters.");
-            }
-        }
-    }
-
 }
