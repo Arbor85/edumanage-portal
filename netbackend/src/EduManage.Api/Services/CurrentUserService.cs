@@ -10,8 +10,8 @@ internal sealed class CurrentUserService(IHttpContextAccessor httpContextAccesso
             return null;
         }
 
-        return user.Identity?.Name
-            ?? user.FindFirst("sub")?.Value
+        return user.FindFirst("sub")?.Value
+            ?? user.Identity?.Name
             ?? user.FindFirst("user_id")?.Value
             ?? user.FindFirst("nameid")?.Value;
     }

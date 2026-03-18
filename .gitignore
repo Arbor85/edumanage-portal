@@ -222,3 +222,4 @@ build/
 web-vue/src/services/prompts.md
 netbackend/.vs/EduManage.NetBackend/v17/DocumentLayout.json
 netbackend/.vs/EduManage.NetBackend/v17/.suo
+netbackend/src/EduManage.Api/appsettings.local.json
