@@ -5,6 +5,15 @@ export type Excercise = {
   name: string
   shortDescription: string
   primaryMuscle: string
+  secondaryMuscles?: string[]
   muscles: ExcerciseMuscle[]
+  tags: string[]
+}
+
+export type ExcerciseWritePayload = {
+  name: string
+  shortDescription: string
+  primaryMuscle: string
+  secondaryMuscles: string[]
   tags: string[]
 }

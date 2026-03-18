@@ -16,6 +16,13 @@ public class ExerciseConfiguration : IEntityTypeConfiguration<Exercise>
                 v => string.Join(",", v),
                 v => v.Split(",", StringSplitOptions.None).ToList());
 
+        builder.Property(e => e.SecondaryMuscles)
+            .HasConversion(
+                v => string.Join(",", v),
+                v => string.IsNullOrEmpty(v)
+                    ? new List<string>()
+                    : v.Split(",", StringSplitOptions.None).ToList());
+
         builder.Property(e => e.Muscles)
             .HasConversion(
                 muscles => JsonSerializer.Serialize(muscles, (JsonSerializerOptions?)null),
@@ -28,6 +35,7 @@ public class ExerciseConfiguration : IEntityTypeConfiguration<Exercise>
                 Name = "Squat",
                 ShortDescription = "Back squat pattern",
                 PrimaryMuscle = "Quadriceps",
+                SecondaryMuscles = ["Glutes", "Hamstrings"],
                 Muscles = [new Muscle("Quadriceps")],
                 Tags = ["Legs", "Strength"]
             },
@@ -37,6 +45,7 @@ public class ExerciseConfiguration : IEntityTypeConfiguration<Exercise>
                 Name = "Bench Press",
                 ShortDescription = "Barbell horizontal press",
                 PrimaryMuscle = "Chest",
+                SecondaryMuscles = ["Front Deltoids", "Triceps"],
                 Muscles = [new Muscle("Pectorals")],
                 Tags = ["Chest", "Strength"]
             },
@@ -46,6 +55,7 @@ public class ExerciseConfiguration : IEntityTypeConfiguration<Exercise>
                 Name = "Deadlift",
                 ShortDescription = "Hip hinge pull",
                 PrimaryMuscle = "Posterior Chain",
+                SecondaryMuscles = ["Glutes", "Lower Back"],
                 Muscles = [new Muscle("Hamstrings")],
                 Tags = ["Back", "Strength"]
             }

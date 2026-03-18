@@ -36,7 +36,6 @@ pnpm-lock.yaml
 bun.lockb
 
 # Environment files
-.env
 .env.*
 !.env.example
 !.env.production.example

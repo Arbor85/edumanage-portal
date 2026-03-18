@@ -105,6 +105,31 @@ All routes are relative to API base URL.
 
 - `GET /api/excercises`
   - Request body: none
+- `POST /api/excercises`
+  - Request JSON:
+    ```json
+    {
+      "name": "Bench Press",
+      "shortDescription": "Compound chest press movement",
+      "primaryMuscle": "Chest",
+      "secondaryMuscles": ["Front Deltoids", "Triceps"],
+      "tags": ["compound", "push", "barbell"]
+    }
+    ```
+- `PUT /api/excercises/{id}`
+  - Request JSON: same shape as `POST /api/excercises`
+- `DELETE /api/excercises/{id}`
+  - Request body: none
+
+Validation rules for `POST` and `PUT`:
+
+- `name`: required, max 200 chars
+- `primaryMuscle`: required, max 120 chars
+- `secondaryMuscles`: optional array, can be empty
+- `secondaryMuscles`: entries matching `primaryMuscle` are removed
+- `secondaryMuscles`: duplicate entries are removed (case-insensitive)
+- `shortDescription`: optional, max 500 chars
+- `tags`: optional array, each tag max 50 chars
 
 ### Meetings (`/api/meetings`)
 

@@ -67,6 +67,26 @@
             {{ tag }}
           </span>
         </div>
+
+        <div class="mt-3 flex justify-end gap-2">
+          <button
+            type="button"
+            @click="excerciseToDelete = excercise"
+            class="inline-flex items-center justify-center rounded-md border border-rose-300 bg-white p-2 text-rose-700 hover:bg-rose-50 dark:border-rose-700 dark:bg-slate-700 dark:text-rose-300 dark:hover:bg-rose-900/30"
+            aria-label="Delete exercise"
+            title="Delete exercise"
+          >
+            <Trash2 :size="16" />
+          </button>
+          <button
+            type="button"
+            @click="openEditDialog(excercise)"
+            class="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600"
+          >
+            <Edit2 :size="14" />
+            Edit
+          </button>
+        </div>
       </article>
 
       <div v-if="filteredExcercises.length === 0"
@@ -89,6 +109,7 @@
               <th class="px-4 py-3 font-semibold">Primary muscle</th>
               <th class="px-4 py-3 font-semibold">Tags</th>
               <th class="px-4 py-3 font-semibold">Description</th>
+              <th class="px-4 py-3 font-semibold text-right">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -105,6 +126,27 @@
                 </div>
               </td>
               <td class="px-4 py-3 text-slate-700 dark:text-slate-300">{{ excercise.shortDescription }}</td>
+              <td class="px-4 py-3">
+                <div class="flex justify-end gap-2">
+                  <button
+                    type="button"
+                    @click="excerciseToDelete = excercise"
+                    class="inline-flex items-center justify-center rounded-md border border-rose-300 bg-white p-2 text-rose-700 hover:bg-rose-50 dark:border-rose-700 dark:bg-slate-700 dark:text-rose-300 dark:hover:bg-rose-900/30"
+                    aria-label="Delete exercise"
+                    title="Delete exercise"
+                  >
+                    <Trash2 :size="16" />
+                  </button>
+                  <button
+                    type="button"
+                    @click="openEditDialog(excercise)"
+                    class="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600"
+                  >
+                    <Edit2 :size="14" />
+                    Edit
+                  </button>
+                </div>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -119,12 +161,31 @@
         </button>
       </div>
     </div>
-    <DialogActionPanel primary-label="Create excercise" @primary-click="showCreateUnavailableInfo" />
+    <DialogActionPanel primary-label="Create excercise" @primary-click="openCreateDialog" />
+
+    <ExcerciseEditorDialog
+      :open="showDialog"
+      :title="isEditing ? 'Edit exercise' : 'Create exercise'"
+      :save-label="isEditing ? 'Save changes' : 'Create exercise'"
+      :initial="editingExcercise"
+      @cancel="closeDialog"
+      @save="saveExcercise"
+    />
+
+    <ConfirmDialog
+      :open="!!excerciseToDelete"
+      title="Delete exercise"
+      :message="excerciseToDelete ? `Are you sure you want to delete '${excerciseToDelete.name}'?` : ''"
+      @confirm="deleteExcercise"
+      @cancel="excerciseToDelete = null"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import { Edit2, Trash2 } from 'lucide-vue-next'
+import ConfirmDialog from '../components/ConfirmDialog.vue'
 import DialogActionPanel from '../components/DialogActionPanel.vue'
 import FilterOption from '../components/FilterOption.vue'
 import LoadingPanel from '../components/LoadingPanel.vue'
@@ -132,7 +193,8 @@ import SearchInput from '../components/SearchInput.vue'
 import { useLocalStorageState } from '../composables/useLocalStorageState'
 import { usePageTitle } from '../composables/usePageTitle'
 import { useExcercisesApi } from '../services/excercisesApi'
-import type { Excercise } from '../types/excercise'
+import type { Excercise, ExcerciseWritePayload } from '../types/excercise'
+import ExcerciseEditorDialog from './Excercises/components/ExcerciseEditorDialog.vue'
 
 usePageTitle('Excercises')
 
@@ -145,6 +207,11 @@ const searchQuery = ref('')
 const selectedPrimaryMuscles = ref<string[]>([])
 const selectedTags = ref<string[]>([])
 const viewMode = useLocalStorageState<'tile' | 'list'>('excercises:viewMode', 'tile')
+
+const showDialog = ref(false)
+const isEditing = ref(false)
+const editingExcercise = ref<Excercise | null>(null)
+const excerciseToDelete = ref<Excercise | null>(null)
 
 const primaryMuscleOptions = computed(() => {
   const muscles = new Set(excercises.value.map((excercise) => excercise.primaryMuscle))
@@ -178,6 +245,54 @@ const filteredExcercises = computed(() => {
   })
 })
 
+const openCreateDialog = () => {
+  isEditing.value = false
+  editingExcercise.value = null
+  showDialog.value = true
+}
+
+const openEditDialog = (excercise: Excercise) => {
+  isEditing.value = true
+  editingExcercise.value = excercise
+  showDialog.value = true
+}
+
+const closeDialog = () => {
+  showDialog.value = false
+  isEditing.value = false
+  editingExcercise.value = null
+}
+
+const saveExcercise = async (payload: ExcerciseWritePayload) => {
+  errorMessage.value = ''
+  try {
+    if (isEditing.value && editingExcercise.value) {
+      const updated = await excercisesApi.updateExcercise(editingExcercise.value.id, payload)
+      const index = excercises.value.findIndex((e) => e.id === updated.id)
+      if (index !== -1) excercises.value[index] = updated
+    } else {
+      const created = await excercisesApi.createExcercise(payload)
+      excercises.value.push(created)
+    }
+    closeDialog()
+  } catch (error) {
+    errorMessage.value = error instanceof Error ? error.message : 'Failed to save exercise'
+  }
+}
+
+const deleteExcercise = async () => {
+  if (!excerciseToDelete.value) return
+  errorMessage.value = ''
+  try {
+    await excercisesApi.deleteExcercise(excerciseToDelete.value.id)
+    excercises.value = excercises.value.filter((e) => e.id !== excerciseToDelete.value?.id)
+    excerciseToDelete.value = null
+  } catch (error) {
+    errorMessage.value = error instanceof Error ? error.message : 'Failed to delete exercise'
+    excerciseToDelete.value = null
+  }
+}
+
 const loadExcercises = async () => {
   isLoading.value = true
   errorMessage.value = ''
@@ -189,10 +304,6 @@ const loadExcercises = async () => {
   } finally {
     isLoading.value = false
   }
-}
-
-const showCreateUnavailableInfo = () => {
-  errorMessage.value = 'Create excercise is not available yet.'
 }
 
 onMounted(() => {

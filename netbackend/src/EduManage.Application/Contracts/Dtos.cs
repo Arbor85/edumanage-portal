@@ -1,4 +1,5 @@
 using EduManage.Domain.Entities;
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
 namespace EduManage.Application.Contracts;
@@ -78,8 +79,16 @@ public sealed record ExcerciseOut(
     string Name,
     string ShortDescription,
     string PrimaryMuscle,
+    IReadOnlyList<string> SecondaryMuscles,
     IReadOnlyList<Muscle> Muscles,
     IReadOnlyList<string> Tags);
+
+public sealed record ExcerciseWriteRequest(
+    [property: Required, MaxLength(200)] string Name,
+    [property: MaxLength(500)] string? ShortDescription,
+    [property: Required, MaxLength(120)] string PrimaryMuscle,
+    IReadOnlyList<string>? SecondaryMuscles,
+    IReadOnlyList<string>? Tags);
 
 public sealed record CompletedRoutineSet(string Type, int? Reps, double? Weight, string? Notes, bool Completed);
 
