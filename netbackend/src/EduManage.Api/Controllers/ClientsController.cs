@@ -12,13 +12,15 @@ public sealed class ClientsController(ISender mediator) : ControllerBase
 {
     [HttpGet]
     public Task<IReadOnlyList<ClientOut>> ListClients(CancellationToken cancellationToken) =>
-        mediator.Send(new ListClientsQuery(), cancellationToken);
+        mediator.Send(new ListClientsQuery(GetCurrentUserId()), cancellationToken);
 
     [HttpPost]
+    private string? GetCurrentUserId() =>
+        User?.Identity?.Name ?? User?.FindFirst("sub")?.Value ?? User?.FindFirst("user_id")?.Value;
     [ProducesResponseType(StatusCodes.Status201Created)]
     public async Task<ActionResult<ClientOut>> AddClient([FromBody] ClientCreate request, CancellationToken cancellationToken)
     {
-        var created = await mediator.Send(new AddClientCommand(request), cancellationToken);
+        var created = await mediator.Send(new AddClientCommand(request, GetCurrentUserId()), cancellationToken);
         return Created($"/api/clients/{created.InvitationCode}", created);
     }
 
@@ -27,7 +29,7 @@ public sealed class ClientsController(ISender mediator) : ControllerBase
     {
         try
         {
-            return Ok(await mediator.Send(new EditClientCommand(invitationCode, request), cancellationToken));
+            return Ok(await mediator.Send(new EditClientCommand(invitationCode, request, GetCurrentUserId()), cancellationToken));
         }
         catch (NotFoundException ex)
         {
@@ -40,7 +42,7 @@ public sealed class ClientsController(ISender mediator) : ControllerBase
     {
         try
         {
-            return Ok(await mediator.Send(new DeleteClientCommand(invitationCode), cancellationToken));
+            return Ok(await mediator.Send(new DeleteClientCommand(invitationCode, GetCurrentUserId()), cancellationToken));
         }
         catch (NotFoundException ex)
         {
@@ -53,7 +55,7 @@ public sealed class ClientsController(ISender mediator) : ControllerBase
     {
         try
         {
-            return Ok(await mediator.Send(new AcceptClientInvitationCommand(invitationCode, request), cancellationToken));
+            return Ok(await mediator.Send(new AcceptClientInvitationCommand(invitationCode, request, GetCurrentUserId()), cancellationToken));
         }
         catch (NotFoundException ex)
         {

@@ -22,6 +22,7 @@ public static class DependencyInjection
         services.AddScoped<IRoutineRepository, RoutineRepository>();
         services.AddScoped<IWorkoutHistoryRepository, WorkoutHistoryRepository>();
 
+
         return services;
     }
 }
