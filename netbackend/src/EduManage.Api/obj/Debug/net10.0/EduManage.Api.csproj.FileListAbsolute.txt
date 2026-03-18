@@ -9,6 +9,9 @@ C:\Users\arbor\edumanage-portal\netbackend\src\EduManage.Api\bin\Debug\net10.0\E
 C:\Users\arbor\edumanage-portal\netbackend\src\EduManage.Api\bin\Debug\net10.0\MediatR.dll
 C:\Users\arbor\edumanage-portal\netbackend\src\EduManage.Api\bin\Debug\net10.0\MediatR.Contracts.dll
 C:\Users\arbor\edumanage-portal\netbackend\src\EduManage.Api\bin\Debug\net10.0\Microsoft.AspNetCore.OpenApi.dll
+C:\Users\arbor\edumanage-portal\netbackend\src\EduManage.Api\bin\Debug\net10.0\Microsoft.EntityFrameworkCore.dll
+C:\Users\arbor\edumanage-portal\netbackend\src\EduManage.Api\bin\Debug\net10.0\Microsoft.EntityFrameworkCore.Abstractions.dll
+C:\Users\arbor\edumanage-portal\netbackend\src\EduManage.Api\bin\Debug\net10.0\Microsoft.EntityFrameworkCore.InMemory.dll
 C:\Users\arbor\edumanage-portal\netbackend\src\EduManage.Api\bin\Debug\net10.0\Microsoft.IdentityModel.Abstractions.dll
 C:\Users\arbor\edumanage-portal\netbackend\src\EduManage.Api\bin\Debug\net10.0\Microsoft.IdentityModel.JsonWebTokens.dll
 C:\Users\arbor\edumanage-portal\netbackend\src\EduManage.Api\bin\Debug\net10.0\Microsoft.IdentityModel.Logging.dll
@@ -47,4 +50,3 @@ C:\Users\arbor\edumanage-portal\netbackend\src\EduManage.Api\obj\Debug\net10.0\r
 C:\Users\arbor\edumanage-portal\netbackend\src\EduManage.Api\obj\Debug\net10.0\EduManage.Api.pdb
 C:\Users\arbor\edumanage-portal\netbackend\src\EduManage.Api\obj\Debug\net10.0\EduManage.Api.genruntimeconfig.cache
 C:\Users\arbor\edumanage-portal\netbackend\src\EduManage.Api\obj\Debug\net10.0\ref\EduManage.Api.dll
-C:\Users\arbor\edumanage-portal\netbackend\src\EduManage.Api\obj\Debug\net10.0\staticwebassets.upToDateCheck.txt

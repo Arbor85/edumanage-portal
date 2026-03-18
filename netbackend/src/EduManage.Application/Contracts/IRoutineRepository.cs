@@ -6,5 +6,4 @@ public interface IRoutineRepository
     Task<RoutineOut> AddRoutineAsync(RoutineCreate request, CancellationToken cancellationToken);
     Task<RoutineOut> UpdateRoutineAsync(string routineId, RoutineUpdate request, CancellationToken cancellationToken);
     Task<Dictionary<string, string>> DeleteRoutineAsync(string routineId, CancellationToken cancellationToken);
-    Task<WorkoutHistoryOut> CompleteRoutineAsync(CompleteRoutineCreate request, CancellationToken cancellationToken);
 }

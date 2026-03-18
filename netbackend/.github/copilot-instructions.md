@@ -5,7 +5,7 @@ These rules apply to all future changes in this catalog repository.
 
 ## 🎯 General Guidelines
 
-* Use **latest stable .NET (LTS)** and modern C# features.
+* Follow the **current solution target framework** and modern C# features (currently `net10.0` in this repo).
 * Prefer **minimal APIs or controllers only when appropriate**, while maintaining separation of concerns.
 * Write **clean, readable, maintainable code**.
 * Follow **SOLID principles**.
@@ -30,29 +30,33 @@ These rules apply to all future changes in this catalog repository.
 * Use **rich domain models**, avoid anemic models.
 * Encapsulate logic inside aggregates.
 
+### Project Decisions (Do Not Revert)
+
+* Data access uses **EF Core InMemory provider** via `UseInMemoryDatabase("EduManageDb")`.
+* Repository interfaces live in **Application/Contracts**.
+* Repository implementations live in **Infrastructure/Persistence/Repositories**.
+* Use **separate repository per entity/use-case boundary**.
+* Do **not** reintroduce aggregate `IEduManageRepository` / `EduManageRepository`.
+* Keep **separate EF configuration class per entity** in `Infrastructure/Persistence/Configurations`.
+* Keep handlers injecting **specific repository interfaces only** (e.g., `IClientRepository`, `IPlanRepository`, etc.).
+* JSON conversion/parsing for persisted fields belongs to **EF configuration (ValueConverter)**, not repository classes.
+
 ---
 
 ## 📁 Folder Structure
 
 ```
 /src
-  /Api
-  /Application
+  /EduManage.Api
+  /EduManage.Application
+    /Contracts
     /Features
-      /Orders
-        CreateOrder
-        GetOrder
-  /Domain
+  /EduManage.Domain
     /Entities
-    /ValueObjects
-    /Interfaces
-  /Infrastructure
+  /EduManage.Infrastructure
     /Persistence
-    /Repositories
-
-/tests
-  /UnitTests
-  /IntegrationTests
+      /Configurations
+      /Repositories
 ```
 
 ---
@@ -86,13 +90,19 @@ public class CreateOrderHandler : IRequestHandler<CreateOrderCommand, Guid>
 
 ### Repository Pattern
 
-* Define repository interfaces in **Domain or Application layer**.
+* Define repository interfaces in **Application/Contracts**.
 * Implement repositories in **Infrastructure layer**.
 * Do not include business logic in repositories.
-* Keep repository methods focused on data access.
-* Each entity should have its own repository interface.
-* Each repository should have a clear, limited set of methods (e.g., `AddAsync`, `GetByIdAsync`, `FindAsync`).
-* Each entity should have a separate repository kept in its own file but ingherited from a common base repository interface if needed.
+* Keep repositories focused and separated:
+
+  * `IClientRepository`
+  * `IPlanRepository`
+  * `IMeetingRepository`
+  * `ICourseRepository`
+  * `IExerciseRepository`
+  * `IRoutineRepository`
+  * `IWorkoutHistoryRepository`
+* Do not add a unified facade repository that combines all operations.
 
 ```csharp
 public interface IOrderRepository
@@ -109,7 +119,10 @@ public interface IOrderRepository
 * Use **latest EF Core version**.
 * Place `DbContext` in Infrastructure.
 * Use **Fluent API configuration** (avoid data annotations where possible).
-* Manage migrations properly.
+* Keep one `IEntityTypeConfiguration<T>` per entity in separate files.
+* Keep conversions (e.g., JSON-to-object mapping) inside EF configuration using value converters.
+* Repositories should consume already-mapped entities and avoid raw JSON parsing.
+* Manage migrations properly if/when provider changes from InMemory.
 * Do not expose EF entities outside Infrastructure.
 
 ---
@@ -190,6 +203,7 @@ public async Task Should_Create_Order()
   * DbContext
   * Repositories
   * Application services
+* Register only concrete per-entity repositories; avoid aggregate repository registrations.
 
 ---
 

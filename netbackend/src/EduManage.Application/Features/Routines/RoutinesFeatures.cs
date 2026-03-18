@@ -29,7 +29,7 @@ public sealed class DeleteRoutineHandler(IRoutineRepository repository) : IReque
     public Task<Dictionary<string, string>> Handle(DeleteRoutineCommand request, CancellationToken cancellationToken) => repository.DeleteRoutineAsync(request.RoutineId, cancellationToken);
 }
 
-public sealed class CompleteRoutineHandler(IRoutineRepository repository) : IRequestHandler<CompleteRoutineCommand, WorkoutHistoryOut>
+public sealed class CompleteRoutineHandler(IWorkoutHistoryRepository repository) : IRequestHandler<CompleteRoutineCommand, WorkoutHistoryOut>
 {
     public Task<WorkoutHistoryOut> Handle(CompleteRoutineCommand request, CancellationToken cancellationToken) => repository.CompleteRoutineAsync(request.Request, cancellationToken);
 }
