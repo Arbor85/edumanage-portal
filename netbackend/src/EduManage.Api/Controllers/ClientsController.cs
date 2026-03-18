@@ -1,6 +1,7 @@
 using EduManage.Application.Common.Exceptions;
 using EduManage.Application.Contracts;
 using EduManage.Application.Features.Clients;
+using EduManage.Api.Services;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,19 +9,17 @@ namespace EduManage.Api.Controllers;
 
 [ApiController]
 [Route("api/clients")]
-public sealed class ClientsController(ISender mediator) : ControllerBase
+public sealed class ClientsController(ISender mediator, ICurrentUserService currentUserService) : ControllerBase
 {
     [HttpGet]
     public Task<IReadOnlyList<ClientOut>> ListClients(CancellationToken cancellationToken) =>
-        mediator.Send(new ListClientsQuery(GetCurrentUserId()), cancellationToken);
+        mediator.Send(new ListClientsQuery(currentUserService.GetCurrentUserId()), cancellationToken);
 
     [HttpPost]
-    private string? GetCurrentUserId() =>
-        User?.Identity?.Name ?? User?.FindFirst("sub")?.Value ?? User?.FindFirst("user_id")?.Value;
     [ProducesResponseType(StatusCodes.Status201Created)]
     public async Task<ActionResult<ClientOut>> AddClient([FromBody] ClientCreate request, CancellationToken cancellationToken)
     {
-        var created = await mediator.Send(new AddClientCommand(request, GetCurrentUserId()), cancellationToken);
+        var created = await mediator.Send(new AddClientCommand(request, currentUserService.GetCurrentUserId()), cancellationToken);
         return Created($"/api/clients/{created.InvitationCode}", created);
     }
 
@@ -29,7 +28,7 @@ public sealed class ClientsController(ISender mediator) : ControllerBase
     {
         try
         {
-            return Ok(await mediator.Send(new EditClientCommand(invitationCode, request, GetCurrentUserId()), cancellationToken));
+            return Ok(await mediator.Send(new EditClientCommand(invitationCode, request, currentUserService.GetCurrentUserId()), cancellationToken));
         }
         catch (NotFoundException ex)
         {
@@ -42,7 +41,7 @@ public sealed class ClientsController(ISender mediator) : ControllerBase
     {
         try
         {
-            return Ok(await mediator.Send(new DeleteClientCommand(invitationCode, GetCurrentUserId()), cancellationToken));
+            return Ok(await mediator.Send(new DeleteClientCommand(invitationCode, currentUserService.GetCurrentUserId()), cancellationToken));
         }
         catch (NotFoundException ex)
         {
@@ -55,7 +54,7 @@ public sealed class ClientsController(ISender mediator) : ControllerBase
     {
         try
         {
-            return Ok(await mediator.Send(new AcceptClientInvitationCommand(invitationCode, request, GetCurrentUserId()), cancellationToken));
+            return Ok(await mediator.Send(new AcceptClientInvitationCommand(invitationCode, request, currentUserService.GetCurrentUserId()), cancellationToken));
         }
         catch (NotFoundException ex)
         {
