@@ -1,5 +1,5 @@
-using System.Text.Json.Nodes;
 using EduManage.Application.Contracts;
+using EduManage.Domain.Entities;
 
 namespace EduManage.Infrastructure;
 
@@ -7,9 +7,9 @@ internal sealed class ExcerciseRepository(EduManageDbContext dbContext) : Reposi
 {
     private static readonly IReadOnlyList<ExcerciseOut> DefaultExcercises =
     [
-        new(1, "Squat", "Back squat pattern", "Quadriceps", [new JsonObject { ["name"] = "Quadriceps" }], ["Legs", "Strength"]),
-        new(2, "Bench Press", "Barbell horizontal press", "Chest", [new JsonObject { ["name"] = "Pectorals" }], ["Chest", "Strength"]),
-        new(3, "Deadlift", "Hip hinge pull", "Posterior Chain", [new JsonObject { ["name"] = "Hamstrings" }], ["Back", "Strength"])
+        new(1, "Squat", "Back squat pattern", "Quadriceps", [new Muscle("Quadriceps")], ["Legs", "Strength"]),
+        new(2, "Bench Press", "Barbell horizontal press", "Chest", [new Muscle("Pectorals")], ["Chest", "Strength"]),
+        new(3, "Deadlift", "Hip hinge pull", "Posterior Chain", [new Muscle("Hamstrings")], ["Back", "Strength"])
     ];
 
     public async Task<IReadOnlyList<ExcerciseOut>> ListExcercisesAsync(CancellationToken cancellationToken)

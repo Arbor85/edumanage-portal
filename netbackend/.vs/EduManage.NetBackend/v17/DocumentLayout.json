@@ -3,6 +3,18 @@
   "WorkspaceRootPath": "C:\\Users\\lukasz.wojcik\\source\\repos\\edumanage-portal\\netbackend\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{4BF417E3-9F68-43A8-B162-D07250AAF55A}|src\\EduManage.Infrastructure\\EduManage.Infrastructure.csproj|c:\\users\\lukasz.wojcik\\source\\repos\\edumanage-portal\\netbackend\\src\\edumanage.infrastructure\\persistence\\configurations\\exerciseconfiguration.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{4BF417E3-9F68-43A8-B162-D07250AAF55A}|src\\EduManage.Infrastructure\\EduManage.Infrastructure.csproj|solutionrelative:src\\edumanage.infrastructure\\persistence\\configurations\\exerciseconfiguration.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4BF417E3-9F68-43A8-B162-D07250AAF55A}|src\\EduManage.Infrastructure\\EduManage.Infrastructure.csproj|c:\\users\\lukasz.wojcik\\source\\repos\\edumanage-portal\\netbackend\\src\\edumanage.infrastructure\\excerciserepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{4BF417E3-9F68-43A8-B162-D07250AAF55A}|src\\EduManage.Infrastructure\\EduManage.Infrastructure.csproj|solutionrelative:src\\edumanage.infrastructure\\excerciserepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CB44EBD1-2B8F-481B-A209-9E2C48B1989F}|src\\EduManage.Domain\\EduManage.Domain.csproj|c:\\users\\lukasz.wojcik\\source\\repos\\edumanage-portal\\netbackend\\src\\edumanage.domain\\entities\\exercise.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CB44EBD1-2B8F-481B-A209-9E2C48B1989F}|src\\EduManage.Domain\\EduManage.Domain.csproj|solutionrelative:src\\edumanage.domain\\entities\\exercise.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{A6C2521A-FCC1-4364-BBD5-88B1EAE01A65}|src\\EduManage.Api\\EduManage.Api.csproj|c:\\users\\lukasz.wojcik\\source\\repos\\edumanage-portal\\netbackend\\src\\edumanage.api\\controllers\\coursescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{A6C2521A-FCC1-4364-BBD5-88B1EAE01A65}|src\\EduManage.Api\\EduManage.Api.csproj|solutionrelative:src\\edumanage.api\\controllers\\coursescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -12,6 +24,14 @@
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Program Files\\dotnet\\sdk\\9.0.311\\Sdks\\Microsoft.NET.Sdk\\targets\\Microsoft.NET.TargetFrameworkInference.targets||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CB44EBD1-2B8F-481B-A209-9E2C48B1989F}|src\\EduManage.Domain\\EduManage.Domain.csproj|c:\\users\\lukasz.wojcik\\source\\repos\\edumanage-portal\\netbackend\\src\\edumanage.domain\\entities\\muscle.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CB44EBD1-2B8F-481B-A209-9E2C48B1989F}|src\\EduManage.Domain\\EduManage.Domain.csproj|solutionrelative:src\\edumanage.domain\\entities\\muscle.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C3FCD176-E087-4547-87CA-1AA80D181443}|src\\EduManage.Application\\EduManage.Application.csproj|c:\\users\\lukasz.wojcik\\source\\repos\\edumanage-portal\\netbackend\\src\\edumanage.application\\contracts\\dtos.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C3FCD176-E087-4547-87CA-1AA80D181443}|src\\EduManage.Application\\EduManage.Application.csproj|solutionrelative:src\\edumanage.application\\contracts\\dtos.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -21,8 +41,60 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 3,
+          "SelectedChildIndex": 7,
           "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "ExcerciseRepository.cs",
+              "DocumentMoniker": "C:\\Users\\lukasz.wojcik\\source\\repos\\edumanage-portal\\netbackend\\src\\EduManage.Infrastructure\\ExcerciseRepository.cs",
+              "RelativeDocumentMoniker": "src\\EduManage.Infrastructure\\ExcerciseRepository.cs",
+              "ToolTip": "C:\\Users\\lukasz.wojcik\\source\\repos\\edumanage-portal\\netbackend\\src\\EduManage.Infrastructure\\ExcerciseRepository.cs",
+              "RelativeToolTip": "src\\EduManage.Infrastructure\\ExcerciseRepository.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-18T09:20:23.837Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "Dtos.cs",
+              "DocumentMoniker": "C:\\Users\\lukasz.wojcik\\source\\repos\\edumanage-portal\\netbackend\\src\\EduManage.Application\\Contracts\\Dtos.cs",
+              "RelativeDocumentMoniker": "src\\EduManage.Application\\Contracts\\Dtos.cs",
+              "ToolTip": "C:\\Users\\lukasz.wojcik\\source\\repos\\edumanage-portal\\netbackend\\src\\EduManage.Application\\Contracts\\Dtos.cs",
+              "RelativeToolTip": "src\\EduManage.Application\\Contracts\\Dtos.cs",
+              "ViewState": "AgIAAG0AAAAAAAAAAABBwAEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-18T09:19:59.205Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "Muscle.cs",
+              "DocumentMoniker": "C:\\Users\\lukasz.wojcik\\source\\repos\\edumanage-portal\\netbackend\\src\\EduManage.Domain\\Entities\\Muscle.cs",
+              "RelativeDocumentMoniker": "src\\EduManage.Domain\\Entities\\Muscle.cs",
+              "ToolTip": "C:\\Users\\lukasz.wojcik\\source\\repos\\edumanage-portal\\netbackend\\src\\EduManage.Domain\\Entities\\Muscle.cs",
+              "RelativeToolTip": "src\\EduManage.Domain\\Entities\\Muscle.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-18T09:18:58.778Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Exercise.cs",
+              "DocumentMoniker": "C:\\Users\\lukasz.wojcik\\source\\repos\\edumanage-portal\\netbackend\\src\\EduManage.Domain\\Entities\\Exercise.cs",
+              "RelativeDocumentMoniker": "src\\EduManage.Domain\\Entities\\Exercise.cs",
+              "ToolTip": "C:\\Users\\lukasz.wojcik\\source\\repos\\edumanage-portal\\netbackend\\src\\EduManage.Domain\\Entities\\Exercise.cs",
+              "RelativeToolTip": "src\\EduManage.Domain\\Entities\\Exercise.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-18T09:17:38.002Z",
+              "EditorCaption": ""
+            },
             {
               "$type": "Bookmark",
               "Name": "ST:134:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
@@ -38,19 +110,32 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
+              "Title": "ExerciseConfiguration.cs",
+              "DocumentMoniker": "C:\\Users\\lukasz.wojcik\\source\\repos\\edumanage-portal\\netbackend\\src\\EduManage.Infrastructure\\Persistence\\Configurations\\ExerciseConfiguration.cs",
+              "RelativeDocumentMoniker": "src\\EduManage.Infrastructure\\Persistence\\Configurations\\ExerciseConfiguration.cs",
+              "ToolTip": "C:\\Users\\lukasz.wojcik\\source\\repos\\edumanage-portal\\netbackend\\src\\EduManage.Infrastructure\\Persistence\\Configurations\\ExerciseConfiguration.cs",
+              "RelativeToolTip": "src\\EduManage.Infrastructure\\Persistence\\Configurations\\ExerciseConfiguration.cs",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAABkAAAANAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-18T09:15:13.753Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
               "Title": "CoursesController.cs",
               "DocumentMoniker": "C:\\Users\\lukasz.wojcik\\source\\repos\\edumanage-portal\\netbackend\\src\\EduManage.Api\\Controllers\\CoursesController.cs",
               "RelativeDocumentMoniker": "src\\EduManage.Api\\Controllers\\CoursesController.cs",
               "ToolTip": "C:\\Users\\lukasz.wojcik\\source\\repos\\edumanage-portal\\netbackend\\src\\EduManage.Api\\Controllers\\CoursesController.cs",
               "RelativeToolTip": "src\\EduManage.Api\\Controllers\\CoursesController.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABgAAAAcAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABwAAAAJAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-03-17T10:34:29.724Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 4,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\Users\\lukasz.wojcik\\source\\repos\\edumanage-portal\\netbackend\\src\\EduManage.Api\\Program.cs",
               "RelativeDocumentMoniker": "src\\EduManage.Api\\Program.cs",
@@ -58,12 +143,11 @@
               "RelativeToolTip": "src\\EduManage.Api\\Program.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAACEAAAAKAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-17T09:24:51.108Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-03-17T09:24:51.108Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 5,
               "Title": "Microsoft.NET.TargetFrameworkInference.targets",
               "DocumentMoniker": "C:\\Program Files\\dotnet\\sdk\\9.0.311\\Sdks\\Microsoft.NET.Sdk\\targets\\Microsoft.NET.TargetFrameworkInference.targets",
               "RelativeDocumentMoniker": "..\\..\\..\\..\\..\\..\\Program Files\\dotnet\\sdk\\9.0.311\\Sdks\\Microsoft.NET.Sdk\\targets\\Microsoft.NET.TargetFrameworkInference.targets",

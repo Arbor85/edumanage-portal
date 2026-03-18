@@ -1,4 +1,4 @@
-using System.Text.Json.Nodes;
+using EduManage.Domain.Entities;
 using System.Text.Json.Serialization;
 
 namespace EduManage.Application.Contracts;
@@ -78,7 +78,7 @@ public sealed record ExcerciseOut(
     string Name,
     string ShortDescription,
     string PrimaryMuscle,
-    IReadOnlyList<JsonObject> Muscles,
+    IReadOnlyList<Muscle> Muscles,
     IReadOnlyList<string> Tags);
 
 public sealed record CompletedRoutineSet(string Type, int? Reps, double? Weight, string? Notes, bool Completed);
