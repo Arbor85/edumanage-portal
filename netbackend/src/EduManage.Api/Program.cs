@@ -1,6 +1,7 @@
 using EduManage.Api.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.OpenApi.Models;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -73,8 +74,16 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-app.UseSwagger();
+app.UseSwagger(options =>
+{
+	options.RouteTemplate = "openapi/{documentName}.json";
+});
 app.UseSwaggerUI();
+app.MapScalarApiReference(options =>
+{
+	options.WithOpenApiRoutePattern("/openapi/{documentName}.json");
+	options.WithTitle("EduManage API");
+});
 
 app.UseHttpsRedirection();
 

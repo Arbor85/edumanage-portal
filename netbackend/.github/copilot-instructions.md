@@ -197,6 +197,14 @@ public async Task Should_Create_Order()
 
 ---
 
+## 📚 Documentation Sync Rule
+
+* Keep `README.md` in sync with every relevant change.
+* Whenever API routes, request/response contracts, auth setup (Swagger/Scalar/Auth0), docs URLs, or persistence models change, update `README.md` in the same change set.
+* Do not leave documentation updates for later follow-up commits.
+
+---
+
 ## 🔌 Dependency Injection
 
 * Use built-in .NET DI container.
