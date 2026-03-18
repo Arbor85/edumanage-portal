@@ -3,11 +3,13 @@ using EduManage.Application.Contracts;
 using EduManage.Application.Features.Clients;
 using EduManage.Api.Services;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EduManage.Api.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/clients")]
 public sealed class ClientsController(ISender mediator, ICurrentUserService currentUserService) : ControllerBase
 {
