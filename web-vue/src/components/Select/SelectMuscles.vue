@@ -14,75 +14,41 @@
       <span class="ml-2 shrink-0">▾</span>
     </button>
 
-    <div
-      v-if="isOpen"
-      class="fixed inset-0 z-[70] flex items-center justify-center bg-slate-900/50 p-4"
-      @click.self="closeDialog"
-    >
-      <div class="w-full max-w-lg rounded-lg border border-slate-200 bg-white p-5 shadow-lg dark:border-slate-700 dark:bg-slate-800">
-        <div class="mb-4 flex items-center justify-between">
-          <h3 class="text-lg font-semibold text-slate-900 dark:text-slate-100">Select muscle</h3>
-          <button
-            type="button"
-            @click="closeDialog"
-            class="rounded px-2 py-1 text-slate-500 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700"
-          >
-            ✕
-          </button>
-        </div>
-
-        <div class="mb-3">
-          <SearchInput v-model="searchQuery" placeholder="Search muscles..." :autofocus="true" />
-        </div>
-
-        <div class="custom-scrollbar max-h-96 space-y-2 overflow-auto rounded-md border border-slate-300 p-2 dark:border-slate-600">
-          <button
-            v-for="muscle in filteredMuscles"
-            :key="muscle"
-            type="button"
-            @click="toggleSelection(muscle)"
-            :class="[
-              'w-full rounded px-3 py-2 text-left text-sm transition-colors',
-              isSelected(muscle)
-                ? 'bg-emerald-100 text-slate-900 dark:bg-emerald-900/30 dark:text-slate-100'
-                : 'text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700'
-            ]"
-          >
-            <div class="flex items-center justify-between gap-2">
-              <span>{{ muscle }}</span>
-              <span v-if="isSelected(muscle)" class="shrink-0 text-emerald-600 dark:text-emerald-400">✓</span>
-            </div>
-          </button>
-
-          <p v-if="filteredMuscles.length === 0" class="px-2 py-3 text-center text-sm text-slate-500 dark:text-slate-300">
-            No muscles match your search.
-          </p>
-        </div>
-
-        <div class="mt-4 flex items-center justify-end gap-2">
-          <button
-            type="button"
-            @click="closeDialog"
-            class="inline-flex items-center rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600"
-          >
-            Cancel
-          </button>
-          <button
-            v-if="multiple"
-            type="button"
-            @click="applySelection"
-            class="inline-flex items-center rounded-md border border-emerald-500 bg-emerald-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            Apply
-          </button>
-        </div>
+    <FormDialog :open="isOpen" title="Select muscle" save-label="Apply" :show-save="multiple" @cancel="closeDialog" @submit="applySelection">
+      <div class="mb-3">
+        <SearchInput v-model="searchQuery" placeholder="Search muscles..." :autofocus="true" />
       </div>
-    </div>
+
+      <div class="custom-scrollbar space-y-2 rounded-md border border-slate-300 p-2 dark:border-slate-600">
+        <button
+          v-for="muscle in filteredMuscles"
+          :key="muscle"
+          type="button"
+          @click="toggleSelection(muscle)"
+          :class="[
+            'w-full rounded px-3 py-2 text-left text-sm transition-colors',
+            isSelected(muscle)
+              ? 'bg-emerald-100 text-slate-900 dark:bg-emerald-900/30 dark:text-slate-100'
+              : 'text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700'
+          ]"
+        >
+          <div class="flex items-center justify-between gap-2">
+            <span>{{ muscle }}</span>
+            <span v-if="isSelected(muscle)" class="shrink-0 text-emerald-600 dark:text-emerald-400">✓</span>
+          </div>
+        </button>
+
+        <p v-if="filteredMuscles.length === 0" class="px-2 py-3 text-center text-sm text-slate-500 dark:text-slate-300">
+          No muscles match your search.
+        </p>
+      </div>
+    </FormDialog>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
+import FormDialog from '../FormDialog.vue'
 import SearchInput from '../SearchInput.vue'
 
 const MUSCLE_OPTIONS = [

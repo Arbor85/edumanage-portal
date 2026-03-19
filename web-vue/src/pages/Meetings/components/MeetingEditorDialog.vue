@@ -1,69 +1,39 @@
 <template>
-  <div v-if="open" class="fixed inset-0 z-[70] flex items-center justify-center bg-slate-900/50 p-4" @click.self="$emit('cancel')">
-    <div class="w-full max-w-lg rounded-lg border border-slate-200 bg-white p-5 shadow-lg dark:border-slate-700 dark:bg-slate-800">
-      <div class="mb-4 flex items-center justify-between">
-        <h3 class="text-lg font-semibold text-slate-900 dark:text-slate-100">{{ title }}</h3>
-        <button
-          type="button"
-          @click="$emit('cancel')"
-          class="rounded px-2 py-1 text-slate-500 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700"
-        >
-          ✕
-        </button>
-      </div>
-
-      <form class="space-y-4" @submit.prevent="submit">
-        <div>
-          <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">Customer</label>
-          <SelectClient v-model="clientId" :options="clients" button-text="Select customer" />
-        </div>
-
-        <div>
-          <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">Course <span class="text-slate-400 font-normal">(optional)</span></label>
-          <SelectCourse v-model="courseId" :options="courses" button-text="Select course" />
-        </div>
-
-        <div>
-          <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">Date</label>
-          <SelectDate v-model="startsAt" />
-        </div>
-
-        <div>
-          <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">Time</label>
-          <SelectTime v-model="startTime" />
-        </div>
-
-        <div v-if="courseId">
-          <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">Price</label>
-          <SelectPrice v-model="price" :currencies="availableCurrencies" />
-        </div>
-
-        <p v-if="errorMessage" class="rounded-md border border-rose-300 bg-rose-50 px-3 py-2 text-sm text-rose-700 dark:border-rose-700 dark:bg-rose-900/30 dark:text-rose-300">
-          {{ errorMessage }}
-        </p>
-
-        <div class="mt-4 flex items-center justify-end gap-2">
-          <button
-            type="button"
-            @click="$emit('cancel')"
-            class="inline-flex items-center rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            class="inline-flex items-center rounded-md border border-emerald-500 bg-emerald-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-emerald-600"
-          >
-            {{ saveLabel }}
-          </button>
-        </div>
-      </form>
+  <FormDialog :open="open" :title="title" :save-label="saveLabel" @cancel="$emit('cancel')" @submit="submit">
+    <div>
+      <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">Customer</label>
+      <SelectClient v-model="clientId" :options="clients" button-text="Select customer" />
     </div>
-  </div>
+
+    <div>
+      <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">Course <span class="text-slate-400 font-normal">(optional)</span></label>
+      <SelectCourse v-model="courseId" :options="courses" button-text="Select course" />
+    </div>
+
+    <div>
+      <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">Date</label>
+      <SelectDate v-model="startsAt" />
+    </div>
+
+    <div>
+      <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">Time</label>
+      <SelectTime v-model="startTime" />
+    </div>
+
+    <div v-if="courseId">
+      <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">Price</label>
+      <SelectPrice v-model="price" :currencies="availableCurrencies" />
+    </div>
+
+    <p v-if="errorMessage" class="rounded-md border border-rose-300 bg-rose-50 px-3 py-2 text-sm text-rose-700 dark:border-rose-700 dark:bg-rose-900/30 dark:text-rose-300">
+      {{ errorMessage }}
+    </p>
+  </FormDialog>
 </template>
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
+import FormDialog from '../../../components/FormDialog.vue'
 import SelectClient from '../../../components/Select/SelectClient.vue'
 import SelectCourse from '../../../components/Select/SelectCourse.vue'
 import SelectDate from '../../../components/SelectDate.vue'

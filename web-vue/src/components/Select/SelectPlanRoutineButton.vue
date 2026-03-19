@@ -9,92 +9,60 @@
       {{ buttonText }}
     </button>
 
-    <div
-      v-if="isOpen"
-      class="fixed inset-0 z-[70] flex items-center justify-center bg-slate-900/50 p-4"
-      @click.self="closeDialog"
-    >
-      <div class="w-full max-w-3xl rounded-lg border border-slate-200 bg-white p-5 shadow-lg dark:border-slate-700 dark:bg-slate-800">
-        <div class="mb-4 flex items-center justify-between">
-          <h3 class="text-lg font-semibold text-slate-900 dark:text-slate-100">{{ dialogTitle }}</h3>
-          <button
-            type="button"
-            @click="closeDialog"
-            class="rounded px-2 py-1 text-slate-500 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700"
-          >
-            ✕
-          </button>
-        </div>
-
-        <SearchInput v-model="searchQuery" placeholder="Search by plan, workout, or client..." class="mb-3" />
-
-        <div class="custom-scrollbar max-h-80 space-y-2 overflow-auto rounded-md border border-slate-300 p-2 dark:border-slate-600">
-          <button
-            v-for="entry in filteredWorkouts"
-            :key="entry.key"
-            type="button"
-            @click="selectedKey = entry.key"
-            :class="[
-              'w-full rounded px-3 py-2 text-left transition-colors',
-              selectedKey === entry.key
-                ? 'bg-emerald-100 dark:bg-emerald-900/30'
-                : 'hover:bg-slate-100 dark:hover:bg-slate-700'
-            ]"
-          >
-            <div class="flex items-center justify-between gap-3">
-              <div class="min-w-0 flex-1">
-                <p class="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">
-                  {{ entry.workout.name }}
-                </p>
-                <p class="truncate text-xs text-slate-600 dark:text-slate-300">
-                  {{ entry.planName }} • {{ entry.clientName }}
-                </p>
-              </div>
-              <div class="text-right">
-                <p class="text-xs font-medium text-slate-700 dark:text-slate-200">{{ formatDate(entry.workout.date) }}</p>
-                <p class="text-[11px] text-slate-500 dark:text-slate-400">
-                  {{ entry.workout.excercises.length }} exercise{{ entry.workout.excercises.length === 1 ? '' : 's' }}
-                </p>
-              </div>
-            </div>
-          </button>
-
-          <p v-if="scheduledWorkouts.length === 0" class="px-2 py-3 text-center text-sm text-slate-500 dark:text-slate-300">
-            No planned workouts available.
-          </p>
-
-          <p
-            v-else-if="filteredWorkouts.length === 0"
-            class="px-2 py-3 text-center text-sm text-slate-500 dark:text-slate-300"
-          >
-            No planned workouts match your search.
-          </p>
-        </div>
-
-        <div class="mt-5 flex items-center justify-end gap-2">
-          <button
-            type="button"
-            @click="closeDialog"
-            class="inline-flex items-center rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600"
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            @click="applySelection"
-            :disabled="!selectedWorkout"
-            class="inline-flex items-center rounded-md border border-emerald-500 bg-emerald-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            Start workout
-          </button>
-        </div>
+    <FormDialog :open="isOpen" :title="dialogTitle" save-label="Start workout" :save-disabled="!selectedWorkout" max-width-class="max-w-3xl" @cancel="closeDialog" @submit="applySelection">
+      <div class="mb-3">
+        <SearchInput v-model="searchQuery" placeholder="Search by plan, workout, or client..." />
       </div>
-    </div>
+
+      <div class="custom-scrollbar space-y-2 rounded-md border border-slate-300 p-2 dark:border-slate-600">
+        <button
+          v-for="entry in filteredWorkouts"
+          :key="entry.key"
+          type="button"
+          @click="selectedKey = entry.key"
+          :class="[
+            'w-full rounded px-3 py-2 text-left transition-colors',
+            selectedKey === entry.key
+              ? 'bg-emerald-100 dark:bg-emerald-900/30'
+              : 'hover:bg-slate-100 dark:hover:bg-slate-700'
+          ]"
+        >
+          <div class="flex items-center justify-between gap-3">
+            <div class="min-w-0 flex-1">
+              <p class="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">
+                {{ entry.workout.name }}
+              </p>
+              <p class="truncate text-xs text-slate-600 dark:text-slate-300">
+                {{ entry.planName }} • {{ entry.clientName }}
+              </p>
+            </div>
+            <div class="text-right">
+              <p class="text-xs font-medium text-slate-700 dark:text-slate-200">{{ formatDate(entry.workout.date) }}</p>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400">
+                {{ entry.workout.excercises.length }} exercise{{ entry.workout.excercises.length === 1 ? '' : 's' }}
+              </p>
+            </div>
+          </div>
+        </button>
+
+        <p v-if="scheduledWorkouts.length === 0" class="px-2 py-3 text-center text-sm text-slate-500 dark:text-slate-300">
+          No planned workouts available.
+        </p>
+
+        <p
+          v-else-if="filteredWorkouts.length === 0"
+          class="px-2 py-3 text-center text-sm text-slate-500 dark:text-slate-300"
+        >
+          No planned workouts match your search.
+        </p>
+      </div>
+    </FormDialog>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import FormDialog from '../FormDialog.vue'
 import SearchInput from '../SearchInput.vue'
 import type { Plan, PlanWorkout } from '../../types/plan'
 

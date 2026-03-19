@@ -16,6 +16,7 @@ app.use(
     authorizationParams: {
       redirect_uri: `${window.location.origin}/login`,
       scope: 'openid profile email',
+      ...(import.meta.env.VITE_AUTH0_AUDIENCE ? { audience: import.meta.env.VITE_AUTH0_AUDIENCE } : {}),
     },
   }),
 );
