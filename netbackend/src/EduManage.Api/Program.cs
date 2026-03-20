@@ -8,6 +8,10 @@ using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Configuration
+	.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+	.AddJsonFile("appsettings.local.json", optional: true, reloadOnChange: true);
+
 const string frontendCorsPolicy = "FrontendCors";
 const string auth0DomainConfigKey = "Authentication:Auth0:Domain";
 const string auth0AudienceConfigKey = "Authentication:Auth0:Audience";
