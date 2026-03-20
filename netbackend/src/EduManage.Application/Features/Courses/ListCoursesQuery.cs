@@ -7,7 +7,12 @@ public sealed record ListCoursesQuery : IRequest<IReadOnlyList<CourseOut>>
 {
     internal sealed class Handler(ICourseRepository repository) : IRequestHandler<ListCoursesQuery, IReadOnlyList<CourseOut>>
     {
-        public Task<IReadOnlyList<CourseOut>> Handle(ListCoursesQuery request, CancellationToken cancellationToken) =>
-            repository.ListCoursesAsync(cancellationToken);
+        public async Task<IReadOnlyList<CourseOut>> Handle(ListCoursesQuery request, CancellationToken cancellationToken)
+        {
+            var courses = await repository.ListAsync(cancellationToken);
+            return courses.Select(c => new CourseOut(
+                c.Id, c.UserId, c.Name, c.Type, c.Size,
+                new CoursePrice(c.PriceValue, c.PriceCurrency), c.Description)).ToList();
+        }
     }
 }

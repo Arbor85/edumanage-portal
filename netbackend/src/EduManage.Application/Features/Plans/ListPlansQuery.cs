@@ -1,5 +1,7 @@
 using EduManage.Application.Contracts;
+using EduManage.Domain.Entities;
 using MediatR;
+using ContractsRoutineSet = EduManage.Application.Contracts.RoutineSet;
 
 namespace EduManage.Application.Features.Plans;
 
@@ -7,7 +9,28 @@ public sealed record ListPlansQuery : IRequest<IReadOnlyList<PlanOut>>
 {
     internal sealed class Handler(IPlanRepository repository) : IRequestHandler<ListPlansQuery, IReadOnlyList<PlanOut>>
     {
-        public Task<IReadOnlyList<PlanOut>> Handle(ListPlansQuery request, CancellationToken cancellationToken) =>
-            repository.ListPlansAsync(cancellationToken);
+        public async Task<IReadOnlyList<PlanOut>> Handle(ListPlansQuery request, CancellationToken cancellationToken)
+        {
+            var plans = await repository.ListAsync(cancellationToken);
+            return plans.Select(MapToOut).ToList();
+        }
+
+        internal static PlanOut MapToOut(Plan plan)
+        {
+            var workoutOutputs = plan.Workouts.Select(pw => new PlanWorkoutOutput(
+                pw.Name, pw.Notes, pw.Id, pw.UserId,
+                pw.Exercises.Select(e => new RoutineExcercise(
+                    e.Name, e.IsBodyweight,
+                    e.Sets.Select(s => new ContractsRoutineSet(s.Type, s.Reps, s.Weight, s.Notes)).ToList()
+                )).ToList(),
+                pw.Date)).ToList();
+
+            var clientOut = plan.Client is not null
+                ? new ClientOut(plan.Client.Name, plan.Client.Tags, plan.Client.ImageUrl,
+                    plan.Client.Status, plan.Client.InvitationCode, plan.Client.TrainerUserId)
+                : null;
+
+            return new PlanOut(plan.Name, plan.ClientId, plan.Notes, plan.Status, plan.Id, workoutOutputs, clientOut);
+        }
     }
 }

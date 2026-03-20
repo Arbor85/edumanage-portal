@@ -1,3 +1,4 @@
+using EduManage.Application.Common.Exceptions;
 using EduManage.Application.Contracts;
 using MediatR;
 
@@ -7,7 +8,10 @@ public sealed record DeleteMeetingCommand(string MeetingId) : IRequest<Dictionar
 {
     internal sealed class Handler(IMeetingRepository repository) : IRequestHandler<DeleteMeetingCommand, Dictionary<string, string>>
     {
-        public Task<Dictionary<string, string>> Handle(DeleteMeetingCommand request, CancellationToken cancellationToken) =>
-            repository.DeleteMeetingAsync(request.MeetingId, cancellationToken);
+        public async Task<Dictionary<string, string>> Handle(DeleteMeetingCommand request, CancellationToken cancellationToken)
+        {
+            await repository.DeleteByIdAsync(request.MeetingId, cancellationToken);
+            return new Dictionary<string, string> { ["detail"] = "Meeting deleted" };
+        }
     }
 }

@@ -5,9 +5,9 @@ namespace EduManage.Application.Contracts;
 
 public sealed record AcceptClientInvitationRequest(string Name, string Email, string ImageUrl);
 
-public sealed record ClientCreate(string Name, IReadOnlyList<string> Tags, string ImageUrl, string Status, string InvitationCode);
+public sealed record ClientCreate(string Name, IReadOnlyList<string> Tags, string InvitationCode);
 
-public sealed record ClientUpdate(string Name, IReadOnlyList<string> Tags, string ImageUrl, string Status, string InvitationCode);
+public sealed record ClientUpdate(string Name, IReadOnlyList<string> Tags);
 
 public sealed record ClientOut(
     string Name,
@@ -15,8 +15,7 @@ public sealed record ClientOut(
     string ImageUrl,
     string Status,
     string InvitationCode,
-    string? UserId,
-    int? CurrentUserId);
+    string TrainerUserId);
 
 public sealed record RoutineSet(string Type, int? Reps, double? Weight, string? Notes);
 

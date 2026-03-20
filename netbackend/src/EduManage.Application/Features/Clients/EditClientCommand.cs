@@ -1,3 +1,4 @@
+using EduManage.Application.Common.Exceptions;
 using EduManage.Application.Contracts;
 using MediatR;
 
@@ -7,7 +8,20 @@ public sealed record EditClientCommand(string InvitationCode, ClientUpdate Reque
 {
     internal sealed class Handler(IClientRepository repository) : IRequestHandler<EditClientCommand, ClientOut>
     {
-        public Task<ClientOut> Handle(EditClientCommand request, CancellationToken cancellationToken) =>
-            repository.EditClientAsync(request.InvitationCode, request.Request, request.UserId, cancellationToken);
+        public async Task<ClientOut> Handle(EditClientCommand request, CancellationToken cancellationToken)
+        {
+            var client = await repository.GetByIdAsync(request.InvitationCode, cancellationToken)
+                ?? throw new NotFoundException($"Client '{request.InvitationCode}' was not found.");
+
+            if (client.TrainerUserId != request.UserId)
+                throw new UnauthorizedAccessException($"You do not have permission to edit client '{request.InvitationCode}'.");
+
+            await repository.UpdateAsync(client with
+            {
+                Name = request.Request.Name,
+                Tags = [.. request.Request.Tags]
+            }, cancellationToken);
+            return new ClientOut(client.Name, client.Tags, client.ImageUrl, client.Status, client.InvitationCode, client.TrainerUserId);
+        }
     }
 }

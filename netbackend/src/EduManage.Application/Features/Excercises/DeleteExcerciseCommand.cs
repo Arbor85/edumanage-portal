@@ -1,5 +1,5 @@
-using MediatR;
 using EduManage.Application.Contracts;
+using MediatR;
 
 namespace EduManage.Application.Features.Excercises;
 
@@ -9,7 +9,7 @@ public sealed record DeleteExcerciseCommand(int Id) : IRequest
     {
         public async Task Handle(DeleteExcerciseCommand request, CancellationToken cancellationToken)
         {
-            await repository.DeleteExcerciseAsync(request.Id, cancellationToken);
+            await repository.DeleteByIdAsync(request.Id, cancellationToken);
         }
     }
 }

@@ -1,3 +1,4 @@
+using EduManage.Application.Common.Exceptions;
 using EduManage.Application.Contracts;
 using MediatR;
 
@@ -7,7 +8,12 @@ public sealed record GetPlanQuery(string PlanId) : IRequest<PlanOut>
 {
     internal sealed class Handler(IPlanRepository repository) : IRequestHandler<GetPlanQuery, PlanOut>
     {
-        public Task<PlanOut> Handle(GetPlanQuery request, CancellationToken cancellationToken) =>
-            repository.GetPlanAsync(request.PlanId, cancellationToken);
+        public async Task<PlanOut> Handle(GetPlanQuery request, CancellationToken cancellationToken)
+        {
+            var plan = await repository.GetByIdAsync(request.PlanId, cancellationToken)
+                ?? throw new NotFoundException($"Plan '{request.PlanId}' was not found.");
+
+            return ListPlansQuery.Handler.MapToOut(plan);
+        }
     }
 }

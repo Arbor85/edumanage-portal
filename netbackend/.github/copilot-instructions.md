@@ -70,21 +70,18 @@ These rules apply to all future changes in this catalog repository.
 
   * `Command` / `Query`
   * `Handler`
-* Keep **one MediatR command/query per file**.
-* Implement each handler as a **nested internal `Handler` class** inside its owning command/query.
 * Keep handlers **small, focused, and single-purpose**.
 
 Example:
 
 ```csharp
-public record CreateOrderCommand(string CustomerName) : IRequest<Guid>
+public record CreateOrderCommand(string CustomerName) : IRequest<Guid>;
+
+public class CreateOrderHandler : IRequestHandler<CreateOrderCommand, Guid>
 {
-  internal sealed class Handler : IRequestHandler<CreateOrderCommand, Guid>
-    {
     public async Task<Guid> Handle(CreateOrderCommand request, CancellationToken ct)
     {
-      // business logic
-    }
+        // business logic
     }
 }
 ```
@@ -197,14 +194,6 @@ public async Task Should_Create_Order()
 
 ---
 
-## 📚 Documentation Sync Rule
-
-* Keep `README.md` in sync with every relevant change.
-* Whenever API routes, request/response contracts, auth setup (Swagger/Scalar/Auth0), docs URLs, or persistence models change, update `README.md` in the same change set.
-* Do not leave documentation updates for later follow-up commits.
-
----
-
 ## 🔌 Dependency Injection
 
 * Use built-in .NET DI container.
@@ -259,6 +248,5 @@ When generating code, always:
 * Ensure **code is testable with high coverage**
 * Keep structure **clean and consistent**
 * Avoid unnecessary complexity
-* If user ask for something that violates these principles or is not inluded in these instructions, ask user what to do. "Update instructions?", "Don't update instructions and proceed?", "Cancel request?" 
 
 ---
