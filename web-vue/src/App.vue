@@ -20,7 +20,7 @@ onMounted(() => {
   <div class="flex w-full min-h-screen bg-white dark:bg-slate-900 shadow-sm border border-slate-200 dark:border-slate-800">
     <SideNavBar />
     
-    <div class="p-6 w-full content">
+    <div class="p-6 pb-24 md:pb-6 w-full content">
       <div class="fixed top-4 right-4 z-40 flex items-center gap-2">
         <ProfileIcon />
       </div>

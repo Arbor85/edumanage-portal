@@ -1,37 +1,15 @@
 <template>
-  <button
-    type="button"
-    class="fixed left-4 top-4 z-50 inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-300 bg-white text-slate-900 shadow-sm transition-colors hover:bg-slate-100 md:hidden dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
-    @click="toggleMobileMenu"
-    :aria-expanded="isMobileMenuOpen"
-    aria-controls="main-sidebar"
-    aria-label="Toggle navigation menu"
-  >
-    <component :is="isMobileMenuOpen ? closeIcon : menuIcon" :size="20" />
-  </button>
-
-  <div
-    v-if="isMobileMenuOpen"
-    class="fixed inset-0 z-40 bg-slate-950/45 md:hidden"
-    @click="closeMobileMenu"
-    aria-hidden="true"
-  />
-
+  <!-- Desktop side nav (md and above) -->
   <nav
     id="main-sidebar"
-    class="fixed inset-y-0 left-0 z-50 h-screen min-h-full w-56 shrink-0 overflow-y-auto border-r border-slate-200 bg-white/95 text-slate-900 shadow-[8px_0_16px_-14px_rgba(15,23,42,0.3)] backdrop-blur-xl transition-all duration-300 dark:border-slate-800 dark:bg-slate-900/90 dark:text-slate-100 dark:shadow-[8px_0_16px_-14px_rgba(2,6,23,0.65)] md:sticky md:top-0 md:z-10 md:translate-x-0 md:bg-white/70 md:dark:bg-slate-900/70 lg:w-56"
-    :class="[
-      isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full',
-      'md:left-auto md:inset-y-auto md:w-20 lg:w-56',
-    ]"
+    class="max-md:hidden sticky top-0 z-10 flex h-screen w-20 flex-col shrink-0 overflow-y-auto border-r border-slate-200 bg-white/95 text-slate-900 shadow-[8px_0_16px_-14px_rgba(15,23,42,0.3)] backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/90 dark:text-slate-100 dark:shadow-[8px_0_16px_-14px_rgba(2,6,23,0.65)] lg:w-56"
   >
     <router-link to="/">
       <span class="mb-2 flex items-center justify-center p-4 md:px-2 lg:justify-start lg:gap-3 lg:p-8">
-        <span
-          class="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500 text-white shadow-lg shadow-emerald-500/20">
+        <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500 text-white shadow-lg shadow-emerald-500/20">
           <component :is="brandIcon" :size="20" />
         </span>
-        <span class="text-xl font-bold tracking-tight md:hidden dark:text-white lg:inline">EduMan</span>
+        <span class="text-xl font-bold tracking-tight hidden dark:text-white lg:inline">EduMan</span>
       </span>
     </router-link>
 
@@ -43,11 +21,10 @@
           :class="isActive(link.to)
             ? 'bg-slate-200 text-slate-900 dark:bg-slate-600 dark:text-slate-100'
             : 'hover:bg-slate-200 hover:text-slate-900 dark:hover:bg-slate-600 dark:hover:text-slate-100'"
-          @click="handleLinkClick"
           :aria-current="isActive(link.to) ? 'page' : undefined"
         >
           <component :is="link.icon" :size="20" />
-          <span class="ml-3 md:hidden lg:inline">{{ link.label }}</span>
+          <span class="ml-3 hidden lg:inline">{{ link.label }}</span>
         </router-link>
       </li>
 
@@ -58,11 +35,10 @@
           :class="isActive(loginLink.to)
             ? 'bg-slate-200 text-slate-900 dark:bg-slate-600 dark:text-slate-100'
             : 'hover:bg-slate-200 hover:text-slate-900 dark:hover:bg-slate-600 dark:hover:text-slate-100'"
-          @click="handleLinkClick"
           :aria-current="isActive(loginLink.to) ? 'page' : undefined"
         >
           <component :is="loginLink.icon" :size="20" />
-          <span class="ml-3 md:hidden lg:inline">{{ loginLink.label }}</span>
+          <span class="ml-3 hidden lg:inline">{{ loginLink.label }}</span>
         </router-link>
       </li>
       <span
@@ -72,13 +48,42 @@
       />
     </ul>
   </nav>
+
+  <!-- Mobile magic bottom nav -->
+  <nav
+    class="md:hidden fixed bottom-0 left-0 right-0 z-50"
+    aria-label="Main navigation"
+  >
+    <div class="flex h-[64px] items-stretch bg-white shadow-[0_-1px_0_rgba(0,0,0,0.07)] dark:bg-slate-800 dark:shadow-[0_-1px_0_rgba(255,255,255,0.06)]">
+      <router-link
+        v-for="link in mobileNavLinks"
+        :key="link.to"
+        :to="link.to"
+        :aria-current="isActive(link.to) ? 'page' : undefined"
+        class="relative flex flex-1 items-center justify-center"
+      >
+        <div
+          class="flex h-11 w-11 items-center justify-center rounded-full transition-all duration-300 ease-out"
+          :class="isActive(link.to)
+            ? '-translate-y-5 bg-emerald-500 shadow-[0_6px_20px_rgba(16,185,129,0.4)]'
+            : 'translate-y-0 bg-transparent'"
+        >
+          <component
+            :is="link.icon"
+            :size="20"
+            :class="isActive(link.to) ? 'text-white' : 'text-slate-400 dark:text-slate-500'"
+          />
+        </div>
+      </router-link>
+    </div>
+  </nav>
 </template>
 
 <script lang="ts">
 import { computed, defineComponent, nextTick, onBeforeUnmount, onMounted, ref, watch, type ComponentPublicInstance } from 'vue';
 import { useAuth0 } from '@auth0/auth0-vue';
 import { useRoute } from 'vue-router';
-import { Home, Users, Dumbbell, CalendarDays, ClipboardList, User, LogIn, CalendarClock, BookOpen, Menu, X  } from 'lucide-vue-next';
+import { Home, Users, Dumbbell, CalendarDays, ClipboardList, User, LogIn, CalendarClock, BookOpen } from 'lucide-vue-next';
 
 export default defineComponent({
   name: 'SideNavBar',
@@ -91,9 +96,6 @@ export default defineComponent({
     const indicatorHeight = ref(0);
     const showIndicator = ref(false);
     const brandIcon = Dumbbell;
-    const menuIcon = Menu;
-    const closeIcon = X;
-    const isMobileMenuOpen = ref(false);
 
     const linkCollection = [
       { label: 'Feed', to: '/', icon: Home, requiresAuth: false, guestOnly: false },
@@ -117,23 +119,15 @@ export default defineComponent({
     const loginLink = computed(() => {
       const login = linkCollection.find(link => link.to === '/login');
       if (!login) return null;
-      if (!isAuthenticated.value) return login; // Show only when not authenticated
+      if (!isAuthenticated.value) return login;
       return null;
     });
 
-    const handleLinkClick = () => {
-      if (window.matchMedia('(max-width: 767px)').matches) {
-        isMobileMenuOpen.value = false;
-      }
-    };
-
-    const toggleMobileMenu = () => {
-      isMobileMenuOpen.value = !isMobileMenuOpen.value;
-    };
-
-    const closeMobileMenu = () => {
-      isMobileMenuOpen.value = false;
-    };
+    const mobileNavLinks = computed(() => {
+      const links = [...mainNavLinks.value];
+      if (loginLink.value) links.push(loginLink.value);
+      return links;
+    });
 
     const isActive = (path: string) => route.path === path;
 
@@ -179,20 +173,8 @@ export default defineComponent({
     );
 
     const onResize = () => {
-      if (window.matchMedia('(min-width: 768px)').matches) {
-        isMobileMenuOpen.value = false;
-      }
       updateIndicator();
     };
-
-    watch(
-      () => route.path,
-      () => {
-        if (window.matchMedia('(max-width: 767px)').matches) {
-          isMobileMenuOpen.value = false;
-        }
-      },
-    );
 
     onMounted(() => {
       window.addEventListener('resize', onResize);
@@ -205,14 +187,9 @@ export default defineComponent({
 
     return {
       brandIcon,
-      menuIcon,
-      closeIcon,
       mainNavLinks,
       loginLink,
-      handleLinkClick,
-      toggleMobileMenu,
-      closeMobileMenu,
-      isMobileMenuOpen,
+      mobileNavLinks,
       isActive,
       listRef,
       setItemRef,
