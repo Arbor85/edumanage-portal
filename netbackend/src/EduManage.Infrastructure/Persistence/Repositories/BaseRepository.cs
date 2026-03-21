@@ -21,6 +21,7 @@ internal abstract class BaseRepository<TEntity, TKey>(EduManageDbContext context
     {
         Context.Set<TEntity>().Add(entity);
         await Context.SaveChangesAsync(cancellationToken);
+
         return entity;
     }
 

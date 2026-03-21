@@ -111,6 +111,16 @@
           </button>
           <button
             type="button"
+            @click="openEditDialog(client)"
+            class="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white p-2 text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600"
+            aria-label="Edit client"
+            title="Edit client"
+          >
+            <Pencil :size="16" />
+          </button>
+          <button
+            v-if="client.status === 'Invited'"
+            type="button"
             @click="openInviteDialog(client)"
             class="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600"
           >
@@ -195,6 +205,16 @@
                   </button>
                   <button
                     type="button"
+                    @click="openEditDialog(client)"
+                    class="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white p-2 text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600"
+                    aria-label="Edit client"
+                    title="Edit client"
+                  >
+                    <Pencil :size="16" />
+                  </button>
+                  <button
+                    v-if="client.status === 'Invited'"
+                    type="button"
                     @click="openInviteDialog(client)"
                     class="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600"
                   >
@@ -238,6 +258,14 @@
       @invited="onClientInvited"
     />
 
+    <EditClientDialog
+      v-if="editTarget"
+      :open="showEditDialog"
+      :client="editTarget"
+      @cancel="closeEditDialog"
+      @saved="onClientSaved"
+    />
+
     <ConfirmDialog
       :open="!!clientToDelete"
       title="Delete client"
@@ -250,7 +278,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { Link, Trash2, User } from 'lucide-vue-next'
+import { Link, Pencil, Trash2, User } from 'lucide-vue-next'
 import ConfirmDialog from '../../components/ConfirmDialog.vue'
 import DialogActionPanel from '../../components/DialogActionPanel.vue'
 import SearchInput from '../../components/SearchInput.vue'
@@ -259,6 +287,7 @@ import { usePageTitle } from '../../composables/usePageTitle'
 import { useClientsApi } from '../../services/clientsApi'
 import type { Client, ClientStatus } from '../../types/client'
 import InviteClientDialog from './components/InviteClientDialog.vue'
+import EditClientDialog from './components/EditClientDialog.vue'
 
 usePageTitle('Clients')
 
@@ -273,6 +302,8 @@ const viewMode = useLocalStorageState<'tile' | 'list'>('clients:viewMode', 'tile
 const showInviteDialog = ref(false)
 const inviteTarget = ref<Client | null>(null)
 const clientToDelete = ref<Client | null>(null)
+const showEditDialog = ref(false)
+const editTarget = ref<Client | null>(null)
 
 const filteredClients = computed(() => {
   const q = searchQuery.value.trim().toLowerCase()
@@ -308,6 +339,22 @@ const onClientInvited = (client: Client) => {
   } else {
     clients.value = [client, ...clients.value]
   }
+}
+
+const openEditDialog = (client: Client) => {
+  editTarget.value = client
+  showEditDialog.value = true
+}
+
+const closeEditDialog = () => {
+  showEditDialog.value = false
+  editTarget.value = null
+}
+
+const onClientSaved = (updated: Client) => {
+  const idx = clients.value.findIndex((c) => c.invitationCode === updated.invitationCode)
+  if (idx !== -1) clients.value[idx] = updated
+  closeEditDialog()
 }
 
 const requestDelete = (client: Client) => {

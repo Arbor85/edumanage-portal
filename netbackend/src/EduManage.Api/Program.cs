@@ -68,7 +68,7 @@ builder.Services.AddSwaggerGen(options =>
 	});
 });
 builder.Services.AddApplication();
-builder.Services.AddInfrastructure();
+builder.Services.AddInfrastructure(builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=edumanage.db");
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddCors(options =>
 {

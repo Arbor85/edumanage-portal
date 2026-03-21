@@ -14,11 +14,7 @@ public sealed record AddClientCommand(ClientCreate Request, string UserId) : IRe
                 ? Guid.NewGuid().ToString("N")[..8]
                 : request.Request.InvitationCode;
 
-            var client = new Client(invitationCode, request.Request.Name, request.UserId)
-            {
-                Tags = [.. request.Request.Tags],
-                ImageUrl = string.Empty
-            };
+            var client = new Client(invitationCode, request.Request.Name, request.UserId, request.Request.Tags);
 
             await repository.AddAsync(client, cancellationToken);
             return new ClientOut(client.Name, client.Tags, client.ImageUrl, client.Status, client.InvitationCode, client.TrainerUserId);

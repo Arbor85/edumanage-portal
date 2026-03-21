@@ -8,7 +8,7 @@ export type ClientTag =
   | 'Mix'
   | 'CrossFit'
 
-export type ClientStatus = 'Active' | 'Suspended' | 'Pending'
+export type ClientStatus = 'Active' | 'Suspended' | 'Invited' | 'Deleted'
 
 export interface Client {
   name: string

@@ -10,10 +10,24 @@ public class ClientConfiguration : IEntityTypeConfiguration<Client>
     {
         builder.HasKey(c => c.InvitationCode);
         
+
+
         builder.Property(c => c.Tags)
             .HasConversion(
                 v => string.Join(",", v),
                 v => v.Split(",", StringSplitOptions.None).ToList());
+
+        builder.Property(c => c.ImageUrl)
+            .HasDefaultValue(string.Empty);
+
+        builder.Property(c => c.Status)
+            .HasDefaultValue("Invited");
+
+        builder.Property(c => c.UserId)
+            .HasDefaultValue(null);
+
+        builder.Property(c => c.TrainerUserId)
+            .IsRequired();
 
         builder.HasMany(c => c.Plans)
             .WithOne(p => p.Client)

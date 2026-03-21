@@ -67,10 +67,9 @@
 
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
-import { Check, Copy } from 'lucide-vue-next'
 import FormDialog from '../../../components/FormDialog.vue'
 import { useClientsApi } from '../../../services/clientsApi'
-import type { Client, ClientTag } from '../../../types/client'
+import type { Client, ClientTag } from '../../.FormDialclient'
 
 const props = withDefaults(
   defineProps<{
@@ -129,8 +128,13 @@ const applyClient = () => {
   if (props.client) {
     name.value = props.client.name
     selectedTags.value = [...props.client.tags]
-    invitationUrl.value = `${window.location.origin}/invite/${props.client.invitationCode}`
-    createdName.value = props.client.name
+    if (props.client.status === 'Invited') {
+      invitationUrl.value = `${window.location.origin}/invite/${props.client.invitationCode}`
+      createdName.value = props.client.name
+    } else {
+      invitationUrl.value = ''
+      createdName.value = ''
+    }
   } else {
     reset()
   }

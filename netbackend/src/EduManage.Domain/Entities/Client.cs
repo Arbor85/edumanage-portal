@@ -5,11 +5,13 @@ public record Client
     public Client(
         string invitationCode,
         string name,
-        string trainerUserId)
+        string trainerUserId,
+        IEnumerable<string> tags)
     {
         InvitationCode = invitationCode;
         Name = name;
         TrainerUserId = trainerUserId;
+        Tags = [.. tags];
         Status = "Invited";
     }
 
@@ -17,7 +19,7 @@ public record Client
     {
     }
 
-    public List<string> Tags { get; init; } = [];
+    public List<string> Tags { get; private set; } = [];
 
     public string ImageUrl { get; init; } = string.Empty;
 
@@ -31,7 +33,7 @@ public record Client
 
     public string InvitationCode { get; }
 
-    public string Name { get; init; }
+    public string Name { get; private set; }
 
     public string TrainerUserId { get; }
 
@@ -39,5 +41,11 @@ public record Client
     {
         UserId = clientUserId;
         Status = "Active";
+    }
+
+    public void Update(string name, IEnumerable<string> tags)
+    {
+        Name = name;
+        Tags = [.. tags];
     }
 }

@@ -16,11 +16,10 @@ public sealed record EditClientCommand(string InvitationCode, ClientUpdate Reque
             if (client.TrainerUserId != request.UserId)
                 throw new UnauthorizedAccessException($"You do not have permission to edit client '{request.InvitationCode}'.");
 
-            await repository.UpdateAsync(client with
-            {
-                Name = request.Request.Name,
-                Tags = [.. request.Request.Tags]
-            }, cancellationToken);
+            client.Update(request.Request.Name, request.Request.Tags);
+
+            await repository.UpdateAsync(client, cancellationToken);
+
             return new ClientOut(client.Name, client.Tags, client.ImageUrl, client.Status, client.InvitationCode, client.TrainerUserId);
         }
     }
