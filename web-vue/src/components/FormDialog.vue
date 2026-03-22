@@ -1,7 +1,7 @@
 <template>
   <div v-if="open" class="fixed inset-0 z-[70] flex items-center justify-center bg-slate-900/50 p-4" @click.self="$emit('cancel')">
-    <div :class="maxWidthClass" class="w-full rounded-lg border border-white/60 bg-white/60 shadow-lg hover:shadow-2xl focus-within:shadow-2xl transition-shadow backdrop-blur-xl dark:border-slate-700 dark:bg-slate-800/40 flex flex-col">
-      <div class="px-5 py-4 flex items-center justify-between border-b border-white/50 dark:border-slate-600">
+    <div :class="maxWidthClass" class="w-full rounded-lg border border-white/60 bg-white shadow-lg hover:shadow-2xl focus-within:shadow-2xl transition-shadow backdrop-blur-xl dark:border-slate-700 dark:bg-slate-800/40 flex flex-col">
+      <div class="px-5 py-4 flex items-center justify-between border-b border-white/90 dark:border-slate-600">
         <h3 class="text-lg font-semibold text-slate-900 dark:text-slate-100">{{ title }}</h3>
         <button
           type="button"
