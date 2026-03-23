@@ -16,13 +16,13 @@ public sealed record AddPlanCommand(PlanCreate Request) : IRequest<PlanOut>
                 Id = Guid.NewGuid().ToString("N"),
                 Name = request.Request.Name,
                 ClientId = request.Request.ClientId,
-                Notes = request.Request.Notes,
+                Notes = request.Request.Note,
                 Status = request.Request.Status,
                 Workouts = request.Request.Workouts.Select(w => new PlanWorkout
                 {
                     Id = w.Id,
                     Name = w.Name,
-                    Notes = w.Notes,
+                    Notes = w.Note,
                     UserId = w.UserId,
                     Date = w.Date,
                     Exercises = w.Excercises.Select(e => new RoutineExercise
@@ -34,7 +34,7 @@ public sealed record AddPlanCommand(PlanCreate Request) : IRequest<PlanOut>
                             Type = s.Type,
                             Reps = s.Reps,
                             Weight = s.Weight,
-                            Notes = s.Notes
+                            Notes = s.Note
                         }).ToList()
                     }).ToList()
                 }).ToList()

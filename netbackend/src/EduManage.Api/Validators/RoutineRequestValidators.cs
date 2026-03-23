@@ -8,7 +8,7 @@ public sealed class RoutineCreateValidator : AbstractValidator<RoutineCreate>
     public RoutineCreateValidator()
     {
         RuleFor(request => request.Name).NotEmpty().MaximumLength(200);
-        RuleFor(request => request.Notes).MaximumLength(2000).When(request => request.Notes is not null);
+        RuleFor(request => request.Note).MaximumLength(2000).When(request => request.Note is not null);
         RuleForEach(request => request.Excercises).SetValidator(new RoutineExcerciseValidator());
     }
 }
@@ -18,7 +18,7 @@ public sealed class RoutineUpdateValidator : AbstractValidator<RoutineUpdate>
     public RoutineUpdateValidator()
     {
         RuleFor(request => request.Name).NotEmpty().MaximumLength(200);
-        RuleFor(request => request.Notes).MaximumLength(2000).When(request => request.Notes is not null);
+        RuleFor(request => request.Note).MaximumLength(2000).When(request => request.Note is not null);
         RuleForEach(request => request.Excercises).SetValidator(new RoutineExcerciseValidator());
     }
 }
@@ -39,7 +39,7 @@ public sealed class RoutineSetValidator : AbstractValidator<RoutineSet>
         RuleFor(request => request.Type).NotEmpty().MaximumLength(50);
         RuleFor(request => request.Reps).GreaterThanOrEqualTo(0).When(request => request.Reps.HasValue);
         RuleFor(request => request.Weight).GreaterThanOrEqualTo(0).When(request => request.Weight.HasValue);
-        RuleFor(request => request.Notes).MaximumLength(1000).When(request => request.Notes is not null);
+        RuleFor(request => request.Note).MaximumLength(1000).When(request => request.Note is not null);
     }
 }
 
@@ -78,7 +78,7 @@ public sealed class CompletedRoutineSetValidator : AbstractValidator<CompletedRo
         RuleFor(request => request.Type).NotEmpty().MaximumLength(50);
         RuleFor(request => request.Reps).GreaterThanOrEqualTo(0).When(request => request.Reps.HasValue);
         RuleFor(request => request.Weight).GreaterThanOrEqualTo(0).When(request => request.Weight.HasValue);
-        RuleFor(request => request.Notes).MaximumLength(1000).When(request => request.Notes is not null);
+        RuleFor(request => request.Note).MaximumLength(1000).When(request => request.Note is not null);
     }
 }
 

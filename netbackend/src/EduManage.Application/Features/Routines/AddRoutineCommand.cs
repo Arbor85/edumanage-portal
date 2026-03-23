@@ -15,7 +15,7 @@ public sealed record AddRoutineCommand(RoutineCreate Request) : IRequest<Routine
             {
                 Id = Guid.NewGuid().ToString("N"),
                 Name = request.Request.Name,
-                Notes = request.Request.Notes,
+                Notes = request.Request.Note,
                 UserId = "local-user",
                 Exercises = request.Request.Excercises.Select(e => new RoutineExercise
                 {
@@ -26,7 +26,7 @@ public sealed record AddRoutineCommand(RoutineCreate Request) : IRequest<Routine
                         Type = s.Type,
                         Reps = s.Reps,
                         Weight = s.Weight,
-                        Notes = s.Notes
+                        Notes = s.Note
                     }).ToList()
                 }).ToList()
             };

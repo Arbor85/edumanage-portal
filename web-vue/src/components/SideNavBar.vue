@@ -54,7 +54,7 @@
     class="md:hidden fixed bottom-0 left-0 right-0 z-50"
     aria-label="Main navigation"
   >
-    <div class="flex h-[64px] items-stretch bg-white shadow-[0_-1px_0_rgba(0,0,0,0.07)] dark:bg-slate-800 dark:shadow-[0_-1px_0_rgba(255,255,255,0.06)]">
+    <div class="flex h-[64px] items-stretch shadow-[0_-1px_0_rgba(0,0,0,0.07)] dark:shadow-[0_-1px_0_rgba(255,255,255,0.06)]">
       <router-link
         v-for="link in mobileNavLinks"
         :key="link.to"

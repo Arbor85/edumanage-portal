@@ -16,7 +16,7 @@ public sealed record UpdateRoutineCommand(string RoutineId, RoutineUpdate Reques
                 ?? throw new NotFoundException($"Routine '{request.RoutineId}' was not found.");
 
             routine.Name = request.Request.Name;
-            routine.Notes = request.Request.Notes;
+            routine.Notes = request.Request.Note;
             routine.Exercises = request.Request.Excercises.Select(e => new RoutineExercise
             {
                 Name = e.Name,
@@ -26,7 +26,7 @@ public sealed record UpdateRoutineCommand(string RoutineId, RoutineUpdate Reques
                     Type = s.Type,
                     Reps = s.Reps,
                     Weight = s.Weight,
-                    Notes = s.Notes
+                    Notes = s.Note
                 }).ToList()
             }).ToList();
 

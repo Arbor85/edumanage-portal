@@ -39,7 +39,7 @@ public sealed record CompleteRoutineCommand(CompleteRoutineCreate Request) : IRe
                         Type = s.Type,
                         Reps = s.Reps,
                         Weight = s.Weight,
-                        Notes = s.Notes,
+                        Notes = s.Note,
                         Completed = s.Completed
                     }).ToList()
                 }).ToList()

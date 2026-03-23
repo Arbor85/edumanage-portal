@@ -17,14 +17,14 @@ public sealed record UpdatePlanCommand(string PlanId, PlanUpdate Request) : IReq
 
             plan.Name = request.Request.Name;
             plan.ClientId = request.Request.ClientId;
-            plan.Notes = request.Request.Notes;
+            plan.Notes = request.Request.Note;
             plan.Status = request.Request.Status;
             plan.Workouts = request.Request.Workouts.Select(w => new PlanWorkout
             {
                 Id = w.Id,
                 PlanId = plan.Id,
                 Name = w.Name,
-                Notes = w.Notes,
+                Notes = w.Note,
                 UserId = w.UserId,
                 Date = w.Date,
                 Exercises = w.Excercises.Select(e => new RoutineExercise
@@ -36,7 +36,7 @@ public sealed record UpdatePlanCommand(string PlanId, PlanUpdate Request) : IReq
                         Type = s.Type,
                         Reps = s.Reps,
                         Weight = s.Weight,
-                        Notes = s.Notes
+                        Notes = s.Note
                     }).ToList()
                 }).ToList()
             }).ToList();

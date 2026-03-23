@@ -17,19 +17,19 @@ public sealed record ClientOut(
     string InvitationCode,
     string TrainerUserId);
 
-public sealed record RoutineSet(string Type, int? Reps, double? Weight, string? Notes);
+public sealed record RoutineSet(string Type, int? Reps, double? Weight, string? Note);
 
 public sealed record RoutineExcercise(string Name, bool IsBodyweight, IReadOnlyList<RoutineSet> Sets);
 
-public sealed record RoutineCreate(string Name, string? Notes, IReadOnlyList<RoutineExcercise> Excercises);
+public sealed record RoutineCreate(string Name, string? Note, IReadOnlyList<RoutineExcercise> Excercises);
 
-public sealed record RoutineUpdate(string Name, string? Notes, IReadOnlyList<RoutineExcercise> Excercises);
+public sealed record RoutineUpdate(string Name, string? Note, IReadOnlyList<RoutineExcercise> Excercises);
 
-public sealed record RoutineOut(string Name, string? Notes, string Id, string? UserId, IReadOnlyList<RoutineExcercise> Excercises);
+public sealed record RoutineOut(string Name, string? Note, string Id, string? UserId, IReadOnlyList<RoutineExcercise> Excercises);
 
 public sealed record PlanWorkoutInput(
     string Name,
-    string? Notes,
+    string? Note,
     string Id,
     [property: JsonPropertyName("user_id")] string? UserId,
     IReadOnlyList<RoutineExcercise> Excercises,
@@ -37,20 +37,20 @@ public sealed record PlanWorkoutInput(
 
 public sealed record PlanWorkoutOutput(
     string Name,
-    string? Notes,
+    string? Note,
     string Id,
     string? UserId,
     IReadOnlyList<RoutineExcercise> Excercises,
     string Date);
 
-public sealed record PlanCreate(string Name, string ClientId, string? Notes, string Status, IReadOnlyList<PlanWorkoutInput> Workouts);
+public sealed record PlanCreate(string Name, string ClientId, string? Note, string Status, IReadOnlyList<PlanWorkoutInput> Workouts);
 
-public sealed record PlanUpdate(string Name, string ClientId, string? Notes, string Status, IReadOnlyList<PlanWorkoutInput> Workouts);
+public sealed record PlanUpdate(string Name, string ClientId, string? Note, string Status, IReadOnlyList<PlanWorkoutInput> Workouts);
 
 public sealed record PlanOut(
     string Name,
     string ClientId,
-    string? Notes,
+    string? Note,
     string Status,
     string Id,
     IReadOnlyList<PlanWorkoutOutput> Workouts,
@@ -88,7 +88,7 @@ public sealed record ExcerciseWriteRequest(
     IReadOnlyList<string>? SecondaryMuscles,
     IReadOnlyList<string>? Tags);
 
-public sealed record CompletedRoutineSet(string Type, int? Reps, double? Weight, string? Notes, bool Completed);
+public sealed record CompletedRoutineSet(string Type, int? Reps, double? Weight, string? Note, bool Completed);
 
 public sealed record CompletedRoutineExcercise(string Name, bool IsBodyweight, IReadOnlyList<CompletedRoutineSet> Sets);
 
