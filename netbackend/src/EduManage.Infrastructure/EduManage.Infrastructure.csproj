@@ -21,4 +21,8 @@
     <ProjectReference Include="..\EduManage.Application\EduManage.Application.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <EmbeddedResource Include="gym_exercises.json" />
+  </ItemGroup>
+
 </Project>

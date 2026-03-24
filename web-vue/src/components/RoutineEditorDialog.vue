@@ -388,6 +388,68 @@
         </div>
       </div>
     </div>
+
+    <Teleport to="body" v-if="isPointerDragging && draggedSet && dragMousePosition">
+      <div
+        class="pointer-events-none fixed z-[9999] rounded-md border border-emerald-300 bg-slate-50 p-2 shadow-lg opacity-80 dark:border-emerald-700 dark:bg-slate-700/80"
+        :style="{
+          left: `${dragMousePosition.x + 10}px`,
+          top: `${dragMousePosition.y + 10}px`,
+          transform: 'translate(-50%, -50%)',
+          width: '240px',
+        }"
+      >
+        <div class="flex flex-wrap items-center justify-between gap-2 text-xs">
+          <div class="flex items-center gap-1">
+            <span class="font-medium text-slate-700 dark:text-slate-200">
+              {{
+                formExcercises[draggedSet.excerciseIndex]?.sets[draggedSet.setIndex]?.type ||
+                'Set'
+              }}
+            </span>
+          </div>
+          <div class="flex items-center gap-2 text-slate-600 dark:text-slate-300">
+            <span
+              v-if="
+                formExcercises[draggedSet.excerciseIndex]?.sets[draggedSet.setIndex]?.reps !== undefined
+              "
+            >
+              {{ formExcercises[draggedSet.excerciseIndex].sets[draggedSet.setIndex].reps }} reps
+            </span>
+            <span
+              v-if="
+                !formExcercises[draggedSet.excerciseIndex]?.isBodyweight &&
+                formExcercises[draggedSet.excerciseIndex]?.sets[draggedSet.setIndex]?.weight !== undefined
+              "
+            >
+              {{ formExcercises[draggedSet.excerciseIndex].sets[draggedSet.setIndex].weight }} kg
+            </span>
+          </div>
+        </div>
+      </div>
+    </Teleport>
+
+    <Teleport to="body" v-if="isExercisePointerDragging && draggedExcerciseIndex !== null && exerciseDragMousePosition">
+      <div
+        class="pointer-events-none fixed z-[9999] rounded-md border border-emerald-300 bg-slate-50 p-3 shadow-lg opacity-80 dark:border-emerald-700 dark:bg-slate-700/80"
+        :style="{
+          left: `${exerciseDragMousePosition.x + 10}px`,
+          top: `${exerciseDragMousePosition.y + 10}px`,
+          transform: 'translate(-50%, -50%)',
+          width: '280px',
+        }"
+      >
+        <div class="space-y-1.5">
+          <p class="font-semibold text-slate-900 dark:text-slate-100">
+            {{ formExcercises[draggedExcerciseIndex]?.name || 'Exercise' }}
+          </p>
+          <p class="text-xs text-slate-500 dark:text-slate-400">
+            {{ formExcercises[draggedExcerciseIndex]?.isBodyweight ? 'Bodyweight' : 'Weighted' }} •
+            {{ formExcercises[draggedExcerciseIndex]?.sets.length }} sets
+          </p>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>
 
@@ -451,6 +513,7 @@ const dropActionTarget = ref<{ excerciseIndex: number; action: 'remove' | 'copy'
 const hoveredDropTarget = ref<HoveredSetDropTarget | null>(null)
 const isPointerDragging = ref(false)
 const dragStartPoint = ref<{ x: number; y: number } | null>(null)
+const dragMousePosition = ref<{ x: number; y: number } | null>(null)
 
 const draggedExcerciseIndex = ref<number | null>(null)
 const excerciseDropInsertIndex = ref<number | null>(null)
@@ -458,6 +521,7 @@ const excerciseDropAction = ref<'remove' | null>(null)
 const hoveredExcerciseDropTarget = ref<HoveredExcerciseDropTarget | null>(null)
 const isExcercisePointerDragging = ref(false)
 const excerciseDragStartPoint = ref<{ x: number; y: number } | null>(null)
+const exerciseDragMousePosition = ref<{ x: number; y: number } | null>(null)
 
 const dragCursorClassName = 'routine-set-dragging-cursor'
 
@@ -948,6 +1012,7 @@ const clearDragState = () => {
   hoveredDropTarget.value = null
   isPointerDragging.value = false
   dragStartPoint.value = null
+  dragMousePosition.value = null
   updateDragCursor()
 }
 
@@ -958,6 +1023,7 @@ const clearExcerciseDragState = () => {
   hoveredExcerciseDropTarget.value = null
   isExcercisePointerDragging.value = false
   excerciseDragStartPoint.value = null
+  exerciseDragMousePosition.value = null
   updateDragCursor()
 }
 
@@ -967,6 +1033,8 @@ const handleSetPointerMove = (event: PointerEvent) => {
   if (!source) {
     return
   }
+
+  dragMousePosition.value = { x: event.clientX, y: event.clientY }
 
   if (!isPointerDragging.value) {
     const startPoint = dragStartPoint.value
@@ -1085,6 +1153,8 @@ const handleExcercisePointerMove = (event: PointerEvent) => {
   if (sourceIndex === null) {
     return
   }
+
+  exerciseDragMousePosition.value = { x: event.clientX, y: event.clientY }
 
   if (!isExcercisePointerDragging.value) {
     const startPoint = excerciseDragStartPoint.value

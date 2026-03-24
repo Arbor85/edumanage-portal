@@ -1,5 +1,6 @@
 using EduManage.Api.Services;
 using EduManage.Api.Validators;
+using EduManage.Infrastructure.Persistence;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -82,6 +83,8 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+await app.Services.SeedExercisesFromJsonAsync();
 
 app.UseSwagger(options =>
 {

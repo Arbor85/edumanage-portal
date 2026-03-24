@@ -1,0 +1,257 @@
+[
+  {
+    "name": "Barbell Back Squat",
+    "description": "Stand with feet shoulder-width apart, bar resting on upper traps. Descend by pushing hips back and bending knees until thighs are parallel to the floor, then drive back up.",
+    "primaryMuscle": "Quadriceps"
+  },
+  {
+    "name": "Conventional Deadlift",
+    "description": "Stand with feet hip-width apart, grip the bar just outside your legs. Keep back flat, drive through the floor to lift the bar to hip level, then lower it back down with control.",
+    "primaryMuscle": "Hamstrings"
+  },
+  {
+    "name": "Bench Press",
+    "description": "Lie flat on a bench, grip the bar slightly wider than shoulder-width. Lower the bar to mid-chest with control, then press it back up to full arm extension.",
+    "primaryMuscle": "Pectoralis Major"
+  },
+  {
+    "name": "Pull-Up",
+    "description": "Hang from a bar with an overhand grip wider than shoulder-width. Pull your chest toward the bar by driving elbows down, then lower with control.",
+    "primaryMuscle": "Latissimus Dorsi"
+  },
+  {
+    "name": "Overhead Press",
+    "description": "Stand holding a barbell at shoulder height, elbows forward. Press the bar straight overhead until arms are fully extended, then lower back to shoulders.",
+    "primaryMuscle": "Deltoids"
+  },
+  {
+    "name": "Barbell Row",
+    "description": "Hinge at the hips with a flat back, grip the barbell with an overhand grip. Pull the bar to your lower chest or upper abdomen, squeezing the shoulder blades together.",
+    "primaryMuscle": "Latissimus Dorsi"
+  },
+  {
+    "name": "Romanian Deadlift",
+    "description": "Stand holding a barbell at hip level. Push hips back, keeping a slight knee bend and flat back, lowering the bar along your legs until you feel a hamstring stretch, then return.",
+    "primaryMuscle": "Hamstrings"
+  },
+  {
+    "name": "Dumbbell Lunges",
+    "description": "Hold dumbbells at your sides, step forward with one leg and lower your back knee toward the floor. Push back to the start position and repeat on the other leg.",
+    "primaryMuscle": "Quadriceps"
+  },
+  {
+    "name": "Dumbbell Shoulder Press",
+    "description": "Sit or stand holding dumbbells at shoulder height with palms facing forward. Press the dumbbells overhead until arms are fully extended, then lower with control.",
+    "primaryMuscle": "Deltoids"
+  },
+  {
+    "name": "Incline Bench Press",
+    "description": "Lie on a bench set to 30–45 degrees. Lower the barbell to the upper chest and press back up, targeting the upper portion of the chest.",
+    "primaryMuscle": "Pectoralis Major (upper)"
+  },
+  {
+    "name": "Leg Press",
+    "description": "Sit in a leg press machine with feet shoulder-width on the platform. Push the platform away by extending the knees, then slowly return to the start without locking out.",
+    "primaryMuscle": "Quadriceps"
+  },
+  {
+    "name": "Lat Pulldown",
+    "description": "Sit at a cable machine and grip the bar wider than shoulder-width. Pull the bar down to your upper chest while driving elbows toward your sides, then return slowly.",
+    "primaryMuscle": "Latissimus Dorsi"
+  },
+  {
+    "name": "Seated Cable Row",
+    "description": "Sit at a low cable pulley with feet braced and knees slightly bent. Pull the handle to your lower abdomen, squeezing shoulder blades together, then extend arms back out.",
+    "primaryMuscle": "Rhomboids"
+  },
+  {
+    "name": "Dumbbell Bicep Curl",
+    "description": "Stand or sit holding dumbbells at your sides with palms facing forward. Curl the weights up toward your shoulders while keeping elbows fixed, then lower with control.",
+    "primaryMuscle": "Biceps Brachii"
+  },
+  {
+    "name": "Tricep Pushdown",
+    "description": "Stand at a cable machine with a bar or rope attachment. Keeping elbows at your sides, push the attachment down until arms are fully extended, then return slowly.",
+    "primaryMuscle": "Triceps Brachii"
+  },
+  {
+    "name": "Dumbbell Chest Fly",
+    "description": "Lie flat on a bench holding dumbbells above your chest with a slight elbow bend. Lower arms out to the sides in an arc until you feel a chest stretch, then bring them back together.",
+    "primaryMuscle": "Pectoralis Major"
+  },
+  {
+    "name": "Plank",
+    "description": "Support your body on forearms and toes with a straight line from head to heels. Hold this position by bracing the core and avoiding any hip sagging or raising.",
+    "primaryMuscle": "Rectus Abdominis"
+  },
+  {
+    "name": "Cable Lateral Raise",
+    "description": "Stand sideways to a low cable pulley, holding the handle with the far hand. Raise the arm out to the side to shoulder height, then lower with control.",
+    "primaryMuscle": "Deltoids (lateral head)"
+  },
+  {
+    "name": "Face Pull",
+    "description": "Set a cable machine at head height with a rope attachment. Pull the rope toward your face with elbows high and wide, squeezing the rear delts and external rotators at peak contraction.",
+    "primaryMuscle": "Rear Deltoids"
+  },
+  {
+    "name": "Hip Thrust",
+    "description": "Sit with upper back against a bench, barbell over the hips. Drive through the heels to thrust hips upward until the body forms a straight line from shoulders to knees, then lower.",
+    "primaryMuscle": "Gluteus Maximus"
+  },
+  {
+    "name": "Leg Curl",
+    "description": "Lie face down on a leg curl machine with the pad resting just above the heels. Curl the weight up by flexing the knees, then lower with control.",
+    "primaryMuscle": "Hamstrings"
+  },
+  {
+    "name": "Leg Extension",
+    "description": "Sit on a leg extension machine with the pad across the shins. Extend the knees to lift the weight until legs are straight, then return to the starting position.",
+    "primaryMuscle": "Quadriceps"
+  },
+  {
+    "name": "Calf Raise",
+    "description": "Stand with the balls of your feet on a raised surface. Push up onto your toes as high as possible, hold briefly at the top, then lower your heels below the platform for a full stretch.",
+    "primaryMuscle": "Gastrocnemius"
+  },
+  {
+    "name": "Hammer Curl",
+    "description": "Hold dumbbells with a neutral (palms-facing-in) grip. Curl the weights toward the shoulders while keeping the wrists neutral, then lower with control.",
+    "primaryMuscle": "Brachialis"
+  },
+  {
+    "name": "Skull Crusher",
+    "description": "Lie on a bench holding an EZ-bar or dumbbells above your chest with arms extended. Bend only at the elbows to lower the weight toward your forehead, then extend back up.",
+    "primaryMuscle": "Triceps Brachii"
+  },
+  {
+    "name": "Dips",
+    "description": "Support yourself on parallel bars with arms extended. Lower your body by bending the elbows until upper arms are parallel to the floor, then push back up to the starting position.",
+    "primaryMuscle": "Triceps Brachii"
+  },
+  {
+    "name": "Push-Up",
+    "description": "Start in a high plank position with hands slightly wider than shoulder-width. Lower your chest to the floor by bending the elbows, then push back up to full arm extension.",
+    "primaryMuscle": "Pectoralis Major"
+  },
+  {
+    "name": "Arnold Press",
+    "description": "Sit holding dumbbells at shoulder height with palms facing you. Rotate the palms outward as you press the weights overhead, then reverse the rotation on the way down.",
+    "primaryMuscle": "Deltoids"
+  },
+  {
+    "name": "T-Bar Row",
+    "description": "Straddle a landmine bar or T-bar machine, hinge at the hips with a flat back. Pull the bar to your lower chest by driving elbows back, then lower with control.",
+    "primaryMuscle": "Latissimus Dorsi"
+  },
+  {
+    "name": "Good Morning",
+    "description": "Stand with a barbell across the upper back. Hinge forward at the hips while keeping the back flat and knees slightly bent until the torso is near parallel, then return upright.",
+    "primaryMuscle": "Erector Spinae"
+  },
+  {
+    "name": "Cable Crunch",
+    "description": "Kneel below a high cable pulley holding a rope attachment behind your head. Crunch your elbows toward your knees by flexing the spine, then return to the start position.",
+    "primaryMuscle": "Rectus Abdominis"
+  },
+  {
+    "name": "Sumo Deadlift",
+    "description": "Take a wide stance with toes pointed out and grip the bar with hands inside the legs. Keep a tall chest and drive through the floor to stand upright, then lower with control.",
+    "primaryMuscle": "Adductors"
+  },
+  {
+    "name": "Bulgarian Split Squat",
+    "description": "Stand in front of a bench and place the rear foot on it. Lower the front knee toward the floor in a single-leg squat motion, then drive back up through the front heel.",
+    "primaryMuscle": "Quadriceps"
+  },
+  {
+    "name": "Cable Fly",
+    "description": "Stand between two cable machines set at chest height. With arms slightly bent, bring the handles together in an arc in front of the chest, then return with control.",
+    "primaryMuscle": "Pectoralis Major"
+  },
+  {
+    "name": "Preacher Curl",
+    "description": "Sit at a preacher bench with upper arms resting on the angled pad. Curl the barbell or dumbbell up toward the shoulders, fully contracting the biceps, then lower slowly.",
+    "primaryMuscle": "Biceps Brachii"
+  },
+  {
+    "name": "Chest Supported Row",
+    "description": "Lie chest-down on an inclined bench holding dumbbells. Row the weights toward your hips by driving elbows back and squeezing the shoulder blades together.",
+    "primaryMuscle": "Rhomboids"
+  },
+  {
+    "name": "Landmine Press",
+    "description": "Hold the end of a barbell fixed in a landmine. Press the bar upward and forward at an angle until the arm is extended, then return to shoulder height.",
+    "primaryMuscle": "Pectoralis Major (upper)"
+  },
+  {
+    "name": "Hack Squat",
+    "description": "Position yourself on a hack squat machine with shoulders under the pads. Lower by bending the knees until thighs are at least parallel, then drive back up through the heels.",
+    "primaryMuscle": "Quadriceps"
+  },
+  {
+    "name": "Glute Bridge",
+    "description": "Lie on your back with knees bent and feet flat on the floor. Drive the hips upward by squeezing the glutes until the body forms a straight line from knees to shoulders, then lower.",
+    "primaryMuscle": "Gluteus Maximus"
+  },
+  {
+    "name": "Reverse Fly",
+    "description": "Hinge forward at the hips holding dumbbells below your chest. Raise the arms out to the sides in an arc until they are at shoulder height, squeezing the rear delts, then lower.",
+    "primaryMuscle": "Rear Deltoids"
+  },
+  {
+    "name": "Seated Leg Press (Narrow Stance)",
+    "description": "Use a leg press machine with feet placed close together and high on the platform. Press through the heels to extend the legs, emphasizing the outer quads, then return slowly.",
+    "primaryMuscle": "Vastus Lateralis"
+  },
+  {
+    "name": "Front Squat",
+    "description": "Hold a barbell across the front of the shoulders in a clean grip or cross-arm position. Squat down keeping an upright torso until thighs are parallel, then drive back up.",
+    "primaryMuscle": "Quadriceps"
+  },
+  {
+    "name": "Close-Grip Bench Press",
+    "description": "Lie on a flat bench with hands placed shoulder-width or narrower on the bar. Lower the bar to the lower chest and press back up, focusing tension on the triceps.",
+    "primaryMuscle": "Triceps Brachii"
+  },
+  {
+    "name": "Concentration Curl",
+    "description": "Sit on a bench, rest one elbow on the inner thigh and let the arm hang. Curl the dumbbell toward the shoulder while keeping the upper arm stationary, then lower slowly.",
+    "primaryMuscle": "Biceps Brachii"
+  },
+  {
+    "name": "Shrug",
+    "description": "Stand holding a barbell or dumbbells at your sides. Elevate the shoulders straight up as high as possible, hold briefly, then lower the weight back down.",
+    "primaryMuscle": "Trapezius"
+  },
+  {
+    "name": "Decline Bench Press",
+    "description": "Lie on a bench declined at 15–30 degrees with feet secured. Lower the barbell to the lower portion of the chest, then press back up, targeting the lower pecs.",
+    "primaryMuscle": "Pectoralis Major (lower)"
+  },
+  {
+    "name": "Cable Bicep Curl",
+    "description": "Stand at a low cable pulley with a straight bar or EZ-bar attachment. Curl the bar upward toward the shoulders, keeping elbows fixed at the sides, then lower with control.",
+    "primaryMuscle": "Biceps Brachii"
+  },
+  {
+    "name": "Overhead Tricep Extension",
+    "description": "Stand or sit holding a dumbbell or EZ-bar overhead with both hands. Lower the weight behind the head by bending the elbows, then extend back to the start position.",
+    "primaryMuscle": "Triceps Brachii (long head)"
+  },
+  {
+    "name": "Hanging Leg Raise",
+    "description": "Hang from a pull-up bar with arms fully extended. Raise both legs by flexing the hips and core until they are parallel to the floor or higher, then lower with control.",
+    "primaryMuscle": "Hip Flexors"
+  },
+  {
+    "name": "Goblet Squat",
+    "description": "Hold a dumbbell or kettlebell vertically at chest height. Squat down keeping an upright torso and elbows inside the knees until thighs are at least parallel, then drive back up.",
+    "primaryMuscle": "Quadriceps"
+  },
+  {
+    "name": "Step-Up",
+    "description": "Hold dumbbells at your sides and place one foot on a box or bench. Drive through the elevated heel to step up fully, then step back down and repeat on the same or opposite leg.",
+    "primaryMuscle": "Gluteus Maximus"
+  }
+]
