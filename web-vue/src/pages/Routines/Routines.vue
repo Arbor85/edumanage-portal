@@ -4,7 +4,13 @@
       <h1 class="text-2xl font-bold text-slate-900 dark:text-slate-100">Routines</h1>
     </div>
 
-    <div class="mb-4 flex items-center justify-end gap-2">
+    <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+      <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:gap-2">
+        <SearchInput v-model="searchQuery" placeholder="Search by routine name..." />
+        <SelectExcercise v-model="selectedExerciseNames" :options="excercises" button-text="Filter by exercise" />
+      </div>
+
+      <div class="flex items-center justify-end gap-2">
       <div class="inline-flex overflow-hidden rounded-md border border-slate-300 dark:border-slate-600">
         <button type="button" @click="viewMode = 'tile'" class="px-3 py-1.5 text-xs font-medium"
           :class="viewMode === 'tile'
@@ -29,6 +35,7 @@
           <polyline points="21 3 21 9 15 9" />
         </svg>
       </button>
+      </div>
     </div>
 
     <div v-if="errorMessage"
@@ -36,7 +43,17 @@
       {{ errorMessage }}
     </div>
 
+    <NotificationToast
+      v-model:open="notificationOpen"
+      :title="notificationTitle"
+      :message="notificationMessage"
+    />
+
     <LoadingPanel v-if="isLoading" :is-loading="isLoading" label="Loading routines..." />
+
+    <div v-else-if="filteredRoutines.length === 0" class="rounded-md border border-slate-300 bg-white p-4 text-center text-sm text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
+      No routines found.
+    </div>
 
     <div v-else-if="viewMode === 'list'"
       class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
@@ -50,7 +67,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="routine in routines" :key="routine.id" class="border-t border-slate-200 dark:border-slate-700">
+            <tr v-for="routine in filteredRoutines" :key="routine.id" class="border-t border-slate-200 dark:border-slate-700">
               <td class="px-4 py-3 font-medium text-slate-900 dark:text-slate-100">{{ routine.name }}</td>
               <td class="px-4 py-3">
                 <div class="flex flex-wrap gap-1.5">
@@ -77,15 +94,10 @@
           </tbody>
         </table>
       </div>
-
-      <div v-if="routines.length === 0"
-        class="border-t border-slate-200 px-4 py-4 text-sm text-slate-700 dark:border-slate-700 dark:text-slate-200">
-        No routines yet.
-      </div>
     </div>
 
     <div v-else class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-      <article v-for="routine in routines" :key="routine.id"
+      <article v-for="routine in filteredRoutines" :key="routine.id"
         class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
         <p class="mb-3 font-semibold text-slate-900 dark:text-slate-100">{{ routine.name }}</p>
 
@@ -97,23 +109,17 @@
         </div>
 
         <div class="mt-4 flex items-center justify-between gap-2">
-
           <button type="button" @click="requestDeleteRoutine(routine)" aria-label="Remove routine"
             title="Remove routine"
             class="inline-flex items-center justify-center gap-2 rounded-md border border-rose-300 bg-white p-2 text-rose-700 hover:bg-rose-50 dark:border-rose-700 dark:bg-slate-700 dark:text-rose-300 dark:hover:bg-rose-900/30">
             <Trash2 :size="16" />
           </button>
           <button type="button" @click="openEditDialog(routine)"
-            class="inline-flex items-center rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600">
+            class="inline-flex items-center justify-center gap-2 rounded-md border border-slate-300 bg-white p-2 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600">
             Edit
           </button>
         </div>
       </article>
-
-      <div v-if="routines.length === 0"
-        class="md:col-span-2 lg:col-span-3 rounded-md border border-slate-300 bg-white p-4 text-sm text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
-        No routines yet.
-      </div>
     </div>
 
     <div class="fixed bottom-0 left-56 right-0 z-30 px-6 pb-3">
@@ -133,18 +139,21 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import { useAuth0 } from '@auth0/auth0-vue'
-import ConfirmDialog from '../components/ConfirmDialog.vue'
-import DialogActionPanel from '../components/DialogActionPanel.vue'
-import LoadingPanel from '../components/LoadingPanel.vue'
-import RoutineEditorDialog from '../components/RoutineEditorDialog.vue'
-import { useLocalStorageState } from '../composables/useLocalStorageState'
-import { usePageTitle } from '../composables/usePageTitle'
-import { useExcercisesApi } from '../services/excercisesApi'
-import { useRoutinesApi } from '../services/routinesApi'
-import type { Excercise } from '../types/excercise'
-import type { Routine, RoutineExcercise } from '../types/routine'
+import ConfirmDialog from '../../components/ConfirmDialog.vue'
+import DialogActionPanel from '../../components/DialogActionPanel.vue'
+import LoadingPanel from '../../components/LoadingPanel.vue'
+import NotificationToast from '../../components/NotificationToast.vue'
+import RoutineEditorDialog from '../../components/RoutineEditorDialog.vue'
+import SearchInput from '../../components/SearchInput.vue'
+import SelectExcercise from '../../components/Select/SelectExcercise.vue'
+import { useLocalStorageState } from '../../composables/useLocalStorageState'
+import { usePageTitle } from '../../composables/usePageTitle'
+import { useExcercisesApi } from '../../services/excercisesApi'
+import { useRoutinesApi } from '../../services/routinesApi'
+import type { Excercise } from '../../types/excercise'
+import type { Routine, RoutineExcercise } from '../../types/routine'
 import { Trash2 } from 'lucide-vue-next'
 
 usePageTitle('Routines')
@@ -169,6 +178,26 @@ const editingRoutineNote = ref('')
 const editingRoutineExcercises = ref<RoutineExcercise[]>([])
 const hasLoadedRoutinesInitially = ref(false)
 
+const notificationOpen = ref(false)
+const notificationTitle = ref('')
+const notificationMessage = ref('')
+
+const searchQuery = ref('')
+const selectedExerciseNames = ref<string[]>([])
+
+const filteredRoutines = computed(() => {
+  const query = searchQuery.value.trim().toLowerCase()
+
+  return routines.value.filter((routine) => {
+    const matchesQuery = !query || routine.name.toLowerCase().includes(query)
+    const matchesExercises =
+      selectedExerciseNames.value.length === 0 ||
+      routine.excercises.some((exc) => selectedExerciseNames.value.includes(exc.name))
+
+    return matchesQuery && matchesExercises
+  })
+})
+
 const loadRoutines = async () => {
   isLoading.value = true
   errorMessage.value = ''
@@ -188,6 +217,14 @@ const loadExcercises = async () => {
   } catch {
     excercises.value = []
   }
+}
+
+const showSuccessNotification = async (title: string, message: string) => {
+  notificationTitle.value = title
+  notificationMessage.value = message
+  notificationOpen.value = false
+  await nextTick()
+  notificationOpen.value = true
 }
 
 const openCreateDialog = () => {
@@ -233,12 +270,15 @@ const saveRoutineFromDialog = async (payload: { name: string; note?: string; exc
 
         return updatedRoutine
       })
-    } else {
-      const createdRoutine = await routinesApi.addRoutine(payload)
-      routines.value = [createdRoutine, ...routines.value]
+      closeDialog()
+      await showSuccessNotification('Routine updated', `Changes for **${updatedRoutine.name}** were saved successfully.`)
+      return
     }
 
+    const createdRoutine = await routinesApi.addRoutine(payload)
+    routines.value = [createdRoutine, ...routines.value]
     closeDialog()
+    await showSuccessNotification('Routine added', `Routine **${createdRoutine.name}** was added successfully.`)
   } catch {
     errorMessage.value = 'Failed to save routine'
   }
@@ -280,6 +320,7 @@ const confirmDeleteRoutine = async () => {
     }
 
     closeDeleteDialog()
+    await showSuccessNotification('Routine deleted', `Routine **${routine.name}** was deleted successfully.`)
   } catch {
     errorMessage.value = 'Failed to delete routine'
   }

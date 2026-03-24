@@ -69,7 +69,7 @@
 import { ref, watch, computed } from 'vue'
 import FormDialog from '../../../components/FormDialog.vue'
 import { useClientsApi } from '../../../services/clientsApi'
-import type { Client, ClientTag } from '../../.FormDialclient'
+import type { Client, ClientTag } from '../../../types/client'
 
 const props = withDefaults(
   defineProps<{
@@ -189,7 +189,7 @@ const handleSubmit = async () => {
       name: name.value.trim(),
       tags: [...selectedTags.value],
       imageUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(name.value.trim())}&background=E2E8F0&color=0F172A`,
-      status: 'Pending',
+      status: 'Invited',
       invitationCode,
     }
 

@@ -46,6 +46,12 @@
       {{ errorMessage }}
     </div>
 
+    <NotificationToast
+      v-model:open="notificationOpen"
+      :title="notificationTitle"
+      :message="notificationMessage"
+    />
+
     <LoadingPanel v-if="isLoading" :is-loading="isLoading" label="Loading excercises..." />
 
     <div v-else-if="viewMode === 'tile'" class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -183,18 +189,19 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, nextTick, onMounted, ref } from 'vue'
 import { Edit2, Trash2 } from 'lucide-vue-next'
-import ConfirmDialog from '../components/ConfirmDialog.vue'
-import DialogActionPanel from '../components/DialogActionPanel.vue'
-import FilterOption from '../components/FilterOption.vue'
-import LoadingPanel from '../components/LoadingPanel.vue'
-import SearchInput from '../components/SearchInput.vue'
-import { useLocalStorageState } from '../composables/useLocalStorageState'
-import { usePageTitle } from '../composables/usePageTitle'
-import { useExcercisesApi } from '../services/excercisesApi'
-import type { Excercise, ExcerciseWritePayload } from '../types/excercise'
-import ExcerciseEditorDialog from './Excercises/components/ExcerciseEditorDialog.vue'
+import ConfirmDialog from '../../components/ConfirmDialog.vue'
+import DialogActionPanel from '../../components/DialogActionPanel.vue'
+import FilterOption from '../../components/FilterOption.vue'
+import LoadingPanel from '../../components/LoadingPanel.vue'
+import NotificationToast from '../../components/NotificationToast.vue'
+import SearchInput from '../../components/SearchInput.vue'
+import { useLocalStorageState } from '../../composables/useLocalStorageState'
+import { usePageTitle } from '../../composables/usePageTitle'
+import { useExcercisesApi } from '../../services/excercisesApi'
+import type { Excercise, ExcerciseWritePayload } from '../../types/excercise'
+import ExcerciseEditorDialog from './components/ExcerciseEditorDialog.vue'
 
 usePageTitle('Excercises')
 
@@ -212,6 +219,9 @@ const showDialog = ref(false)
 const isEditing = ref(false)
 const editingExcercise = ref<Excercise | null>(null)
 const excerciseToDelete = ref<Excercise | null>(null)
+const notificationOpen = ref(false)
+const notificationTitle = ref('')
+const notificationMessage = ref('')
 
 const primaryMuscleOptions = computed(() => {
   const muscles = new Set(excercises.value.map((excercise) => excercise.primaryMuscle))
@@ -263,6 +273,14 @@ const closeDialog = () => {
   editingExcercise.value = null
 }
 
+const showSuccessNotification = async (title: string, message: string) => {
+  notificationTitle.value = title
+  notificationMessage.value = message
+  notificationOpen.value = false
+  await nextTick()
+  notificationOpen.value = true
+}
+
 const saveExcercise = async (payload: ExcerciseWritePayload) => {
   errorMessage.value = ''
   try {
@@ -270,11 +288,15 @@ const saveExcercise = async (payload: ExcerciseWritePayload) => {
       const updated = await excercisesApi.updateExcercise(editingExcercise.value.id, payload)
       const index = excercises.value.findIndex((e) => e.id === updated.id)
       if (index !== -1) excercises.value[index] = updated
-    } else {
-      const created = await excercisesApi.createExcercise(payload)
-      excercises.value.push(created)
+      closeDialog()
+      await showSuccessNotification('Exercise updated', `Changes for **${updated.name}** were saved successfully.`)
+      return
     }
+
+    const created = await excercisesApi.createExcercise(payload)
+    excercises.value.push(created)
     closeDialog()
+    await showSuccessNotification('Exercise added', `Exercise **${created.name}** was added successfully.`)
   } catch (error) {
     errorMessage.value = error instanceof Error ? error.message : 'Failed to save exercise'
   }
@@ -283,10 +305,14 @@ const saveExcercise = async (payload: ExcerciseWritePayload) => {
 const deleteExcercise = async () => {
   if (!excerciseToDelete.value) return
   errorMessage.value = ''
+
+  const deletedExcercise = excerciseToDelete.value
+
   try {
-    await excercisesApi.deleteExcercise(excerciseToDelete.value.id)
-    excercises.value = excercises.value.filter((e) => e.id !== excerciseToDelete.value?.id)
+    await excercisesApi.deleteExcercise(deletedExcercise.id)
+    excercises.value = excercises.value.filter((e) => e.id !== deletedExcercise.id)
     excerciseToDelete.value = null
+    await showSuccessNotification('Exercise deleted', `Exercise **${deletedExcercise.name}** was deleted successfully.`)
   } catch (error) {
     errorMessage.value = error instanceof Error ? error.message : 'Failed to delete exercise'
     excerciseToDelete.value = null

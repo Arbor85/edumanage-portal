@@ -14,12 +14,12 @@
       <span class="ml-2 shrink-0">▾</span>
     </button>
 
-    <FormDialog :open="isOpen" title="Select muscle" save-label="Apply" :show-save="multiple" @cancel="closeDialog" @submit="applySelection">
+    <Drawer :open="isOpen" title="Select muscle" save-label="Apply" :show-save="multiple" width-class="sm:max-w-xl" @cancel="closeDialog" @submit="applySelection">
       <div class="mb-3">
         <SearchInput v-model="searchQuery" placeholder="Search muscles..." :autofocus="true" />
       </div>
 
-      <div class="custom-scrollbar space-y-2 rounded-md border border-slate-300 p-2 dark:border-slate-600">
+      <div class="custom-scrollbar max-h-[min(45vh,18rem)] overflow-y-auto space-y-2 rounded-md border border-slate-300 p-2 dark:border-slate-600 sm:max-h-[20rem]">
         <button
           v-for="muscle in filteredMuscles"
           :key="muscle"
@@ -42,13 +42,13 @@
           No muscles match your search.
         </p>
       </div>
-    </FormDialog>
+    </Drawer>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import FormDialog from '../FormDialog.vue'
+import Drawer from '../Drawer.vue'
 import SearchInput from '../SearchInput.vue'
 
 const MUSCLE_OPTIONS = [

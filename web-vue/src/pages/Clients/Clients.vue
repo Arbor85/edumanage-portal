@@ -50,6 +50,12 @@
       {{ errorMessage }}
     </div>
 
+    <NotificationToast
+      v-model:open="notificationOpen"
+      :title="notificationTitle"
+      :message="notificationMessage"
+    />
+
     <!-- Loading -->
     <div
       v-if="isLoading"
@@ -277,10 +283,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, nextTick, onMounted, ref } from 'vue'
 import { Link, Pencil, Trash2, User } from 'lucide-vue-next'
 import ConfirmDialog from '../../components/ConfirmDialog.vue'
 import DialogActionPanel from '../../components/DialogActionPanel.vue'
+import NotificationToast from '../../components/NotificationToast.vue'
 import SearchInput from '../../components/SearchInput.vue'
 import { useLocalStorageState } from '../../composables/useLocalStorageState'
 import { usePageTitle } from '../../composables/usePageTitle'
@@ -304,6 +311,9 @@ const inviteTarget = ref<Client | null>(null)
 const clientToDelete = ref<Client | null>(null)
 const showEditDialog = ref(false)
 const editTarget = ref<Client | null>(null)
+const notificationOpen = ref(false)
+const notificationTitle = ref('')
+const notificationMessage = ref('')
 
 const filteredClients = computed(() => {
   const q = searchQuery.value.trim().toLowerCase()
@@ -332,12 +342,22 @@ const closeInviteDialog = () => {
   inviteTarget.value = null
 }
 
-const onClientInvited = (client: Client) => {
+const showSuccessNotification = async (title: string, message: string) => {
+  notificationTitle.value = title
+  notificationMessage.value = message
+  notificationOpen.value = false
+  await nextTick()
+  notificationOpen.value = true
+}
+
+const onClientInvited = async (client: Client) => {
   const existing = clients.value.findIndex((c) => c.invitationCode === client.invitationCode)
   if (existing !== -1) {
     clients.value[existing] = client
+    await showSuccessNotification('Invitation refreshed', `A new invitation link for **${client.name}** is ready.`)
   } else {
     clients.value = [client, ...clients.value]
+    await showSuccessNotification('Client added', `Client **${client.name}** was added successfully.`)
   }
 }
 
@@ -351,10 +371,11 @@ const closeEditDialog = () => {
   editTarget.value = null
 }
 
-const onClientSaved = (updated: Client) => {
+const onClientSaved = async (updated: Client) => {
   const idx = clients.value.findIndex((c) => c.invitationCode === updated.invitationCode)
   if (idx !== -1) clients.value[idx] = updated
   closeEditDialog()
+  await showSuccessNotification('Client updated', `Changes for **${updated.name}** were saved successfully.`)
 }
 
 const requestDelete = (client: Client) => {
@@ -364,10 +385,14 @@ const requestDelete = (client: Client) => {
 const deleteClient = async () => {
   if (!clientToDelete.value) return
   errorMessage.value = ''
+
+  const deletedClient = clientToDelete.value
+
   try {
-    await clientsApi.deleteClient(clientToDelete.value.invitationCode)
-    clients.value = clients.value.filter((c) => c.invitationCode !== clientToDelete.value!.invitationCode)
+    await clientsApi.deleteClient(deletedClient.invitationCode)
+    clients.value = clients.value.filter((c) => c.invitationCode !== deletedClient.invitationCode)
     clientToDelete.value = null
+    await showSuccessNotification('Client deleted', `Client **${deletedClient.name}** was deleted successfully.`)
   } catch {
     errorMessage.value = 'Failed to delete client'
     clientToDelete.value = null

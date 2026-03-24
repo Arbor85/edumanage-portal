@@ -29,6 +29,7 @@ These rules apply to all future changes in this repository.
 ## Task-Specific Notes
 - Add temporary rules for a specific task here, then remove them later.
 - Example: "Use spinner instead of empty table while fetching clients."
+- For client actions, display confirmation notifications using the shared `src/components/NotificationToast.vue` component after every successful add, edit, and delete operation.
 
 # Frontend Structure Rules
 
