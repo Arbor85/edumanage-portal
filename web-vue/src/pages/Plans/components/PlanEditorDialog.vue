@@ -39,6 +39,24 @@
               Workouts ({{ formData.workouts.length }})
             </label>
             <div class="flex items-center gap-2">
+              <div class="inline-flex overflow-hidden rounded-md border border-slate-300 dark:border-slate-600">
+                <button
+                  type="button"
+                  @click="workoutsViewMode = 'list'"
+                  class="px-3 py-1 text-xs font-medium"
+                  :class="workoutsViewMode === 'list' ? 'bg-emerald-500 text-white' : 'bg-white text-slate-700 hover:bg-slate-100 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600'"
+                >
+                  List
+                </button>
+                <button
+                  type="button"
+                  @click="workoutsViewMode = 'calendar'"
+                  class="border-l border-slate-300 px-3 py-1 text-xs font-medium dark:border-slate-600"
+                  :class="workoutsViewMode === 'calendar' ? 'bg-emerald-500 text-white' : 'bg-white text-slate-700 hover:bg-slate-100 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600'"
+                >
+                  Calendar
+                </button>
+              </div>
               <button
                 type="button"
                 @click="openEmptyWorkoutDialog"
@@ -53,7 +71,7 @@
             </div>
           </div>
 
-          <div class="custom-scrollbar max-h-96 space-y-3 overflow-y-auto">
+          <div v-if="workoutsViewMode === 'list'" class="custom-scrollbar max-h-96 space-y-3 overflow-y-auto">
             <div
               v-for="(workout, index) in formData.workouts"
               :key="`workout-${index}`"
@@ -101,6 +119,46 @@
               No workouts scheduled. Click "Add workout" to start.
             </div>
           </div>
+
+          <CalendarView v-else v-model="calendarDate">
+            <template #day="{ day, date }">
+              <div class="mb-1 text-xs font-medium text-slate-900 dark:text-slate-100">
+                {{ day }}
+              </div>
+              <div
+                class="space-y-1 rounded p-0.5"
+                :class="dragOverDateKey === toDateKey(date) ? 'bg-emerald-50 dark:bg-emerald-900/20' : ''"
+                @dragover.prevent="handleDayDragOver(date)"
+                @dragenter.prevent="handleDayDragOver(date)"
+                @dragleave="handleDayDragLeave(date)"
+                @drop.prevent="handleDayDrop(date)"
+              >
+                <button
+                  v-for="entry in getWorkoutsForDay(date)"
+                  :key="`workout-calendar-${entry.index}-${entry.workout.id}`"
+                  type="button"
+                  draggable="true"
+                  @dragstart="handleWorkoutDragStart(entry.index)"
+                  @dragend="handleWorkoutDragEnd"
+                  @click="openEditWorkoutDialog(entry.index)"
+                  class="w-full rounded bg-emerald-100 px-1.5 py-1 text-left text-[10px] text-emerald-800 hover:bg-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-300 dark:hover:bg-emerald-800"
+                  :title="`${entry.workout.name} • ${formatDate(entry.workout.date)}`"
+                >
+                  <p class="truncate font-semibold">{{ entry.workout.name }}</p>
+                  <p class="truncate">{{ entry.workout.excercises.length }} exc.</p>
+                </button>
+              </div>
+            </template>
+
+            <template #footer>
+              <div
+                v-if="calendarMonthEmpty"
+                class="mt-4 rounded-md border border-slate-300 bg-white p-4 text-sm text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+              >
+                No workouts scheduled in this month.
+              </div>
+            </template>
+          </CalendarView>
         </div>
       </div>
 
@@ -171,6 +229,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { Ban, Send } from 'lucide-vue-next'
+import CalendarView from '../../../components/CalendarView.vue'
 import RoutineEditorDialog from '../../../components/RoutineEditorDialog.vue'
 import ScheduleRoutine from '../../../components/ScheduleRoutine.vue'
 import SelectClient from '../../../components/Select/SelectClient.vue'
@@ -225,6 +284,10 @@ const workoutDialogInitialDate = ref('')
 const copyingWorkoutIndex = ref<number | null>(null)
 const copyWorkoutDate = ref('')
 const nameManuallyEdited = ref(false)
+const workoutsViewMode = ref<'list' | 'calendar'>('list')
+const calendarDate = ref(new Date())
+const draggedWorkoutIndex = ref<number | null>(null)
+const dragOverDateKey = ref('')
 
 const formData = ref<PlanEditorPayload>({
   name: '',
@@ -285,6 +348,85 @@ const autoGenerateName = () => {
 }
 
 watch(() => [formData.value.workouts.map((workout) => workout.name).join(','), formData.value.clientId], autoGenerateName)
+
+const toDateKey = (value: Date | string) => {
+  if (value instanceof Date) {
+    const y = value.getFullYear()
+    const m = String(value.getMonth() + 1).padStart(2, '0')
+    const d = String(value.getDate()).padStart(2, '0')
+    return `${y}-${m}-${d}`
+  }
+
+  return value.split('T')[0] || value
+}
+
+const withUpdatedDate = (sourceDate: string, dateKey: string) => {
+  const timePart = sourceDate.includes('T') ? sourceDate.slice(sourceDate.indexOf('T')) : ''
+  return `${dateKey}${timePart}`
+}
+
+const getWorkoutsForDay = (date: Date) => {
+  const dateKey = toDateKey(date)
+  return formData.value.workouts
+    .map((workout, index) => ({ workout, index }))
+    .filter((entry) => toDateKey(entry.workout.date) === dateKey)
+}
+
+const calendarMonthEmpty = computed(() => {
+  const year = calendarDate.value.getFullYear()
+  const month = calendarDate.value.getMonth()
+
+  return formData.value.workouts.every((workout) => {
+    const d = new Date(workout.date)
+    return d.getFullYear() !== year || d.getMonth() !== month
+  })
+})
+
+const handleWorkoutDragStart = (index: number) => {
+  draggedWorkoutIndex.value = index
+}
+
+const handleWorkoutDragEnd = () => {
+  draggedWorkoutIndex.value = null
+  dragOverDateKey.value = ''
+}
+
+const handleDayDragOver = (date: Date) => {
+  if (draggedWorkoutIndex.value === null) {
+    return
+  }
+
+  dragOverDateKey.value = toDateKey(date)
+}
+
+const handleDayDragLeave = (date: Date) => {
+  const dayKey = toDateKey(date)
+
+  if (dragOverDateKey.value === dayKey) {
+    dragOverDateKey.value = ''
+  }
+}
+
+const handleDayDrop = (date: Date) => {
+  if (draggedWorkoutIndex.value === null) {
+    return
+  }
+
+  const droppedWorkout = formData.value.workouts[draggedWorkoutIndex.value]
+
+  if (!droppedWorkout) {
+    handleWorkoutDragEnd()
+    return
+  }
+
+  const dayKey = toDateKey(date)
+  formData.value.workouts[draggedWorkoutIndex.value] = {
+    ...droppedWorkout,
+    date: withUpdatedDate(droppedWorkout.date, dayKey),
+  }
+
+  handleWorkoutDragEnd()
+}
 
 const formatDate = (dateString: string) => {
   const date = new Date(dateString)
