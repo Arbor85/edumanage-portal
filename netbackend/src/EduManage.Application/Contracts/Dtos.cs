@@ -43,9 +43,9 @@ public sealed record PlanWorkoutOutput(
     IReadOnlyList<RoutineExcercise> Excercises,
     string Date);
 
-public sealed record PlanCreate(string Name, string ClientId, string? Note, string Status, IReadOnlyList<PlanWorkoutInput> Workouts);
+public sealed record PlanCreate(string Name, string ClientId, string? Note, IReadOnlyList<PlanWorkoutInput> Workouts);
 
-public sealed record PlanUpdate(string Name, string ClientId, string? Note, string Status, IReadOnlyList<PlanWorkoutInput> Workouts);
+public sealed record PlanUpdate(string Name, string ClientId, string? Note, IReadOnlyList<PlanWorkoutInput> Workouts);
 
 public sealed record PlanOut(
     string Name,

@@ -18,8 +18,7 @@ public sealed record UpdatePlanCommand(string PlanId, PlanUpdate Request) : IReq
             plan.Name = request.Request.Name;
             plan.ClientId = request.Request.ClientId;
             plan.Notes = request.Request.Note;
-            plan.Status = request.Request.Status;
-            plan.Workouts = request.Request.Workouts.Select(w => new PlanWorkout
+            plan.Workouts = [.. request.Request.Workouts.Select(w => new PlanWorkout
             {
                 Id = w.Id,
                 PlanId = plan.Id,
@@ -27,7 +26,7 @@ public sealed record UpdatePlanCommand(string PlanId, PlanUpdate Request) : IReq
                 Notes = w.Note,
                 UserId = w.UserId,
                 Date = w.Date,
-                Exercises = w.Excercises.Select(e => new RoutineExercise
+                Exercises = [.. w.Excercises.Select(e => new RoutineExercise
                 {
                     Name = e.Name,
                     IsBodyweight = e.IsBodyweight,
@@ -38,8 +37,8 @@ public sealed record UpdatePlanCommand(string PlanId, PlanUpdate Request) : IReq
                         Weight = s.Weight,
                         Notes = s.Note
                     }).ToList()
-                }).ToList()
-            }).ToList();
+                })]
+            })];
 
             await repository.UpdateAsync(plan, cancellationToken);
             return ListPlansQuery.Handler.MapToOut(plan);

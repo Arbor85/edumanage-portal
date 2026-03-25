@@ -9,6 +9,5 @@ public class RoutineExercise
     public bool IsBodyweight { get; set; }
 
     public Routine? Routine { get; set; }
-    public PlanWorkout? PlanWorkout { get; set; }
     public ICollection<RoutineSet> Sets { get; set; } = [];
 }

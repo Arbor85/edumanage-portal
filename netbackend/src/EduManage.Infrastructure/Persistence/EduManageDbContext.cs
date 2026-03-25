@@ -12,7 +12,6 @@ public class EduManageDbContext : DbContext
 
     public DbSet<Client> Clients { get; set; }
     public DbSet<Plan> Plans { get; set; }
-    public DbSet<PlanWorkout> PlanWorkouts { get; set; }
     public DbSet<Meeting> Meetings { get; set; }
     public DbSet<Course> Courses { get; set; }
     public DbSet<Exercise> Exercises { get; set; }
@@ -31,7 +30,6 @@ public class EduManageDbContext : DbContext
         // Apply all configurations
         modelBuilder.ApplyConfiguration(new ClientConfiguration());
         modelBuilder.ApplyConfiguration(new PlanConfiguration());
-        modelBuilder.ApplyConfiguration(new PlanWorkoutConfiguration());
         modelBuilder.ApplyConfiguration(new MeetingConfiguration());
         modelBuilder.ApplyConfiguration(new CourseConfiguration());
         modelBuilder.ApplyConfiguration(new ExerciseConfiguration());

@@ -17,7 +17,7 @@ public sealed record AddPlanCommand(PlanCreate Request) : IRequest<PlanOut>
                 Name = request.Request.Name,
                 ClientId = request.Request.ClientId,
                 Notes = request.Request.Note,
-                Status = request.Request.Status,
+                Status = "Draft",
                 Workouts = request.Request.Workouts.Select(w => new PlanWorkout
                 {
                     Id = w.Id,

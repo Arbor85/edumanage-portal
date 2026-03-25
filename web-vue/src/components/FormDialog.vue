@@ -1,6 +1,6 @@
 <template>
   <div v-if="open" class="fixed inset-0 z-[70] flex items-center justify-center bg-slate-900/50 p-4" @click.self="$emit('cancel')">
-    <div :class="maxWidthClass" class="w-full rounded-lg border border-white/60 bg-white shadow-lg hover:shadow-2xl focus-within:shadow-2xl transition-shadow backdrop-blur-xl dark:border-slate-700 dark:bg-slate-800/40 flex flex-col">
+    <div :class="maxWidthClass" class="flex max-h-[calc(100vh-2rem)] w-full flex-col overflow-hidden rounded-lg border border-white/60 bg-white shadow-lg transition-shadow backdrop-blur-xl hover:shadow-2xl focus-within:shadow-2xl dark:border-slate-700 dark:bg-slate-800/40">
       <div class="px-5 py-4 flex items-center justify-between border-b border-white/90 dark:border-slate-600">
         <h3 class="text-lg font-semibold text-slate-900 dark:text-slate-100">{{ title }}</h3>
         <button
@@ -12,8 +12,10 @@
         </button>
       </div>
 
-      <form class="p-5 space-y-4" @submit.prevent="$emit('submit')">
-        <slot />
+      <form class="flex min-h-0 flex-1 flex-col p-5" @submit.prevent="$emit('submit')">
+        <div class="custom-scrollbar min-h-0 flex-1 space-y-4 overflow-y-auto pr-1">
+          <slot />
+        </div>
 
         <div class="mt-4 flex items-center justify-end gap-2">
           <button

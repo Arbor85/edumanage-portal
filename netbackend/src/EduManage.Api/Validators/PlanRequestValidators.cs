@@ -10,7 +10,6 @@ public sealed class PlanCreateValidator : AbstractValidator<PlanCreate>
         RuleFor(request => request.Name).NotEmpty().MaximumLength(200);
         RuleFor(request => request.ClientId).NotEmpty().MaximumLength(100);
         RuleFor(request => request.Note).MaximumLength(2000).When(request => request.Note is not null);
-        RuleFor(request => request.Status).NotEmpty().MaximumLength(100);
         RuleForEach(request => request.Workouts).SetValidator(new PlanWorkoutInputValidator());
     }
 }
@@ -22,7 +21,6 @@ public sealed class PlanUpdateValidator : AbstractValidator<PlanUpdate>
         RuleFor(request => request.Name).NotEmpty().MaximumLength(200);
         RuleFor(request => request.ClientId).NotEmpty().MaximumLength(100);
         RuleFor(request => request.Note).MaximumLength(2000).When(request => request.Note is not null);
-        RuleFor(request => request.Status).NotEmpty().MaximumLength(100);
         RuleForEach(request => request.Workouts).SetValidator(new PlanWorkoutInputValidator());
     }
 }

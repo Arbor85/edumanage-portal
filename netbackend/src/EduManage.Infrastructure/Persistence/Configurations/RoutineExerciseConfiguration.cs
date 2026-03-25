@@ -15,11 +15,6 @@ public class RoutineExerciseConfiguration : IEntityTypeConfiguration<RoutineExer
             .HasForeignKey(re => re.RoutineId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.HasOne(re => re.PlanWorkout)
-            .WithMany(pw => pw.Exercises)
-            .HasForeignKey(re => re.PlanWorkoutId)
-            .OnDelete(DeleteBehavior.SetNull);
-
         builder.HasMany(re => re.Sets)
             .WithOne(rs => rs.RoutineExercise)
             .HasForeignKey(rs => rs.RoutineExerciseId)
