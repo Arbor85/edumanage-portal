@@ -7,7 +7,7 @@ import Clients from './pages/Clients/Clients.vue'
 import Invite from './pages/Invite.vue'
 import Excercises from './pages/Excercises/Excercises.vue'
 import Routines from './pages/Routines/Routines.vue'
-import Plans from './pages/Plans.vue'
+import Plans from './pages/Plans/Plans.vue'
 import Meetings from './pages/Meetings/Meetings.vue'
 import Courses from './pages/Courses/Courses.vue'
 

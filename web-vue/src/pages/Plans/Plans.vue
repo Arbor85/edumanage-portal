@@ -361,150 +361,22 @@
       </div>
     </div>
 
-    <div
-      v-if="showDialog"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4"
-      @click.self="cancelDialog"
-    >
-      <div class="w-full max-w-3xl rounded-lg border border-slate-300 bg-white p-6 shadow-xl dark:border-slate-600 dark:bg-slate-800">
-        <h2 class="mb-4 text-xl font-semibold text-slate-900 dark:text-slate-100">
-          {{ isEditing ? 'Edit plan' : 'Create plan' }}
-        </h2>
-
-        <div class="space-y-4">
-          <div>
-            <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
-              Plan name
-            </label>
-            <input
-              v-model="formData.name"
-              @input="nameManuallyEdited = true"
-              type="text"
-              class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
-              placeholder="Enter plan name"
-            />
-          </div>
-
-          <div>
-            <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
-              Client
-            </label>
-            <SelectClient
-              v-model="formData.clientId"
-              :options="clients"
-            />
-          </div>
-
-          <div>
-            <div class="mb-2 flex items-center justify-between">
-              <label class="text-sm font-medium text-slate-700 dark:text-slate-300">
-                Workouts ({{ formData.workouts.length }})
-              </label>
-              <div class="flex items-center gap-2">
-                <button
-                  type="button"
-                  @click="openEmptyWorkoutDialog"
-                  class="inline-flex items-center rounded-md border border-slate-300 bg-white px-3 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600"
-                >
-                  Add empty workout
-                </button>
-                <ScheduleRoutine
-                  :routines="routines"
-                  @schedule="addWorkout"
-                />
-              </div>
-            </div>
-
-            <div class="custom-scrollbar max-h-96 space-y-3 overflow-y-auto">
-              <div
-                v-for="(workout, index) in formData.workouts"
-                :key="`workout-${index}`"
-                class="rounded border border-slate-200 bg-slate-50 p-3 dark:border-slate-600 dark:bg-slate-700/50"
-              >
-                <div class="flex items-start justify-between gap-2">
-                  <div class="min-w-0 flex-1">
-                    <p class="text-sm font-medium text-slate-900 dark:text-slate-100">
-                      {{ workout.name }}
-                    </p>
-                    <p class="mt-1 text-xs text-slate-600 dark:text-slate-400">
-                      {{ formatDate(workout.date) }} • {{ workout.excercises.length }} exercise{{ workout.excercises.length !== 1 ? 's' : '' }}
-                    </p>
-                  </div>
-                  <div class="flex items-center gap-2">
-                    <button
-                      type="button"
-                      @click="openEditWorkoutDialog(index)"
-                      class="rounded-md border border-slate-300 bg-white px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      type="button"
-                      @click="openCopyWorkoutDialog(index)"
-                      class="rounded-md border border-slate-300 bg-white px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600"
-                    >
-                      Copy
-                    </button>
-                    <button
-                      type="button"
-                      @click="removeWorkout(index)"
-                      class="rounded-md bg-rose-100 px-2 py-1 text-xs font-medium text-rose-700 hover:bg-rose-200 dark:bg-rose-900/30 dark:text-rose-300 dark:hover:bg-rose-900/50"
-                    >
-                      Remove
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <div
-                v-if="formData.workouts.length === 0"
-                class="rounded border border-slate-200 bg-slate-50 p-4 text-center text-xs text-slate-600 dark:border-slate-600 dark:bg-slate-700/50 dark:text-slate-400"
-              >
-                No workouts scheduled. Click "Add workout" to start.
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="mt-6 flex justify-end gap-2">
-          <button
-            type="button"
-            @click="cancelDialog"
-            class="rounded-md bg-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600"
-          >
-            Cancel
-          </button>
-          <button
-            v-if="isEditing && plans.find(p => p.id === editingPlanId)?.status === 'Published'"
-            type="button"
-            :disabled="updatingStatusPlanId === editingPlanId"
-            @click="updatePlanStatus(plans.find(p => p.id === editingPlanId)!, 'Revoked')"
-            class="inline-flex items-center gap-1.5 rounded-md border border-orange-400 bg-white px-4 py-2 text-sm font-medium text-orange-600 hover:bg-orange-50 disabled:opacity-50 dark:bg-slate-800 dark:hover:bg-orange-900/20"
-          >
-            <Ban :size="15" />
-            Revoke
-          </button>
-          <button
-            v-if="isEditing && (plans.find(p => p.id === editingPlanId)?.status ?? 'Draft') !== 'Published'"
-            type="button"
-            @click="saveAndPublish"
-            :disabled="!canSave || updatingStatusPlanId === editingPlanId"
-            class="inline-flex items-center gap-1.5 rounded-md border border-emerald-500 bg-white px-4 py-2 text-sm font-medium text-emerald-600 hover:bg-emerald-50 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-slate-800 dark:hover:bg-emerald-900/20"
-          >
-            <Send :size="15" />
-            Save + Publish
-          </button>
-          <button
-            type="button"
-            @click="savePlan"
-            :disabled="!canSave"
-            class="rounded-md bg-emerald-500 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-emerald-600 dark:hover:bg-emerald-700"
-          >
-            {{ isEditing ? 'Save changes' : 'Create plan' }}
-          </button>
-        </div>
-      </div>
-    </div>
+    <PlanEditorDialog
+      :open="showDialog"
+      :is-editing="isEditing"
+      :current-status="currentEditingPlanStatus"
+      :status-updating="updatingStatusPlanId === editingPlanId"
+      :clients="clients"
+      :routines="routines"
+      :excercises="excercises"
+      :initial-name="dialogInitialData.name"
+      :initial-client-id="dialogInitialData.clientId"
+      :initial-workouts="dialogInitialData.workouts"
+      @cancel="cancelDialog"
+      @save="savePlan"
+      @save-and-publish="saveAndPublish"
+      @revoke="revokeCurrentPlan"
+    />
 
     <ConfirmDialog
       :open="!!planToDelete"
@@ -524,29 +396,6 @@
       @cancel="planToPublish = null"
     />
 
-    <RoutineEditorDialog
-      :open="showEmptyWorkoutDialog"
-      :title="workoutDialogMode === 'edit' ? 'Edit workout' : 'Add empty workout'"
-      :save-label="workoutDialogMode === 'edit' ? 'Save workout' : 'Add workout'"
-      :excercises="excercises"
-      :show-schedule-date="true"
-      :initial-name="workoutDialogInitialName"
-      :initial-note="workoutDialogInitialNote"
-      :initial-excercises="workoutDialogInitialExcercises"
-      :initial-date="workoutDialogInitialDate"
-      @cancel="closeWorkoutDialog"
-      @save="saveWorkoutFromDialog"
-    />
-
-    <SelectDate
-      v-if="copyingWorkoutIndex !== null"
-      :model-value="copyWorkoutDate"
-      :auto-open="true"
-      :hide-button="true"
-      @update:modelValue="onCopyDateSelected"
-      @close="closeCopyWorkoutDialog"
-    />
-
     <NotificationToast
       v-model:open="notificationOpen"
       :title="notificationTitle"
@@ -556,29 +405,26 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, onMounted, ref, watch } from 'vue'
-import { Ban, Copy, Edit2, Send, Trash2 } from 'lucide-vue-next'
-import ConfirmDialog from '../components/ConfirmDialog.vue'
-import CustomerDisplay from '../components/CustomerDisplay.vue'
-import DialogActionPanel from '../components/DialogActionPanel.vue'
-import FilterOption from '../components/FilterOption.vue'
-import NotificationToast from '../components/NotificationToast.vue'
-import RoutineEditorDialog from '../components/RoutineEditorDialog.vue'
-import ScheduleRoutine from '../components/ScheduleRoutine.vue'
-import CalendarView from '../components/CalendarView.vue'
-import SearchInput from '../components/SearchInput.vue'
-import SelectClient from '../components/Select/SelectClient.vue'
-import SelectDate from '../components/SelectDate.vue'
-import { useLocalStorageState } from '../composables/useLocalStorageState'
-import { usePageTitle } from '../composables/usePageTitle'
-import { useClientsApi } from '../services/clientsApi'
-import { useExcercisesApi } from '../services/excercisesApi'
-import { usePlansApi } from '../services/plansApi'
-import { useRoutinesApi } from '../services/routinesApi'
-import type { Client } from '../types/client'
-import type { Excercise } from '../types/excercise'
-import type { Plan, PlanStatus, PlanWorkout } from '../types/plan'
-import type { Routine, RoutineExcercise } from '../types/routine'
+import { computed, nextTick, onMounted, ref } from 'vue'
+import { Copy, Edit2, Send, Trash2 } from 'lucide-vue-next'
+import ConfirmDialog from '../../components/ConfirmDialog.vue'
+import CustomerDisplay from '../../components/CustomerDisplay.vue'
+import DialogActionPanel from '../../components/DialogActionPanel.vue'
+import FilterOption from '../../components/FilterOption.vue'
+import NotificationToast from '../../components/NotificationToast.vue'
+import CalendarView from '../../components/CalendarView.vue'
+import SearchInput from '../../components/SearchInput.vue'
+import PlanEditorDialog from './components/PlanEditorDialog.vue'
+import { useLocalStorageState } from '../../composables/useLocalStorageState'
+import { usePageTitle } from '../../composables/usePageTitle'
+import { useClientsApi } from '../../services/clientsApi'
+import { useExcercisesApi } from '../../services/excercisesApi'
+import { usePlansApi } from '../../services/plansApi'
+import { useRoutinesApi } from '../../services/routinesApi'
+import type { Client } from '../../types/client'
+import type { Excercise } from '../../types/excercise'
+import type { Plan, PlanStatus, PlanWorkout } from '../../types/plan'
+import type { Routine } from '../../types/routine'
 
 usePageTitle('Plans')
 
@@ -599,26 +445,16 @@ const viewMode = useLocalStorageState<'tile' | 'list' | 'calendar'>('plans:viewM
 const currentDate = ref(new Date())
 
 const showDialog = ref(false)
-const showEmptyWorkoutDialog = ref(false)
-const workoutDialogMode = ref<'create' | 'edit'>('create')
-const editingWorkoutIndex = ref<number | null>(null)
-const workoutDialogInitialName = ref('')
-const workoutDialogInitialNote = ref('')
-const workoutDialogInitialExcercises = ref<RoutineExcercise[]>([])
-const workoutDialogInitialDate = ref('')
-const copyingWorkoutIndex = ref<number | null>(null)
-const copyWorkoutDate = ref('')
 const isEditing = ref(false)
 const editingPlanId = ref<string | null>(null)
 const planToDelete = ref<Plan | null>(null)
-const nameManuallyEdited = ref(false)
 const updatingStatusPlanId = ref<string | null>(null)
 const planToPublish = ref<Plan | null>(null)
 const notificationOpen = ref(false)
 const notificationTitle = ref('')
 const notificationMessage = ref('')
 
-const formData = ref<{
+const dialogInitialData = ref<{
   name: string
   clientId: string
   workouts: PlanWorkout[]
@@ -628,22 +464,14 @@ const formData = ref<{
   workouts: [],
 })
 
-const canSave = computed(() => {
-  return formData.value.clientId.trim() && (formData.value.name.trim() || formData.value.workouts.length > 0)
-})
-
-const autoGenerateName = () => {
-  if (isEditing.value || nameManuallyEdited.value) return
-  const workoutNames = formData.value.workouts.map(w => w.name).join(' + ')
-  const clientName = clients.value.find(c => c.invitationCode === formData.value.clientId)?.name || ''
-  if (workoutNames) {
-    formData.value.name = clientName ? `${workoutNames} for ${clientName}` : workoutNames
-  } else {
-    formData.value.name = ''
+const currentEditingPlanStatus = computed<PlanStatus>(() => {
+  if (!isEditing.value || !editingPlanId.value) {
+    return 'Draft'
   }
-}
 
-watch(() => [formData.value.workouts.map(w => w.name).join(','), formData.value.clientId], autoGenerateName)
+  const currentPlan = plans.value.find((plan) => plan.id === editingPlanId.value)
+  return currentPlan?.status ?? 'Draft'
+})
 
 const getPlanClientName = (plan: Plan) => {
   return plan.client?.name || plan.clientName
@@ -747,8 +575,7 @@ const showSuccessNotification = async (title: string, message: string) => {
 const openCreateDialog = () => {
   isEditing.value = false
   editingPlanId.value = null
-  nameManuallyEdited.value = false
-  formData.value = {
+  dialogInitialData.value = {
     name: '',
     clientId: '',
     workouts: [],
@@ -759,10 +586,10 @@ const openCreateDialog = () => {
 const openEditDialog = (plan: Plan) => {
   isEditing.value = true
   editingPlanId.value = plan.id
-  formData.value = {
+  dialogInitialData.value = {
     name: plan.name,
     clientId: getPlanClientId(plan),
-    workouts: [...plan.workouts],
+    workouts: clonePlanWorkouts(plan.workouts),
   }
   showDialog.value = true
 }
@@ -780,7 +607,7 @@ const clonePlanWorkouts = (workouts: PlanWorkout[]): PlanWorkout[] => {
 const openCloneDialog = (plan: Plan) => {
   isEditing.value = false
   editingPlanId.value = null
-  formData.value = {
+  dialogInitialData.value = {
     name: plan.name,
     clientId: getPlanClientId(plan),
     workouts: clonePlanWorkouts(plan.workouts),
@@ -790,187 +617,25 @@ const openCloneDialog = (plan: Plan) => {
 
 const cancelDialog = () => {
   showDialog.value = false
-  closeWorkoutDialog()
-  closeCopyWorkoutDialog()
   isEditing.value = false
   editingPlanId.value = null
 }
-
-const openEmptyWorkoutDialog = () => {
-  workoutDialogMode.value = 'create'
-  editingWorkoutIndex.value = null
-  workoutDialogInitialName.value = ''
-  workoutDialogInitialNote.value = ''
-  workoutDialogInitialExcercises.value = []
-  workoutDialogInitialDate.value = ''
-  showEmptyWorkoutDialog.value = true
-}
-
-const openEditWorkoutDialog = (index: number) => {
-  const workout = formData.value.workouts[index]
-
-  if (!workout) {
-    return
-  }
-
-  workoutDialogMode.value = 'edit'
-  editingWorkoutIndex.value = index
-  workoutDialogInitialName.value = workout.name
-  workoutDialogInitialNote.value = workout.note || ''
-  workoutDialogInitialDate.value = workout.date
-  workoutDialogInitialExcercises.value = workout.excercises.map((excercise) => ({
-    ...excercise,
-    sets: excercise.sets.map((setItem) => ({ ...setItem })),
-  }))
-  showEmptyWorkoutDialog.value = true
-}
-
-const closeWorkoutDialog = () => {
-  showEmptyWorkoutDialog.value = false
-  workoutDialogMode.value = 'create'
-  editingWorkoutIndex.value = null
-  workoutDialogInitialName.value = ''
-  workoutDialogInitialNote.value = ''
-  workoutDialogInitialExcercises.value = []
-  workoutDialogInitialDate.value = ''
-}
-
-const addWorkout = (workout: PlanWorkout) => {
-  formData.value.workouts.push(workout)
-}
-
-const closeCopyWorkoutDialog = () => {
-  copyingWorkoutIndex.value = null
-  copyWorkoutDate.value = ''
-}
-
-const openCopyWorkoutDialog = (index: number) => {
-  const workout = formData.value.workouts[index]
-  if (!workout) return
-  copyingWorkoutIndex.value = index
-  copyWorkoutDate.value = getDateWithOffset(workout.date, 7)
-}
-
-const formatDateForInput = (date: Date) => {
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
-  return `${year}-${month}-${day}`
-}
-
-const getDateWithOffset = (sourceDate: string, daysOffset: number) => {
-  const normalizedSourceDate = sourceDate.split('T')[0] || sourceDate
-
-  if (!normalizedSourceDate) {
-    return ''
-  }
-
-  const [yearPart, monthPart, dayPart] = normalizedSourceDate.split('-')
-  const year = Number(yearPart)
-  const month = Number(monthPart)
-  const day = Number(dayPart)
-
-  if (!year || !month || !day) {
-    return ''
-  }
-
-  const date = new Date(year, month - 1, day)
-
-  if (Number.isNaN(date.getTime())) {
-    return ''
-  }
-
-  date.setDate(date.getDate() + daysOffset)
-  return formatDateForInput(date)
-}
-
-const onCopyDateSelected = (date: string) => {
-  if (copyingWorkoutIndex.value === null || !date) return
-
-  const sourceWorkout = formData.value.workouts[copyingWorkoutIndex.value]
-  if (!sourceWorkout) {
-    closeCopyWorkoutDialog()
-    return
-  }
-
-  const generatedId = typeof crypto !== 'undefined' && 'randomUUID' in crypto
-    ? crypto.randomUUID()
-    : `workout-${Date.now()}-${Math.random().toString(16).slice(2)}`
-
-  const copiedWorkout: PlanWorkout = {
-    ...sourceWorkout,
-    id: generatedId,
-    date,
-    excercises: sourceWorkout.excercises.map((excercise) => ({
-      ...excercise,
-      sets: excercise.sets.map((setItem) => ({ ...setItem })),
-    })),
-  }
-
-  formData.value.workouts.splice(copyingWorkoutIndex.value + 1, 0, copiedWorkout)
-  closeCopyWorkoutDialog()
-}
-
-const saveWorkoutFromDialog = (payload: { name: string; note?: string; excercises: RoutineExcercise[]; date?: string }) => {
-  if (workoutDialogMode.value === 'edit' && editingWorkoutIndex.value !== null) {
-    const currentWorkout = formData.value.workouts[editingWorkoutIndex.value]
-
-    if (!currentWorkout) {
-      closeWorkoutDialog()
-      return
-    }
-
-    formData.value.workouts[editingWorkoutIndex.value] = {
-      ...currentWorkout,
-      name: payload.name,
-      note: payload.note,
-      excercises: payload.excercises,
-      date: payload.date || currentWorkout.date,
-    }
-
-    closeWorkoutDialog()
-    return
-  }
-
-  const generatedId = typeof crypto !== 'undefined' && 'randomUUID' in crypto
-    ? crypto.randomUUID()
-    : `workout-${Date.now()}-${Math.random().toString(16).slice(2)}`
-
-  const workout: PlanWorkout = {
-    id: generatedId,
-    name: payload.name,
-    note: payload.note,
-    excercises: payload.excercises,
-    date: payload.date || new Date().toISOString().split('T')[0] || '',
-  }
-
-  formData.value.workouts.push(workout)
-  closeWorkoutDialog()
-}
-
-const removeWorkout = (index: number) => {
-  formData.value.workouts.splice(index, 1)
-}
-
-const savePlan = async () => {
-  if (!canSave.value) {
-    return
-  }
+const savePlan = async (payload: { name: string; clientId: string; workouts: PlanWorkout[] }) => {
 
   errorMessage.value = ''
 
   try {
-    const derivedName = formData.value.name.trim() ||
-      formData.value.workouts.map(w => w.name).join(' + ') ||
+    const derivedName = payload.name.trim() ||
+      payload.workouts.map((workout) => workout.name).join(' + ') ||
       'Untitled Plan'
-    const payload = {
+    const writePayload = {
       name: derivedName,
-      clientId: formData.value.clientId.trim(),
-      workouts: formData.value.workouts,
+      clientId: payload.clientId.trim(),
+      workouts: payload.workouts,
     }
 
     if (isEditing.value && editingPlanId.value) {
-      const updatedPlan = await plansApi.editPlan(editingPlanId.value, payload)
+      const updatedPlan = await plansApi.editPlan(editingPlanId.value, writePayload)
       const index = plans.value.findIndex((plan) => plan.id === updatedPlan.id)
       if (index !== -1) {
         plans.value[index] = updatedPlan
@@ -978,7 +643,7 @@ const savePlan = async () => {
       cancelDialog()
       await showSuccessNotification('Plan updated', `Changes for **${updatedPlan.name}** were saved successfully.`)
     } else {
-      const newPlan = await plansApi.addPlan(payload)
+      const newPlan = await plansApi.addPlan(writePayload)
       plans.value.push(newPlan)
       cancelDialog()
       await showSuccessNotification('Plan added', `Plan **${newPlan.name}** was added successfully.`)
@@ -988,28 +653,26 @@ const savePlan = async () => {
   }
 }
 
-const saveAndPublish = async () => {
-  if (!canSave.value) return
-
+const saveAndPublish = async (payload: { name: string; clientId: string; workouts: PlanWorkout[] }) => {
   errorMessage.value = ''
 
   try {
-    const derivedName = formData.value.name.trim() ||
-      formData.value.workouts.map(w => w.name).join(' + ') ||
+    const derivedName = payload.name.trim() ||
+      payload.workouts.map((workout) => workout.name).join(' + ') ||
       'Untitled Plan'
-    const payload = {
+    const writePayload = {
       name: derivedName,
-      clientId: formData.value.clientId.trim(),
-      workouts: formData.value.workouts,
+      clientId: payload.clientId.trim(),
+      workouts: payload.workouts,
     }
 
     let savedPlan: Plan
     if (isEditing.value && editingPlanId.value) {
-      savedPlan = await plansApi.editPlan(editingPlanId.value, payload)
+      savedPlan = await plansApi.editPlan(editingPlanId.value, writePayload)
       const index = plans.value.findIndex((plan) => plan.id === savedPlan.id)
       if (index !== -1) plans.value[index] = savedPlan
     } else {
-      savedPlan = await plansApi.addPlan(payload)
+      savedPlan = await plansApi.addPlan(writePayload)
       plans.value.push(savedPlan)
     }
 
@@ -1112,6 +775,20 @@ const updatePlanStatus = async (plan: Plan, status: PlanStatus) => {
   } finally {
     updatingStatusPlanId.value = null
   }
+}
+
+const revokeCurrentPlan = async () => {
+  if (!editingPlanId.value) {
+    return
+  }
+
+  const currentPlan = plans.value.find((plan) => plan.id === editingPlanId.value)
+
+  if (!currentPlan) {
+    return
+  }
+
+  await updatePlanStatus(currentPlan, 'Revoked')
 }
 
 const confirmPublish = () => {
