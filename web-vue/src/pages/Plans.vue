@@ -546,16 +546,23 @@
       @update:modelValue="onCopyDateSelected"
       @close="closeCopyWorkoutDialog"
     />
+
+    <NotificationToast
+      v-model:open="notificationOpen"
+      :title="notificationTitle"
+      :message="notificationMessage"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { Ban, Copy, Edit2, Send, Trash2 } from 'lucide-vue-next'
 import ConfirmDialog from '../components/ConfirmDialog.vue'
 import CustomerDisplay from '../components/CustomerDisplay.vue'
 import DialogActionPanel from '../components/DialogActionPanel.vue'
 import FilterOption from '../components/FilterOption.vue'
+import NotificationToast from '../components/NotificationToast.vue'
 import RoutineEditorDialog from '../components/RoutineEditorDialog.vue'
 import ScheduleRoutine from '../components/ScheduleRoutine.vue'
 import CalendarView from '../components/CalendarView.vue'
@@ -607,6 +614,9 @@ const planToDelete = ref<Plan | null>(null)
 const nameManuallyEdited = ref(false)
 const updatingStatusPlanId = ref<string | null>(null)
 const planToPublish = ref<Plan | null>(null)
+const notificationOpen = ref(false)
+const notificationTitle = ref('')
+const notificationMessage = ref('')
 
 const formData = ref<{
   name: string
@@ -724,6 +734,14 @@ const planCalendarEmpty = computed(() => {
 const formatDate = (dateString: string) => {
   const date = new Date(dateString)
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+}
+
+const showSuccessNotification = async (title: string, message: string) => {
+  notificationTitle.value = title
+  notificationMessage.value = message
+  notificationOpen.value = false
+  await nextTick()
+  notificationOpen.value = true
 }
 
 const openCreateDialog = () => {
@@ -957,12 +975,14 @@ const savePlan = async () => {
       if (index !== -1) {
         plans.value[index] = updatedPlan
       }
+      cancelDialog()
+      await showSuccessNotification('Plan updated', `Changes for **${updatedPlan.name}** were saved successfully.`)
     } else {
       const newPlan = await plansApi.addPlan(payload)
       plans.value.push(newPlan)
+      cancelDialog()
+      await showSuccessNotification('Plan added', `Plan **${newPlan.name}** was added successfully.`)
     }
-
-    cancelDialog()
   } catch (error) {
     errorMessage.value = error instanceof Error ? error.message : 'Failed to save plan'
   }
@@ -1010,11 +1030,13 @@ const deletePlan = async () => {
   }
 
   errorMessage.value = ''
+  const deletedPlan = planToDelete.value
 
   try {
-    await plansApi.deletePlan(planToDelete.value.id)
-    plans.value = plans.value.filter((plan) => plan.id !== planToDelete.value?.id)
+    await plansApi.deletePlan(deletedPlan.id)
+    plans.value = plans.value.filter((plan) => plan.id !== deletedPlan.id)
     planToDelete.value = null
+    await showSuccessNotification('Plan deleted', `Plan **${deletedPlan.name}** was deleted successfully.`)
   } catch (error) {
     errorMessage.value = error instanceof Error ? error.message : 'Failed to delete plan'
     planToDelete.value = null
@@ -1076,6 +1098,15 @@ const updatePlanStatus = async (plan: Plan, status: PlanStatus) => {
     const updated = await plansApi.updatePlanStatus(plan.id, status)
     const index = plans.value.findIndex(p => p.id === plan.id)
     if (index !== -1) plans.value[index] = updated
+    const clientName = getPlanClientName(updated)
+
+    if (status === 'Published') {
+      await showSuccessNotification('Plan published', `Plan **${updated.name}** was published for **${clientName}**.`)
+    }
+
+    if (status === 'Revoked') {
+      await showSuccessNotification('Plan revoked', `Plan **${updated.name}** was revoked for **${clientName}**.`)
+    }
   } catch (error) {
     errorMessage.value = error instanceof Error ? error.message : 'Failed to update plan status'
   } finally {
