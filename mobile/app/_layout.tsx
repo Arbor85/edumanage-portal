@@ -6,6 +6,9 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
 
+import { GluestackUIProvider } from '@/components/ui/gluestack-ui-provider';
+import '@/global.css';
+
 export const unstable_settings = {
   anchor: '(tabs)',
 };
@@ -37,7 +40,9 @@ function RootLayoutNav() {
   }
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+    
+    <GluestackUIProvider mode="dark">
+      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack
         screenOptions={{
           animationEnabled: false,
@@ -55,6 +60,8 @@ function RootLayoutNav() {
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>
+    </GluestackUIProvider>
+  
   );
 }
 
