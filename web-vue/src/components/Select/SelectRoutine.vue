@@ -6,7 +6,17 @@
 
     <SearchInput v-model="searchQuery" placeholder="Search routines..." class="mb-2" />
 
-    <div class="custom-scrollbar max-h-64 space-y-2 overflow-auto rounded-md border border-slate-300 p-2 dark:border-slate-600">
+    <div v-if="isLoading" class="flex items-center justify-center py-8">
+      <div class="inline-flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
+        <svg class="h-4 w-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+        </svg>
+        <span>Loading routines...</span>
+      </div>
+    </div>
+
+    <div v-else class="custom-scrollbar max-h-64 space-y-2 overflow-auto rounded-md border border-slate-300 p-2 dark:border-slate-600">
       <div
         v-for="routine in filteredRoutines"
         :key="routine.id"
@@ -53,7 +63,7 @@
         </div>
       </div>
 
-      <p v-if="routines.length === 0" class="px-2 py-3 text-center text-sm text-slate-500 dark:text-slate-300">
+      <p v-if="currentRoutines.length === 0" class="px-2 py-3 text-center text-sm text-slate-500 dark:text-slate-300">
         No routines available. Create a routine first.
       </p>
 
@@ -68,7 +78,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import SearchInput from '../SearchInput.vue'
 import type { Routine } from '../../types/routine'
 
@@ -77,6 +87,7 @@ const props = withDefaults(
     modelValue?: string
     routines?: Routine[]
     label?: string
+    fetchFn?: () => Promise<Routine[]>
   }>(),
   {
     modelValue: '',
@@ -90,18 +101,29 @@ const emit = defineEmits<{
 }>()
 
 const searchQuery = ref('')
+const isLoading = ref(false)
+const localRoutines = ref<Routine[]>(props.routines)
+const dataFetched = ref(false)
+
+const currentRoutines = computed(() => localRoutines.value.length > 0 ? localRoutines.value : props.routines)
 
 const filteredRoutines = computed(() => {
   const normalizedQuery = searchQuery.value.trim().toLowerCase()
 
   if (!normalizedQuery) {
-    return props.routines
+    return currentRoutines.value
   }
 
-  return props.routines.filter((routine) => routine.name.toLowerCase().includes(normalizedQuery))
+  return currentRoutines.value.filter((routine) => routine.name.toLowerCase().includes(normalizedQuery))
 })
 
 const selectRoutine = (routineId: string) => {
   emit('update:modelValue', routineId)
 }
+
+watch(() => props.routines, (newRoutines) => {
+  if (!dataFetched.value) {
+    localRoutines.value = newRoutines
+  }
+})
 </script>

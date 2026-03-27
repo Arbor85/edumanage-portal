@@ -27,7 +27,17 @@
         </select>
       </div>
 
-      <div class="custom-scrollbar space-y-2 rounded-md border border-slate-300 p-2 dark:border-slate-600">
+      <div v-if="isLoading" class="flex items-center justify-center py-8">
+        <div class="inline-flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
+          <svg class="h-4 w-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+          </svg>
+          <span>Loading exercises...</span>
+        </div>
+      </div>
+
+      <div v-else class="custom-scrollbar space-y-2 rounded-md border border-slate-300 p-2 dark:border-slate-600">
         <div
           v-for="excercise in filteredOptions"
           :key="excercise.id"
@@ -51,8 +61,8 @@
           </button>
         </div>
 
-        <p v-if="options.length === 0" class="px-2 py-1 text-xs text-slate-500 dark:text-slate-300">
-          No excercises available.
+        <p v-if="currentOptions.length === 0" class="px-2 py-1 text-xs text-slate-500 dark:text-slate-300">
+          No exercises available.
         </p>
 
         <p
@@ -76,6 +86,7 @@ const props = withDefaults(
     modelValue?: string[]
     options?: Excercise[]
     buttonText?: string
+    fetchFn?: () => Promise<Excercise[]>
   }>(),
   {
     modelValue: () => [],
@@ -92,11 +103,16 @@ const isOpen = ref(false)
 const draftSelection = ref<string[]>([...props.modelValue])
 const selectedTag = ref('')
 const selectedPrimaryMuscle = ref('')
+const isLoading = ref(false)
+const localOptions = ref<Excercise[]>(props.options)
+const dataFetched = ref(false)
+
+const currentOptions = computed(() => localOptions.value.length > 0 ? localOptions.value : props.options)
 
 const availableTags = computed(() => {
   const uniqueTags = new Set<string>()
 
-  for (const excercise of props.options) {
+  for (const excercise of currentOptions.value) {
     for (const tag of excercise.tags) {
       uniqueTags.add(tag)
     }
@@ -108,7 +124,7 @@ const availableTags = computed(() => {
 const availablePrimaryMuscles = computed(() => {
   const uniqueMuscles = new Set<string>()
 
-  for (const excercise of props.options) {
+  for (const excercise of currentOptions.value) {
     if (excercise.primaryMuscle) {
       uniqueMuscles.add(excercise.primaryMuscle)
     }
@@ -118,7 +134,7 @@ const availablePrimaryMuscles = computed(() => {
 })
 
 const filteredOptions = computed(() => {
-  return props.options.filter((excercise) => {
+  return currentOptions.value.filter((excercise) => {
     const matchesTag = selectedTag.value ? excercise.tags.includes(selectedTag.value) : true
     const matchesPrimaryMuscle = selectedPrimaryMuscle.value ? excercise.primaryMuscle === selectedPrimaryMuscle.value : true
 
@@ -135,11 +151,24 @@ watch(
   },
 )
 
-const openDialog = () => {
+const openDialog = async () => {
   draftSelection.value = [...props.modelValue]
   selectedTag.value = ''
   selectedPrimaryMuscle.value = ''
   isOpen.value = true
+
+  if (!dataFetched.value && props.fetchFn && localOptions.value.length === 0) {
+    isLoading.value = true
+    try {
+      localOptions.value = await props.fetchFn()
+      dataFetched.value = true
+    } catch (error) {
+      console.error('Failed to fetch exercises:', error)
+      localOptions.value = []
+    } finally {
+      isLoading.value = false
+    }
+  }
 }
 
 const closeDialog = () => {
