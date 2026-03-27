@@ -1,8 +1,6 @@
 using EduManage.Application.Common.Exceptions;
 using EduManage.Application.Contracts;
 using EduManage.Application.Features.Excercises;
-using MediatR;
-using Microsoft.AspNetCore.Mvc;
 
 namespace EduManage.Api.Controllers;
 

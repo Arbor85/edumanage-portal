@@ -620,7 +620,7 @@ const cancelDialog = () => {
   isEditing.value = false
   editingPlanId.value = null
 }
-const savePlan = async (payload: { name: string; clientId: string; workouts: PlanWorkout[] }) => {
+const savePlan = async (payload: { name: string; clientId?: string; workouts: PlanWorkout[] }) => {
 
   errorMessage.value = ''
 
@@ -630,7 +630,7 @@ const savePlan = async (payload: { name: string; clientId: string; workouts: Pla
       'Untitled Plan'
     const writePayload = {
       name: derivedName,
-      clientId: payload.clientId.trim(),
+      clientId: payload.clientId?.trim() || undefined,
       workouts: payload.workouts,
     }
 
@@ -653,7 +653,7 @@ const savePlan = async (payload: { name: string; clientId: string; workouts: Pla
   }
 }
 
-const saveAndPublish = async (payload: { name: string; clientId: string; workouts: PlanWorkout[] }) => {
+const saveAndPublish = async (payload: { name: string; clientId?: string; workouts: PlanWorkout[] }) => {
   errorMessage.value = ''
 
   try {
@@ -662,7 +662,7 @@ const saveAndPublish = async (payload: { name: string; clientId: string; workout
       'Untitled Plan'
     const writePayload = {
       name: derivedName,
-      clientId: payload.clientId.trim(),
+      clientId: payload.clientId?.trim() || undefined,
       workouts: payload.workouts,
     }
 

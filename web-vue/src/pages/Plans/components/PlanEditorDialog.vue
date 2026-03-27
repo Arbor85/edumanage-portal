@@ -23,7 +23,7 @@
           />
         </div>
 
-        <div>
+        <div v-if="canManageClients">
           <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
             Client
           </label>
@@ -234,14 +234,16 @@ import RoutineEditorDialog from '../../../components/RoutineEditorDialog.vue'
 import ScheduleRoutine from '../../../components/ScheduleRoutine.vue'
 import SelectClient from '../../../components/Select/SelectClient.vue'
 import SelectDate from '../../../components/SelectDate.vue'
+import { hasCurrentUserPermission } from '../../../services/permissionsService'
 import type { Client } from '../../../types/client'
 import type { Excercise } from '../../../types/excercise'
+import { Permission } from '../../../types/permission'
 import type { PlanStatus, PlanWorkout } from '../../../types/plan'
 import type { Routine, RoutineExcercise } from '../../../types/routine'
 
 type PlanEditorPayload = {
   name: string
-  clientId: string
+  clientId?: string
   workouts: PlanWorkout[]
 }
 
@@ -288,6 +290,7 @@ const workoutsViewMode = ref<'list' | 'calendar'>('list')
 const calendarDate = ref(new Date())
 const draggedWorkoutIndex = ref<number | null>(null)
 const dragOverDateKey = ref('')
+const canManageClients = hasCurrentUserPermission(Permission.MANAGE_CLIENTS)
 
 const formData = ref<PlanEditorPayload>({
   name: '',
@@ -296,7 +299,7 @@ const formData = ref<PlanEditorPayload>({
 })
 
 const canSave = computed(() => {
-  return formData.value.clientId.trim() && (formData.value.name.trim() || formData.value.workouts.length > 0)
+  return Boolean(formData.value.name.trim() || formData.value.workouts.length > 0)
 })
 
 const clonePlanWorkouts = (workouts: PlanWorkout[]): PlanWorkout[] => {
@@ -603,7 +606,7 @@ const save = () => {
 
   emit('save', {
     name: formData.value.name,
-    clientId: formData.value.clientId,
+    clientId: formData.value.clientId?.trim() || undefined,
     workouts: clonePlanWorkouts(formData.value.workouts),
   })
 }
@@ -615,7 +618,7 @@ const saveAndPublish = () => {
 
   emit('save-and-publish', {
     name: formData.value.name,
-    clientId: formData.value.clientId,
+    clientId: formData.value.clientId?.trim() || undefined,
     workouts: clonePlanWorkouts(formData.value.workouts),
   })
 }

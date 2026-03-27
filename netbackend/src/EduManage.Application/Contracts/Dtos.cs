@@ -17,6 +17,11 @@ public sealed record ClientOut(
     string InvitationCode,
     string TrainerUserId);
 
+public sealed record InvitationOut(
+    string Name,
+    string ImageUrl
+);
+
 public sealed record RoutineSet(string Type, int? Reps, double? Weight, string? Note);
 
 public sealed record RoutineExcercise(string Name, bool IsBodyweight, IReadOnlyList<RoutineSet> Sets);
@@ -43,13 +48,13 @@ public sealed record PlanWorkoutOutput(
     IReadOnlyList<RoutineExcercise> Excercises,
     string Date);
 
-public sealed record PlanCreate(string Name, string ClientId, string? Note, IReadOnlyList<PlanWorkoutInput> Workouts);
+public sealed record PlanCreate(string Name, string? ClientId, string? Note, IReadOnlyList<PlanWorkoutInput> Workouts);
 
-public sealed record PlanUpdate(string Name, string ClientId, string? Note, IReadOnlyList<PlanWorkoutInput> Workouts);
+public sealed record PlanUpdate(string Name, string? ClientId, string? Note, IReadOnlyList<PlanWorkoutInput> Workouts);
 
 public sealed record PlanOut(
     string Name,
-    string ClientId,
+    string? ClientId,
     string? Note,
     string Status,
     string Id,

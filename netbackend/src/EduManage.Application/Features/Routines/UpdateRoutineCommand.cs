@@ -6,7 +6,7 @@ using DomainRoutineSet = EduManage.Domain.Entities.RoutineSet;
 
 namespace EduManage.Application.Features.Routines;
 
-public sealed record UpdateRoutineCommand(string RoutineId, RoutineUpdate Request) : IRequest<RoutineOut>
+public sealed record UpdateRoutineCommand(string RoutineId, RoutineUpdate Request, string CurrentUserId) : IRequest<RoutineOut>
 {
     internal sealed class Handler(IRoutineRepository repository) : IRequestHandler<UpdateRoutineCommand, RoutineOut>
     {
@@ -14,6 +14,11 @@ public sealed record UpdateRoutineCommand(string RoutineId, RoutineUpdate Reques
         {
             var routine = await repository.GetByIdAsync(request.RoutineId, cancellationToken)
                 ?? throw new NotFoundException($"Routine '{request.RoutineId}' was not found.");
+
+            if (routine.UserId != request.CurrentUserId)
+            {
+                throw new UnauthorizedAccessException($"You do not have permission to update routine '{request.RoutineId}'.");
+            }
 
             routine.Name = request.Request.Name;
             routine.Notes = request.Request.Note;

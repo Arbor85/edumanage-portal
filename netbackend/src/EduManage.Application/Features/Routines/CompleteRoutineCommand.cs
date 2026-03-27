@@ -4,7 +4,7 @@ using MediatR;
 
 namespace EduManage.Application.Features.Routines;
 
-public sealed record CompleteRoutineCommand(CompleteRoutineCreate Request) : IRequest<WorkoutHistoryOut>
+public sealed record CompleteRoutineCommand(CompleteRoutineCreate Request, string CurrentUserId) : IRequest<WorkoutHistoryOut>
 {
     internal sealed class Handler(IWorkoutHistoryRepository repository) : IRequestHandler<CompleteRoutineCommand, WorkoutHistoryOut>
     {
@@ -17,7 +17,7 @@ public sealed record CompleteRoutineCommand(CompleteRoutineCreate Request) : IRe
             var workoutHistory = new WorkoutHistory
             {
                 Id = Guid.NewGuid().ToString("N"),
-                CurrentUserId = "local-user",
+                CurrentUserId = request.CurrentUserId,
                 Mode = request.Request.Mode,
                 StartedAt = request.Request.StartedAt,
                 CompletedAt = request.Request.CompletedAt,

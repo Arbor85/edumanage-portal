@@ -84,6 +84,8 @@ import { computed, defineComponent, nextTick, onBeforeUnmount, onMounted, ref, w
 import { useAuth0 } from '@auth0/auth0-vue';
 import { useRoute } from 'vue-router';
 import { Home, Users, Dumbbell, CalendarDays, ClipboardList, User, LogIn, CalendarClock, BookOpen } from 'lucide-vue-next';
+import { getCurrentUserPermissions } from '../services/permissionsService';
+import { getRouteGuardPolicy } from '../router';
 
 export default defineComponent({
   name: 'SideNavBar',
@@ -98,22 +100,33 @@ export default defineComponent({
     const brandIcon = Dumbbell;
 
     const linkCollection = [
-      { label: 'Feed', to: '/', icon: Home, requiresAuth: false, guestOnly: false },
-      { label: 'Clients', to: '/clients', icon: Users, requiresAuth: true, guestOnly: false },
-      { label: 'Excercises', to: '/excercises', icon: Dumbbell, requiresAuth: false, guestOnly: false },
-      { label: 'Routines', to: '/routines', icon: CalendarDays, requiresAuth: true, guestOnly: false },
-      { label: 'Plans', to: '/plans', icon: ClipboardList, requiresAuth: true, guestOnly: false },
-      { label: 'Meetings', to: '/meetings', icon: CalendarClock, requiresAuth: true, guestOnly: false },
-      { label: 'Courses', to: '/courses', icon: BookOpen, requiresAuth: true, guestOnly: false },
-      { label: 'Profile', to: '/profile', icon: User, requiresAuth: true, guestOnly: false },
-      { label: 'Login', to: '/login', icon: LogIn, requiresAuth: false, guestOnly: true }
+      { label: 'Feed', to: '/', icon: Home, guestOnly: false },
+      { label: 'Clients', to: '/clients', icon: Users, guestOnly: false },
+      { label: 'Excercises', to: '/excercises', icon: Dumbbell, guestOnly: false },
+      { label: 'Routines', to: '/routines', icon: CalendarDays, guestOnly: false },
+      { label: 'Plans', to: '/plans', icon: ClipboardList, guestOnly: false },
+      { label: 'Meetings', to: '/meetings', icon: CalendarClock, guestOnly: false },
+      { label: 'Courses', to: '/courses', icon: BookOpen, guestOnly: false },
+      { label: 'Profile', to: '/profile', icon: User, guestOnly: false },
+      { label: 'Login', to: '/login', icon: LogIn, guestOnly: true }
     ];
+
+    const userPermissions = computed(() => new Set(getCurrentUserPermissions()));
+
+    const canAccessLink = (path: string) => {
+      const routePolicy = getRouteGuardPolicy(path);
+
+      if (routePolicy.requiresAuth && !isAuthenticated.value) {
+        return false;
+      }
+
+      return routePolicy.requiredPermissions.every((permission) => userPermissions.value.has(permission));
+    };
 
     const mainNavLinks = computed(() => linkCollection.filter(link => {
       if (link.to === '/login') return false; // Exclude login from main nav
-      if (link.requiresAuth) return isAuthenticated.value;
       if (link.guestOnly) return !isAuthenticated.value;
-      return true;
+      return canAccessLink(link.to);
     }));
 
     const loginLink = computed(() => {

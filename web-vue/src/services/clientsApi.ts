@@ -8,6 +8,12 @@ if (!API_BASE_URL) {
 }
 
 const CLIENTS_ENDPOINT = `${API_BASE_URL}/api/clients`
+const INVITATIONS_ENDPOINT = `${API_BASE_URL}/api/invitations`
+
+export interface InvitationDetails {
+  name: string | null
+  imageUrl: string | null
+}
 
 const parseJsonResponse = async <T>(response: Response): Promise<T> => {
   if (!response.ok) {
@@ -70,28 +76,27 @@ export const useClientsApi = () => {
     return parseJsonResponse<Record<string, string>>(response)
   }
 
-  const getClientByInvitationCode = async (invitationCode: string): Promise<Client | null> => {
-    const clients = await listClients()
-    return clients.find((client) => client.invitationCode === invitationCode) || null
+  const getInvitationByCode = async (invitationCode: string): Promise<InvitationDetails> => {
+    const response = await fetchWithAuth(`${INVITATIONS_ENDPOINT}/${encodeURIComponent(invitationCode)}`)
+    return parseJsonResponse<InvitationDetails>(response)
   }
 
-  const acceptInvitation = async (
-    invitationCode: string,
-    payload: { name: string; email: string; imageUrl: string },
-  ): Promise<Client> => {
-    const response = await fetchWithAuth(`${CLIENTS_ENDPOINT}/${encodeURIComponent(invitationCode)}/accept`, {
+  const acceptInvitation = async (invitationCode: string, payload: { invitationCode: string; imageUrl: string }): Promise<void> => {
+    const response = await fetchWithAuth(`${INVITATIONS_ENDPOINT}/${encodeURIComponent(invitationCode)}/accept`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        name: payload.name,
-        email: payload.email,
+        invitationCode: payload.invitationCode,
         imageUrl: payload.imageUrl,
       }),
     })
 
-    return parseJsonResponse<Client>(response)
+    if (!response.ok) {
+      const message = await response.text()
+      throw new Error(message || 'Client API request failed')
+    }
   }
 
   return {
@@ -99,7 +104,7 @@ export const useClientsApi = () => {
     addClient,
     editClient,
     deleteClient,
-    getClientByInvitationCode,
+    getInvitationByCode,
     acceptInvitation,
   }
 }

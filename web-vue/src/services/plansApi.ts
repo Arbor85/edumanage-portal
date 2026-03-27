@@ -3,7 +3,7 @@ import { useAuth0 } from '@auth0/auth0-vue'
 
 type PlanWritePayload = {
   name: string
-  clientId: string
+  clientId?: string
   workouts: Plan['workouts']
 }
 

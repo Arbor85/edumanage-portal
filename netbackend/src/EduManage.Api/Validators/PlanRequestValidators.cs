@@ -8,7 +8,7 @@ public sealed class PlanCreateValidator : AbstractValidator<PlanCreate>
     public PlanCreateValidator()
     {
         RuleFor(request => request.Name).NotEmpty().MaximumLength(200);
-        RuleFor(request => request.ClientId).NotEmpty().MaximumLength(100);
+        RuleFor(request => request.ClientId).MaximumLength(100).When(request => request.ClientId is not null);
         RuleFor(request => request.Note).MaximumLength(2000).When(request => request.Note is not null);
         RuleForEach(request => request.Workouts).SetValidator(new PlanWorkoutInputValidator());
     }
@@ -19,7 +19,7 @@ public sealed class PlanUpdateValidator : AbstractValidator<PlanUpdate>
     public PlanUpdateValidator()
     {
         RuleFor(request => request.Name).NotEmpty().MaximumLength(200);
-        RuleFor(request => request.ClientId).NotEmpty().MaximumLength(100);
+        RuleFor(request => request.ClientId).MaximumLength(100).When(request => request.ClientId is not null);
         RuleFor(request => request.Note).MaximumLength(2000).When(request => request.Note is not null);
         RuleForEach(request => request.Workouts).SetValidator(new PlanWorkoutInputValidator());
     }

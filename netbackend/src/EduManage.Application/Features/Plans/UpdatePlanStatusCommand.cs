@@ -4,7 +4,7 @@ using MediatR;
 
 namespace EduManage.Application.Features.Plans;
 
-public sealed record UpdatePlanStatusCommand(string PlanId, PlanStatusUpdate Request) : IRequest<PlanOut>
+public sealed record UpdatePlanStatusCommand(string PlanId, PlanStatusUpdate Request, string CurrentUserId) : IRequest<PlanOut>
 {
     internal sealed class Handler(IPlanRepository repository) : IRequestHandler<UpdatePlanStatusCommand, PlanOut>
     {
@@ -12,6 +12,11 @@ public sealed record UpdatePlanStatusCommand(string PlanId, PlanStatusUpdate Req
         {
             var plan = await repository.GetByIdAsync(request.PlanId, cancellationToken)
                 ?? throw new NotFoundException($"Plan '{request.PlanId}' was not found.");
+
+            if (plan.UserId != request.CurrentUserId)
+            {
+                throw new UnauthorizedAccessException($"You do not have permission to update status for plan '{request.PlanId}'.");
+            }
 
             plan.Status = request.Request.Status;
 

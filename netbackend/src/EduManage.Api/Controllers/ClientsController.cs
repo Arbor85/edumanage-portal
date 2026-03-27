@@ -1,15 +1,12 @@
+using EduManage.Api.Services;
 using EduManage.Application.Common.Exceptions;
 using EduManage.Application.Contracts;
 using EduManage.Application.Features.Clients;
-using EduManage.Api.Services;
-using MediatR;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
 
 namespace EduManage.Api.Controllers;
 
 [ApiController]
-[Authorize]
+[Authorize(Policy = "manage:clients")]
 [Route("api/clients")]
 public sealed class ClientsController(ISender mediator, ICurrentUserService currentUserService) : ControllerBase
 {
@@ -44,19 +41,6 @@ public sealed class ClientsController(ISender mediator, ICurrentUserService curr
         try
         {
             return Ok(await mediator.Send(new DeleteClientCommand(invitationCode, currentUserService.GetCurrentUserId()), cancellationToken));
-        }
-        catch (NotFoundException ex)
-        {
-            return NotFound(new { detail = ex.Message });
-        }
-    }
-
-    [HttpPost("{invitation_code}/accept")]
-    public async Task<ActionResult<ClientOut>> AcceptClientInvitation([FromRoute(Name = "invitation_code")] string invitationCode, [FromBody] AcceptClientInvitationRequest request, CancellationToken cancellationToken)
-    {
-        try
-        {
-            return Ok(await mediator.Send(new AcceptClientInvitationCommand(invitationCode, request, currentUserService.GetCurrentUserId()), cancellationToken));
         }
         catch (NotFoundException ex)
         {

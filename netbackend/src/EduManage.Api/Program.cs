@@ -1,8 +1,10 @@
+using EduManage.Api.Authorization;
 using EduManage.Api.Services;
 using EduManage.Api.Validators;
 using EduManage.Infrastructure.Persistence;
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.OpenApi.Models;
 using Scalar.AspNetCore;
@@ -40,6 +42,12 @@ builder.Services
 		options.TokenValidationParameters.ClockSkew = TimeSpan.Zero;
 	});
 builder.Services.AddControllers();
+builder.Services.AddAuthorization(options =>
+{
+	options.AddPolicy("manage:clients", policy =>
+		policy.Requirements.Add(new HasPermissionRequirement("manage:clients")));
+});
+builder.Services.AddSingleton<IAuthorizationHandler, HasPermissionHandler>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {

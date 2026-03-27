@@ -21,7 +21,7 @@ public record Client
 
     public List<string> Tags { get; private set; } = [];
 
-    public string ImageUrl { get; init; } = string.Empty;
+    public string ImageUrl { get; private set; } = string.Empty;
 
     public string Status { get; private set; } = string.Empty;
 
@@ -37,9 +37,10 @@ public record Client
 
     public string TrainerUserId { get; }
 
-    public void AcceptInvitation(string clientUserId)
+    public void AcceptInvitation(string clientUserId, string imageUrl)
     {
         UserId = clientUserId;
+        ImageUrl = imageUrl;
         Status = "Active";
     }
 

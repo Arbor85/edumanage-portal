@@ -37,4 +37,6 @@ internal abstract class BaseRepository<TEntity, TKey>(EduManageDbContext context
         Context.Set<TEntity>().Remove(entity);
         await Context.SaveChangesAsync(cancellationToken);
     }
+
+    public IAsyncEnumerable<TEntity> Enumerate => GetQuery().AsAsyncEnumerable();
 }

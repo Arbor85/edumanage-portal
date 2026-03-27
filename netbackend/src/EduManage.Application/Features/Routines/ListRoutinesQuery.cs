@@ -5,13 +5,16 @@ using ContractsRoutineSet = EduManage.Application.Contracts.RoutineSet;
 
 namespace EduManage.Application.Features.Routines;
 
-public sealed record ListRoutinesQuery : IRequest<IReadOnlyList<RoutineOut>>
+public sealed record ListRoutinesQuery(string CurrentUserId) : IRequest<IReadOnlyList<RoutineOut>>
 {
     internal sealed class Handler(IRoutineRepository repository) : IRequestHandler<ListRoutinesQuery, IReadOnlyList<RoutineOut>>
     {
         public async Task<IReadOnlyList<RoutineOut>> Handle(ListRoutinesQuery request, CancellationToken cancellationToken)
         {
-            var routines = await repository.ListAsync(cancellationToken);
+            var routines = await repository.Enumerate
+                .Where(r => r.UserId == request.CurrentUserId)
+                .ToListAsync(cancellationToken);
+
             return routines.Select(MapToOut).ToList();
         }
 

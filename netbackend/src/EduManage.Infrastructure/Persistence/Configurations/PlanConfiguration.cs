@@ -19,6 +19,12 @@ public class PlanConfiguration : IEntityTypeConfiguration<Plan>
             .HasForeignKey(p => p.ClientId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        builder.Property(p => p.ClientId)
+            .IsRequired(false);
+
+        builder.Property(p => p.UserId)
+            .IsRequired(true);
+
         builder.Property(p => p.Workouts)
             .HasConversion(
                 workouts => JsonSerializer.Serialize(workouts, SerializerOptions),

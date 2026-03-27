@@ -5,7 +5,7 @@ using DomainRoutineSet = EduManage.Domain.Entities.RoutineSet;
 
 namespace EduManage.Application.Features.Routines;
 
-public sealed record AddRoutineCommand(RoutineCreate Request) : IRequest<RoutineOut>
+public sealed record AddRoutineCommand(RoutineCreate Request, string CurrentUserId) : IRequest<RoutineOut>
 {
     internal sealed class Handler(IRoutineRepository repository) : IRequestHandler<AddRoutineCommand, RoutineOut>
     {
@@ -16,7 +16,7 @@ public sealed record AddRoutineCommand(RoutineCreate Request) : IRequest<Routine
                 Id = Guid.NewGuid().ToString("N"),
                 Name = request.Request.Name,
                 Notes = request.Request.Note,
-                UserId = "local-user",
+                UserId = request.CurrentUserId,
                 Exercises = request.Request.Excercises.Select(e => new RoutineExercise
                 {
                     Name = e.Name,
