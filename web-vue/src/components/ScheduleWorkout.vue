@@ -26,10 +26,10 @@
         </div>
 
         <div class="space-y-4">
-          <SelectRoutine
-            v-model="draftRoutineId"
-            :routines="routines"
-            label="Select routine"
+          <SelectWorkout
+            v-model="draftWorkoutId"
+            :workouts="workouts"
+            label="Select workout"
           />
 
           <div>
@@ -65,17 +65,17 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import SelectDate from './SelectDate.vue'
-import SelectRoutine from './Select/SelectRoutine.vue'
-import type { Routine } from '../types/routine'
+import SelectWorkout from './Select/SelectWorkout.vue'
+import type { Workout } from '../types/workout'
 import type { PlanWorkout } from '../types/plan'
 
 const props = withDefaults(
   defineProps<{
-    routines?: Routine[]
+    workouts?: Workout[]
     buttonText?: string
   }>(),
   {
-    routines: () => [],
+    workouts: () => [],
     buttonText: 'Add workout',
   },
 )
@@ -85,15 +85,15 @@ const emit = defineEmits<{
 }>()
 
 const isOpen = ref(false)
-const draftRoutineId = ref<string>('')
+const draftWorkoutId = ref<string>('')
 const draftDate = ref<string>('')
 
 const canApply = computed(() => {
-  return draftRoutineId.value && draftDate.value
+  return draftWorkoutId.value && draftDate.value
 })
 
 const openDialog = () => {
-  draftRoutineId.value = ''
+  draftWorkoutId.value = ''
   draftDate.value = new Date().toISOString().split('T')[0] || ''
   isOpen.value = true
 }
@@ -105,13 +105,13 @@ const closeDialog = () => {
 const applySelection = () => {
   if (!canApply.value) return
 
-  const selectedRoutine = props.routines.find(r => r.id === draftRoutineId.value)
-  if (!selectedRoutine) return
+  const selectedWorkout = props.workouts.find(w => w.id === draftWorkoutId.value)
+  if (!selectedWorkout) return
 
   const workout: PlanWorkout = {
-    id: selectedRoutine.id,
-    name: selectedRoutine.name,
-    excercises: selectedRoutine.excercises,
+    id: selectedWorkout.id,
+    name: selectedWorkout.name,
+    excercises: selectedWorkout.excercises,
     date: draftDate.value,
   }
 

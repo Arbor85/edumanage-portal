@@ -27,7 +27,7 @@
             <input
               v-model.trim="formName"
               type="text"
-              placeholder="Routine name"
+              placeholder="Workout name"
               class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
             />
             <div class="mt-2">
@@ -462,7 +462,7 @@ import SelectDate from './SelectDate.vue'
 import SelectExcercise from './Select/SelectExcercise.vue'
 import SetTypePicker from './SetTypePicker.vue'
 import type { Excercise } from '../types/excercise'
-import type { RoutineExcercise, RoutineSet } from '../types/routine'
+import type { WorkoutExcercise, WorkoutSet } from '../types/workout'
 
 type HoveredSetDropTarget =
   | { type: 'insert'; excerciseIndex: number; insertIndex: number }
@@ -483,7 +483,7 @@ const props = withDefaults(
     excercises: Excercise[]
     initialName?: string
     initialNote?: string
-    initialExcercises?: RoutineExcercise[]
+    initialExcercises?: WorkoutExcercise[]
     showScheduleDate?: boolean
     initialDate?: string
   }>(),
@@ -498,14 +498,14 @@ const props = withDefaults(
 
 const emit = defineEmits<{
   (event: 'cancel'): void
-  (event: 'save', payload: { name: string; note?: string; excercises: RoutineExcercise[]; date?: string }): void
+  (event: 'save', payload: { name: string; note?: string; excercises: WorkoutExcercise[]; date?: string }): void
 }>()
 
 const formName = ref('')
 const formNote = ref('')
 const formDate = ref('')
 const formExcerciseNames = ref<string[]>([])
-const formExcercises = ref<RoutineExcercise[]>([])
+const formExcercises = ref<WorkoutExcercise[]>([])
 
 const draggedSet = ref<{ excerciseIndex: number; setIndex: number } | null>(null)
 const dropInsertTarget = ref<{ excerciseIndex: number; insertIndex: number } | null>(null)
@@ -523,7 +523,7 @@ const isExcercisePointerDragging = ref(false)
 const excerciseDragStartPoint = ref<{ x: number; y: number } | null>(null)
 const exerciseDragMousePosition = ref<{ x: number; y: number } | null>(null)
 
-const dragCursorClassName = 'routine-set-dragging-cursor'
+const dragCursorClassName = 'workout-set-dragging-cursor'
 
 const setDragCursorActive = (isActive: boolean) => {
   document.body.classList.toggle(dragCursorClassName, isActive)
@@ -555,7 +555,7 @@ const isBodyweightExcercise = (excerciseName: string) => {
   return matchedExcercise.tags.some((tag) => tag.toLowerCase() === 'bodyweight')
 }
 
-const createEmptySet = (): RoutineSet => {
+const createEmptySet = (): WorkoutSet => {
   return {
     type: 'normal',
     reps: null,
@@ -564,7 +564,7 @@ const createEmptySet = (): RoutineSet => {
   }
 }
 
-const cloneExcercises = (excercises: RoutineExcercise[]): RoutineExcercise[] => {
+const cloneExcercises = (excercises: WorkoutExcercise[]): WorkoutExcercise[] => {
   return excercises.map((excercise) => ({
     name: excercise.name,
     isBodyweight: excercise.isBodyweight,
@@ -668,7 +668,7 @@ const removeSet = (excerciseIndex: number, setIndex: number) => {
   excercise.sets.splice(setIndex, 1)
 }
 
-const getVolumeDiff = (excercise: RoutineExcercise, setIndex: number): string | null => {
+const getVolumeDiff = (excercise: WorkoutExcercise, setIndex: number): string | null => {
   if (setIndex === 0) return null
   const prev = excercise.sets[setIndex - 1]
   const curr = excercise.sets[setIndex]
@@ -741,10 +741,10 @@ const openProgressionDialog = (
 }
 
 const buildProgressedSet = (
-  excercise: RoutineExcercise,
-  sourceSet: RoutineSet,
+  excercise: WorkoutExcercise,
+  sourceSet: WorkoutSet,
   direction: ProgressionDirection,
-): RoutineSet => {
+): WorkoutSet => {
   if (progressionStrategy.value === 'manual') {
     return {
       type: sourceSet.type,
@@ -1373,8 +1373,8 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
-:global(body.routine-set-dragging-cursor),
-:global(body.routine-set-dragging-cursor *) {
+:global(body.workout-set-dragging-cursor),
+:global(body.workout-set-dragging-cursor *) {
   cursor: grabbing !important;
 }
 </style>

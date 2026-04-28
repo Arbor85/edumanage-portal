@@ -103,7 +103,7 @@ export default defineComponent({
       { label: 'Feed', to: '/', icon: Home, guestOnly: false },
       { label: 'Clients', to: '/clients', icon: Users, guestOnly: false },
       { label: 'Excercises', to: '/excercises', icon: Dumbbell, guestOnly: false },
-      { label: 'Routines', to: '/routines', icon: CalendarDays, guestOnly: false },
+      { label: 'Workouts', to: '/workouts', icon: CalendarDays, guestOnly: false },
       { label: 'Plans', to: '/plans', icon: ClipboardList, guestOnly: false },
       { label: 'Meetings', to: '/meetings', icon: CalendarClock, guestOnly: false },
       { label: 'Courses', to: '/courses', icon: BookOpen, guestOnly: false },

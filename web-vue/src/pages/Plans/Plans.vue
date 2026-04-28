@@ -367,7 +367,7 @@
       :current-status="currentEditingPlanStatus"
       :status-updating="updatingStatusPlanId === editingPlanId"
       :clients="clients"
-      :routines="routines"
+      :workouts="workouts"
       :excercises="excercises"
       :initial-name="dialogInitialData.name"
       :initial-client-id="dialogInitialData.clientId"
@@ -420,22 +420,22 @@ import { usePageTitle } from '../../composables/usePageTitle'
 import { useClientsApi } from '../../services/clientsApi'
 import { useExcercisesApi } from '../../services/excercisesApi'
 import { usePlansApi } from '../../services/plansApi'
-import { useRoutinesApi } from '../../services/routinesApi'
+import { useWorkoutsApi } from '../../services/workoutsApi'
 import type { Client } from '../../types/client'
 import type { Excercise } from '../../types/excercise'
 import type { Plan, PlanStatus, PlanWorkout } from '../../types/plan'
-import type { Routine } from '../../types/routine'
+import type { Workout } from '../../types/workout'
 
 usePageTitle('Plans')
 
 const plansApi = usePlansApi()
 const clientsApi = useClientsApi()
-const routinesApi = useRoutinesApi()
+const workoutsApi = useWorkoutsApi()
 const excercisesApi = useExcercisesApi()
 
 const plans = ref<Plan[]>([])
 const clients = ref<Client[]>([])
-const routines = ref<Routine[]>([])
+const workouts = ref<Workout[]>([])
 const excercises = ref<Excercise[]>([])
 const isLoading = ref(false)
 const errorMessage = ref('')
@@ -727,11 +727,11 @@ const loadClients = async () => {
   }
 }
 
-const loadRoutines = async () => {
+const loadWorkouts = async () => {
   try {
-    routines.value = await routinesApi.listRoutines()
+    workouts.value = await workoutsApi.listWorkouts()
   } catch {
-    routines.value = []
+    workouts.value = []
   }
 }
 
@@ -801,7 +801,7 @@ const confirmPublish = () => {
 onMounted(() => {
   loadPlans()
   loadClients()
-  loadRoutines()
+  loadWorkouts()
   loadExcercises()
 })
 </script>

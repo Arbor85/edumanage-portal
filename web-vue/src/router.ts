@@ -9,7 +9,7 @@ import Login from './pages/Login.vue'
 import Clients from './pages/Clients/Clients.vue'
 import Invite from './pages/Invite.vue'
 import Excercises from './pages/Excercises/Excercises.vue'
-import Routines from './pages/Routines/Routines.vue'
+import Workouts from './pages/Workouts/Workouts.vue'
 import Plans from './pages/Plans/Plans.vue'
 import Meetings from './pages/Meetings/Meetings.vue'
 import Courses from './pages/Courses/Courses.vue'
@@ -104,9 +104,9 @@ const routes = [
     component: Excercises,
   },
   {
-    path: '/routines',
-    name: 'Routines',
-    component: Routines,
+    path: '/workouts',
+    name: 'Workouts',
+    component: Workouts,
     beforeEnter: requireAuth,
   },
   {

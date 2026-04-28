@@ -193,11 +193,11 @@ import DialogActionPanel from './DialogActionPanel.vue'
 import SelectExcercise from './Select/SelectExcercise.vue'
 import type { Excercise } from '../types/excercise'
 import type { Plan, PlanWorkout } from '../types/plan'
-import type { Routine, RoutineExcercise, RoutineSet } from '../types/routine'
+import type { Workout, WorkoutExcercise as WorkoutExcerciseBase, WorkoutSet as WorkoutSetBase } from '../types/workout'
 
-type StartWorkoutMode = 'empty' | 'plan' | 'routine'
+type StartWorkoutMode = 'empty' | 'plan' | 'workout'
 
-type WorkoutSet = RoutineSet & {
+type WorkoutSet = WorkoutSetBase & {
   completed: boolean
 }
 
@@ -234,14 +234,14 @@ const props = withDefaults(
     open: boolean
     mode: StartWorkoutMode
     plans?: Plan[]
-    routines?: Routine[]
+    workouts?: Workout[]
     excercises?: Excercise[]
     initialWorkout?: PlanWorkout | null
     initialSession?: StartedWorkoutSession | null
   }>(),
   {
     plans: () => [],
-    routines: () => [],
+    workouts: () => [],
     excercises: () => [],
     initialWorkout: null,
     initialSession: null,
@@ -277,8 +277,8 @@ const dialogTitle = computed(() => {
     return 'Start planned workout'
   }
 
-  if (props.mode === 'routine') {
-    return 'Start routine workout'
+  if (props.mode === 'workout') {
+    return 'Start workout'
   }
 
   return 'Start empty workout'
@@ -344,7 +344,7 @@ const stopTimer = () => {
   }
 }
 
-const toWorkoutSet = (setItem: RoutineSet): WorkoutSet => {
+const toWorkoutSet = (setItem: WorkoutSetBase): WorkoutSet => {
   return {
     type: setItem.type,
     reps: setItem.reps,
@@ -353,7 +353,7 @@ const toWorkoutSet = (setItem: RoutineSet): WorkoutSet => {
   }
 }
 
-const toWorkoutExcercise = (excercise: RoutineExcercise): WorkoutExcercise => {
+const toWorkoutExcercise = (excercise: WorkoutExcerciseBase): WorkoutExcercise => {
   return {
     name: excercise.name,
     isBodyweight: excercise.isBodyweight,

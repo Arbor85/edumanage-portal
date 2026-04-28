@@ -1,4 +1,4 @@
-import type { Routine } from '../types/routine'
+import type { Workout } from '../types/workout'
 import { useAuth0 } from '@auth0/auth0-vue'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
@@ -7,20 +7,20 @@ if (!API_BASE_URL) {
   throw new Error('Missing VITE_API_BASE_URL in environment configuration')
 }
 
-const ROUTINES_ENDPOINT = `${API_BASE_URL}/api/routines`
+const WORKOUTS_ENDPOINT = `${API_BASE_URL}/api/workouts`
 
-export type CompleteRoutinePayload = Record<string, unknown>
+export type CompleteWorkoutPayload = Record<string, unknown>
 
 const parseJsonResponse = async <T>(response: Response): Promise<T> => {
   if (!response.ok) {
     const message = await response.text()
-    throw new Error(message || 'Routine API request failed')
+    throw new Error(message || 'Workout API request failed')
   }
 
   return response.json() as Promise<T>
 }
 
-export const useRoutinesApi = () => {
+export const useWorkoutsApi = () => {
   const { getAccessTokenSilently } = useAuth0()
 
   const fetchWithAuth = async (input: RequestInfo | URL, init?: RequestInit) => {
@@ -35,13 +35,13 @@ export const useRoutinesApi = () => {
     })
   }
 
-  const listRoutines = async (): Promise<Routine[]> => {
-    const response = await fetchWithAuth(ROUTINES_ENDPOINT)
-    return parseJsonResponse<Routine[]>(response)
+  const listWorkouts = async (): Promise<Workout[]> => {
+    const response = await fetchWithAuth(WORKOUTS_ENDPOINT)
+    return parseJsonResponse<Workout[]>(response)
   }
 
-  const addRoutine = async (payload: Omit<Routine, 'id'>): Promise<Routine> => {
-    const response = await fetchWithAuth(ROUTINES_ENDPOINT, {
+  const addWorkout = async (payload: Omit<Workout, 'id'>): Promise<Workout> => {
+    const response = await fetchWithAuth(WORKOUTS_ENDPOINT, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -53,11 +53,11 @@ export const useRoutinesApi = () => {
       }),
     })
 
-    return parseJsonResponse<Routine>(response)
+    return parseJsonResponse<Workout>(response)
   }
 
-  const editRoutine = async (routineId: string, payload: Omit<Routine, 'id'>): Promise<Routine> => {
-    const response = await fetchWithAuth(`${ROUTINES_ENDPOINT}/${encodeURIComponent(routineId)}`, {
+  const editWorkout = async (workoutId: string, payload: Omit<Workout, 'id'>): Promise<Workout> => {
+    const response = await fetchWithAuth(`${WORKOUTS_ENDPOINT}/${encodeURIComponent(workoutId)}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -69,22 +69,22 @@ export const useRoutinesApi = () => {
       }),
     })
 
-    return parseJsonResponse<Routine>(response)
+    return parseJsonResponse<Workout>(response)
   }
 
-  const deleteRoutine = async (routineId: string): Promise<void> => {
-    const response = await fetchWithAuth(`${ROUTINES_ENDPOINT}/${encodeURIComponent(routineId)}`, {
+  const deleteWorkout = async (workoutId: string): Promise<void> => {
+    const response = await fetchWithAuth(`${WORKOUTS_ENDPOINT}/${encodeURIComponent(workoutId)}`, {
       method: 'DELETE',
     })
 
     if (!response.ok) {
       const message = await response.text()
-      throw new Error(message || 'Routine API request failed')
+      throw new Error(message || 'Workout API request failed')
     }
   }
 
-  const completeRoutine = async (payload: CompleteRoutinePayload): Promise<void> => {
-    const response = await fetchWithAuth(`${ROUTINES_ENDPOINT}/complete`, {
+  const completeWorkout = async (payload: CompleteWorkoutPayload): Promise<void> => {
+    const response = await fetchWithAuth(`${WORKOUTS_ENDPOINT}/complete`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -94,15 +94,15 @@ export const useRoutinesApi = () => {
 
     if (!response.ok) {
       const message = await response.text()
-      throw new Error(message || 'Routine completion request failed')
+      throw new Error(message || 'Workout completion request failed')
     }
   }
 
   return {
-    listRoutines,
-    addRoutine,
-    editRoutine,
-    deleteRoutine,
-    completeRoutine,
+    listWorkouts,
+    addWorkout,
+    editWorkout,
+    deleteWorkout,
+    completeWorkout,
   }
 }

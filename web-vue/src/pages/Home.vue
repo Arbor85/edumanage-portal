@@ -3,7 +3,7 @@
         <div class="mb-5">
             <h1 class="text-2xl font-bold text-slate-900 dark:text-slate-100">Home</h1>
             <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">
-                Start a training session from scratch, an existing plan, or a saved routine.
+                Start a training session from scratch, an existing plan, or a saved workout.
             </p>
         </div>
 
@@ -37,16 +37,16 @@
                     Start empty workout
                 </button>
 
-                <SelectPlanRoutineButton
+                <SelectPlanWorkoutButton
                     :plans="plans"
                     button-text="Start planned workout"
                     @select="startPlannedWorkout"
                 />
 
-                <SelectRoutineButton
-                    :routines="routines"
-                    button-text="Start defined routine"
-                    @select="startRoutineWorkout"
+                <SelectWorkoutButton
+                    :workouts="workouts"
+                    button-text="Start defined workout"
+                    @select="startWorkoutWorkout"
                 />
 
                 <button
@@ -61,7 +61,7 @@
 
             <div class="grid grid-cols-1 gap-2 text-xs text-slate-600 dark:text-slate-300 sm:grid-cols-3">
                 <p class="rounded-md bg-slate-100 px-3 py-2 dark:bg-slate-700/40">Plans available: {{ plans.length }}</p>
-                <p class="rounded-md bg-slate-100 px-3 py-2 dark:bg-slate-700/40">Routines available: {{ routines.length }}</p>
+                <p class="rounded-md bg-slate-100 px-3 py-2 dark:bg-slate-700/40">Workouts available: {{ workouts.length }}</p>
                 <p class="rounded-md bg-slate-100 px-3 py-2 dark:bg-slate-700/40">Excercises available: {{ excercises.length }}</p>
             </div>
         </div>
@@ -70,7 +70,7 @@
             :open="showStartWorkout"
             :mode="startMode"
             :plans="plans"
-            :routines="routines"
+            :workouts="workouts"
             :excercises="excercises"
             :initial-workout="prefilledWorkout"
             :initial-session="resumeSession"
@@ -84,26 +84,26 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import SelectPlanRoutineButton from '../components/Select/SelectPlanRoutineButton.vue'
-import SelectRoutineButton from '../components/Select/SelectRoutineButton.vue'
+import SelectPlanWorkoutButton from '../components/Select/SelectPlanWorkoutButton.vue'
+import SelectWorkoutButton from '../components/Select/SelectWorkoutButton.vue'
 import StartWorkout from '../components/StartWorkout.vue'
 import { useLocalStorageState } from '../composables/useLocalStorageState'
 import { usePageTitle } from '../composables/usePageTitle'
 import { useExcercisesApi } from '../services/excercisesApi'
 import { usePlansApi } from '../services/plansApi'
-import { useRoutinesApi } from '../services/routinesApi'
+import { useWorkoutsApi } from '../services/workoutsApi'
 import type { Excercise } from '../types/excercise'
 import type { Plan, PlanWorkout } from '../types/plan'
-import type { Routine, RoutineSet, RoutineSetType } from '../types/routine'
+import type { Workout, WorkoutSet, WorkoutSetType } from '../types/workout'
 
 usePageTitle('Home')
 
-type StartWorkoutMode = 'empty' | 'plan' | 'routine'
+type StartWorkoutMode = 'empty' | 'plan' | 'workout'
 
 type StartedWorkoutSet = {
-    type: RoutineSetType
-    reps: RoutineSet['reps']
-    weight: RoutineSet['weight']
+    type: WorkoutSetType
+    reps: WorkoutSet['reps']
+    weight: WorkoutSet['weight']
     completed: boolean
 }
 
@@ -136,11 +136,11 @@ type CompletedWorkoutPayload = {
 }
 
 const plansApi = usePlansApi()
-const routinesApi = useRoutinesApi()
+const workoutsApi = useWorkoutsApi()
 const excercisesApi = useExcercisesApi()
 
 const plans = ref<Plan[]>([])
-const routines = ref<Routine[]>([])
+const workouts = ref<Workout[]>([])
 const excercises = ref<Excercise[]>([])
 const isLoading = ref(false)
 const errorMessage = ref('')
@@ -176,15 +176,15 @@ const formatDateForInput = (date: Date) => {
     return `${year}-${month}-${day}`
 }
 
-const startRoutineWorkout = (routine: Routine) => {
+const startWorkoutWorkout = (workout: Workout) => {
     prefilledWorkout.value = {
-        id: routine.id,
-        name: routine.name,
-        excercises: routine.excercises,
+        id: workout.id,
+        name: workout.name,
+        excercises: workout.excercises,
         date: formatDateForInput(new Date()),
     }
     resumeSession.value = null
-    startMode.value = 'routine'
+    startMode.value = 'workout'
     showStartWorkout.value = true
 }
 
@@ -211,7 +211,7 @@ const closeStartWorkout = () => {
 
 const finishWorkout = async (payload: CompletedWorkoutPayload) => {
     try {
-        await routinesApi.completeRoutine(payload)
+        await workoutsApi.completeWorkout(payload)
         startedWorkoutSession.value = null
         errorMessage.value = ''
     } catch (error) {
@@ -228,14 +228,14 @@ const loadData = async () => {
     errorMessage.value = ''
 
     try {
-        const [plansResult, routinesResult, excercisesResult] = await Promise.all([
+        const [plansResult, workoutsResult, excercisesResult] = await Promise.all([
             plansApi.listPlans(),
-            routinesApi.listRoutines(),
+            workoutsApi.listWorkouts(),
             excercisesApi.listExcercises(),
         ])
 
         plans.value = plansResult
-        routines.value = routinesResult
+        workouts.value = workoutsResult
         excercises.value = excercisesResult
     } catch (error) {
         errorMessage.value = error instanceof Error ? error.message : 'Failed to load workout data'

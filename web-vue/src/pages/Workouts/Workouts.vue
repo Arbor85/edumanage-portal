@@ -1,12 +1,12 @@
 <template>
   <div class="w-full max-w-5xl pb-24">
     <div class="mb-5">
-      <h1 class="text-2xl font-bold text-slate-900 dark:text-slate-100">Routines</h1>
+      <h1 class="text-2xl font-bold text-slate-900 dark:text-slate-100">Workouts</h1>
     </div>
 
     <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
       <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:gap-2">
-        <SearchInput v-model="searchQuery" placeholder="Search by routine name..." />
+        <SearchInput v-model="searchQuery" placeholder="Search by workout name..." />
         <SelectExcercise v-model="selectedExerciseNames" :options="excercises" button-text="Filter by exercise" />
       </div>
 
@@ -26,8 +26,8 @@
           List
         </button>
       </div>
-      <button type="button" @click="loadRoutines" :disabled="isLoading" aria-label="Refresh routines"
-        title="Refresh routines"
+      <button type="button" @click="loadWorkouts" :disabled="isLoading" aria-label="Refresh workouts"
+        title="Refresh workouts"
         class="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white p-2 text-slate-700 hover:bg-slate-100 disabled:opacity-60 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
           class="h-4 w-4" :class="isLoading ? 'animate-spin' : ''">
@@ -49,10 +49,10 @@
       :message="notificationMessage"
     />
 
-    <LoadingPanel v-if="isLoading" :is-loading="isLoading" label="Loading routines..." />
+    <LoadingPanel v-if="isLoading" :is-loading="isLoading" label="Loading workouts..." />
 
-    <div v-else-if="filteredRoutines.length === 0" class="rounded-md border border-slate-300 bg-white p-4 text-center text-sm text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
-      No routines found.
+    <div v-else-if="filteredWorkouts.length === 0" class="rounded-md border border-slate-300 bg-white p-4 text-center text-sm text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
+      No workouts found.
     </div>
 
     <div v-else-if="viewMode === 'list'"
@@ -67,11 +67,11 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="routine in filteredRoutines" :key="routine.id" class="border-t border-slate-200 dark:border-slate-700">
-              <td class="px-4 py-3 font-medium text-slate-900 dark:text-slate-100">{{ routine.name }}</td>
+            <tr v-for="workout in filteredWorkouts" :key="workout.id" class="border-t border-slate-200 dark:border-slate-700">
+              <td class="px-4 py-3 font-medium text-slate-900 dark:text-slate-100">{{ workout.name }}</td>
               <td class="px-4 py-3">
                 <div class="flex flex-wrap gap-1.5">
-                  <span v-for="excercise in routine.excercises" :key="`${routine.id}-${excercise.name}`"
+                  <span v-for="excercise in workout.excercises" :key="`${workout.id}-${excercise.name}`"
                     class="rounded-full bg-slate-200 px-2 py-0.5 text-[11px] text-slate-700 dark:bg-slate-700 dark:text-slate-200">
                     {{ excercise.name }} ({{ excercise.sets.length }})
                   </span>
@@ -79,12 +79,12 @@
               </td>
               <td class="px-4 py-3 text-right">
                 <div class="inline-flex items-center gap-2">
-                  <button type="button" @click="requestDeleteRoutine(routine)" aria-label="Remove routine"
-                    title="Remove routine"
+                  <button type="button" @click="requestDeleteWorkout(workout)" aria-label="Remove workout"
+                    title="Remove workout"
                     class="inline-flex items-center justify-center gap-2 rounded-md border border-rose-300 bg-white p-2 text-rose-700 hover:bg-rose-50 dark:border-rose-700 dark:bg-slate-700 dark:text-rose-300 dark:hover:bg-rose-900/30">
                     <Trash2 :size="16" />
                   </button>
-                  <button type="button" @click="openEditDialog(routine)"
+                  <button type="button" @click="openEditDialog(workout)"
                     class="inline-flex items-center justify-center gap-2 rounded-md border border-slate-300 bg-white p-2 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600">
                     Edit
                   </button>
@@ -97,24 +97,24 @@
     </div>
 
     <div v-else class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-      <article v-for="routine in filteredRoutines" :key="routine.id"
+      <article v-for="workout in filteredWorkouts" :key="workout.id"
         class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
-        <p class="mb-3 font-semibold text-slate-900 dark:text-slate-100">{{ routine.name }}</p>
+        <p class="mb-3 font-semibold text-slate-900 dark:text-slate-100">{{ workout.name }}</p>
 
         <div class="flex flex-wrap gap-2">
-          <span v-for="excercise in routine.excercises" :key="`${routine.id}-${excercise.name}`"
+          <span v-for="excercise in workout.excercises" :key="`${workout.id}-${excercise.name}`"
             class="rounded-full bg-slate-200 px-2 py-1 text-xs text-slate-700 dark:bg-slate-700 dark:text-slate-200">
             {{ excercise.name }} ({{ excercise.sets.length }})
           </span>
         </div>
 
         <div class="mt-4 flex items-center justify-between gap-2">
-          <button type="button" @click="requestDeleteRoutine(routine)" aria-label="Remove routine"
-            title="Remove routine"
+          <button type="button" @click="requestDeleteWorkout(workout)" aria-label="Remove workout"
+            title="Remove workout"
             class="inline-flex items-center justify-center gap-2 rounded-md border border-rose-300 bg-white p-2 text-rose-700 hover:bg-rose-50 dark:border-rose-700 dark:bg-slate-700 dark:text-rose-300 dark:hover:bg-rose-900/30">
             <Trash2 :size="16" />
           </button>
-          <button type="button" @click="openEditDialog(routine)"
+          <button type="button" @click="openEditDialog(workout)"
             class="inline-flex items-center justify-center gap-2 rounded-md border border-slate-300 bg-white p-2 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600">
             Edit
           </button>
@@ -124,17 +124,17 @@
 
     <div class="fixed bottom-0 left-56 right-0 z-30 px-6 pb-3">
       <div class="mx-auto w-full max-w-5xl">
-        <DialogActionPanel primary-label="Add routine" @primary-click="openCreateDialog" />
+        <DialogActionPanel primary-label="Add workout" @primary-click="openCreateDialog" />
       </div>
     </div>
 
-    <RoutineEditorDialog :open="showDialog" :title="dialogMode === 'edit' ? 'Edit routine' : 'Add routine'"
-      :save-label="dialogMode === 'edit' ? 'Save changes' : 'Add routine'" :excercises="excercises"
-      :initial-name="editingRoutineName" :initial-note="editingRoutineNote" :initial-excercises="editingRoutineExcercises" @cancel="closeDialog"
-      @save="saveRoutineFromDialog" />
+    <WorkoutEditorDialog :open="showDialog" :title="dialogMode === 'edit' ? 'Edit workout' : 'Add workout'"
+      :save-label="dialogMode === 'edit' ? 'Save changes' : 'Add workout'" :excercises="excercises"
+      :initial-name="editingWorkoutName" :initial-note="editingWorkoutNote" :initial-excercises="editingWorkoutExcercises" @cancel="closeDialog"
+      @save="saveWorkoutFromDialog" />
 
-    <ConfirmDialog :open="showDeleteDialog" title="Delete routine" :message="deleteDialogMessage" confirm-label="Delete"
-      cancel-label="Cancel" @confirm="confirmDeleteRoutine" @cancel="closeDeleteDialog" />
+    <ConfirmDialog :open="showDeleteDialog" title="Delete workout" :message="deleteDialogMessage" confirm-label="Delete"
+      cancel-label="Cancel" @confirm="confirmDeleteWorkout" @cancel="closeDeleteDialog" />
   </div>
 </template>
 
@@ -145,38 +145,38 @@ import ConfirmDialog from '../../components/ConfirmDialog.vue'
 import DialogActionPanel from '../../components/DialogActionPanel.vue'
 import LoadingPanel from '../../components/LoadingPanel.vue'
 import NotificationToast from '../../components/NotificationToast.vue'
-import RoutineEditorDialog from '../../components/RoutineEditorDialog.vue'
+import WorkoutEditorDialog from '../../components/WorkoutEditorDialog.vue'
 import SearchInput from '../../components/SearchInput.vue'
 import SelectExcercise from '../../components/Select/SelectExcercise.vue'
 import { useLocalStorageState } from '../../composables/useLocalStorageState'
 import { usePageTitle } from '../../composables/usePageTitle'
 import { useExcercisesApi } from '../../services/excercisesApi'
-import { useRoutinesApi } from '../../services/routinesApi'
+import { useWorkoutsApi } from '../../services/workoutsApi'
 import type { Excercise } from '../../types/excercise'
-import type { Routine, RoutineExcercise } from '../../types/routine'
+import type { Workout, WorkoutExcercise } from '../../types/workout'
 import { Trash2 } from 'lucide-vue-next'
 
-usePageTitle('Routines')
+usePageTitle('Workouts')
 
 const excercisesApi = useExcercisesApi()
-const routinesApi = useRoutinesApi()
+const workoutsApi = useWorkoutsApi()
 const { isLoading: isAuthLoading, isAuthenticated } = useAuth0()
 
-const routines = ref<Routine[]>([])
-const viewMode = useLocalStorageState<'tile' | 'list'>('routines:viewMode', 'list')
+const workouts = ref<Workout[]>([])
+const viewMode = useLocalStorageState<'tile' | 'list'>('workouts:viewMode', 'list')
 const excercises = ref<Excercise[]>([])
 const isLoading = ref(false)
 const errorMessage = ref('')
 const showDeleteDialog = ref(false)
-const pendingDeleteRoutine = ref<Routine | null>(null)
+const pendingDeleteWorkout = ref<Workout | null>(null)
 
 const showDialog = ref(false)
 const dialogMode = ref<'create' | 'edit'>('create')
-const editingRoutineId = ref<string | null>(null)
-const editingRoutineName = ref('')
-const editingRoutineNote = ref('')
-const editingRoutineExcercises = ref<RoutineExcercise[]>([])
-const hasLoadedRoutinesInitially = ref(false)
+const editingWorkoutId = ref<string | null>(null)
+const editingWorkoutName = ref('')
+const editingWorkoutNote = ref('')
+const editingWorkoutExcercises = ref<WorkoutExcercise[]>([])
+const hasLoadedWorkoutsInitially = ref(false)
 
 const notificationOpen = ref(false)
 const notificationTitle = ref('')
@@ -185,27 +185,27 @@ const notificationMessage = ref('')
 const searchQuery = ref('')
 const selectedExerciseNames = ref<string[]>([])
 
-const filteredRoutines = computed(() => {
+const filteredWorkouts = computed(() => {
   const query = searchQuery.value.trim().toLowerCase()
 
-  return routines.value.filter((routine) => {
-    const matchesQuery = !query || routine.name.toLowerCase().includes(query)
+  return workouts.value.filter((workout) => {
+    const matchesQuery = !query || workout.name.toLowerCase().includes(query)
     const matchesExercises =
       selectedExerciseNames.value.length === 0 ||
-      routine.excercises.some((exc) => selectedExerciseNames.value.includes(exc.name))
+      workout.excercises.some((exc) => selectedExerciseNames.value.includes(exc.name))
 
     return matchesQuery && matchesExercises
   })
 })
 
-const loadRoutines = async () => {
+const loadWorkouts = async () => {
   isLoading.value = true
   errorMessage.value = ''
 
   try {
-    routines.value = await routinesApi.listRoutines()
+    workouts.value = await workoutsApi.listWorkouts()
   } catch {
-    errorMessage.value = 'Failed to load routines'
+    errorMessage.value = 'Failed to load workouts'
   } finally {
     isLoading.value = false
   }
@@ -229,19 +229,19 @@ const showSuccessNotification = async (title: string, message: string) => {
 
 const openCreateDialog = () => {
   dialogMode.value = 'create'
-  editingRoutineId.value = null
-  editingRoutineName.value = ''
-  editingRoutineNote.value = ''
-  editingRoutineExcercises.value = []
+  editingWorkoutId.value = null
+  editingWorkoutName.value = ''
+  editingWorkoutNote.value = ''
+  editingWorkoutExcercises.value = []
   showDialog.value = true
 }
 
-const openEditDialog = (routine: Routine) => {
+const openEditDialog = (workout: Workout) => {
   dialogMode.value = 'edit'
-  editingRoutineId.value = routine.id
-  editingRoutineName.value = routine.name
-  editingRoutineNote.value = routine.note || ''
-  editingRoutineExcercises.value = routine.excercises.map((excercise) => ({
+  editingWorkoutId.value = workout.id
+  editingWorkoutName.value = workout.name
+  editingWorkoutNote.value = workout.note || ''
+  editingWorkoutExcercises.value = workout.excercises.map((excercise) => ({
     name: excercise.name,
     isBodyweight: excercise.isBodyweight,
     note: excercise.note,
@@ -253,88 +253,88 @@ const openEditDialog = (routine: Routine) => {
 const closeDialog = () => {
   showDialog.value = false
   dialogMode.value = 'create'
-  editingRoutineId.value = null
-  editingRoutineName.value = ''
-  editingRoutineNote.value = ''
-  editingRoutineExcercises.value = []
+  editingWorkoutId.value = null
+  editingWorkoutName.value = ''
+  editingWorkoutNote.value = ''
+  editingWorkoutExcercises.value = []
 }
 
-const saveRoutineFromDialog = async (payload: { name: string; note?: string; excercises: RoutineExcercise[] }) => {
+const saveWorkoutFromDialog = async (payload: { name: string; note?: string; excercises: WorkoutExcercise[] }) => {
   try {
-    if (dialogMode.value === 'edit' && editingRoutineId.value) {
-      const updatedRoutine = await routinesApi.editRoutine(editingRoutineId.value, payload)
-      routines.value = routines.value.map((routine) => {
-        if (routine.id !== updatedRoutine.id) {
-          return routine
+    if (dialogMode.value === 'edit' && editingWorkoutId.value) {
+      const updatedWorkout = await workoutsApi.editWorkout(editingWorkoutId.value, payload)
+      workouts.value = workouts.value.map((workout) => {
+        if (workout.id !== updatedWorkout.id) {
+          return workout
         }
 
-        return updatedRoutine
+        return updatedWorkout
       })
       closeDialog()
-      await showSuccessNotification('Routine updated', `Changes for **${updatedRoutine.name}** were saved successfully.`)
+      await showSuccessNotification('Workout updated', `Changes for **${updatedWorkout.name}** were saved successfully.`)
       return
     }
 
-    const createdRoutine = await routinesApi.addRoutine(payload)
-    routines.value = [createdRoutine, ...routines.value]
+    const createdWorkout = await workoutsApi.addWorkout(payload)
+    workouts.value = [createdWorkout, ...workouts.value]
     closeDialog()
-    await showSuccessNotification('Routine added', `Routine **${createdRoutine.name}** was added successfully.`)
+    await showSuccessNotification('Workout added', `Workout **${createdWorkout.name}** was added successfully.`)
   } catch {
-    errorMessage.value = 'Failed to save routine'
+    errorMessage.value = 'Failed to save workout'
   }
 }
 
 const deleteDialogMessage = computed(() => {
-  if (!pendingDeleteRoutine.value) {
-    return 'Are you sure you want to delete this routine?'
+  if (!pendingDeleteWorkout.value) {
+    return 'Are you sure you want to delete this workout?'
   }
 
-  return `Are you sure you want to delete "${pendingDeleteRoutine.value.name}"?`
+  return `Are you sure you want to delete "${pendingDeleteWorkout.value.name}"?`
 })
 
-const requestDeleteRoutine = (routine: Routine) => {
-  pendingDeleteRoutine.value = routine
+const requestDeleteWorkout = (workout: Workout) => {
+  pendingDeleteWorkout.value = workout
   showDeleteDialog.value = true
 }
 
 const closeDeleteDialog = () => {
   showDeleteDialog.value = false
-  pendingDeleteRoutine.value = null
+  pendingDeleteWorkout.value = null
 }
 
-const confirmDeleteRoutine = async () => {
-  const routine = pendingDeleteRoutine.value
+const confirmDeleteWorkout = async () => {
+  const workout = pendingDeleteWorkout.value
 
-  if (!routine) {
+  if (!workout) {
     return
   }
 
   errorMessage.value = ''
 
   try {
-    await routinesApi.deleteRoutine(routine.id)
-    routines.value = routines.value.filter((entry) => entry.id !== routine.id)
+    await workoutsApi.deleteWorkout(workout.id)
+    workouts.value = workouts.value.filter((entry) => entry.id !== workout.id)
 
-    if (dialogMode.value === 'edit' && editingRoutineId.value === routine.id) {
+    if (dialogMode.value === 'edit' && editingWorkoutId.value === workout.id) {
       closeDialog()
     }
 
     closeDeleteDialog()
-    await showSuccessNotification('Routine deleted', `Routine **${routine.name}** was deleted successfully.`)
+    await showSuccessNotification('Workout deleted', `Workout **${workout.name}** was deleted successfully.`)
   } catch {
-    errorMessage.value = 'Failed to delete routine'
+    errorMessage.value = 'Failed to delete workout'
   }
 }
 
 watch(
   [isAuthLoading, isAuthenticated],
   async ([authLoading, authenticated]) => {
-    if (authLoading || !authenticated || hasLoadedRoutinesInitially.value) {
+    if (authLoading || !authenticated || hasLoadedWorkoutsInitially.value) {
       return
     }
 
-    hasLoadedRoutinesInitially.value = true
-    await loadRoutines()
+    hasLoadedWorkoutsInitially.value = true
+    await loadWorkouts()
     await loadExcercises()
   },
   { immediate: true },

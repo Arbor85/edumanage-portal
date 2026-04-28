@@ -64,8 +64,8 @@
               >
                 Add empty workout
               </button>
-              <ScheduleRoutine
-                :routines="routines"
+              <ScheduleWorkout
+                :workouts="workouts"
                 @schedule="addWorkout"
               />
             </div>
@@ -201,7 +201,7 @@
       </div>
     </div>
 
-    <RoutineEditorDialog
+    <WorkoutEditorDialog
       :open="showEmptyWorkoutDialog"
       :title="workoutDialogMode === 'edit' ? 'Edit workout' : 'Add empty workout'"
       :save-label="workoutDialogMode === 'edit' ? 'Save workout' : 'Add workout'"
@@ -214,6 +214,7 @@
       @cancel="closeWorkoutDialog"
       @save="saveWorkoutFromDialog"
     />
+
 
     <SelectDate
       v-if="copyingWorkoutIndex !== null"
@@ -230,8 +231,8 @@
 import { computed, ref, watch } from 'vue'
 import { Ban, Send } from 'lucide-vue-next'
 import CalendarView from '../../../components/CalendarView.vue'
-import RoutineEditorDialog from '../../../components/RoutineEditorDialog.vue'
-import ScheduleRoutine from '../../../components/ScheduleRoutine.vue'
+import WorkoutEditorDialog from '../../../components/WorkoutEditorDialog.vue'
+import ScheduleWorkout from '../../../components/ScheduleWorkout.vue'
 import SelectClient from '../../../components/Select/SelectClient.vue'
 import SelectDate from '../../../components/SelectDate.vue'
 import { hasCurrentUserPermission } from '../../../services/permissionsService'
@@ -239,7 +240,7 @@ import type { Client } from '../../../types/client'
 import type { Excercise } from '../../../types/excercise'
 import { Permission } from '../../../types/permission'
 import type { PlanStatus, PlanWorkout } from '../../../types/plan'
-import type { Routine, RoutineExcercise } from '../../../types/routine'
+import type { Workout, WorkoutExcercise } from '../../../types/workout'
 
 type PlanEditorPayload = {
   name: string
@@ -254,7 +255,7 @@ const props = withDefaults(
     currentStatus?: PlanStatus
     statusUpdating?: boolean
     clients: Client[]
-    routines: Routine[]
+    workouts: Workout[]
     excercises: Excercise[]
     initialName?: string
     initialClientId?: string
@@ -281,7 +282,7 @@ const workoutDialogMode = ref<'create' | 'edit'>('create')
 const editingWorkoutIndex = ref<number | null>(null)
 const workoutDialogInitialName = ref('')
 const workoutDialogInitialNote = ref('')
-const workoutDialogInitialExcercises = ref<RoutineExcercise[]>([])
+const workoutDialogInitialExcercises = ref<WorkoutExcercise[]>([])
 const workoutDialogInitialDate = ref('')
 const copyingWorkoutIndex = ref<number | null>(null)
 const copyWorkoutDate = ref('')
@@ -558,7 +559,7 @@ const onCopyDateSelected = (date: string) => {
   closeCopyWorkoutDialog()
 }
 
-const saveWorkoutFromDialog = (payload: { name: string; note?: string; excercises: RoutineExcercise[]; date?: string }) => {
+const saveWorkoutFromDialog = (payload: { name: string; note?: string; excercises: WorkoutExcercise[]; date?: string }) => {
   if (workoutDialogMode.value === 'edit' && editingWorkoutIndex.value !== null) {
     const currentWorkout = formData.value.workouts[editingWorkoutIndex.value]
 

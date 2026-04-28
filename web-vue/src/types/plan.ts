@@ -1,6 +1,6 @@
-import type { Routine } from './routine'
+import type { Workout } from './workout'
 
-export type PlanWorkout = Routine & {
+export type PlanWorkout = Workout & {
   date: string // ISO 8601 date string
 }
 
