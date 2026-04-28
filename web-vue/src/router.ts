@@ -138,6 +138,12 @@ const routes = [
     name: 'Login',
     component: Login,
     meta: { standalone: true },
+  },
+  {
+    path: '/register',
+    name: 'Register',
+    component: Login,
+    meta: { standalone: true },
   }
 ]
 

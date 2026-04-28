@@ -10,12 +10,12 @@
       <button
         class="auth-mobile-tab"
         :class="{ 'auth-mobile-tab--active': mode === 'login' }"
-        @click="mode = 'login'"
+        @click="setMode('login')"
       >Sign In</button>
       <button
         class="auth-mobile-tab"
         :class="{ 'auth-mobile-tab--active': mode === 'register' }"
-        @click="mode = 'register'"
+        @click="setMode('register')"
       >Register</button>
       <div class="auth-mobile-indicator" :class="{ 'auth-mobile-indicator--right': mode === 'register' }" />
     </div>
@@ -66,7 +66,7 @@
 
             <p class="auth-toggle-link md:hidden">
               No account yet?
-              <button @click="mode = 'register'" class="auth-toggle-btn">Create one</button>
+              <button @click="setMode('register')" class="auth-toggle-btn">Create one</button>
             </p>
           </div>
         </Transition>
@@ -110,7 +110,7 @@
 
             <p class="auth-toggle-link md:hidden">
               Already have an account?
-              <button @click="mode = 'login'" class="auth-toggle-btn">Sign in</button>
+              <button @click="setMode('login')" class="auth-toggle-btn">Sign in</button>
             </p>
           </div>
         </Transition>
@@ -136,7 +136,7 @@
             <p class="auth-deco-body">
               Join EduManage and unlock a world of learning tools, personalised schedules, and progress tracking.
             </p>
-            <button @click="mode = 'register'" class="auth-deco-cta">
+            <button @click="setMode('register')" class="auth-deco-cta">
               Create Account
             </button>
           </div>
@@ -151,7 +151,7 @@
             <p class="auth-deco-body">
               Welcome back. Your courses, schedule, and progress are waiting for you right where you left off.
             </p>
-            <button @click="mode = 'login'" class="auth-deco-cta">
+            <button @click="setMode('login')" class="auth-deco-cta">
               Sign In
             </button>
           </div>
@@ -163,7 +163,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuth0 } from '@auth0/auth0-vue'
 import { usePageTitle } from '../composables/usePageTitle'
@@ -183,8 +183,12 @@ const { loginWithRedirect, isAuthenticated } = useAuth0()
 const route = useRoute()
 const router = useRouter()
 
-const mode = ref<'login' | 'register'>('login')
+const mode = computed(() => route.name === 'Register' ? 'register' : 'login')
 const LOGIN_RETURN_TO_KEY = 'login:returnTo'
+
+function setMode(newMode: 'login' | 'register') {
+  router.replace({ name: newMode === 'register' ? 'Register' : 'Login', query: route.query })
+}
 
 const formatErrorCode = (errorCode: string) =>
   errorCode
