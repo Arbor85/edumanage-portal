@@ -6,6 +6,7 @@ import ActiveExerciseCard from './ActiveExerciseCard.vue'
 import WorkoutExerciseQueue from './WorkoutExerciseQueue.vue'
 import BaseButton from '../../../components/BaseButton.vue'
 import ConfirmDialog from '../../../components/ConfirmDialog.vue'
+import { Timer, Play, Pause } from 'lucide-vue-next'
 
 const store = useWorkoutStore()
 const router = useRouter()
@@ -38,9 +39,10 @@ async function finish() {
   <div class="flex flex-col gap-4">
     <!-- Toolbar -->
     <div class="flex items-center gap-3">
-      <p class="text-text-secondary text-sm font-mono tabular-nums flex-1">⏱ {{ elapsed }}</p>
+      <p class="text-text-secondary text-sm font-mono tabular-nums flex-1 flex items-center gap-1.5"><Timer class="w-4 h-4" /> {{ elapsed }}</p>
       <BaseButton size="sm" variant="ghost" @click="store.activeWorkout?.paused ? store.resumeWorkout() : store.pauseWorkout()">
-        {{ store.activeWorkout?.paused ? '▶ Resume' : '⏸ Pause' }}
+        <Play v-if="store.activeWorkout?.paused" class="w-4 h-4" /> <Pause v-else class="w-4 h-4" />
+        {{ store.activeWorkout?.paused ? 'Resume' : 'Pause' }}
       </BaseButton>
       <BaseButton size="sm" variant="danger" @click="confirmFinish = true">Finish</BaseButton>
     </div>

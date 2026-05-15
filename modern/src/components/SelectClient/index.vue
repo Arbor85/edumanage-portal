@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue'
 import { useClientStore } from '../../stores/clientStore'
 import BaseAvatar from '../BaseAvatar.vue'
+import { ChevronDown } from 'lucide-vue-next'
 
 const props = defineProps<{
   modelValue: string | null
@@ -46,7 +47,7 @@ function pick(code: string | null) {
     >
       <BaseAvatar v-if="selected" :name="selected.name ?? '?'" size="xs" />
       <span class="flex-1 truncate">{{ selected?.name ?? 'Select client...' }}</span>
-      <span class="text-text-secondary">▾</span>
+      <ChevronDown class="w-4 h-4 text-text-secondary" />
     </button>
 
     <!-- Dropdown -->

@@ -1,16 +1,18 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
 import { useWorkoutStore } from '../../stores/workoutStore'
+import { Home, Dumbbell, Play, Calendar, CalendarDays } from 'lucide-vue-next'
+import type { Component } from 'vue'
 
 const route = useRoute()
 const workoutStore = useWorkoutStore()
 
-const items = [
-  { to: '/dashboard', icon: '🏠', label: 'Home' },
-  { to: '/exercises', icon: '🏋️', label: 'Exercises' },
-  { to: '/workout/active', icon: '▶️', label: 'Workout', fab: true },
-  { to: '/plans', icon: '📅', label: 'Plans' },
-  { to: '/meetings', icon: '🗓️', label: 'Schedule' },
+const items: { to: string; icon: Component; label: string; fab?: boolean }[] = [
+  { to: '/dashboard', icon: Home, label: 'Home' },
+  { to: '/exercises', icon: Dumbbell, label: 'Exercises' },
+  { to: '/workout/active', icon: Play, label: 'Workout', fab: true },
+  { to: '/plans', icon: Calendar, label: 'Plans' },
+  { to: '/meetings', icon: CalendarDays, label: 'Schedule' },
 ]
 </script>
 
@@ -31,9 +33,9 @@ const items = [
         class="w-12 h-12 rounded-full bg-primary flex items-center justify-center shadow-lg text-white text-lg"
         :class="workoutStore.activeWorkout ? 'animate-pulse' : ''"
       >
-        {{ item.icon }}
+        <component :is="item.icon" class="w-6 h-6" />
       </span>
-      <span v-else class="text-lg">{{ item.icon }}</span>
+      <component :is="item.icon" v-else class="text-xl w-5 h-5" />
       <span v-if="!item.fab">{{ item.label }}</span>
     </RouterLink>
   </nav>

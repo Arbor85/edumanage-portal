@@ -2,6 +2,7 @@
 import type { PlanOut } from '../../../types'
 import BaseBadge from '../../../components/BaseBadge.vue'
 import { useClientStore } from '../../../stores/clientStore'
+import { Pencil, Trash2 } from 'lucide-vue-next'
 
 defineProps<{ plan: PlanOut }>()
 defineEmits<{ edit: []; delete: [] }>()
@@ -17,8 +18,8 @@ function clientName(id: string | null) {
     <div class="flex items-start justify-between gap-2">
       <p class="font-semibold text-sm text-text-primary dark:text-white line-clamp-2">{{ plan.name }}</p>
       <div class="hidden group-hover:flex gap-1 flex-shrink-0">
-        <button class="w-7 h-7 flex items-center justify-center rounded-lg text-xs text-text-secondary hover:text-primary focus-visible:ring-1 focus-visible:ring-primary" aria-label="Edit" @click="$emit('edit')">✏️</button>
-        <button class="w-7 h-7 flex items-center justify-center rounded-lg text-xs text-text-secondary hover:text-red-500 focus-visible:ring-1 focus-visible:ring-primary" aria-label="Delete" @click="$emit('delete')">🗑️</button>
+        <button class="w-7 h-7 flex items-center justify-center rounded-lg text-text-secondary hover:text-primary focus-visible:ring-1 focus-visible:ring-primary" aria-label="Edit" @click="$emit('edit')"><Pencil class="w-3.5 h-3.5" /></button>
+        <button class="w-7 h-7 flex items-center justify-center rounded-lg text-text-secondary hover:text-red-500 focus-visible:ring-1 focus-visible:ring-primary" aria-label="Delete" @click="$emit('delete')"><Trash2 class="w-3.5 h-3.5" /></button>
       </div>
     </div>
     <p class="text-xs text-text-secondary mt-1">{{ clientName(plan.clientId) }}</p>

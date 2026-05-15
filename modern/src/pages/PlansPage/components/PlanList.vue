@@ -10,6 +10,7 @@ import BaseBadge from '../../../components/BaseBadge.vue'
 import BaseButton from '../../../components/BaseButton.vue'
 import PaginationBar from '../../../components/PaginationBar.vue'
 import ConfirmDialog from '../../../components/ConfirmDialog.vue'
+import { Pencil, Trash2, Calendar } from 'lucide-vue-next'
 
 const props = defineProps<{ plans: PlanOut[]; loading: boolean }>()
 const emit = defineEmits<{ edit: [p: PlanOut] }>()
@@ -60,7 +61,7 @@ async function changeStatus(plan: PlanOut, status: string) {
       <SkeletonBlock v-for="i in 5" :key="i" height="4rem" />
     </div>
 
-    <EmptyState v-else-if="!plans.length" icon="📅" title="No plans yet" description="Create your first training plan." />
+    <EmptyState v-else-if="!plans.length" :icon="Calendar" title="No plans yet" description="Create your first training plan." />
 
     <div v-else class="flex flex-col gap-3 custom-scrollbar">
       <div
@@ -80,8 +81,8 @@ async function changeStatus(plan: PlanOut, status: string) {
           <BaseButton size="sm" variant="ghost" @click="changeStatus(plan, plan.status === 'active' ? 'inactive' : 'active')">
             {{ plan.status === 'active' ? 'Deactivate' : 'Activate' }}
           </BaseButton>
-          <BaseButton size="sm" variant="ghost" aria-label="Edit" @click="emit('edit', plan)">✏️</BaseButton>
-          <BaseButton size="sm" variant="ghost" aria-label="Delete" @click="deleteTarget = plan">🗑️</BaseButton>
+          <BaseButton size="sm" variant="ghost" aria-label="Edit" @click="emit('edit', plan)"><Pencil class="w-4 h-4" /></BaseButton>
+          <BaseButton size="sm" variant="ghost" aria-label="Delete" @click="deleteTarget = plan"><Trash2 class="w-4 h-4" /></BaseButton>
         </div>
       </div>
     </div>

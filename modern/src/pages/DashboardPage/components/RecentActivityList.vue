@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { useWorkoutStore } from '../../../stores/workoutStore'
 import { useRouter } from 'vue-router'
+import { Dumbbell } from 'lucide-vue-next'
 
 const store = useWorkoutStore()
 const router = useRouter()
@@ -24,7 +25,7 @@ function formatDate(iso: string | null) {
         class="flex items-center gap-3 py-2.5 cursor-pointer hover:text-primary transition-colors"
         @click="router.push('/history')"
       >
-        <span class="text-xl">🏋️</span>
+        <Dumbbell class="w-5 h-5 text-text-secondary" />
         <div class="flex-1 min-w-0">
           <p class="text-sm font-medium text-text-primary dark:text-white truncate">{{ w.name ?? 'Workout' }}</p>
           <p class="text-xs text-text-secondary">{{ formatDate(w.completedAt) }}</p>

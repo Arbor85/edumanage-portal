@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useRoutineStore } from '../../stores/routineStore'
+import { ChevronDown } from 'lucide-vue-next'
 
 const props = defineProps<{
   modelValue: string | null
@@ -41,7 +42,7 @@ function pick(id: string | null) {
       @click="open = !open"
     >
       <span class="flex-1 truncate">{{ selected?.name ?? 'Select routine...' }}</span>
-      <span class="text-text-secondary">▾</span>
+      <ChevronDown class="w-4 h-4 text-text-secondary" />
     </button>
 
     <div

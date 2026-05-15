@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
+import type { Component } from 'vue'
+import { List, LayoutGrid, Calendar } from 'lucide-vue-next'
 
 const props = defineProps<{
   modelValue: string
@@ -8,7 +10,7 @@ const props = defineProps<{
 }>()
 const emit = defineEmits<{ 'update:modelValue': [val: string] }>()
 
-const icons: Record<string, string> = { list: '☰', kanban: '⊞', calendar: '📅' }
+const icons: Record<string, Component> = { list: List, kanban: LayoutGrid, calendar: Calendar }
 
 onMounted(() => {
   if (props.storageKey) {
@@ -34,7 +36,7 @@ function select(val: string) {
         : 'text-text-secondary hover:text-text-primary dark:hover:text-white'"
       @click="select(opt.value)"
     >
-      <span>{{ icons[opt.value] ?? '' }}</span>
+      <component :is="icons[opt.value]" v-if="icons[opt.value]" class="w-4 h-4" />
       <span class="hidden sm:inline">{{ opt.label }}</span>
     </button>
   </div>

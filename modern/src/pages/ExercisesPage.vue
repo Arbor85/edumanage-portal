@@ -11,6 +11,7 @@ import ExerciseFormModal from './ExercisesPage/components/ExerciseFormModal.vue'
 import ExerciseDetailModal from './ExercisesPage/components/ExerciseDetailModal.vue'
 import ConfirmDialog from '../components/ConfirmDialog.vue'
 import { useToast } from '../composables/useToast'
+import { Search } from 'lucide-vue-next'
 
 const exerciseStore = useExerciseStore()
 const toast = useToast()
@@ -69,7 +70,9 @@ function openEdit(ex: ExcerciseOut) {
     <!-- Filters -->
     <div class="flex flex-col sm:flex-row gap-3 mb-6">
       <div class="relative flex-1">
-        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none">🔍</span>
+        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none">
+          <Search class="w-4 h-4" />
+        </span>
         <input
           v-model="search"
           placeholder="Search by name, muscle or tag..."

@@ -11,6 +11,7 @@ import { useWorkoutStore } from '../../../stores/workoutStore'
 import { useRouter } from 'vue-router'
 import { useToast } from '../../../composables/useToast'
 import { useRoutineStore } from '../../../stores/routineStore'
+import { Pencil, Play, ClipboardList } from 'lucide-vue-next'
 
 const props = defineProps<{
   routines: RoutineOut[]
@@ -58,7 +59,7 @@ async function handleDelete() {
     <!-- Empty state -->
     <EmptyState
       v-else-if="!routines.length"
-      icon="📋"
+      :icon="ClipboardList"
       title="No routines yet"
       description="Create your first workout routine."
     />
@@ -76,8 +77,8 @@ async function handleDelete() {
         </div>
         <BaseBadge :label="`${routine.excercises?.length ?? 0} exercises`" />
         <div class="flex gap-1.5">
-          <BaseButton size="sm" variant="primary" @click="start(routine)">▶ Start</BaseButton>
-          <BaseButton size="sm" variant="ghost" aria-label="Edit" @click="emit('edit', routine)">✏️</BaseButton>
+          <BaseButton size="sm" variant="primary" @click="start(routine)"><Play class="w-4 h-4" /> Start</BaseButton>
+          <BaseButton size="sm" variant="ghost" aria-label="Edit" @click="emit('edit', routine)"><Pencil class="w-4 h-4" /></BaseButton>
         </div>
       </div>
     </div>

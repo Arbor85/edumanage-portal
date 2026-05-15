@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Teleport } from 'vue'
+import { CheckCircle, XCircle, Info } from 'lucide-vue-next'
 import { useToast } from '../composables/useToast'
 
 const { toasts } = useToast()
@@ -23,9 +24,9 @@ const { toasts } = useToast()
             'bg-gray-800 text-white': toast.type === 'info',
           }"
         >
-          <span v-if="toast.type === 'success'">✓</span>
-          <span v-else-if="toast.type === 'error'">✕</span>
-          <span v-else>ℹ</span>
+          <CheckCircle v-if="toast.type === 'success'" class="w-4 h-4 flex-shrink-0" />
+          <XCircle v-else-if="toast.type === 'error'" class="w-4 h-4 flex-shrink-0" />
+          <Info v-else class="w-4 h-4 flex-shrink-0" />
           {{ toast.message }}
         </div>
       </TransitionGroup>

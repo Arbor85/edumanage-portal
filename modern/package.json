@@ -11,6 +11,7 @@
   "dependencies": {
     "@auth0/auth0-vue": "^2.7.0",
     "axios": "^1.16.1",
+    "lucide-vue-next": "^1.0.0",
     "pinia": "^3.0.4",
     "vue": "^3.5.34",
     "vue-router": "^4.6.4"

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { ChevronLeft, ChevronRight } from 'lucide-vue-next'
 
 const props = defineProps<{
   page: number
@@ -19,7 +20,7 @@ const show = computed(() => props.total > props.pageSize)
       :disabled="page <= 1"
       @click="emit('update:page', page - 1)"
     >
-      ←
+      <ChevronLeft class="w-4 h-4" />
     </button>
     <span class="text-sm text-text-secondary dark:text-white/60">
       {{ page }} / {{ totalPages }}
@@ -29,7 +30,7 @@ const show = computed(() => props.total > props.pageSize)
       :disabled="page >= totalPages"
       @click="emit('update:page', page + 1)"
     >
-      →
+      <ChevronRight class="w-4 h-4" />
     </button>
   </div>
 </template>

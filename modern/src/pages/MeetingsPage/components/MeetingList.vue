@@ -6,6 +6,7 @@ import EmptyState from '../../../components/EmptyState.vue'
 import BaseButton from '../../../components/BaseButton.vue'
 import BaseAvatar from '../../../components/BaseAvatar.vue'
 import { useClientStore } from '../../../stores/clientStore'
+import { Pencil, CalendarDays } from 'lucide-vue-next'
 
 const props = defineProps<{ meetings: MeetingOut[]; loading: boolean }>()
 const emit = defineEmits<{ edit: [m: MeetingOut] }>()
@@ -35,7 +36,7 @@ function formatDate(iso: string | null) {
     <div v-if="loading" class="flex flex-col gap-3">
       <SkeletonBlock v-for="i in 5" :key="i" height="4rem" />
     </div>
-    <EmptyState v-else-if="!meetings.length" icon="📆" title="No meetings" description="Schedule your first session." />
+    <EmptyState v-else-if="!meetings.length" :icon="CalendarDays" title="No meetings" description="Schedule your first session." />
 
     <div v-else class="flex flex-col gap-6">
       <!-- Upcoming -->
@@ -52,10 +53,10 @@ function formatDate(iso: string | null) {
               <p class="font-semibold text-text-primary dark:text-white">{{ m.title }}</p>
               <p class="text-xs text-text-secondary mt-0.5">{{ clientName(m.clientId) }} · {{ formatDate(m.date) }}</p>
             </div>
-            <BaseButton size="sm" variant="ghost" @click="emit('edit', m)">✏️</BaseButton>
+            <BaseButton size="sm" variant="ghost" aria-label="Edit" @click="emit('edit', m)"><Pencil class="w-4 h-4" /></BaseButton>
           </div>
         </div>
-        <EmptyState v-if="!upcoming.length" icon="" title="" description="No upcoming meetings." class="py-4" />
+        <EmptyState v-if="!upcoming.length" :icon="undefined" title="" description="No upcoming meetings." class="py-4" />
       </div>
 
       <!-- Past -->
@@ -72,7 +73,7 @@ function formatDate(iso: string | null) {
               <p class="font-semibold text-text-primary dark:text-white">{{ m.title }}</p>
               <p class="text-xs text-text-secondary mt-0.5">{{ clientName(m.clientId) }} · {{ formatDate(m.date) }}</p>
             </div>
-            <BaseButton size="sm" variant="ghost" @click="emit('edit', m)">✏️</BaseButton>
+            <BaseButton size="sm" variant="ghost" aria-label="Edit" @click="emit('edit', m)"><Pencil class="w-4 h-4" /></BaseButton>
           </div>
         </div>
       </div>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
+import { Search, RefreshCw } from 'lucide-vue-next'
 
 const props = defineProps<{
   modelValue: string
@@ -22,7 +23,9 @@ watch(() => props.modelValue, (val) => { if (val !== local.value) local.value = 
 <template>
   <div class="flex items-center gap-2">
     <div class="relative flex-1">
-      <span class="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none">🔍</span>
+      <span class="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none">
+        <Search class="w-4 h-4" />
+      </span>
       <input
         v-model="local"
         :placeholder="placeholder ?? 'Search...'"
@@ -31,11 +34,11 @@ watch(() => props.modelValue, (val) => { if (val !== local.value) local.value = 
     </div>
     <button
       class="w-11 h-11 flex items-center justify-center rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-surface-dark text-text-secondary hover:text-primary transition-colors focus-visible:ring-2 focus-visible:ring-primary"
-      :class="loading ? 'animate-pulse' : ''"
+      :class="loading ? 'animate-spin' : ''"
       aria-label="Refresh"
       @click="$emit('refresh')"
     >
-      🔄
+      <RefreshCw class="w-4 h-4" />
     </button>
   </div>
 </template>

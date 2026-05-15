@@ -2,6 +2,7 @@
 import type { ActiveExercise } from '../../../types'
 import BaseButton from '../../../components/BaseButton.vue'
 import { useWorkoutStore } from '../../../stores/workoutStore'
+import { Check } from 'lucide-vue-next'
 
 defineProps<{ exercise: ActiveExercise; isCurrent: boolean }>()
 const store = useWorkoutStore()
@@ -34,8 +35,8 @@ const store = useWorkoutStore()
           size="sm"
           variant="primary"
           @click="store.completeSet()"
-        >✓ Done</BaseButton>
-        <span v-else-if="set.completed" class="text-xs">✓</span>
+        ><Check class="w-4 h-4" /> Done</BaseButton>
+        <span v-else-if="set.completed" class="text-xs"><Check class="w-3.5 h-3.5 inline" /></span>
       </div>
     </div>
   </div>

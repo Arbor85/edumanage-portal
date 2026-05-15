@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue'
 import { useExerciseStore } from '../../stores/exerciseStore'
 import BaseBadge from '../BaseBadge.vue'
+import { ChevronDown } from 'lucide-vue-next'
 
 const props = defineProps<{
   modelValue: number | null
@@ -43,7 +44,7 @@ function pick(id: number | null) {
     >
       <span class="flex-1 truncate">{{ selected?.name ?? 'Select exercise...' }}</span>
       <BaseBadge v-if="selected?.primaryMuscle" :label="selected.primaryMuscle" />
-      <span class="text-text-secondary">▾</span>
+      <ChevronDown class="w-4 h-4 text-text-secondary" />
     </button>
 
     <div

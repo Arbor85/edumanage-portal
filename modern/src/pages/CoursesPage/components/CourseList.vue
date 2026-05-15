@@ -9,6 +9,7 @@ import BaseBadge from '../../../components/BaseBadge.vue'
 import BaseButton from '../../../components/BaseButton.vue'
 import PaginationBar from '../../../components/PaginationBar.vue'
 import ConfirmDialog from '../../../components/ConfirmDialog.vue'
+import { Pencil, Trash2, GraduationCap } from 'lucide-vue-next'
 
 const props = defineProps<{ courses: CourseOut[]; loading: boolean }>()
 const emit = defineEmits<{ edit: [c: CourseOut] }>()
@@ -42,7 +43,7 @@ function priceLabel(c: CourseOut) {
     <div v-if="loading" class="flex flex-col gap-3">
       <SkeletonBlock v-for="i in 5" :key="i" height="4rem" />
     </div>
-    <EmptyState v-else-if="!courses.length" icon="🎓" title="No courses yet" description="Create your first course." />
+    <EmptyState v-else-if="!courses.length" :icon="GraduationCap" title="No courses yet" description="Create your first course." />
     <div v-else class="flex flex-col gap-3 custom-scrollbar">
       <div
         v-for="course in paginated"
@@ -58,8 +59,8 @@ function priceLabel(c: CourseOut) {
           <p class="text-xs text-text-secondary mt-0.5">{{ priceLabel(course) }}</p>
         </div>
         <div class="flex gap-1.5">
-          <BaseButton size="sm" variant="ghost" @click="emit('edit', course)">✏️</BaseButton>
-          <BaseButton size="sm" variant="ghost" @click="deleteTarget = course">🗑️</BaseButton>
+          <BaseButton size="sm" variant="ghost" aria-label="Edit" @click="emit('edit', course)"><Pencil class="w-4 h-4" /></BaseButton>
+          <BaseButton size="sm" variant="ghost" aria-label="Delete" @click="deleteTarget = course"><Trash2 class="w-4 h-4" /></BaseButton>
         </div>
       </div>
     </div>

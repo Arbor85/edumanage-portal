@@ -10,6 +10,7 @@ import BaseAvatar from '../../../components/BaseAvatar.vue'
 import BaseButton from '../../../components/BaseButton.vue'
 import PaginationBar from '../../../components/PaginationBar.vue'
 import ConfirmDialog from '../../../components/ConfirmDialog.vue'
+import { Pencil, Trash2, User } from 'lucide-vue-next'
 
 const props = defineProps<{ clients: ClientOut[]; loading: boolean }>()
 const emit = defineEmits<{ edit: [c: ClientOut] }>()
@@ -50,7 +51,7 @@ async function handleDelete() {
       <SkeletonBlock v-for="i in 5" :key="i" height="4rem" />
     </div>
 
-    <EmptyState v-else-if="!clients.length" icon="👤" title="No clients yet" description="Invite your first client." />
+    <EmptyState v-else-if="!clients.length" :icon="User" title="No clients yet" description="Invite your first client." />
 
     <div v-else class="flex flex-col gap-3 custom-scrollbar">
       <div
@@ -74,8 +75,8 @@ async function handleDelete() {
           </div>
         </div>
         <div class="flex gap-1.5">
-          <BaseButton size="sm" variant="ghost" @click="emit('edit', client)">✏️</BaseButton>
-          <BaseButton size="sm" variant="ghost" @click="deleteTarget = client">🗑️</BaseButton>
+          <BaseButton size="sm" variant="ghost" aria-label="Edit" @click="emit('edit', client)"><Pencil class="w-4 h-4" /></BaseButton>
+          <BaseButton size="sm" variant="ghost" aria-label="Delete" @click="deleteTarget = client"><Trash2 class="w-4 h-4" /></BaseButton>
         </div>
       </div>
     </div>

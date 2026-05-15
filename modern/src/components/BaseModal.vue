@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Teleport, watch, onUnmounted } from 'vue'
+import { X } from 'lucide-vue-next'
 
 const props = defineProps<{
   open: boolean
@@ -48,7 +49,7 @@ onUnmounted(() => { document.body.style.overflow = '' })
               aria-label="Close dialog"
               @click="emit('close')"
             >
-              ✕
+              <X class="w-4 h-4" />
             </button>
           </div>
 

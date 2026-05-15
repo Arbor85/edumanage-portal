@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { Sun, Moon } from 'lucide-vue-next'
 
 const isDark = ref(false)
 
@@ -22,6 +23,7 @@ function toggle() {
     :aria-label="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
     @click="toggle"
   >
-    <span class="text-lg">{{ isDark ? '☀️' : '🌙' }}</span>
+    <Sun v-if="isDark" class="w-5 h-5" />
+    <Moon v-else class="w-5 h-5" />
   </button>
 </template>

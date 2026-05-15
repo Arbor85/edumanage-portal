@@ -6,6 +6,7 @@ import BaseButton from '../../../components/BaseButton.vue'
 import SelectRoutine from '../../../components/SelectRoutine/index.vue'
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { Dumbbell } from 'lucide-vue-next'
 
 const workoutStore = useWorkoutStore()
 const routineStore = useRoutineStore()
@@ -34,7 +35,7 @@ function startBlank() {
   <div class="flex flex-col items-center justify-center min-h-screen p-6 bg-surface dark:bg-gray-900">
     <div class="w-full max-w-sm flex flex-col gap-6">
       <div class="text-center">
-        <p class="text-4xl mb-2">🏋️</p>
+        <Dumbbell class="w-10 h-10 text-primary mb-2" />
         <h1 class="text-2xl font-bold text-text-primary dark:text-white">Start Workout</h1>
         <p class="text-text-secondary mt-1">Choose a routine or start free</p>
       </div>

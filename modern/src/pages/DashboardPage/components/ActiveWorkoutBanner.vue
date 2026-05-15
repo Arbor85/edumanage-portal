@@ -2,6 +2,7 @@
 import { useWorkoutStore } from '../../../stores/workoutStore'
 import { useRouter } from 'vue-router'
 import BaseButton from '../../../components/BaseButton.vue'
+import { Dumbbell } from 'lucide-vue-next'
 
 const store = useWorkoutStore()
 const router = useRouter()
@@ -13,7 +14,7 @@ const router = useRouter()
     class="bg-primary rounded-2xl p-4 flex items-center gap-4 text-white cursor-pointer hover:bg-primary-dark transition-colors"
     @click="router.push('/workout/active')"
   >
-    <span class="text-2xl">🏋️</span>
+    <Dumbbell class="w-8 h-8" />
     <div class="flex-1">
       <p class="font-semibold">Active Workout</p>
       <p class="text-sm opacity-80">{{ store.activeWorkout.routineName ?? 'Workout' }} in progress</p>

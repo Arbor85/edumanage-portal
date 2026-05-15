@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import type { ExcerciseOut } from '../../../types'
 import DifficultyBadge from '../../../components/DifficultyBadge.vue'
+import { Pencil, Trash2, Dumbbell } from 'lucide-vue-next'
 
 const props = defineProps<{ exercise: ExcerciseOut }>()
 defineEmits<{ edit: []; delete: [] }>()
@@ -17,18 +18,52 @@ const difficultyLevel = computed(() => {
   return null
 })
 
-// Deterministic placeholder image from primaryMuscle
+const MUSCLE_IMAGES: Record<string, string> = {
+  chest: '/images/benchpress.png',
+  back: '/images/muscles/deadlift.jpg',
+  shoulders: '/images/muscles/shoulders.jpg',
+  biceps: '/images/muscles/biceps.jpg',
+  triceps: '/images/muscles/triceps.jpg',
+  legs: '/images/muscles/legs.jpg',
+  quads: '/images/muscles/quads.jpg',
+  hamstrings: '/images/muscles/hamstrings.jpg',
+  glutes: '/images/muscles/glutes.jpg',
+  abs: '/images/muscles/abs.jpg',
+  core: '/images/muscles/core.jpg',
+  calves: '/images/muscles/calves.jpg',
+  forearms: '/images/muscles/forearms.jpg',
+  cardio: '/images/muscles/cardio.jpg',
+}
+
+const FALLBACK = '/images/benchpress.png'
+
 const imageUrl = computed(() => {
-  const muscle = (props.exercise.primaryMuscle ?? 'fitness').replace(/\s+/g, '+')
-  return `https://source.unsplash.com/400x300/?${muscle},workout`
+  const key = (props.exercise.primaryMuscle ?? '').toLowerCase().trim()
+  return MUSCLE_IMAGES[key] ?? FALLBACK
 })
+
+const imgError = ref(false)
+
+function onImgError() {
+  imgError.value = true
+}
 </script>
 
 <template>
   <div class="rounded-2xl overflow-hidden group cursor-pointer hover:scale-[1.02] transition-transform bg-surface dark:bg-surface-dark shadow-sm border border-gray-100 dark:border-white/10">
     <!-- Image area -->
     <div class="relative aspect-[4/3] bg-gray-200 dark:bg-gray-700">
-      <img :src="imageUrl" :alt="exercise.name ?? ''" class="w-full h-full object-cover" loading="lazy" />
+      <img
+        v-if="!imgError"
+        :src="imageUrl"
+        :alt="exercise.name ?? ''"
+        class="w-full h-full object-cover"
+        loading="lazy"
+        @error="onImgError"
+      />
+      <div v-else class="w-full h-full flex items-center justify-center bg-gray-100 dark:bg-gray-800">
+        <Dumbbell class="w-12 h-12 text-gray-300 dark:text-gray-600" />
+      </div>
       <!-- Gradient overlay -->
       <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
 
@@ -55,12 +90,12 @@ const imageUrl = computed(() => {
           class="w-7 h-7 bg-white/90 rounded-lg flex items-center justify-center text-xs hover:bg-white transition-colors focus-visible:ring-2 focus-visible:ring-primary"
           aria-label="Edit exercise"
           @click.stop="$emit('edit')"
-        >✏️</button>
+        ><Pencil class="w-3.5 h-3.5" /></button>
         <button
-          class="w-7 h-7 bg-white/90 rounded-lg flex items-center justify-center text-xs hover:bg-red-50 transition-colors focus-visible:ring-2 focus-visible:ring-primary"
+          class="w-7 h-7 bg-white/90 rounded-lg flex items-center justify-center hover:bg-red-50 transition-colors focus-visible:ring-2 focus-visible:ring-primary"
           aria-label="Delete exercise"
           @click.stop="$emit('delete')"
-        >🗑️</button>
+        ><Trash2 class="w-3.5 h-3.5" /></button>
       </div>
     </div>
 

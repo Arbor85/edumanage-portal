@@ -1,8 +1,9 @@
 <script setup lang="ts">
+import type { Component } from 'vue'
 defineProps<{
   label: string
   value: string | number
-  icon?: string
+  icon?: Component
   iconBg?: string
   delta?: string | null
   deltaPositive?: boolean
@@ -21,8 +22,8 @@ defineProps<{
     </span>
 
     <!-- Icon -->
-    <div v-if="icon" class="w-10 h-10 rounded-full flex items-center justify-center text-lg mb-3" :class="iconBg ?? 'bg-primary/10'">
-      {{ icon }}
+    <div v-if="icon" class="w-10 h-10 rounded-full flex items-center justify-center mb-3" :class="iconBg ?? 'bg-primary/10'">
+      <component :is="icon" class="w-5 h-5 text-text-secondary dark:text-white/60" />
     </div>
 
     <!-- Value -->

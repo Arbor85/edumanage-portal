@@ -3,6 +3,7 @@ import type { WorkoutHistoryOut } from '../../../types'
 import BaseButton from '../../../components/BaseButton.vue'
 import EmptyState from '../../../components/EmptyState.vue'
 import BaseBadge from '../../../components/BaseBadge.vue'
+import { ScrollText } from 'lucide-vue-next'
 
 const props = defineProps<{ history: WorkoutHistoryOut[] }>()
 const emit = defineEmits<{ view: [w: WorkoutHistoryOut] }>()
@@ -21,7 +22,7 @@ function formatDuration(s: number | null) {
 
 <template>
   <div>
-    <EmptyState v-if="!history.length" icon="📜" title="No workouts yet" description="Complete your first workout to see history." />
+    <EmptyState v-if="!history.length" :icon="ScrollText" title="No workouts yet" description="Complete your first workout to see history." />
     <div v-else class="flex flex-col gap-3 custom-scrollbar">
       <div
         v-for="w in history"

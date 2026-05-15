@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
+import { ChevronLeft } from 'lucide-vue-next'
 
 const props = defineProps<{
   title: string
@@ -18,7 +19,7 @@ const router = useRouter()
       aria-label="Go back"
       @click="router.push(backTo)"
     >
-      ←
+      <ChevronLeft class="w-5 h-5" />
     </button>
     <div>
       <h1 class="text-2xl font-bold text-text-primary dark:text-white">{{ title }}</h1>
