@@ -7,11 +7,10 @@ import FullSizeDialog from '../../../components/FullSizeDialog/index.vue'
 import ProcessWizard from '../../../components/ProcessWizard/index.vue'
 import ExercisePickerDialog from '../../../components/ExercisePickerDialog/index.vue'
 import ConfirmDialog from '../../../components/ConfirmDialog.vue'
-import BaseInput from '../../../components/BaseInput.vue'
 import BaseButton from '../../../components/BaseButton.vue'
-import BaseSelect from '../../../components/BaseSelect.vue'
 import EmptyState from '../../../components/EmptyState.vue'
 import { X, Plus, Dumbbell } from 'lucide-vue-next'
+import EditSet from '../../../components/EditSet/index.vue'
 
 const props = defineProps<{
   open: boolean
@@ -30,11 +29,6 @@ const confirmDelete = ref(false)
 const activeStepIndex = ref(0)
 const isExercisePickerOpen = ref(false)
 
-const setTypeOptions = [
-  { value: 'normal', label: 'Normal' },
-  { value: 'warmup', label: 'Warmup' },
-  { value: 'drop', label: 'Drop' },
-]
 
 const wizardSteps = computed(() =>
   form.value.excercises.map((ex, i) => ({ id: i, label: ex.name ?? 'New exercise' }))
@@ -76,9 +70,11 @@ function removeExercise(i: number) {
 }
 
 function addSet(exIdx: number) {
+  const sets = form.value.excercises[exIdx].sets ?? []
+  const last = sets[sets.length - 1]
   form.value.excercises[exIdx].sets = [
-    ...(form.value.excercises[exIdx].sets ?? []),
-    { type: 'normal', reps: 10, weight: null, note: null },
+    ...sets,
+    last ? { ...last } : { type: 'normal', reps: 10, weight: null, note: null },
   ]
 }
 
@@ -185,26 +181,11 @@ async function doDelete() {
               :key="setIdx"
               class="flex items-center gap-2"
             >
-              <BaseSelect
-                :model-value="set.type"
-                :options="setTypeOptions"
-                class="w-28"
-                @update:model-value="set.type = $event as string"
-              />
-              <BaseInput
-                :model-value="set.reps"
-                type="number"
-                placeholder="Reps"
-                class="w-20"
-                @update:model-value="set.reps = parseInt($event as string) || null"
-              />
-              <BaseInput
-                v-if="!form.excercises[index].isBodyweight"
-                :model-value="set.weight"
-                type="number"
-                placeholder="kg"
-                class="w-20"
-                @update:model-value="set.weight = parseFloat($event as string) || null"
+              <EditSet
+                :set="set"
+                :is-bodyweight="form.excercises[index].isBodyweight"
+                class="flex-1"
+                @update:set="form.excercises[index].sets![setIdx] = $event"
               />
               <button
                 type="button"
