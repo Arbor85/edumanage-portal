@@ -1,9 +1,12 @@
 <script setup lang="ts">
+import { usePageTitle } from '../../../composables/usePageTitle'
 import type { WorkoutHistoryOut } from '../../../types'
 import BaseModal from '../../../components/BaseModal.vue'
 
-defineProps<{ open: boolean; workout: WorkoutHistoryOut | null }>()
+const props = defineProps<{ open: boolean; workout: WorkoutHistoryOut | null }>()
 defineEmits<{ close: [] }>()
+
+usePageTitle(() => props.workout?.name ?? 'Workout Details', () => props.open)
 
 function formatDate(iso: string | null) {
   if (!iso) return '—'

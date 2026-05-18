@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { usePageTitle } from '../../../composables/usePageTitle'
 import type { ExcerciseOut } from '../../../types'
 import BaseModal from '../../../components/BaseModal.vue'
 import DifficultyBadge from '../../../components/DifficultyBadge.vue'
@@ -11,6 +12,8 @@ const props = defineProps<{
   exercise: ExcerciseOut | null
 }>()
 defineEmits<{ close: []; edit: [] }>()
+
+usePageTitle(() => props.exercise?.name ?? 'Exercise Details', () => props.open)
 
 const difficultyLevel = computed(() => {
   const tags = props.exercise?.tags ?? []

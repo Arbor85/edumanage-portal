@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
+import { usePageTitle } from '../../../composables/usePageTitle'
 import type { ExcerciseOut, ExcerciseWriteRequest } from '../../../types'
 import { useExerciseStore } from '../../../stores/exerciseStore'
 import { useToast } from '../../../composables/useToast'
@@ -15,6 +16,8 @@ const props = defineProps<{
   exercise: ExcerciseOut | null
 }>()
 const emit = defineEmits<{ close: [] }>()
+
+usePageTitle(() => props.exercise ? 'Edit Exercise' : 'New Exercise', () => props.open)
 
 const exerciseStore = useExerciseStore()
 const toast = useToast()

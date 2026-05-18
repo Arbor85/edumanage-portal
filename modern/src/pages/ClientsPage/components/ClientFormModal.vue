@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
+import { usePageTitle } from '../../../composables/usePageTitle'
 import type { ClientOut, ClientCreate, ClientUpdate } from '../../../types'
 import { useClientStore } from '../../../stores/clientStore'
 import { useToast } from '../../../composables/useToast'
@@ -10,6 +11,8 @@ import ConfirmDialog from '../../../components/ConfirmDialog.vue'
 
 const props = defineProps<{ open: boolean; client: ClientOut | null }>()
 const emit = defineEmits<{ close: [] }>()
+
+usePageTitle(() => props.client ? 'Edit Client' : 'New Client', () => props.open)
 
 const clientStore = useClientStore()
 const toast = useToast()

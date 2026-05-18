@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { usePageTitle } from '../composables/usePageTitle'
+usePageTitle('Courses')
 import type { CourseOut } from '../types'
 import { useCourseStore } from '../stores/courseStore'
 import AppLayout from '../components/layout/AppLayout.vue'

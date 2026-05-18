@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
+import { usePageTitle } from '../../../composables/usePageTitle'
 import type { CourseOut, CourseCreate, CourseUpdate, CoursePrice } from '../../../types'
 import { useCourseStore } from '../../../stores/courseStore'
 import { useToast } from '../../../composables/useToast'
@@ -14,6 +15,8 @@ import ConfirmDialog from '../../../components/ConfirmDialog.vue'
 
 const props = defineProps<{ open: boolean; course: CourseOut | null }>()
 const emit = defineEmits<{ close: [] }>()
+
+usePageTitle(() => props.course ? 'Edit Course' : 'New Course', () => props.open)
 
 const courseStore = useCourseStore()
 const toast = useToast()

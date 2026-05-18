@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { usePageTitle } from '../composables/usePageTitle'
+usePageTitle('Sign In')
 import { useAuth0 } from '@auth0/auth0-vue'
 import AuthLayout from '../components/layout/AuthLayout.vue'
 import BaseButton from '../components/BaseButton.vue'

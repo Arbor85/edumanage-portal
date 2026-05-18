@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
+import { usePageTitle } from '../composables/usePageTitle'
+usePageTitle('Dashboard')
 import { useClientStore } from '../stores/clientStore'
 import { useMeetingStore } from '../stores/meetingStore'
 import { useRoutineStore } from '../stores/routineStore'

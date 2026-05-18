@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
+import { usePageTitle } from '../../../composables/usePageTitle'
 import type { MeetingOut, MeetingCreate, MeetingUpdate } from '../../../types'
 import { useMeetingStore } from '../../../stores/meetingStore'
 import { useToast } from '../../../composables/useToast'
@@ -13,6 +14,8 @@ import ConfirmDialog from '../../../components/ConfirmDialog.vue'
 
 const props = defineProps<{ open: boolean; meeting: MeetingOut | null; prefilledDate?: string }>()
 const emit = defineEmits<{ close: [] }>()
+
+usePageTitle(() => props.meeting ? 'Edit Meeting' : 'Schedule Meeting', () => props.open)
 
 const meetingStore = useMeetingStore()
 const toast = useToast()

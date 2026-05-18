@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { usePageTitle } from '../composables/usePageTitle'
+usePageTitle('Plans')
 import type { PlanOut } from '../types'
 import { usePlanStore } from '../stores/planStore'
 import { useClientStore } from '../stores/clientStore'

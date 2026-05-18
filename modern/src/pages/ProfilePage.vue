@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { usePageTitle } from '../composables/usePageTitle'
+usePageTitle('Profile')
 import { useAuthStore } from '../stores/authStore'
 import { useRouter } from 'vue-router'
 import AppLayout from '../components/layout/AppLayout.vue'

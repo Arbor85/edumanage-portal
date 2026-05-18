@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
+import { usePageTitle } from '../../../composables/usePageTitle'
 import type { RoutineOut, RoutineCreate, RoutineUpdate, RoutineExcercise, RoutineSet, ExcerciseOut } from '../../../types'
 import { useRoutineStore } from '../../../stores/routineStore'
 import { useToast } from '../../../composables/useToast'
@@ -18,6 +19,8 @@ const props = defineProps<{
   routine: RoutineOut | null
 }>()
 const emit = defineEmits<{ close: [] }>()
+
+usePageTitle(() => props.routine ? 'Edit Routine' : 'New Routine', () => props.open)
 
 const routineStore = useRoutineStore()
 const toast = useToast()

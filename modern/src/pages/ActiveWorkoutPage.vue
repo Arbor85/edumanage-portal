@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { usePageTitle } from '../composables/usePageTitle'
+usePageTitle('Active Workout')
 import { useWorkoutStore } from '../stores/workoutStore'
 import { useExerciseStore } from '../stores/exerciseStore'
 import { onMounted } from 'vue'

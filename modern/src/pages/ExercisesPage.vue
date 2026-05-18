@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue'
+import { usePageTitle } from '../composables/usePageTitle'
+usePageTitle('Exercises')
 import { useExerciseStore } from '../stores/exerciseStore'
 import type { ExcerciseOut } from '../types'
 import BaseSelect from '../components/BaseSelect.vue'

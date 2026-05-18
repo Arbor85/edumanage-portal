@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { usePageTitle } from '../composables/usePageTitle'
+usePageTitle('Routines')
 import { useRoutineStore } from '../stores/routineStore'
 import { useExerciseStore } from '../stores/exerciseStore'
 import type { RoutineOut } from '../types'

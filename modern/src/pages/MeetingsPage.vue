@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { usePageTitle } from '../composables/usePageTitle'
+usePageTitle('Meetings')
 import type { MeetingOut } from '../types'
 import { useMeetingStore } from '../stores/meetingStore'
 import { useClientStore } from '../stores/clientStore'

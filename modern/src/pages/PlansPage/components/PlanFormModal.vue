@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
+import { usePageTitle } from '../../../composables/usePageTitle'
 import type { PlanOut, PlanCreate, PlanUpdate, PlanWorkoutInput, RoutineOut, ClientOut, RoutineExcercise } from '../../../types'
 import { usePlanStore } from '../../../stores/planStore'
 import { useClientStore } from '../../../stores/clientStore'
@@ -17,6 +18,8 @@ import { X, Plus, CalendarDays } from 'lucide-vue-next'
 
 const props = defineProps<{ open: boolean; plan: PlanOut | null }>()
 const emit = defineEmits<{ close: [] }>()
+
+usePageTitle(() => props.plan ? 'Edit Plan' : 'New Plan', () => props.open)
 
 const planStore = usePlanStore()
 const clientStore = useClientStore()

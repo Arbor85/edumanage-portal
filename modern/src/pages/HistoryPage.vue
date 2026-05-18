@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { usePageTitle } from '../composables/usePageTitle'
+usePageTitle('History')
 import type { WorkoutHistoryOut } from '../types'
 import { useWorkoutStore } from '../stores/workoutStore'
 import AppLayout from '../components/layout/AppLayout.vue'
