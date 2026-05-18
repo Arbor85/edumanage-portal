@@ -9,6 +9,7 @@ import ProcessWizard from '../../../components/ProcessWizard/index.vue'
 import ConfirmDialog from '../../../components/ConfirmDialog.vue'
 import BaseButton from '../../../components/BaseButton.vue'
 import BaseAvatar from '../../../components/BaseAvatar.vue'
+import BaseDatePicker from '../../../components/BaseDatePicker.vue'
 import EmptyState from '../../../components/EmptyState.vue'
 import ClientPickerDialog from '../../../components/ClientPickerDialog/index.vue'
 import RoutinePickerDialog from '../../../components/RoutinePickerDialog/index.vue'
@@ -260,15 +261,11 @@ async function doDelete() {
           </div>
 
           <!-- Date -->
-          <div class="flex flex-col gap-1.5">
-            <p class="text-xs font-semibold uppercase tracking-wide text-text-secondary">Date</p>
-            <input
-              :value="form.workouts[index].date ?? ''"
-              type="date"
-              class="px-3 py-2.5 min-h-[44px] rounded-xl border border-gray-200 dark:border-white/10 text-sm bg-white dark:bg-surface-dark text-text-primary dark:text-white outline-none focus-visible:ring-2 focus-visible:ring-primary w-fit"
-              @input="form.workouts[index].date = ($event.target as HTMLInputElement).value || null"
-            />
-          </div>
+          <BaseDatePicker
+            :model-value="form.workouts[index].date"
+            label="Date"
+            @update:model-value="form.workouts[index].date = $event"
+          />
 
           <!-- Note -->
           <div class="flex flex-col gap-1.5">

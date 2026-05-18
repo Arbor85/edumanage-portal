@@ -5,6 +5,7 @@ import { useMeetingStore } from '../../../stores/meetingStore'
 import { useToast } from '../../../composables/useToast'
 import BaseModal from '../../../components/BaseModal.vue'
 import BaseInput from '../../../components/BaseInput.vue'
+import BaseDatePicker from '../../../components/BaseDatePicker.vue'
 import BaseTextarea from '../../../components/BaseTextarea.vue'
 import BaseButton from '../../../components/BaseButton.vue'
 import SelectClient from '../../../components/SelectClient/index.vue'
@@ -71,7 +72,7 @@ async function doDelete() {
     <form class="flex flex-col gap-4" @submit.prevent="save">
       <BaseInput v-model="form.title" label="Title" placeholder="e.g. Weekly Check-in" />
       <SelectClient v-model="form.clientId" label="Client" />
-      <BaseInput v-model="form.date" label="Date & Time" type="datetime-local" />
+      <BaseDatePicker v-model="form.date" label="Date & Time" mode="datetime" />
       <BaseTextarea v-model="form.note" label="Notes" :rows="2" />
     </form>
 

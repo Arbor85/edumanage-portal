@@ -12,3 +12,51 @@ html {
   font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 16px;
 }
+
+/* ─── VueDatePicker design-system theme ─────────────── */
+:root {
+  --dp-font-family: Inter, system-ui, sans-serif;
+  --dp-border-radius: 0.75rem;
+  --dp-cell-border-radius: 0.5rem;
+  --dp-font-size: 0.875rem;
+  --dp-primary-color: #00C896;
+  --dp-primary-disabled-color: rgba(0, 200, 150, 0.4);
+  --dp-primary-text-color: #ffffff;
+  --dp-secondary-color: #f7f8fa;
+  --dp-background-color: #ffffff;
+  --dp-text-color: #1a1d23;
+  --dp-hover-color: #f7f8fa;
+  --dp-hover-text-color: #1a1d23;
+  --dp-hover-icon-color: #6b7280;
+  --dp-border-color: #e5e7eb;
+  --dp-menu-border-color: #e5e7eb;
+  --dp-border-color-hover: #d1d5db;
+  --dp-border-color-focus: #00C896;
+  --dp-disabled-color: #f9fafb;
+  --dp-disabled-color-text: #9ca3af;
+  --dp-icon-color: #6b7280;
+  --dp-highlight-color: rgba(0, 200, 150, 0.1);
+  --dp-action-button-height: 36px;
+  --dp-input-padding: 0.625rem 2.5rem 0.625rem 0.75rem;
+}
+
+.dp--dark {
+  --dp-background-color: #1a1d23;
+  --dp-text-color: #ffffff;
+  --dp-hover-color: rgba(255, 255, 255, 0.05);
+  --dp-hover-text-color: #ffffff;
+  --dp-hover-icon-color: rgba(255, 255, 255, 0.6);
+  --dp-secondary-color: rgba(255, 255, 255, 0.05);
+  --dp-border-color: rgba(255, 255, 255, 0.1);
+  --dp-menu-border-color: rgba(255, 255, 255, 0.1);
+  --dp-border-color-hover: rgba(255, 255, 255, 0.2);
+  --dp-disabled-color: rgba(255, 255, 255, 0.04);
+  --dp-disabled-color-text: rgba(255, 255, 255, 0.3);
+  --dp-icon-color: rgba(255, 255, 255, 0.5);
+}
+
+.dp__input {
+  min-height: 44px;
+  border-radius: 0.75rem !important;
+  font-size: 0.875rem;
+}

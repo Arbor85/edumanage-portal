@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@auth0/auth0-vue": "^2.7.0",
+    "@vuepic/vue-datepicker": "^12.1.0",
     "axios": "^1.16.1",
     "lucide-vue-next": "^1.0.0",
     "pinia": "^3.0.4",
