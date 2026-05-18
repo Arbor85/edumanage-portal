@@ -11,7 +11,7 @@ import { useWorkoutStore } from '../../../stores/workoutStore'
 import { useRouter } from 'vue-router'
 import { useToast } from '../../../composables/useToast'
 import { useRoutineStore } from '../../../stores/routineStore'
-import { Pencil, Play, ClipboardList } from 'lucide-vue-next'
+import { Play, ClipboardList } from 'lucide-vue-next'
 
 const props = defineProps<{
   routines: RoutineOut[]
@@ -66,21 +66,20 @@ async function handleDelete() {
 
     <!-- List -->
     <div v-else class="flex flex-col gap-3 custom-scrollbar">
-      <div
+      <button
         v-for="routine in paginated"
         :key="routine.id ?? ''"
-        class="bg-white dark:bg-surface-dark rounded-2xl border border-gray-100 dark:border-white/10 p-4 flex items-center gap-4"
+        type="button"
+        class="w-full text-left bg-white dark:bg-surface-dark rounded-2xl border border-gray-100 dark:border-white/10 p-4 flex items-center gap-4 hover:border-gray-200 dark:hover:border-white/20 hover:shadow-sm transition-all focus-visible:ring-2 focus-visible:ring-primary"
+        @click="emit('edit', routine)"
       >
         <div class="flex-1 min-w-0">
           <p class="font-semibold text-text-primary dark:text-white truncate">{{ routine.name }}</p>
           <p v-if="routine.note" class="text-xs text-text-secondary truncate mt-0.5">{{ routine.note }}</p>
         </div>
         <BaseBadge :label="`${routine.excercises?.length ?? 0} exercises`" />
-        <div class="flex gap-1.5">
-          <BaseButton size="sm" variant="primary" @click="start(routine)"><Play class="w-4 h-4" /> Start</BaseButton>
-          <BaseButton size="sm" variant="ghost" aria-label="Edit" @click="emit('edit', routine)"><Pencil class="w-4 h-4" /></BaseButton>
-        </div>
-      </div>
+        <BaseButton size="sm" variant="primary" @click.stop="start(routine)"><Play class="w-4 h-4" /> Start</BaseButton>
+      </button>
     </div>
 
     <PaginationBar :page="page" :page-size="PAGE_SIZE" :total="routines.length" @update:page="page = $event" />

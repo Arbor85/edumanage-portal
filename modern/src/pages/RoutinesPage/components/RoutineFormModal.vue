@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
-import type { RoutineOut, RoutineCreate, RoutineUpdate, RoutineExcercise, ExcerciseOut } from '../../../types'
+import type { RoutineOut, RoutineCreate, RoutineUpdate, RoutineExcercise, RoutineSet, ExcerciseOut } from '../../../types'
 import { useRoutineStore } from '../../../stores/routineStore'
 import { useToast } from '../../../composables/useToast'
 import FullSizeDialog from '../../../components/FullSizeDialog/index.vue'
@@ -11,6 +11,7 @@ import BaseButton from '../../../components/BaseButton.vue'
 import EmptyState from '../../../components/EmptyState.vue'
 import { X, Plus, Dumbbell } from 'lucide-vue-next'
 import EditSet from '../../../components/EditSet/index.vue'
+import AddSetsDialog from '../../../components/AddSetsDialog/index.vue'
 
 const props = defineProps<{
   open: boolean
@@ -26,13 +27,34 @@ const form = ref<{ name: string | null; note: string | null; excercises: Routine
 })
 const saving = ref(false)
 const confirmDelete = ref(false)
+const confirmDiscard = ref(false)
 const activeStepIndex = ref(0)
 const isExercisePickerOpen = ref(false)
+const addSetsForExIdx = ref<number | null>(null)
 
+let savedSnapshot = ''
+
+const isDirty = computed(() => JSON.stringify(form.value) !== savedSnapshot)
+
+const nameIsAuto = ref(false)
 
 const wizardSteps = computed(() =>
   form.value.excercises.map((ex, i) => ({ id: i, label: ex.name ?? 'New exercise' }))
 )
+
+watch(
+  () => form.value.excercises.map((e) => e.name),
+  (names) => {
+    if (!nameIsAuto.value) return
+    form.value.name = names.filter(Boolean).join(' + ') || null
+  },
+)
+
+function onNameInput(e: Event) {
+  const val = (e.target as HTMLInputElement).value
+  nameIsAuto.value = !val
+  form.value.name = val || null
+}
 
 watch(() => props.open, (val) => {
   if (val) {
@@ -46,12 +68,23 @@ watch(() => props.open, (val) => {
           sets: (ex.sets ?? []).map((s) => ({ ...s })),
         })),
       }
+      nameIsAuto.value = false
     } else {
       form.value = { name: null, note: null, excercises: [] }
+      nameIsAuto.value = true
     }
     activeStepIndex.value = 0
+    savedSnapshot = JSON.stringify(form.value)
   }
 })
+
+function requestClose() {
+  if (isDirty.value) {
+    confirmDiscard.value = true
+  } else {
+    emit('close')
+  }
+}
 
 function onExercisePicked(ex: ExcerciseOut) {
   form.value.excercises.push({
@@ -82,6 +115,12 @@ function removeSet(exIdx: number, setIdx: number) {
   form.value.excercises[exIdx].sets!.splice(setIdx, 1)
 }
 
+function onSetsAdded(sets: RoutineSet[]) {
+  const ex = form.value.excercises[addSetsForExIdx.value!]
+  ex.sets = [...(ex.sets ?? []), ...sets]
+  addSetsForExIdx.value = null
+}
+
 async function save() {
   saving.value = true
   try {
@@ -92,6 +131,7 @@ async function save() {
       await routineStore.create(form.value as RoutineCreate)
       toast.success('Routine created')
     }
+    savedSnapshot = JSON.stringify(form.value)
     emit('close')
   } catch {
     toast.error('Failed to save routine')
@@ -117,7 +157,8 @@ async function doDelete() {
   <FullSizeDialog :open="open">
     <template #header>
       <input
-        v-model="form.name"
+        :value="form.name ?? ''"
+        @input="onNameInput"
         type="text"
         placeholder="Routine name…"
         autofocus
@@ -127,7 +168,7 @@ async function doDelete() {
         type="button"
         class="p-1.5 rounded-lg text-text-secondary hover:text-text-primary dark:text-white/60 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 min-h-[44px] min-w-[44px] flex items-center justify-center focus-visible:ring-2 focus-visible:ring-primary"
         aria-label="Close dialog"
-        @click="emit('close')"
+        @click="requestClose"
       >
         <X class="w-5 h-5" />
       </button>
@@ -196,13 +237,22 @@ async function doDelete() {
                 ×
               </button>
             </div>
-            <button
-              type="button"
-              class="text-sm text-primary font-medium text-left hover:underline mt-1 focus-visible:ring-1 focus-visible:ring-primary rounded w-fit"
-              @click="addSet(index)"
-            >
-              + Add set
-            </button>
+            <div class="flex items-center gap-4 mt-1">
+              <button
+                type="button"
+                class="text-sm text-primary font-medium hover:underline focus-visible:ring-1 focus-visible:ring-primary rounded w-fit"
+                @click="addSet(index)"
+              >
+                + Add set
+              </button>
+              <button
+                type="button"
+                class="text-sm text-primary font-medium hover:underline focus-visible:ring-1 focus-visible:ring-primary rounded w-fit"
+                @click="addSetsForExIdx = index"
+              >
+                + Add sets…
+              </button>
+            </div>
           </div>
         </div>
       </template>
@@ -223,7 +273,7 @@ async function doDelete() {
       <div class="flex items-center gap-2">
         <BaseButton v-if="routine" variant="danger" @click="confirmDelete = true">Delete</BaseButton>
         <div class="flex-1" />
-        <BaseButton variant="ghost" @click="emit('close')">Cancel</BaseButton>
+        <BaseButton variant="ghost" @click="requestClose">Cancel</BaseButton>
         <BaseButton variant="primary" :loading="saving" @click="save">{{ routine ? 'Save' : 'Create' }}</BaseButton>
       </div>
     </template>
@@ -239,9 +289,28 @@ async function doDelete() {
     @cancel="confirmDelete = false"
   />
 
+  <ConfirmDialog
+    :open="confirmDiscard"
+    title="Discard changes?"
+    message="You have unsaved changes. Leave anyway and lose them?"
+    confirm-label="Discard"
+    variant="danger"
+    @confirm="confirmDiscard = false; emit('close')"
+    @cancel="confirmDiscard = false"
+  />
+
   <ExercisePickerDialog
     :open="isExercisePickerOpen"
     @close="isExercisePickerOpen = false"
     @select="onExercisePicked"
+  />
+
+  <AddSetsDialog
+    v-if="addSetsForExIdx !== null"
+    :open="addSetsForExIdx !== null"
+    :base-set="form.excercises[addSetsForExIdx].sets?.at(-1) ?? { type: 'normal', reps: 10, weight: null, note: null }"
+    :is-bodyweight="form.excercises[addSetsForExIdx].isBodyweight"
+    @add="onSetsAdded"
+    @close="addSetsForExIdx = null"
   />
 </template>
