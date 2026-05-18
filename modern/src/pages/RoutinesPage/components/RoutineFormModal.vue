@@ -1,16 +1,17 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
-import type { RoutineOut, RoutineCreate, RoutineUpdate, RoutineExcercise } from '../../../types'
+import { ref, computed, watch } from 'vue'
+import type { RoutineOut, RoutineCreate, RoutineUpdate, RoutineExcercise, ExcerciseOut } from '../../../types'
 import { useRoutineStore } from '../../../stores/routineStore'
-import { useExerciseStore } from '../../../stores/exerciseStore'
 import { useToast } from '../../../composables/useToast'
-import BaseModal from '../../../components/BaseModal.vue'
+import FullSizeDialog from '../../../components/FullSizeDialog/index.vue'
+import ProcessWizard from '../../../components/ProcessWizard/index.vue'
+import ExercisePickerDialog from '../../../components/ExercisePickerDialog/index.vue'
+import ConfirmDialog from '../../../components/ConfirmDialog.vue'
 import BaseInput from '../../../components/BaseInput.vue'
-import BaseTextarea from '../../../components/BaseTextarea.vue'
 import BaseButton from '../../../components/BaseButton.vue'
 import BaseSelect from '../../../components/BaseSelect.vue'
-import ConfirmDialog from '../../../components/ConfirmDialog.vue'
-import SelectExercise from '../../../components/SelectExercise/index.vue'
+import EmptyState from '../../../components/EmptyState.vue'
+import { X, Plus, Dumbbell } from 'lucide-vue-next'
 
 const props = defineProps<{
   open: boolean
@@ -19,7 +20,6 @@ const props = defineProps<{
 const emit = defineEmits<{ close: [] }>()
 
 const routineStore = useRoutineStore()
-const exerciseStore = useExerciseStore()
 const toast = useToast()
 
 const form = ref<{ name: string | null; note: string | null; excercises: RoutineExcercise[] }>({
@@ -27,13 +27,18 @@ const form = ref<{ name: string | null; note: string | null; excercises: Routine
 })
 const saving = ref(false)
 const confirmDelete = ref(false)
-const addExId = ref<number | null>(null)
+const activeStepIndex = ref(0)
+const isExercisePickerOpen = ref(false)
 
 const setTypeOptions = [
   { value: 'normal', label: 'Normal' },
   { value: 'warmup', label: 'Warmup' },
   { value: 'drop', label: 'Drop' },
 ]
+
+const wizardSteps = computed(() =>
+  form.value.excercises.map((ex, i) => ({ id: i, label: ex.name ?? 'New exercise' }))
+)
 
 watch(() => props.open, (val) => {
   if (val) {
@@ -50,23 +55,24 @@ watch(() => props.open, (val) => {
     } else {
       form.value = { name: null, note: null, excercises: [] }
     }
-    addExId.value = null
+    activeStepIndex.value = 0
   }
 })
 
-function addExercise() {
-  const ex = exerciseStore.exercises.find((e) => e.id === addExId.value)
-  if (!ex) return
+function onExercisePicked(ex: ExcerciseOut) {
   form.value.excercises.push({
     name: ex.name,
     isBodyweight: false,
     sets: [{ type: 'normal', reps: 10, weight: null, note: null }],
   })
-  addExId.value = null
+  activeStepIndex.value = form.value.excercises.length - 1
 }
 
 function removeExercise(i: number) {
   form.value.excercises.splice(i, 1)
+  if (activeStepIndex.value >= form.value.excercises.length) {
+    activeStepIndex.value = Math.max(0, form.value.excercises.length - 1)
+  }
 }
 
 function addSet(exIdx: number) {
@@ -112,72 +118,125 @@ async function doDelete() {
 </script>
 
 <template>
-  <BaseModal :open="open" :title="routine ? 'Edit Routine' : 'New Routine'" size="lg" @close="emit('close')">
-    <form class="flex flex-col gap-4" @submit.prevent="save">
-      <BaseInput v-model="form.name" label="Name" placeholder="e.g. Push Day" />
-      <BaseTextarea v-model="form.note" label="Notes" placeholder="Optional notes..." :rows="2" />
+  <FullSizeDialog :open="open">
+    <template #header>
+      <input
+        v-model="form.name"
+        type="text"
+        placeholder="Routine name…"
+        autofocus
+        class="flex-1 text-lg font-semibold bg-transparent outline-none text-text-primary dark:text-white placeholder:text-text-secondary placeholder:font-normal"
+      />
+      <button
+        type="button"
+        class="p-1.5 rounded-lg text-text-secondary hover:text-text-primary dark:text-white/60 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 min-h-[44px] min-w-[44px] flex items-center justify-center focus-visible:ring-2 focus-visible:ring-primary"
+        aria-label="Close dialog"
+        @click="emit('close')"
+      >
+        <X class="w-5 h-5" />
+      </button>
+    </template>
 
-      <!-- Exercises -->
-      <div class="flex flex-col gap-3">
-        <p class="text-sm font-semibold text-text-primary dark:text-white">Exercises</p>
-
-        <div
-          v-for="(ex, exIdx) in form.excercises"
-          :key="exIdx"
-          class="border border-gray-200 dark:border-white/10 rounded-xl p-3 flex flex-col gap-2"
+    <!-- Wizard or empty state -->
+    <ProcessWizard
+      v-if="form.excercises.length"
+      v-model="activeStepIndex"
+      :steps="wizardSteps"
+      class="h-full"
+    >
+      <template #add-step>
+        <button
+          type="button"
+          class="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm text-primary font-medium hover:bg-primary/10 transition-colors"
+          @click="isExercisePickerOpen = true"
         >
-          <div class="flex items-center gap-2">
-            <span class="font-medium text-sm text-text-primary dark:text-white flex-1">{{ ex.name }}</span>
-            <label class="flex items-center gap-1.5 text-xs text-text-secondary cursor-pointer">
-              <input v-model="ex.isBodyweight" type="checkbox" class="w-3.5 h-3.5" />
-              Bodyweight
-            </label>
-            <button type="button" class="text-red-500 text-xs hover:underline focus-visible:ring-1 focus-visible:ring-primary rounded" @click="removeExercise(exIdx)">Remove</button>
+          <Plus class="w-4 h-4" />
+          Add exercise
+        </button>
+      </template>
+
+      <template #step-content="{ index }">
+        <div v-if="form.excercises[index]" class="flex flex-col gap-5">
+          <!-- Exercise header -->
+          <div class="flex items-center justify-between gap-3">
+            <h2 class="text-lg font-semibold text-text-primary dark:text-white truncate">
+              {{ form.excercises[index].name }}
+            </h2>
+            <div class="flex items-center gap-4">
+              <label class="flex items-center gap-2 text-sm text-text-secondary cursor-pointer select-none">
+                <input v-model="form.excercises[index].isBodyweight" type="checkbox" class="w-4 h-4 accent-primary" />
+                Bodyweight
+              </label>
+              <button
+                type="button"
+                class="text-sm text-red-500 hover:text-red-600 font-medium focus-visible:ring-1 focus-visible:ring-primary rounded"
+                @click="removeExercise(index)"
+              >
+                Remove
+              </button>
+            </div>
           </div>
 
           <!-- Sets -->
-          <div class="flex flex-col gap-1.5">
+          <div class="flex flex-col gap-2">
+            <p class="text-xs font-semibold uppercase tracking-wide text-text-secondary">Sets</p>
             <div
-              v-for="(set, setIdx) in ex.sets ?? []"
+              v-for="(set, setIdx) in form.excercises[index].sets ?? []"
               :key="setIdx"
-              class="flex items-center gap-2 text-xs"
+              class="flex items-center gap-2"
             >
               <BaseSelect
                 :model-value="set.type"
                 :options="setTypeOptions"
-                class="w-24 text-xs"
+                class="w-28"
                 @update:model-value="set.type = $event as string"
               />
               <BaseInput
                 :model-value="set.reps"
                 type="number"
                 placeholder="Reps"
-                class="w-16 text-xs"
+                class="w-20"
                 @update:model-value="set.reps = parseInt($event as string) || null"
               />
               <BaseInput
-                v-if="!ex.isBodyweight"
+                v-if="!form.excercises[index].isBodyweight"
                 :model-value="set.weight"
                 type="number"
                 placeholder="kg"
-                class="w-16 text-xs"
+                class="w-20"
                 @update:model-value="set.weight = parseFloat($event as string) || null"
               />
-              <button type="button" class="text-red-400 hover:text-red-600 text-sm" aria-label="Remove set" @click="removeSet(exIdx, setIdx)">×</button>
+              <button
+                type="button"
+                class="text-red-400 hover:text-red-600 text-lg leading-none p-1 focus-visible:ring-1 focus-visible:ring-primary rounded"
+                aria-label="Remove set"
+                @click="removeSet(index, setIdx)"
+              >
+                ×
+              </button>
             </div>
+            <button
+              type="button"
+              class="text-sm text-primary font-medium text-left hover:underline mt-1 focus-visible:ring-1 focus-visible:ring-primary rounded w-fit"
+              @click="addSet(index)"
+            >
+              + Add set
+            </button>
           </div>
-          <button type="button" class="text-xs text-primary font-medium text-left hover:underline mt-1 focus-visible:ring-1 focus-visible:ring-primary rounded" @click="addSet(exIdx)">+ Add Set</button>
         </div>
+      </template>
+    </ProcessWizard>
 
-        <!-- Add Exercise -->
-        <div class="flex gap-2 items-end">
-          <div class="flex-1">
-            <SelectExercise v-model="addExId" label="Add Exercise" />
-          </div>
-          <BaseButton variant="secondary" size="sm" :disabled="addExId === null" @click="addExercise">Add</BaseButton>
-        </div>
-      </div>
-    </form>
+    <!-- Empty state when no exercises yet -->
+    <div v-else class="h-full flex flex-col items-center justify-center">
+      <EmptyState
+        :icon="Dumbbell"
+        title="No exercises yet"
+        description="Add your first exercise to get started"
+        action-label="Add exercise"
+        @action="isExercisePickerOpen = true"
+      />
+    </div>
 
     <template #footer>
       <div class="flex items-center gap-2">
@@ -187,7 +246,7 @@ async function doDelete() {
         <BaseButton variant="primary" :loading="saving" @click="save">{{ routine ? 'Save' : 'Create' }}</BaseButton>
       </div>
     </template>
-  </BaseModal>
+  </FullSizeDialog>
 
   <ConfirmDialog
     :open="confirmDelete"
@@ -197,5 +256,11 @@ async function doDelete() {
     variant="danger"
     @confirm="doDelete"
     @cancel="confirmDelete = false"
+  />
+
+  <ExercisePickerDialog
+    :open="isExercisePickerOpen"
+    @close="isExercisePickerOpen = false"
+    @select="onExercisePicked"
   />
 </template>
