@@ -2,7 +2,7 @@
 import { computed, ref } from 'vue'
 import type { ExcerciseOut } from '../../../types'
 import DifficultyBadge from '../../../components/DifficultyBadge.vue'
-import { Pencil, Trash2, Dumbbell } from 'lucide-vue-next'
+import { Trash2, Dumbbell } from 'lucide-vue-next'
 
 const props = defineProps<{ exercise: ExcerciseOut }>()
 defineEmits<{ edit: []; delete: [] }>()
@@ -50,7 +50,7 @@ function onImgError() {
 </script>
 
 <template>
-  <div class="rounded-2xl overflow-hidden group cursor-pointer hover:scale-[1.02] transition-transform bg-surface dark:bg-surface-dark shadow-sm border border-gray-100 dark:border-white/10">
+  <div class="rounded-2xl overflow-hidden group cursor-pointer hover:scale-[1.02] transition-transform bg-surface dark:bg-surface-dark shadow-sm border border-gray-100 dark:border-white/10" @click="$emit('edit')">
     <!-- Image area -->
     <div class="relative aspect-[4/3] bg-gray-200 dark:bg-gray-700">
       <img
@@ -70,6 +70,11 @@ function onImgError() {
       <!-- Difficulty badge: top-left -->
       <DifficultyBadge :level="difficultyLevel" class="absolute top-3 left-3" />
 
+      <!-- Bodyweight badge -->
+      <span v-if="exercise.isBodyweight" class="absolute bottom-3 right-3 inline-flex items-center px-1.5 py-0.5 rounded-md bg-emerald-500/90 text-white text-[10px] font-semibold uppercase tracking-wide">
+        Bodyweight
+      </span>
+
       <!-- Muscle tags: bottom-left -->
       <div class="absolute bottom-3 left-3 flex gap-1 flex-wrap">
         <span v-if="exercise.primaryMuscle" class="text-xs font-semibold uppercase tracking-wider text-white/80">
@@ -84,13 +89,8 @@ function onImgError() {
         </span>
       </div>
 
-      <!-- Edit / Delete icons: top-right, hover only -->
+      <!-- Delete icon: top-right, hover only -->
       <div class="absolute top-3 right-3 hidden group-hover:flex gap-1">
-        <button
-          class="w-7 h-7 bg-white/90 rounded-lg flex items-center justify-center text-xs hover:bg-white transition-colors focus-visible:ring-2 focus-visible:ring-primary"
-          aria-label="Edit exercise"
-          @click.stop="$emit('edit')"
-        ><Pencil class="w-3.5 h-3.5" /></button>
         <button
           class="w-7 h-7 bg-white/90 rounded-lg flex items-center justify-center hover:bg-red-50 transition-colors focus-visible:ring-2 focus-visible:ring-primary"
           aria-label="Delete exercise"
@@ -102,9 +102,7 @@ function onImgError() {
     <!-- Footer -->
     <div class="p-3">
       <p class="font-semibold text-text-primary dark:text-white truncate text-sm">{{ exercise.name }}</p>
-      <button class="text-xs text-primary font-medium mt-1 hover:underline focus-visible:ring-1 focus-visible:ring-primary rounded" @click.stop>
-        View Details +
-      </button>
+      <p class="text-xs text-primary font-medium mt-1">Edit</p>
     </div>
   </div>
 </template>

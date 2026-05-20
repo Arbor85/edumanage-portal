@@ -21,6 +21,7 @@ These rules apply to all future changes in this repository.
 - Handle loading, empty, and error states explicitly.
 - Keep UI responsive for desktop and mobile.
 - Avoid layout shifts and flashing empty states during loading.
+- Use `lucide-vue-next` for all icons. Never use any other icon library (no heroicons, phosphor, font-awesome, mdi, tabler, feather, etc.).
 
 ## Validation Before Finishing
 - Run or check TypeScript/Vue errors for changed files.
@@ -62,4 +63,9 @@ Use these rules for all React/TypeScript code in this workspace.
 3. Selecting an related entity should be done by using custom component specialized for that entity, and should allow searching and selecting from existing entities.
 
 When unsure whether a component is shared or page-specific, default to page-specific first and move to `src/components` once reuse appears in multiple pages.
+
+# Backend integration
+1. For any new frontend feature that requires backend support, create a file `src/services/prompts_{feature}.md` with AI prompts to generate necessary backend endpoints, and include instructions for testing them.
+2. When creating prompts for backend endpoints, include details such as endpoint URL, HTTP method, request body schema, response schema, and any necessary authentication or authorization requirements.
+3. Ensure that the generated backend endpoints follow existing API patterns and conventions used in the project.
 

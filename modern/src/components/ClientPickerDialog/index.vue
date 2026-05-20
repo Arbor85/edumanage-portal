@@ -22,7 +22,7 @@ watch(() => props.open, (val) => {
 })
 
 const filtered = computed(() =>
-  clientStore.active.filter((c) =>
+  clientStore.clients.filter((c) =>
     !search.value || c.name?.toLowerCase().includes(search.value.toLowerCase()),
   ),
 )

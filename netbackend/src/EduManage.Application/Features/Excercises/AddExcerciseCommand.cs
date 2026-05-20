@@ -17,7 +17,8 @@ public sealed record AddExcerciseCommand(ExcerciseWriteRequest Request) : IReque
                 PrimaryMuscle = request.Request.PrimaryMuscle,
                 SecondaryMuscles = NormalizeSecondaryMuscles(request.Request.PrimaryMuscle, request.Request.SecondaryMuscles),
                 Muscles = [],
-                Tags = request.Request.Tags?.ToList() ?? []
+                Tags = request.Request.Tags?.ToList() ?? [],
+                IsBodyweight = request.Request.IsBodyweight
             };
 
             await repository.AddAsync(exercise, cancellationToken);

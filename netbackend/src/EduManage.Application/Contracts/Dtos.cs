@@ -36,7 +36,6 @@ public sealed record PlanWorkoutInput(
     string Name,
     string? Note,
     string Id,
-    [property: JsonPropertyName("user_id")] string? UserId,
     IReadOnlyList<RoutineExcercise> Excercises,
     string Date);
 
@@ -84,14 +83,16 @@ public sealed record ExcerciseOut(
     string PrimaryMuscle,
     IReadOnlyList<string> SecondaryMuscles,
     IReadOnlyList<Muscle> Muscles,
-    IReadOnlyList<string> Tags);
+    IReadOnlyList<string> Tags,
+    bool IsBodyweight);
 
 public sealed record ExcerciseWriteRequest(
     string Name,
     string? ShortDescription,
     string PrimaryMuscle,
     IReadOnlyList<string>? SecondaryMuscles,
-    IReadOnlyList<string>? Tags);
+    IReadOnlyList<string>? Tags,
+    bool IsBodyweight = false);
 
 public sealed record CompletedRoutineSet(string Type, int? Reps, double? Weight, string? Note, bool Completed);
 

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { usePageTitle } from '../../../composables/usePageTitle'
-import type { PlanOut, PlanCreate, PlanUpdate, PlanWorkoutInput, RoutineOut, ClientOut, RoutineExcercise } from '../../../types'
+import type { PlanOut, PlanCreate, PlanUpdate, PlanWorkoutInput, RoutineOut, ClientOut, RoutineExcercise, RoutineSet, ExcerciseOut } from '../../../types'
 import { usePlanStore } from '../../../stores/planStore'
 import { useClientStore } from '../../../stores/clientStore'
 import { useToast } from '../../../composables/useToast'
@@ -14,6 +14,9 @@ import BaseDatePicker from '../../../components/BaseDatePicker.vue'
 import EmptyState from '../../../components/EmptyState.vue'
 import ClientPickerDialog from '../../../components/ClientPickerDialog/index.vue'
 import RoutinePickerDialog from '../../../components/RoutinePickerDialog/index.vue'
+import ExercisePickerDialog from '../../../components/ExercisePickerDialog/index.vue'
+import EditSet from '../../../components/EditSet/index.vue'
+import AddSetsDialog from '../../../components/AddSetsDialog/index.vue'
 import { X, Plus, CalendarDays } from 'lucide-vue-next'
 
 const props = defineProps<{ open: boolean; plan: PlanOut | null }>()
@@ -31,7 +34,7 @@ const form = ref<{
   note: string | null
   status: string | null
   workouts: PlanWorkoutInput[]
-}>({ name: null, clientId: null, note: null, status: 'draft', workouts: [] })
+}>({ name: null, clientId: null, note: null, status: null, workouts: [] })
 
 const saving = ref(false)
 const confirmDelete = ref(false)
@@ -39,6 +42,8 @@ const confirmDiscard = ref(false)
 const activeWorkoutIndex = ref(0)
 const isClientPickerOpen = ref(false)
 const isRoutinePickerOpen = ref(false)
+const isExercisePickerOpen = ref(false)
+const addSetsForExIdx = ref<number | null>(null)
 const nameIsAuto = ref(false)
 
 let savedSnapshot = ''
@@ -47,8 +52,8 @@ const isDirty = computed(() => JSON.stringify(form.value) !== savedSnapshot)
 
 const STATUS_CYCLE = ['draft', 'active', 'inactive']
 const STATUS_META: Record<string, { label: string; classes: string }> = {
-  draft:    { label: 'Draft',    classes: 'bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-white/60' },
-  active:   { label: 'Active',   classes: 'bg-primary/10 text-primary' },
+  draft: { label: 'Draft', classes: 'bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-white/60' },
+  active: { label: 'Active', classes: 'bg-primary/10 text-primary' },
   inactive: { label: 'Inactive', classes: 'bg-red-50 dark:bg-red-500/10 text-red-500' },
 }
 
@@ -94,7 +99,7 @@ watch(() => props.open, (val) => {
     }
     nameIsAuto.value = false
   } else {
-    form.value = { name: null, clientId: null, note: null, status: 'draft', workouts: [] }
+    form.value = { name: null, clientId: null, note: null, status: null, workouts: [] }
     nameIsAuto.value = true
   }
   activeWorkoutIndex.value = 0
@@ -131,6 +136,40 @@ function addBlankWorkout() {
   activeWorkoutIndex.value = form.value.workouts.length - 1
 }
 
+function onExercisePicked(ex: ExcerciseOut) {
+  const workout = form.value.workouts[activeWorkoutIndex.value]
+  if (!workout) return
+  if (!workout.excercises) workout.excercises = []
+  workout.excercises.push({
+    name: ex.name,
+    isBodyweight: ex.isBodyweight,
+    sets: [{ type: 'normal', reps: 10, weight: null, note: null }],
+  })
+}
+
+function removeExercise(workoutIdx: number, exIdx: number) {
+  form.value.workouts[workoutIdx].excercises!.splice(exIdx, 1)
+}
+
+function addSet(workoutIdx: number, exIdx: number) {
+  const sets = form.value.workouts[workoutIdx].excercises![exIdx].sets ?? []
+  const last = sets[sets.length - 1]
+  form.value.workouts[workoutIdx].excercises![exIdx].sets = [
+    ...sets,
+    last ? { ...last } : { type: 'normal', reps: 10, weight: null, note: null },
+  ]
+}
+
+function removeSet(workoutIdx: number, exIdx: number, setIdx: number) {
+  form.value.workouts[workoutIdx].excercises![exIdx].sets!.splice(setIdx, 1)
+}
+
+function onSetsAdded(sets: RoutineSet[]) {
+  const ex = form.value.workouts[activeWorkoutIndex.value].excercises![addSetsForExIdx.value!]
+  ex.sets = [...(ex.sets ?? []), ...sets]
+  addSetsForExIdx.value = null
+}
+
 function removeWorkout(i: number) {
   form.value.workouts.splice(i, 1)
   if (activeWorkoutIndex.value >= form.value.workouts.length) {
@@ -148,7 +187,8 @@ async function save() {
       }
       toast.success('Plan updated')
     } else {
-      await planStore.create(form.value as PlanCreate)
+      const { status, ...createModel } = form.value;
+      await planStore.create(createModel as PlanCreate);
       toast.success('Plan created')
     }
     savedSnapshot = JSON.stringify(form.value)
@@ -176,67 +216,46 @@ async function doDelete() {
 <template>
   <FullSizeDialog :open="open">
     <template #header>
-      <input
-        :value="form.name ?? ''"
-        type="text"
-        placeholder="Plan name…"
-        autofocus
+      <input :value="form.name ?? ''" type="text" placeholder="Plan name…" autofocus
         class="flex-1 min-w-0 text-lg font-semibold bg-transparent outline-none text-text-primary dark:text-white placeholder:text-text-secondary placeholder:font-normal"
-        @input="onNameInput"
-      />
+        @input="onNameInput" />
 
       <!-- Client picker -->
-      <button
-        type="button"
+      <button type="button"
         class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-gray-200 dark:border-white/10 text-sm text-text-secondary dark:text-white/60 hover:bg-gray-50 dark:hover:bg-white/5 focus-visible:ring-2 focus-visible:ring-primary transition-colors flex-shrink-0"
-        @click="isClientPickerOpen = true"
-      >
+        @click="isClientPickerOpen = true">
         <BaseAvatar v-if="selectedClient" :name="selectedClient.name ?? '?'" size="xs" />
         <span class="max-w-[120px] truncate">{{ selectedClient?.name ?? 'No client' }}</span>
       </button>
 
-      <!-- Status badge — click to cycle -->
-      <button
-        type="button"
+      <!-- Status badge — only when editing an existing plan -->
+      <button v-if="plan" type="button"
         :class="['px-2.5 py-1.5 rounded-xl text-xs font-semibold flex-shrink-0 transition-colors focus-visible:ring-2 focus-visible:ring-primary', statusMeta.classes]"
-        @click="cycleStatus"
-      >
+        @click="cycleStatus">
         {{ statusMeta.label }}
       </button>
 
       <!-- Close -->
-      <button
-        type="button"
+      <button type="button"
         class="p-1.5 rounded-lg text-text-secondary hover:text-text-primary dark:text-white/60 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 min-h-[44px] min-w-[44px] flex items-center justify-center focus-visible:ring-2 focus-visible:ring-primary"
-        aria-label="Close dialog"
-        @click="requestClose"
-      >
+        aria-label="Close dialog" @click="requestClose">
         <X class="w-5 h-5" />
       </button>
     </template>
 
     <!-- Wizard -->
-    <ProcessWizard
-      v-if="form.workouts.length"
-      v-model="activeWorkoutIndex"
-      :steps="wizardSteps"
-      class="h-full"
-    >
+    <ProcessWizard v-if="form.workouts.length" v-model="activeWorkoutIndex" :steps="wizardSteps" class="h-full">
       <template #add-step>
         <div class="flex flex-col gap-1">
-          <button
-            type="button"
+          <button type="button"
             class="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm text-primary font-medium hover:bg-primary/10 transition-colors"
-            @click="isRoutinePickerOpen = true"
-          >
+            @click="isRoutinePickerOpen = true">
             <Plus class="w-4 h-4" />
             From routine
           </button>
-          <button
-            type="button"
+          <button type="button"
             class="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-text-secondary dark:text-white/60 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
-            @click="addBlankWorkout"
-          >
+            @click="addBlankWorkout">
             <Plus class="w-4 h-4" />
             Blank workout
           </button>
@@ -247,57 +266,78 @@ async function doDelete() {
         <div v-if="form.workouts[index]" class="flex flex-col gap-5">
           <!-- Workout name + remove -->
           <div class="flex items-center justify-between gap-3">
-            <input
-              :value="form.workouts[index].name ?? ''"
-              type="text"
-              placeholder="Workout name…"
+            <input :value="form.workouts[index].name ?? ''" type="text" placeholder="Workout name…"
               class="flex-1 text-lg font-semibold bg-transparent outline-none text-text-primary dark:text-white placeholder:text-text-secondary placeholder:font-normal"
-              @input="form.workouts[index].name = ($event.target as HTMLInputElement).value || null"
-            />
-            <button
-              type="button"
+              @input="form.workouts[index].name = ($event.target as HTMLInputElement).value || null" />
+            <button type="button"
               class="text-sm text-red-500 hover:text-red-600 font-medium focus-visible:ring-1 focus-visible:ring-primary rounded flex-shrink-0"
-              @click="removeWorkout(index)"
-            >
+              @click="removeWorkout(index)">
               Remove
             </button>
           </div>
 
           <!-- Date -->
-          <BaseDatePicker
-            :model-value="form.workouts[index].date"
-            label="Date"
-            @update:model-value="form.workouts[index].date = $event"
-          />
+          <BaseDatePicker :model-value="form.workouts[index].date" label="Date"
+            @update:model-value="form.workouts[index].date = $event" />
 
           <!-- Note -->
           <div class="flex flex-col gap-1.5">
             <p class="text-xs font-semibold uppercase tracking-wide text-text-secondary">Note</p>
-            <textarea
-              :value="form.workouts[index].note ?? ''"
-              rows="2"
-              placeholder="Optional note…"
+            <textarea :value="form.workouts[index].note ?? ''" rows="2" placeholder="Optional note…"
               class="px-3 py-2.5 rounded-xl border border-gray-200 dark:border-white/10 text-sm bg-white dark:bg-surface-dark text-text-primary dark:text-white placeholder:text-text-secondary outline-none resize-none focus-visible:ring-2 focus-visible:ring-primary"
-              @input="form.workouts[index].note = ($event.target as HTMLTextAreaElement).value || null"
-            />
+              @input="form.workouts[index].note = ($event.target as HTMLTextAreaElement).value || null" />
           </div>
 
-          <!-- Exercises (read-only) -->
-          <div v-if="form.workouts[index].excercises?.length" class="flex flex-col gap-2">
-            <p class="text-xs font-semibold uppercase tracking-wide text-text-secondary">
-              Exercises ({{ form.workouts[index].excercises!.length }})
-            </p>
-            <ul class="flex flex-col gap-1">
-              <li
-                v-for="(ex, ei) in form.workouts[index].excercises"
-                :key="ei"
-                class="flex items-center gap-2 text-sm py-1"
-              >
-                <span class="text-text-secondary w-5 flex-shrink-0 text-right">{{ ei + 1 }}.</span>
-                <span class="flex-1 truncate text-text-primary dark:text-white">{{ ex.name }}</span>
-                <span class="text-xs text-text-secondary flex-shrink-0">{{ ex.sets?.length ?? 0 }} sets</span>
-              </li>
-            </ul>
+          <!-- Exercises -->
+          <div class="flex flex-col gap-3">
+            <p class="text-xs font-semibold uppercase tracking-wide text-text-secondary">Exercises</p>
+
+            <div v-for="(ex, ei) in form.workouts[index].excercises ?? []" :key="ei"
+              class="flex flex-col gap-3 p-3 rounded-xl border border-gray-100 dark:border-white/10">
+              <!-- Exercise header -->
+              <div class="flex items-center justify-between gap-2">
+                <div class="flex items-center gap-2">
+                  <span class="font-medium text-sm text-text-primary dark:text-white">{{ ex.name }}</span>
+                  <span v-if="ex.isBodyweight"
+                    class="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400">
+                    Bodyweight
+                  </span>
+                </div>
+                <button type="button"
+                  class="text-sm text-red-500 hover:text-red-600 font-medium focus-visible:ring-1 focus-visible:ring-primary rounded flex-shrink-0"
+                  @click="removeExercise(index, ei)">
+                  Remove
+                </button>
+              </div>
+
+              <!-- Sets -->
+              <div class="flex flex-col gap-2">
+                <div v-for="(set, si) in ex.sets ?? []" :key="si" class="flex items-center gap-2">
+                  <EditSet :set="set" :is-bodyweight="ex.isBodyweight" class="flex-1"
+                    @update:set="form.workouts[index].excercises![ei].sets![si] = $event" />
+                  <button type="button"
+                    class="text-red-400 hover:text-red-600 text-lg leading-none p-1 focus-visible:ring-1 focus-visible:ring-primary rounded"
+                    aria-label="Remove set" @click="removeSet(index, ei, si)">×</button>
+                </div>
+              </div>
+
+              <!-- Add set actions -->
+              <div class="flex items-center gap-4">
+                <button type="button"
+                  class="text-sm text-primary font-medium hover:underline focus-visible:ring-1 focus-visible:ring-primary rounded"
+                  @click="addSet(index, ei)">+ Add set</button>
+                <button type="button"
+                  class="text-sm text-primary font-medium hover:underline focus-visible:ring-1 focus-visible:ring-primary rounded"
+                  @click="addSetsForExIdx = ei">+ Add sets…</button>
+              </div>
+            </div>
+
+            <button type="button"
+              class="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm text-primary font-medium hover:bg-primary/10 transition-colors w-full"
+              @click="isExercisePickerOpen = true">
+              <Plus class="w-4 h-4" />
+              Add exercise
+            </button>
           </div>
         </div>
       </template>
@@ -305,18 +345,11 @@ async function doDelete() {
 
     <!-- Empty state -->
     <div v-else class="h-full flex flex-col items-center justify-center gap-2">
-      <EmptyState
-        :icon="CalendarDays"
-        title="No workouts yet"
-        description="Add a workout from a routine or start blank"
-        action-label="From routine"
-        @action="isRoutinePickerOpen = true"
-      />
-      <button
-        type="button"
+      <EmptyState :icon="CalendarDays" title="No workouts yet" description="Add a workout from a routine or start blank"
+        action-label="From routine" @action="isRoutinePickerOpen = true" />
+      <button type="button"
         class="text-sm text-text-secondary hover:text-text-primary dark:hover:text-white transition-colors"
-        @click="addBlankWorkout"
-      >
+        @click="addBlankWorkout">
         or add a blank workout
       </button>
     </div>
@@ -331,35 +364,21 @@ async function doDelete() {
     </template>
   </FullSizeDialog>
 
-  <ConfirmDialog
-    :open="confirmDelete"
-    title="Delete Plan"
-    message="Are you sure you want to delete this plan?"
-    confirm-label="Delete"
-    variant="danger"
-    @confirm="doDelete"
-    @cancel="confirmDelete = false"
-  />
+  <ConfirmDialog :open="confirmDelete" title="Delete Plan" message="Are you sure you want to delete this plan?"
+    confirm-label="Delete" variant="danger" @confirm="doDelete" @cancel="confirmDelete = false" />
 
-  <ConfirmDialog
-    :open="confirmDiscard"
-    title="Discard changes?"
-    message="You have unsaved changes. Leave anyway and lose them?"
-    confirm-label="Discard"
-    variant="danger"
-    @confirm="confirmDiscard = false; emit('close')"
-    @cancel="confirmDiscard = false"
-  />
+  <ConfirmDialog :open="confirmDiscard" title="Discard changes?"
+    message="You have unsaved changes. Leave anyway and lose them?" confirm-label="Discard" variant="danger"
+    @confirm="confirmDiscard = false; emit('close')" @cancel="confirmDiscard = false" />
 
-  <ClientPickerDialog
-    :open="isClientPickerOpen"
-    @select="onClientPicked"
-    @close="isClientPickerOpen = false"
-  />
+  <ClientPickerDialog :open="isClientPickerOpen" @select="onClientPicked" @close="isClientPickerOpen = false" />
 
-  <RoutinePickerDialog
-    :open="isRoutinePickerOpen"
-    @select="onRoutinePicked"
-    @close="isRoutinePickerOpen = false"
-  />
+  <RoutinePickerDialog :open="isRoutinePickerOpen" @select="onRoutinePicked" @close="isRoutinePickerOpen = false" />
+
+  <ExercisePickerDialog :open="isExercisePickerOpen" @select="onExercisePicked" @close="isExercisePickerOpen = false" />
+
+  <AddSetsDialog v-if="addSetsForExIdx !== null" :open="addSetsForExIdx !== null"
+    :base-set="form.workouts[activeWorkoutIndex]?.excercises?.[addSetsForExIdx]?.sets?.at(-1) ?? { type: 'normal', reps: 10, weight: null, note: null }"
+    :is-bodyweight="form.workouts[activeWorkoutIndex]?.excercises?.[addSetsForExIdx]?.isBodyweight" @add="onSetsAdded"
+    @close="addSetsForExIdx = null" />
 </template>

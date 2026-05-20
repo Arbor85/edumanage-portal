@@ -33,6 +33,9 @@ const difficultyLevel = computed(() => {
       <div class="flex flex-wrap gap-2 mb-4">
         <DifficultyBadge :level="difficultyLevel" />
         <BaseBadge v-if="exercise.primaryMuscle" :label="exercise.primaryMuscle" variant="primary" />
+        <span v-if="exercise.isBodyweight" class="inline-flex items-center px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 text-xs font-semibold">
+          Bodyweight
+        </span>
       </div>
 
       <p v-if="exercise.shortDescription" class="text-sm text-text-secondary dark:text-white/70 mb-4">

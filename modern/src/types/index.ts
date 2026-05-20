@@ -13,6 +13,7 @@ export interface ExcerciseOut {
   secondaryMuscles: string[] | null
   muscles: Muscle[] | null
   tags: string[] | null
+  isBodyweight: boolean
 }
 
 export interface ExcerciseWriteRequest {
@@ -21,6 +22,7 @@ export interface ExcerciseWriteRequest {
   primaryMuscle: string | null
   secondaryMuscles: string[] | null
   tags: string[] | null
+  isBodyweight: boolean
 }
 
 // ─── Routines ─────────────────────────────────────────────────

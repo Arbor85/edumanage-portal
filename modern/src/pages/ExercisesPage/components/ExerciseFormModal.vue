@@ -7,6 +7,7 @@ import { useToast } from '../../../composables/useToast'
 import BaseModal from '../../../components/BaseModal.vue'
 import BaseInput from '../../../components/BaseInput.vue'
 import BaseTextarea from '../../../components/BaseTextarea.vue'
+import BaseCheckbox from '../../../components/BaseCheckbox.vue'
 import TagInput from '../../../components/TagInput.vue'
 import BaseButton from '../../../components/BaseButton.vue'
 import ConfirmDialog from '../../../components/ConfirmDialog.vue'
@@ -22,15 +23,15 @@ usePageTitle(() => props.exercise ? 'Edit Exercise' : 'New Exercise', () => prop
 const exerciseStore = useExerciseStore()
 const toast = useToast()
 
-const form = ref<ExcerciseWriteRequest>({ name: null, shortDescription: null, primaryMuscle: null, secondaryMuscles: [], tags: [] })
+const form = ref<ExcerciseWriteRequest>({ name: null, shortDescription: null, primaryMuscle: null, secondaryMuscles: [], tags: [], isBodyweight: false })
 const saving = ref(false)
 const confirmDelete = ref(false)
 
 watch(() => props.open, (val) => {
   if (val) {
     form.value = props.exercise
-      ? { name: props.exercise.name, shortDescription: props.exercise.shortDescription, primaryMuscle: props.exercise.primaryMuscle, secondaryMuscles: [...(props.exercise.secondaryMuscles ?? [])], tags: [...(props.exercise.tags ?? [])] }
-      : { name: null, shortDescription: null, primaryMuscle: null, secondaryMuscles: [], tags: [] }
+      ? { name: props.exercise.name, shortDescription: props.exercise.shortDescription, primaryMuscle: props.exercise.primaryMuscle, secondaryMuscles: [...(props.exercise.secondaryMuscles ?? [])], tags: [...(props.exercise.tags ?? [])], isBodyweight: props.exercise.isBodyweight }
+      : { name: null, shortDescription: null, primaryMuscle: null, secondaryMuscles: [], tags: [], isBodyweight: false }
   }
 })
 
@@ -79,6 +80,7 @@ async function doDelete() {
         <label class="text-sm font-medium text-text-primary dark:text-white">Tags <span class="text-text-secondary font-normal">(include difficulty: Beginner / Intermediate / Advanced)</span></label>
         <TagInput :model-value="form.tags ?? []" placeholder="Add tag, press Enter" @update:model-value="form.tags = $event" />
       </div>
+      <BaseCheckbox v-model="form.isBodyweight" label="Bodyweight exercise" hint="No equipment or added weight required" />
     </form>
 
     <template #footer>

@@ -12,6 +12,19 @@ public sealed class ExcercisesController(ISender mediator) : ControllerBase
     public Task<IReadOnlyList<ExcerciseOut>> ListExcercises(CancellationToken cancellationToken) =>
         mediator.Send(new ListExcercisesQuery(), cancellationToken);
 
+    [HttpGet("{id:int}")]
+    public async Task<ActionResult<ExcerciseOut>> GetExcercise([FromRoute] int id, CancellationToken cancellationToken)
+    {
+        try
+        {
+            return Ok(await mediator.Send(new GetExcerciseQuery(id), cancellationToken));
+        }
+        catch (NotFoundException ex)
+        {
+            return NotFound(new { detail = ex.Message });
+        }
+    }
+
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status201Created)]
     public async Task<ActionResult<ExcerciseOut>> AddExcercise([FromBody] ExcerciseWriteRequest request, CancellationToken cancellationToken)

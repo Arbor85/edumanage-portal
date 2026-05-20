@@ -92,7 +92,7 @@ function requestClose() {
 function onExercisePicked(ex: ExcerciseOut) {
   form.value.excercises.push({
     name: ex.name,
-    isBodyweight: false,
+    isBodyweight: ex.isBodyweight,
     sets: [{ type: 'normal', reps: 10, weight: null, note: null }],
   })
   activeStepIndex.value = form.value.excercises.length - 1
@@ -203,10 +203,9 @@ async function doDelete() {
               {{ form.excercises[index].name }}
             </h2>
             <div class="flex items-center gap-4">
-              <label class="flex items-center gap-2 text-sm text-text-secondary cursor-pointer select-none">
-                <input v-model="form.excercises[index].isBodyweight" type="checkbox" class="w-4 h-4 accent-primary" />
+              <span v-if="form.excercises[index].isBodyweight" class="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400">
                 Bodyweight
-              </label>
+              </span>
               <button
                 type="button"
                 class="text-sm text-red-500 hover:text-red-600 font-medium focus-visible:ring-1 focus-visible:ring-primary rounded"

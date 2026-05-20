@@ -19,6 +19,7 @@ public sealed record UpdateExcerciseCommand(int Id, ExcerciseWriteRequest Reques
             exercise.SecondaryMuscles = AddExcerciseCommand.Handler.NormalizeSecondaryMuscles(
                 request.Request.PrimaryMuscle, request.Request.SecondaryMuscles);
             exercise.Tags = request.Request.Tags?.ToList() ?? [];
+            exercise.IsBodyweight = request.Request.IsBodyweight;
 
             await repository.UpdateAsync(exercise, cancellationToken);
             return ListExcercisesQuery.Handler.ToOut(exercise);
