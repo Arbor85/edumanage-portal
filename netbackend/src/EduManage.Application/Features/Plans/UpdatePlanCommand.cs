@@ -36,7 +36,7 @@ public sealed record UpdatePlanCommand(string PlanId, PlanUpdate Request, string
             plan.Notes = request.Request.Note;
             plan.Workouts = [.. request.Request.Workouts.Select(w => new PlanWorkout
             {
-                Id = w.Id,
+                Id = Guid.NewGuid().ToString("N"),
                 PlanId = plan.Id,
                 Name = w.Name,
                 Notes = w.Note,

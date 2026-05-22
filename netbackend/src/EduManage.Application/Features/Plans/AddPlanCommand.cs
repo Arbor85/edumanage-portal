@@ -33,7 +33,7 @@ public sealed record AddPlanCommand(PlanCreate Request, string CurrentUserId) : 
                 Status = "Draft",
                 Workouts = request.Request.Workouts.Select(w => new PlanWorkout
                 {
-                    Id = w.Id,
+                    Id = Guid.NewGuid().ToString("N"),
                     Name = w.Name,
                     Notes = w.Note,
                     UserId = request.CurrentUserId,

@@ -39,7 +39,6 @@ public sealed record RoutineOut(string Name, string? Note, string Id, string? Us
 public sealed record PlanWorkoutInput(
     string Name,
     string? Note,
-    string Id,
     IReadOnlyList<RoutineExcercise> Excercises,
     string Date);
 

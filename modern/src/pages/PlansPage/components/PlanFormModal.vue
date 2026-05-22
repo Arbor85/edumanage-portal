@@ -17,7 +17,7 @@ import RoutinePickerDialog from '../../../components/RoutinePickerDialog/index.v
 import ExercisePickerDialog from '../../../components/ExercisePickerDialog/index.vue'
 import EditSet from '../../../components/EditSet/index.vue'
 import AddSetsDialog from '../../../components/AddSetsDialog/index.vue'
-import { X, Plus, CalendarDays, Copy } from 'lucide-vue-next'
+import { X, Plus, CalendarDays, Copy, LayoutList, ChevronLeft, ChevronRight } from 'lucide-vue-next'
 
 const props = defineProps<{ open: boolean; plan: PlanOut | null }>()
 const emit = defineEmits<{ close: [] }>()
@@ -45,6 +45,12 @@ const isRoutinePickerOpen = ref(false)
 const isExercisePickerOpen = ref(false)
 const addSetsForExIdx = ref<number | null>(null)
 const nameIsAuto = ref(false)
+const planView = ref<'wizard' | 'calendar'>('wizard')
+const calendarCursor = ref(new Date())
+const draggingIdx = ref<number | null>(null)
+const dragOverDate = ref<string | null>(null)
+const slideDirection = ref<'left' | 'right'>('left')
+const slideTransitionName = computed(() => `view-slide-${slideDirection.value}`)
 const isScheduleCopyOpen = ref(false)
 const scheduleCopySourceIndex = ref<number | null>(null)
 const scheduleCopyFrequency = ref<string>('weekly')
@@ -105,6 +111,86 @@ const wizardSteps = computed(() =>
   }),
 )
 
+const calendarYear = computed(() => calendarCursor.value.getFullYear())
+const calendarMonth = computed(() => calendarCursor.value.getMonth())
+const calendarTitle = computed(() =>
+  calendarCursor.value.toLocaleDateString(undefined, { month: 'long', year: 'numeric' }),
+)
+const calendarDays = computed(() => {
+  const year = calendarYear.value
+  const month = calendarMonth.value
+  const firstDow = (new Date(year, month, 1).getDay() + 6) % 7 // Mon=0
+  const daysInMonth = new Date(year, month + 1, 0).getDate()
+  const cells: { dateStr: string | null }[] = Array.from({ length: firstDow }, () => ({ dateStr: null }))
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`
+    cells.push({ dateStr })
+  }
+  // pad to complete last row
+  while (cells.length % 7 !== 0) cells.push({ dateStr: null })
+  return cells
+})
+const workoutsByDate = computed(() => {
+  const map = new Map<string, number[]>()
+  form.value.workouts.forEach((w, i) => {
+    if (w.date) {
+      if (!map.has(w.date)) map.set(w.date, [])
+      map.get(w.date)!.push(i)
+    }
+  })
+  return map
+})
+const todayStr = new Date().toISOString().split('T')[0]
+
+watch(planView, (newVal) => {
+  slideDirection.value = newVal === 'calendar' ? 'left' : 'right'
+})
+
+function prevMonth() {
+  calendarCursor.value = new Date(calendarYear.value, calendarMonth.value - 1, 1)
+}
+function nextMonth() {
+  calendarCursor.value = new Date(calendarYear.value, calendarMonth.value + 1, 1)
+}
+function goToWorkout(index: number) {
+  activeWorkoutIndex.value = index
+  planView.value = 'wizard'
+}
+
+function onChipDragStart(wIdx: number, e: DragEvent) {
+  draggingIdx.value = wIdx
+  e.dataTransfer!.effectAllowed = 'copyMove'
+}
+function onChipDragEnd() {
+  draggingIdx.value = null
+  dragOverDate.value = null
+}
+function onCellDragOver(dateStr: string, e: DragEvent) {
+  e.preventDefault()
+  dragOverDate.value = dateStr
+  e.dataTransfer!.dropEffect = e.ctrlKey ? 'copy' : 'move'
+}
+function onCellDragLeave(e: DragEvent) {
+  if (!(e.currentTarget as HTMLElement).contains(e.relatedTarget as Node)) {
+    dragOverDate.value = null
+  }
+}
+function onCellDrop(dateStr: string, e: DragEvent) {
+  e.preventDefault()
+  if (draggingIdx.value === null) return
+  if (e.ctrlKey) {
+    const src = form.value.workouts[draggingIdx.value]
+    form.value.workouts.push({
+      id: null, name: src.name, note: src.note, user_id: null,
+      excercises: JSON.parse(JSON.stringify(src.excercises)), date: dateStr,
+    })
+  } else {
+    form.value.workouts[draggingIdx.value].date = dateStr
+  }
+  draggingIdx.value = null
+  dragOverDate.value = null
+}
+
 watch(
   () => form.value.workouts.map((w) => w.name),
   (names) => {
@@ -143,6 +229,9 @@ watch(() => props.open, (val) => {
     nameIsAuto.value = true
   }
   activeWorkoutIndex.value = 0
+  planView.value = 'wizard'
+  const firstDated = form.value.workouts.find(w => w.date)
+  calendarCursor.value = firstDated ? new Date(firstDated.date + 'T00:00:00') : new Date()
   savedSnapshot = JSON.stringify(form.value)
   if (!clientStore.clients.length) clientStore.fetch()
 })
@@ -299,6 +388,20 @@ async function doDelete() {
         {{ statusMeta.label }}
       </button>
 
+      <!-- View toggle -->
+      <div v-if="form.workouts.length" class="flex items-center gap-0.5 bg-gray-100 dark:bg-white/10 rounded-xl p-1 flex-shrink-0">
+        <button type="button"
+          :class="['p-1.5 rounded-lg transition-colors', planView === 'wizard' ? 'bg-white dark:bg-white/15 text-text-primary dark:text-white shadow-sm' : 'text-text-secondary dark:text-white/50 hover:text-text-primary dark:hover:text-white']"
+          aria-label="Wizard view" @click="planView = 'wizard'">
+          <LayoutList class="w-4 h-4" />
+        </button>
+        <button type="button"
+          :class="['p-1.5 rounded-lg transition-colors', planView === 'calendar' ? 'bg-white dark:bg-white/15 text-text-primary dark:text-white shadow-sm' : 'text-text-secondary dark:text-white/50 hover:text-text-primary dark:hover:text-white']"
+          aria-label="Calendar view" @click="planView = 'calendar'">
+          <CalendarDays class="w-4 h-4" />
+        </button>
+      </div>
+
       <!-- Close -->
       <button type="button"
         class="p-1.5 rounded-lg text-text-secondary hover:text-text-primary dark:text-white/60 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 min-h-[44px] min-w-[44px] flex items-center justify-center focus-visible:ring-2 focus-visible:ring-primary"
@@ -307,114 +410,190 @@ async function doDelete() {
       </button>
     </template>
 
-    <!-- Wizard -->
-    <ProcessWizard v-if="form.workouts.length" v-model="activeWorkoutIndex" :steps="wizardSteps" class="h-full">
-      <template #add-step>
-        <div class="flex flex-col gap-1">
-          <button type="button"
-            class="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm text-primary font-medium hover:bg-primary/10 transition-colors"
-            @click="isRoutinePickerOpen = true">
-            <Plus class="w-4 h-4" />
-            From routine
-          </button>
-          <button type="button"
-            class="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-text-secondary dark:text-white/60 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
-            @click="addBlankWorkout">
-            <Plus class="w-4 h-4" />
-            Blank workout
-          </button>
-        </div>
-      </template>
+    <!-- Animated view container -->
+    <div v-if="form.workouts.length" class="h-full overflow-hidden relative">
+      <Transition :name="slideTransitionName" mode="out-in">
 
-      <template #step-content="{ index }">
-        <div v-if="form.workouts[index]" class="flex flex-col gap-5">
-          <!-- Workout name + remove -->
-          <div class="flex items-center justify-between gap-3">
-            <input :value="form.workouts[index].name ?? ''" type="text" placeholder="Workout name…"
-              class="flex-1 text-lg font-semibold bg-transparent outline-none text-text-primary dark:text-white placeholder:text-text-secondary placeholder:font-normal"
-              @input="form.workouts[index].name = ($event.target as HTMLInputElement).value || null" />
-            <button type="button"
-              class="text-sm text-red-500 hover:text-red-600 font-medium focus-visible:ring-1 focus-visible:ring-primary rounded flex-shrink-0"
-              @click="removeWorkout(index)">
-              Remove
-            </button>
-          </div>
+        <!-- Wizard -->
+        <ProcessWizard v-if="planView === 'wizard'" key="wizard" v-model="activeWorkoutIndex" :steps="wizardSteps" class="h-full">
+          <template #add-step>
+            <div class="flex flex-col gap-1">
+              <button type="button"
+                class="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm text-primary font-medium hover:bg-primary/10 transition-colors"
+                @click="isRoutinePickerOpen = true">
+                <Plus class="w-4 h-4" />
+                From routine
+              </button>
+              <button type="button"
+                class="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-text-secondary dark:text-white/60 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
+                @click="addBlankWorkout">
+                <Plus class="w-4 h-4" />
+                Blank workout
+              </button>
+            </div>
+          </template>
 
-          <!-- Date -->
-          <div class="flex items-center gap-2">
-            <BaseDatePicker :model-value="form.workouts[index].date" label="Date" class="flex-1"
-              @update:model-value="form.workouts[index].date = $event" />
-            <button type="button"
-              :disabled="!form.workouts[index].date"
-              :class="['flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium border transition-colors mt-5', form.workouts[index].date ? 'border-primary text-primary hover:bg-primary/10' : 'border-gray-200 dark:border-white/10 text-text-secondary dark:text-white/30 cursor-not-allowed']"
-              @click="openScheduleCopy(index)">
-              <Copy class="w-4 h-4" />
-              Schedule copy
-            </button>
-          </div>
-
-          <!-- Note -->
-          <div class="flex flex-col gap-1.5">
-            <p class="text-xs font-semibold uppercase tracking-wide text-text-secondary">Note</p>
-            <textarea :value="form.workouts[index].note ?? ''" rows="2" placeholder="Optional note…"
-              class="px-3 py-2.5 rounded-xl border border-gray-200 dark:border-white/10 text-sm bg-white dark:bg-surface-dark text-text-primary dark:text-white placeholder:text-text-secondary outline-none resize-none focus-visible:ring-2 focus-visible:ring-primary"
-              @input="form.workouts[index].note = ($event.target as HTMLTextAreaElement).value || null" />
-          </div>
-
-          <!-- Exercises -->
-          <div class="flex flex-col gap-3">
-            <p class="text-xs font-semibold uppercase tracking-wide text-text-secondary">Exercises</p>
-
-            <div v-for="(ex, ei) in form.workouts[index].excercises ?? []" :key="ei"
-              class="flex flex-col gap-3 p-3 rounded-xl border border-gray-100 dark:border-white/10">
-              <!-- Exercise header -->
-              <div class="flex items-center justify-between gap-2">
-                <div class="flex items-center gap-2">
-                  <span class="font-medium text-sm text-text-primary dark:text-white">{{ ex.name }}</span>
-                  <span v-if="ex.isBodyweight"
-                    class="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400">
-                    Bodyweight
-                  </span>
-                </div>
+          <template #step-content="{ index }">
+            <div v-if="form.workouts[index]" class="flex flex-col gap-5">
+              <!-- Workout name + remove -->
+              <div class="flex items-center justify-between gap-3">
+                <input :value="form.workouts[index].name ?? ''" type="text" placeholder="Workout name…"
+                  class="flex-1 text-lg font-semibold bg-transparent outline-none text-text-primary dark:text-white placeholder:text-text-secondary placeholder:font-normal"
+                  @input="form.workouts[index].name = ($event.target as HTMLInputElement).value || null" />
                 <button type="button"
                   class="text-sm text-red-500 hover:text-red-600 font-medium focus-visible:ring-1 focus-visible:ring-primary rounded flex-shrink-0"
-                  @click="removeExercise(index, ei)">
+                  @click="removeWorkout(index)">
                   Remove
                 </button>
               </div>
 
-              <!-- Sets -->
-              <div class="flex flex-col gap-2">
-                <div v-for="(set, si) in ex.sets ?? []" :key="si" class="flex items-center gap-2">
-                  <EditSet :set="set" :is-bodyweight="ex.isBodyweight" class="flex-1"
-                    @update:set="form.workouts[index].excercises![ei].sets![si] = $event" />
-                  <button type="button"
-                    class="text-red-400 hover:text-red-600 text-lg leading-none p-1 focus-visible:ring-1 focus-visible:ring-primary rounded"
-                    aria-label="Remove set" @click="removeSet(index, ei, si)">×</button>
-                </div>
+              <!-- Date -->
+              <div class="flex items-center gap-2">
+                <BaseDatePicker :model-value="form.workouts[index].date" label="Date" class="flex-1"
+                  @update:model-value="form.workouts[index].date = $event" />
+                <button type="button"
+                  :disabled="!form.workouts[index].date"
+                  :class="['flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium border transition-colors mt-5', form.workouts[index].date ? 'border-primary text-primary hover:bg-primary/10' : 'border-gray-200 dark:border-white/10 text-text-secondary dark:text-white/30 cursor-not-allowed']"
+                  @click="openScheduleCopy(index)">
+                  <Copy class="w-4 h-4" />
+                  Schedule copy
+                </button>
               </div>
 
-              <!-- Add set actions -->
-              <div class="flex items-center gap-4">
+              <!-- Note -->
+              <div class="flex flex-col gap-1.5">
+                <p class="text-xs font-semibold uppercase tracking-wide text-text-secondary">Note</p>
+                <textarea :value="form.workouts[index].note ?? ''" rows="2" placeholder="Optional note…"
+                  class="px-3 py-2.5 rounded-xl border border-gray-200 dark:border-white/10 text-sm bg-white dark:bg-surface-dark text-text-primary dark:text-white placeholder:text-text-secondary outline-none resize-none focus-visible:ring-2 focus-visible:ring-primary"
+                  @input="form.workouts[index].note = ($event.target as HTMLTextAreaElement).value || null" />
+              </div>
+
+              <!-- Exercises -->
+              <div class="flex flex-col gap-3">
+                <p class="text-xs font-semibold uppercase tracking-wide text-text-secondary">Exercises</p>
+
+                <div v-for="(ex, ei) in form.workouts[index].excercises ?? []" :key="ei"
+                  class="flex flex-col gap-3 p-3 rounded-xl border border-gray-100 dark:border-white/10">
+                  <div class="flex items-center justify-between gap-2">
+                    <div class="flex items-center gap-2">
+                      <span class="font-medium text-sm text-text-primary dark:text-white">{{ ex.name }}</span>
+                      <span v-if="ex.isBodyweight"
+                        class="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400">
+                        Bodyweight
+                      </span>
+                    </div>
+                    <button type="button"
+                      class="text-sm text-red-500 hover:text-red-600 font-medium focus-visible:ring-1 focus-visible:ring-primary rounded flex-shrink-0"
+                      @click="removeExercise(index, ei)">
+                      Remove
+                    </button>
+                  </div>
+
+                  <div class="flex flex-col gap-2">
+                    <div v-for="(set, si) in ex.sets ?? []" :key="si" class="flex items-center gap-2">
+                      <EditSet :set="set" :is-bodyweight="ex.isBodyweight" class="flex-1"
+                        @update:set="form.workouts[index].excercises![ei].sets![si] = $event" />
+                      <button type="button"
+                        class="text-red-400 hover:text-red-600 text-lg leading-none p-1 focus-visible:ring-1 focus-visible:ring-primary rounded"
+                        aria-label="Remove set" @click="removeSet(index, ei, si)">×</button>
+                    </div>
+                  </div>
+
+                  <div class="flex items-center gap-4">
+                    <button type="button"
+                      class="text-sm text-primary font-medium hover:underline focus-visible:ring-1 focus-visible:ring-primary rounded"
+                      @click="addSet(index, ei)">+ Add set</button>
+                    <button type="button"
+                      class="text-sm text-primary font-medium hover:underline focus-visible:ring-1 focus-visible:ring-primary rounded"
+                      @click="addSetsForExIdx = ei">+ Add sets…</button>
+                  </div>
+                </div>
+
                 <button type="button"
-                  class="text-sm text-primary font-medium hover:underline focus-visible:ring-1 focus-visible:ring-primary rounded"
-                  @click="addSet(index, ei)">+ Add set</button>
-                <button type="button"
-                  class="text-sm text-primary font-medium hover:underline focus-visible:ring-1 focus-visible:ring-primary rounded"
-                  @click="addSetsForExIdx = ei">+ Add sets…</button>
+                  class="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm text-primary font-medium hover:bg-primary/10 transition-colors w-full"
+                  @click="isExercisePickerOpen = true">
+                  <Plus class="w-4 h-4" />
+                  Add exercise
+                </button>
               </div>
             </div>
+          </template>
+        </ProcessWizard>
 
+        <!-- Calendar view -->
+        <div v-else key="calendar" class="h-full flex flex-col overflow-auto p-4">
+          <!-- Month navigation + add buttons -->
+          <div class="flex items-center gap-2 mb-4 flex-shrink-0">
             <button type="button"
-              class="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm text-primary font-medium hover:bg-primary/10 transition-colors w-full"
-              @click="isExercisePickerOpen = true">
-              <Plus class="w-4 h-4" />
-              Add exercise
+              class="p-1.5 rounded-lg text-text-secondary hover:text-text-primary dark:text-white/60 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
+              @click="prevMonth">
+              <ChevronLeft class="w-5 h-5" />
+            </button>
+            <p class="text-sm font-semibold text-text-primary dark:text-white capitalize flex-1 text-center">{{ calendarTitle }}</p>
+            <button type="button"
+              class="p-1.5 rounded-lg text-text-secondary hover:text-text-primary dark:text-white/60 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
+              @click="nextMonth">
+              <ChevronRight class="w-5 h-5" />
+            </button>
+            <div class="w-px h-4 bg-gray-200 dark:bg-white/10 mx-1" />
+            <button type="button"
+              class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm text-primary font-medium hover:bg-primary/10 transition-colors"
+              @click="isRoutinePickerOpen = true">
+              <Plus class="w-3.5 h-3.5" />
+              From routine
+            </button>
+            <button type="button"
+              class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm text-text-secondary dark:text-white/60 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
+              @click="addBlankWorkout">
+              <Plus class="w-3.5 h-3.5" />
+              Blank
             </button>
           </div>
+
+          <!-- Day-of-week headers -->
+          <div class="grid grid-cols-7 mb-1 flex-shrink-0">
+            <div v-for="d in ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']" :key="d"
+              class="text-center text-xs font-semibold text-text-secondary py-1">{{ d }}</div>
+          </div>
+
+          <!-- Day cells -->
+          <div class="grid grid-cols-7 gap-px flex-1">
+            <div v-for="(cell, ci) in calendarDays" :key="ci"
+              :class="['min-h-[80px] rounded-lg p-1 flex flex-col gap-1 transition-colors',
+                cell.dateStr ? 'bg-white dark:bg-white/5' : '',
+                cell.dateStr === todayStr ? 'ring-2 ring-primary ring-inset' : '',
+                cell.dateStr && dragOverDate === cell.dateStr ? 'bg-primary/10 dark:bg-primary/20 ring-2 ring-primary/50 ring-inset' : '']"
+              @dragover="cell.dateStr ? onCellDragOver(cell.dateStr, $event) : undefined"
+              @dragleave="onCellDragLeave($event)"
+              @drop="cell.dateStr ? onCellDrop(cell.dateStr, $event) : undefined">
+              <!-- Day number -->
+              <span v-if="cell.dateStr"
+                :class="['text-xs font-medium leading-none px-1 pt-0.5 self-end select-none',
+                  cell.dateStr === todayStr ? 'text-primary' : 'text-text-secondary dark:text-white/40']">
+                {{ Number(cell.dateStr.split('-')[2]) }}
+              </span>
+              <!-- Workout chips -->
+              <div v-for="wIdx in workoutsByDate.get(cell.dateStr ?? '') ?? []" :key="wIdx"
+                :class="['w-full px-1.5 py-0.5 rounded-md bg-primary/10 text-primary text-xs font-medium truncate leading-5 cursor-grab active:cursor-grabbing transition-opacity',
+                  draggingIdx === wIdx ? 'opacity-40' : 'hover:bg-primary/20']"
+                draggable="true"
+                :title="form.workouts[wIdx].name || 'Workout'"
+                @click="goToWorkout(wIdx)"
+                @dragstart="onChipDragStart(wIdx, $event)"
+                @dragend="onChipDragEnd">
+                {{ form.workouts[wIdx].name || 'Workout' }}
+              </div>
+            </div>
+          </div>
+
+          <!-- DnD hint -->
+          <p class="text-xs text-text-secondary text-center mt-2 flex-shrink-0 select-none">
+            Drag to move · Hold <kbd class="px-1 py-0.5 rounded bg-gray-100 dark:bg-white/10 font-mono text-[10px]">Ctrl</kbd> while dropping to copy
+          </p>
         </div>
-      </template>
-    </ProcessWizard>
+
+      </Transition>
+    </div>
 
     <!-- Empty state -->
     <div v-else class="h-full flex flex-col items-center justify-center gap-2">
@@ -511,3 +690,17 @@ async function doDelete() {
     :is-bodyweight="form.workouts[activeWorkoutIndex]?.excercises?.[addSetsForExIdx]?.isBodyweight" @add="onSetsAdded"
     @close="addSetsForExIdx = null" />
 </template>
+
+<style scoped>
+.view-slide-left-enter-active,
+.view-slide-left-leave-active,
+.view-slide-right-enter-active,
+.view-slide-right-leave-active {
+  transition: transform 0.25s ease, opacity 0.25s ease;
+}
+
+.view-slide-left-enter-from  { transform: translateX(40px);  opacity: 0; }
+.view-slide-left-leave-to    { transform: translateX(-40px); opacity: 0; }
+.view-slide-right-enter-from { transform: translateX(-40px); opacity: 0; }
+.view-slide-right-leave-to   { transform: translateX(40px);  opacity: 0; }
+</style>
