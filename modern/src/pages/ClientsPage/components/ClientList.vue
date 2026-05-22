@@ -27,8 +27,8 @@ const paginated = computed(() =>
   props.clients.slice((page.value - 1) * PAGE_SIZE, page.value * PAGE_SIZE)
 )
 
-async function copyCode(code: string) {
-  await navigator.clipboard.writeText(code)
+async function copyLink(code: string) {
+  await navigator.clipboard.writeText(`${window.location.origin}/join/${code}`)
   copiedCode.value = code
   setTimeout(() => { copiedCode.value = null }, 2000)
 }
@@ -63,15 +63,19 @@ async function handleDelete() {
         <div class="flex-1 min-w-0">
           <div class="flex items-center gap-2 flex-wrap">
             <p class="font-semibold text-text-primary dark:text-white">{{ client.name }}</p>
-            <BaseBadge :label="client.invitationAccepted ? 'Active' : 'Pending'" :variant="client.invitationAccepted ? 'success' : 'warning'" />
+            <BaseBadge :label="client.status ?? 'Invited'" :variant="client.status === 'Active' ? 'success' : 'warning'" />
           </div>
-          <p v-if="client.email" class="text-xs text-text-secondary mt-0.5">{{ client.email }}</p>
-          <div v-if="client.invitationCode" class="flex items-center gap-1.5 mt-1">
+          <p v-if="client.firstName || client.lastName || client.email" class="text-xs text-text-secondary mt-0.5">
+            <span v-if="client.firstName || client.lastName">{{ [client.firstName, client.lastName].filter(Boolean).join(' ') }}</span>
+            <span v-if="(client.firstName || client.lastName) && client.email"> · </span>
+            <span v-if="client.email">{{ client.email }}</span>
+          </p>
+          <div v-if="client.status === 'Invited' && client.invitationCode" class="flex items-center gap-1.5 mt-1">
             <code class="text-xs bg-gray-100 dark:bg-white/10 rounded px-1 py-0.5 font-mono">{{ client.invitationCode }}</code>
             <button
               class="text-xs text-primary hover:underline focus-visible:ring-1 focus-visible:ring-primary rounded"
-              @click="copyCode(client.invitationCode!)"
-            >{{ copiedCode === client.invitationCode ? '✓ Copied' : 'Copy' }}</button>
+              @click="copyLink(client.invitationCode!)"
+            >{{ copiedCode === client.invitationCode ? '✓ Copied' : 'Copy Link' }}</button>
           </div>
         </div>
         <div class="flex gap-1.5">

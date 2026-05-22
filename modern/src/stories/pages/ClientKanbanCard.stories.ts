@@ -27,7 +27,7 @@ export const ActiveClient: Story = {
   }),
 }
 
-export const PendingClient: Story = {
+export const InvitedClient: Story = {
   args: { client: mockClients[2] },
   render: (args) => ({
     components: { ClientKanbanCard },

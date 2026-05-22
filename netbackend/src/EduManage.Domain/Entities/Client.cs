@@ -27,6 +27,14 @@ public record Client
 
     public string? UserId { get; private set; } = null;
 
+    public string? Email { get; private set; }
+
+    public string? FirstName { get; private set; }
+
+    public string? LastName { get; private set; }
+
+    public string? Gender { get; private set; }
+
     public ICollection<Plan> Plans { get; init; } = [];
 
     public ICollection<Meeting> Meetings { get; init; } = [];
@@ -37,10 +45,14 @@ public record Client
 
     public string TrainerUserId { get; }
 
-    public void AcceptInvitation(string clientUserId, string imageUrl)
+    public void AcceptInvitation(string clientUserId, string imageUrl, string? email, string? firstName, string? lastName, string? gender)
     {
         UserId = clientUserId;
         ImageUrl = imageUrl;
+        Email = email;
+        FirstName = firstName;
+        LastName = lastName;
+        Gender = gender;
         Status = "Active";
     }
 

@@ -166,27 +166,23 @@ export interface ClientOut {
   name: string | null
   tags: string[] | null
   imageUrl: string | null
-  status: string | null      // "pending" | "active"
-  invitationAccepted: boolean
+  status: string | null      // "Active" | "Invited"
   invitationCode: string | null
   trainerUserId: string | null
+  firstName: string | null
+  lastName: string | null
   email: string | null
-  note: string | null
+  gender: string | null
 }
 
 export interface ClientCreate {
   name: string | null
   tags: string[] | null
-  email: string | null
-  note: string | null
-  invitationCode: string | null
 }
 
 export interface ClientUpdate {
   name: string | null
   tags: string[] | null
-  email: string | null
-  note: string | null
 }
 
 // ─── Invitations ──────────────────────────────────────────────
@@ -200,6 +196,10 @@ export interface InvitationOut {
 export interface AcceptInvitationRequest {
   invitationCode: string | null
   imageUrl: string | null
+  email: string | null
+  firstName: string | null
+  lastName: string | null
+  gender: string | null
 }
 
 // ─── Meetings ─────────────────────────────────────────────────

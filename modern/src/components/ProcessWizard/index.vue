@@ -2,7 +2,7 @@
 import { ref, watch } from 'vue'
 
 const props = defineProps<{
-  steps: { id: string | number; label: string }[]
+  steps: { id: string | number; label: string; subtitle?: string }[]
   modelValue: number
 }>()
 const emit = defineEmits<{ 'update:modelValue': [val: number] }>()
@@ -26,14 +26,17 @@ function goTo(idx: number) {
         v-for="(step, idx) in steps"
         :key="step.id"
         type="button"
-        class="w-full text-left px-4 py-3 text-sm truncate transition-colors border-l-2 flex items-center gap-2"
+        class="w-full text-left px-4 py-3 text-sm transition-colors border-l-2 flex items-center gap-2"
         :class="modelValue === idx
           ? 'bg-primary/10 text-primary font-semibold border-primary'
           : 'text-text-primary dark:text-white hover:bg-gray-50 dark:hover:bg-white/5 border-transparent'"
         @click="goTo(idx)"
       >
         <span class="text-xs text-text-secondary flex-shrink-0">{{ idx + 1 }}.</span>
-        <span class="truncate">{{ step.label || 'New exercise' }}</span>
+        <span class="flex flex-col min-w-0">
+          <span class="truncate">{{ step.label || 'New exercise' }}</span>
+          <span v-if="step.subtitle" class="truncate text-xs font-normal opacity-60 mt-0.5">{{ step.subtitle }}</span>
+        </span>
       </button>
       <div class="p-2 mt-auto">
         <slot name="add-step" />

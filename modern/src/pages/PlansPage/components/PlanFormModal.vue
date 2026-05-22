@@ -17,7 +17,7 @@ import RoutinePickerDialog from '../../../components/RoutinePickerDialog/index.v
 import ExercisePickerDialog from '../../../components/ExercisePickerDialog/index.vue'
 import EditSet from '../../../components/EditSet/index.vue'
 import AddSetsDialog from '../../../components/AddSetsDialog/index.vue'
-import { X, Plus, CalendarDays } from 'lucide-vue-next'
+import { X, Plus, CalendarDays, Copy } from 'lucide-vue-next'
 
 const props = defineProps<{ open: boolean; plan: PlanOut | null }>()
 const emit = defineEmits<{ close: [] }>()
@@ -45,6 +45,37 @@ const isRoutinePickerOpen = ref(false)
 const isExercisePickerOpen = ref(false)
 const addSetsForExIdx = ref<number | null>(null)
 const nameIsAuto = ref(false)
+const isScheduleCopyOpen = ref(false)
+const scheduleCopySourceIndex = ref<number | null>(null)
+const scheduleCopyFrequency = ref<string>('weekly')
+const scheduleCopyCount = ref(4)
+
+const FREQUENCIES = [
+  { key: 'every-1', label: 'Every day', days: 1 },
+  { key: 'every-2', label: 'Every 2 days', days: 2 },
+  { key: 'every-3', label: 'Every 3 days', days: 3 },
+  { key: 'every-4', label: 'Every 4 days', days: 4 },
+  { key: 'every-5', label: 'Every 5 days', days: 5 },
+  { key: 'every-6', label: 'Every 6 days', days: 6 },
+  { key: 'weekly', label: 'Once a week', days: 7 },
+  { key: 'biweekly', label: 'Every 2 weeks', days: 14 },
+  { key: 'monthly', label: 'Once a month', months: 1 },
+] as const
+
+const scheduleCopyDates = computed(() => {
+  if (scheduleCopySourceIndex.value === null) return []
+  const src = form.value.workouts[scheduleCopySourceIndex.value]
+  if (!src?.date) return []
+  const freq = FREQUENCIES.find(f => f.key === scheduleCopyFrequency.value)
+  if (!freq) return []
+  const base = new Date(src.date + 'T00:00:00')
+  return Array.from({ length: scheduleCopyCount.value }, (_, i) => {
+    const d = new Date(base)
+    if ('months' in freq) d.setMonth(d.getMonth() + freq.months * (i + 1))
+    else d.setDate(d.getDate() + freq.days * (i + 1))
+    return d.toISOString().split('T')[0]
+  })
+})
 
 let savedSnapshot = ''
 
@@ -62,7 +93,16 @@ const selectedClient = computed(() =>
   clientStore.clients.find((c) => c.invitationCode === form.value.clientId) ?? null,
 )
 const wizardSteps = computed(() =>
-  form.value.workouts.map((w, i) => ({ id: i, label: w.name ?? 'New workout' })),
+  form.value.workouts.map((w, i) => {
+    const exCount = (w.excercises ?? []).length
+    const vol = (w.excercises ?? []).reduce((sum, ex) =>
+      sum + (ex.sets ?? []).reduce((s, set) => s + (set.reps ?? 0) * (set.weight ?? 0), 0), 0)
+    const parts: string[] = []
+    if (w.date) parts.push(new Date(w.date + 'T00:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric' }))
+    if (exCount) parts.push(`${exCount} ex`)
+    if (vol > 0) parts.push(vol >= 1000 ? `${(vol / 1000).toFixed(1)}k kg` : `${vol} kg`)
+    return { id: i, label: w.name ?? 'New workout', subtitle: parts.length ? parts.join(' · ') : undefined }
+  }),
 )
 
 watch(
@@ -168,6 +208,30 @@ function onSetsAdded(sets: RoutineSet[]) {
   const ex = form.value.workouts[activeWorkoutIndex.value].excercises![addSetsForExIdx.value!]
   ex.sets = [...(ex.sets ?? []), ...sets]
   addSetsForExIdx.value = null
+}
+
+function openScheduleCopy(index: number) {
+  scheduleCopySourceIndex.value = index
+  scheduleCopyFrequency.value = 'weekly'
+  scheduleCopyCount.value = 4
+  isScheduleCopyOpen.value = true
+}
+
+function doScheduleCopy() {
+  const src = form.value.workouts[scheduleCopySourceIndex.value!]
+  for (const date of scheduleCopyDates.value) {
+    form.value.workouts.push({
+      id: null,
+      name: src.name,
+      note: src.note,
+      user_id: null,
+      excercises: JSON.parse(JSON.stringify(src.excercises)),
+      date,
+    })
+  }
+  activeWorkoutIndex.value = form.value.workouts.length - 1
+  isScheduleCopyOpen.value = false
+  scheduleCopySourceIndex.value = null
 }
 
 function removeWorkout(i: number) {
@@ -277,8 +341,17 @@ async function doDelete() {
           </div>
 
           <!-- Date -->
-          <BaseDatePicker :model-value="form.workouts[index].date" label="Date"
-            @update:model-value="form.workouts[index].date = $event" />
+          <div class="flex items-center gap-2">
+            <BaseDatePicker :model-value="form.workouts[index].date" label="Date" class="flex-1"
+              @update:model-value="form.workouts[index].date = $event" />
+            <button type="button"
+              :disabled="!form.workouts[index].date"
+              :class="['flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium border transition-colors mt-5', form.workouts[index].date ? 'border-primary text-primary hover:bg-primary/10' : 'border-gray-200 dark:border-white/10 text-text-secondary dark:text-white/30 cursor-not-allowed']"
+              @click="openScheduleCopy(index)">
+              <Copy class="w-4 h-4" />
+              Schedule copy
+            </button>
+          </div>
 
           <!-- Note -->
           <div class="flex flex-col gap-1.5">
@@ -376,6 +449,62 @@ async function doDelete() {
   <RoutinePickerDialog :open="isRoutinePickerOpen" @select="onRoutinePicked" @close="isRoutinePickerOpen = false" />
 
   <ExercisePickerDialog :open="isExercisePickerOpen" @select="onExercisePicked" @close="isExercisePickerOpen = false" />
+
+  <!-- Schedule copy dialog -->
+  <Teleport to="body">
+    <div v-if="isScheduleCopyOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+      <div class="bg-white dark:bg-surface-dark rounded-2xl shadow-xl w-full max-w-md flex flex-col gap-5 p-6">
+        <h3 class="text-base font-semibold text-text-primary dark:text-white">Schedule copies</h3>
+
+        <!-- Frequency -->
+        <div class="flex flex-col gap-2">
+          <p class="text-xs font-semibold uppercase tracking-wide text-text-secondary">Frequency</p>
+          <div class="flex flex-wrap gap-2">
+            <button v-for="freq in FREQUENCIES" :key="freq.key" type="button"
+              :class="['px-3 py-1.5 rounded-xl text-sm font-medium border transition-colors', scheduleCopyFrequency === freq.key ? 'border-primary bg-primary/10 text-primary' : 'border-gray-200 dark:border-white/10 text-text-secondary dark:text-white/60 hover:border-primary/50 hover:text-primary']"
+              @click="scheduleCopyFrequency = freq.key">
+              {{ freq.label }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Count -->
+        <div class="flex flex-col gap-2">
+          <p class="text-xs font-semibold uppercase tracking-wide text-text-secondary">Number of copies</p>
+          <div class="flex items-center gap-3">
+            <button type="button"
+              class="w-8 h-8 rounded-lg border border-gray-200 dark:border-white/10 text-text-primary dark:text-white text-lg leading-none flex items-center justify-center hover:bg-gray-50 dark:hover:bg-white/5 disabled:opacity-30"
+              :disabled="scheduleCopyCount <= 1" @click="scheduleCopyCount = Math.max(1, scheduleCopyCount - 1)">−</button>
+            <span class="w-8 text-center text-sm font-semibold text-text-primary dark:text-white">{{ scheduleCopyCount }}</span>
+            <button type="button"
+              class="w-8 h-8 rounded-lg border border-gray-200 dark:border-white/10 text-text-primary dark:text-white text-lg leading-none flex items-center justify-center hover:bg-gray-50 dark:hover:bg-white/5 disabled:opacity-30"
+              :disabled="scheduleCopyCount >= 52" @click="scheduleCopyCount = Math.min(52, scheduleCopyCount + 1)">+</button>
+          </div>
+        </div>
+
+        <!-- Date preview -->
+        <div class="flex flex-col gap-2">
+          <p class="text-xs font-semibold uppercase tracking-wide text-text-secondary">
+            {{ scheduleCopyDates.length }} workout{{ scheduleCopyDates.length !== 1 ? 's' : '' }} will be added
+          </p>
+          <ul class="flex flex-col gap-1 max-h-40 overflow-y-auto">
+            <li v-for="(d, i) in scheduleCopyDates" :key="d"
+              class="flex items-center gap-2 text-sm text-text-primary dark:text-white px-2 py-1 rounded-lg odd:bg-gray-50 dark:odd:bg-white/5">
+              <span class="text-text-secondary dark:text-white/40 w-5 text-right text-xs">{{ i + 1 }}</span>
+              <span>{{ new Date(d + 'T00:00:00').toLocaleDateString(undefined, { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' }) }}</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="flex items-center justify-end gap-2">
+          <BaseButton variant="ghost" @click="isScheduleCopyOpen = false">Cancel</BaseButton>
+          <BaseButton variant="primary" :disabled="!scheduleCopyDates.length" @click="doScheduleCopy">
+            Add {{ scheduleCopyDates.length }} workout{{ scheduleCopyDates.length !== 1 ? 's' : '' }}
+          </BaseButton>
+        </div>
+      </div>
+    </div>
+  </Teleport>
 
   <AddSetsDialog v-if="addSetsForExIdx !== null" :open="addSetsForExIdx !== null"
     :base-set="form.workouts[activeWorkoutIndex]?.excercises?.[addSetsForExIdx]?.sets?.at(-1) ?? { type: 'normal', reps: 10, weight: null, note: null }"

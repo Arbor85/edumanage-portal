@@ -5,6 +5,7 @@ import { useClientStore } from '../../stores/clientStore'
 import BaseModal from '../BaseModal.vue'
 import BaseInput from '../BaseInput.vue'
 import BaseAvatar from '../BaseAvatar.vue'
+import BaseBadge from '../BaseBadge.vue'
 import EmptyState from '../EmptyState.vue'
 import { Users } from 'lucide-vue-next'
 
@@ -46,8 +47,15 @@ function pick(client: ClientOut) {
           >
             <BaseAvatar :name="client.name ?? '?'" size="sm" />
             <div class="flex-1 min-w-0">
-              <p class="font-medium truncate">{{ client.name }}</p>
-              <p v-if="client.email" class="text-xs text-text-secondary truncate">{{ client.email }}</p>
+              <div class="flex items-center gap-2">
+                <p class="font-medium truncate">{{ client.name }}</p>
+                <BaseBadge v-if="client.status && client.status !== 'Active'" :label="client.status" variant="warning" class="flex-shrink-0" />
+              </div>
+              <p v-if="client.firstName || client.lastName || client.email" class="text-xs text-text-secondary truncate">
+                <span v-if="client.firstName || client.lastName">{{ [client.firstName, client.lastName].filter(Boolean).join(' ') }}</span>
+                <span v-if="(client.firstName || client.lastName) && client.email"> · </span>
+                <span v-if="client.email">{{ client.email }}</span>
+              </p>
             </div>
           </button>
         </li>

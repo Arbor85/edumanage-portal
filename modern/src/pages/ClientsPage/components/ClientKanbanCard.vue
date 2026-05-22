@@ -13,10 +13,9 @@ defineEmits<{ edit: []; delete: [] }>()
     <BaseAvatar :name="client.name ?? ''" size="sm" />
     <div class="flex-1 min-w-0">
       <p class="text-sm font-semibold text-text-primary dark:text-white truncate">{{ client.name }}</p>
-      <p v-if="client.email" class="text-xs text-text-secondary truncate">{{ client.email }}</p>
     </div>
     <div class="flex items-center gap-1">
-      <BaseBadge :label="client.invitationAccepted ? 'Active' : 'Pending'" :variant="client.invitationAccepted ? 'success' : 'warning'" />
+      <BaseBadge :label="client.status ?? 'Invited'" :variant="client.status === 'Active' ? 'success' : 'warning'" />
       <div class="hidden group-hover:flex gap-1 ml-1">
         <button class="w-6 h-6 flex items-center justify-center rounded text-text-secondary hover:text-primary" aria-label="Edit" @click="$emit('edit')"><Pencil class="w-3.5 h-3.5" /></button>
         <button class="w-6 h-6 flex items-center justify-center rounded text-text-secondary hover:text-red-500" aria-label="Delete" @click="$emit('delete')"><Trash2 class="w-3.5 h-3.5" /></button>

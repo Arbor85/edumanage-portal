@@ -26,6 +26,22 @@ public class ClientConfiguration : IEntityTypeConfiguration<Client>
         builder.Property(c => c.UserId)
             .HasDefaultValue(null);
 
+        builder.Property(c => c.Email)
+            .HasMaxLength(256)
+            .IsRequired(false);
+
+        builder.Property(c => c.FirstName)
+            .HasMaxLength(100)
+            .IsRequired(false);
+
+        builder.Property(c => c.LastName)
+            .HasMaxLength(100)
+            .IsRequired(false);
+
+        builder.Property(c => c.Gender)
+            .HasMaxLength(10)
+            .IsRequired(false);
+
         builder.Property(c => c.TrainerUserId)
             .IsRequired();
 

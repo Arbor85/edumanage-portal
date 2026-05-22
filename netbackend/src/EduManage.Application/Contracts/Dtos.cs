@@ -5,7 +5,7 @@ namespace EduManage.Application.Contracts;
 
 public sealed record AcceptClientInvitationRequest(string Name, string Email, string ImageUrl);
 
-public sealed record ClientCreate(string Name, IReadOnlyList<string> Tags, string InvitationCode);
+public sealed record ClientCreate(string Name, IReadOnlyList<string> Tags);
 
 public sealed record ClientUpdate(string Name, IReadOnlyList<string> Tags);
 
@@ -15,7 +15,11 @@ public sealed record ClientOut(
     string ImageUrl,
     string Status,
     string InvitationCode,
-    string TrainerUserId);
+    string TrainerUserId,
+    string? FirstName,
+    string? LastName,
+    string? Email,
+    string? Gender);
 
 public sealed record InvitationOut(
     string Name,

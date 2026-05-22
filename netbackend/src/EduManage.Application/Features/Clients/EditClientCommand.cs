@@ -20,7 +20,7 @@ public sealed record EditClientCommand(string InvitationCode, ClientUpdate Reque
 
             await repository.UpdateAsync(client, cancellationToken);
 
-            return new ClientOut(client.Name, client.Tags, client.ImageUrl, client.Status, client.InvitationCode, client.TrainerUserId);
+            return new ClientOut(client.Name, client.Tags, client.ImageUrl, client.Status, client.InvitationCode, client.TrainerUserId, client.FirstName, client.LastName, client.Email, client.Gender);
         }
     }
 }

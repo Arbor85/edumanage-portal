@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import type { ClientOut } from '../../../types'
 import SkeletonBlock from '../../../components/SkeletonBlock.vue'
 import ClientKanbanCard from './ClientKanbanCard.vue'
@@ -6,13 +7,17 @@ import ClientKanbanCard from './ClientKanbanCard.vue'
 const props = defineProps<{ clients: ClientOut[]; loading: boolean }>()
 const emit = defineEmits<{ edit: [c: ClientOut]; delete: [c: ClientOut] }>()
 
-const columns = [
-  { key: false, label: 'Pending' },
-  { key: true, label: 'Active' },
-]
+// Derive columns from actual status values; prefer a known order, append unknown ones
+const PREFERRED_ORDER = ['Invited', 'Active']
 
-function byStatus(accepted: boolean) {
-  return props.clients.filter((c) => c.invitationAccepted === accepted)
+const columns = computed(() => {
+  const extra = [...new Set(props.clients.map((c) => c.status ?? 'Unknown'))]
+    .filter((s) => !PREFERRED_ORDER.includes(s))
+  return [...PREFERRED_ORDER, ...extra].map((s) => ({ key: s, label: s }))
+})
+
+function byStatus(status: string) {
+  return props.clients.filter((c) => (c.status ?? 'Unknown') === status)
 }
 </script>
 

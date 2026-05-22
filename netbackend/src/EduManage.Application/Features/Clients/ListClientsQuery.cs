@@ -13,7 +13,7 @@ public sealed record ListClientsQuery(string? UserId) : IRequest<IReadOnlyList<C
             var clients = await repository.ListAsync(cancellationToken);
             return clients
                 .Where(c => c.TrainerUserId == request.UserId)
-                .Select(c => new ClientOut(c.Name, c.Tags, c.ImageUrl, c.Status, c.InvitationCode, c.TrainerUserId))
+                .Select(c => new ClientOut(c.Name, c.Tags, c.ImageUrl, c.Status, c.InvitationCode, c.TrainerUserId, c.FirstName, c.LastName, c.Email, c.Gender))
                 .ToList();
         }
     }

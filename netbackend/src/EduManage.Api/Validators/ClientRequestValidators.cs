@@ -8,7 +8,6 @@ public sealed class ClientCreateValidator : AbstractValidator<ClientCreate>
     public ClientCreateValidator()
     {
         RuleFor(request => request.Name).NotEmpty().MaximumLength(200);
-        RuleFor(request => request.InvitationCode).MaximumLength(50);
         RuleForEach(request => request.Tags).MaximumLength(50);
     }
 }

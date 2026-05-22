@@ -4,7 +4,14 @@ using MediatR;
 
 namespace EduManage.Application.Features.Clients
 {
-    public record AcceptInvitationCommand(string InvitationCode, string ImageUrl, string CurrentUserId) : IRequest
+    public record AcceptInvitationCommand(
+        string InvitationCode,
+        string ImageUrl,
+        string? Email,
+        string? FirstName,
+        string? LastName,
+        string? Gender,
+        string CurrentUserId) : IRequest
     {
         internal class Handler(IClientRepository repository) : IRequestHandler<AcceptInvitationCommand>
         {
@@ -16,7 +23,7 @@ namespace EduManage.Application.Features.Clients
                 if (client.Status != "Invited")
                     throw new UnauthorizedAccessException($"Invitation '{request.InvitationCode}' is already accepted.");
 
-                client.AcceptInvitation(request.CurrentUserId, request.ImageUrl);
+                client.AcceptInvitation(request.CurrentUserId, request.ImageUrl, request.Email, request.FirstName, request.LastName, request.Gender);
                 await repository.UpdateAsync(client, cancellationToken);
             }
         }

@@ -34,8 +34,8 @@ export const useClientStore = defineStore('client', () => {
     clients.value = clients.value.filter((c) => c.invitationCode !== code)
   }
 
-  const active = computed(() => clients.value.filter((c) => c.status === 'active'))
-  const pending = computed(() => clients.value.filter((c) => c.status === 'pending'))
+  const active = computed(() => clients.value.filter((c) => c.status === 'Active'))
+  const invited = computed(() => clients.value.filter((c) => c.status === 'Invited'))
 
-  return { clients, isLoading, fetch, create, update, remove, active, pending }
+  return { clients, isLoading, fetch, create, update, remove, active, invited }
 })

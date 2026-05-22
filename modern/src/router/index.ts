@@ -20,6 +20,11 @@ const router = createRouter({
       name: 'InviteAccept',
       component: () => import('../pages/InviteAcceptPage.vue'),
     },
+    {
+      path: '/join/:code',
+      name: 'Join',
+      component: () => import('../pages/JoinPage.vue'),
+    },
 
     // Protected routes
     {

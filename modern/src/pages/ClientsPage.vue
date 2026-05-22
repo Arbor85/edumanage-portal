@@ -28,7 +28,7 @@ onMounted(() => clientStore.fetch())
 
 const filtered = computed(() =>
   clientStore.clients.filter((c) =>
-    !search.value || c.name?.toLowerCase().includes(search.value.toLowerCase()) || c.email?.toLowerCase().includes(search.value.toLowerCase())
+    !search.value || c.name?.toLowerCase().includes(search.value.toLowerCase())
   )
 )
 
