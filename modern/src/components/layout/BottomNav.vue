@@ -12,7 +12,7 @@ const items: { to: string; icon: Component; label: string; fab?: boolean }[] = [
   { to: '/exercises', icon: Dumbbell, label: 'Exercises' },
   { to: '/workout/active', icon: Play, label: 'Workout', fab: true },
   { to: '/plans', icon: Calendar, label: 'Plans' },
-  { to: '/meetings', icon: CalendarDays, label: 'Schedule' },
+  // { to: '/meetings', icon: CalendarDays, label: 'Schedule' },
 ]
 </script>
 

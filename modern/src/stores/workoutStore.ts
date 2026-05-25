@@ -157,31 +157,58 @@ export const useWorkoutStore = defineStore('workout', () => {
     persist()
   }
 
-  function addAdHocExercise(ex: { name: string; isBodyweight: boolean }) {
+  function addAdHocExercise(
+    ex: { name: string; isBodyweight: boolean },
+    sets?: { reps: number | null; weight: number | null }[]
+  ) {
     if (!activeWorkout.value) return
     const { name, isBodyweight } = ex
+    const rawSets = sets?.length ? sets : [{ reps: null, weight: null }]
     const newEx: ActiveExercise = {
       name,
       isBodyweight,
       skipped: false,
       currentSetIndex: 0,
-      sets: [
-        {
-          setNumber: 1,
-          reps: null,
-          weight: null,
-          targetReps: null,
-          targetWeight: null,
-          actualReps: null,
-          actualWeight: null,
-          completed: false,
-          isBodyweight,
-          note: null,
-        },
-      ],
+      sets: rawSets.map((s, i) => ({
+        setNumber: i + 1,
+        reps: s.reps,
+        weight: s.weight,
+        targetReps: s.reps,
+        targetWeight: s.weight,
+        actualReps: null,
+        actualWeight: null,
+        completed: false,
+        isBodyweight,
+        note: null,
+      })),
     }
     const insertAt = activeWorkout.value.currentExerciseIndex + 1
     activeWorkout.value.exercises.splice(insertAt, 0, newEx)
+    persist()
+  }
+
+  function updateExerciseSets(
+    exerciseIndex: number,
+    sets: { reps: number | null; weight: number | null }[]
+  ) {
+    if (!activeWorkout.value) return
+    const ex = activeWorkout.value.exercises[exerciseIndex]
+    if (!ex) return
+    ex.sets = sets.map((s, i) => ({
+      setNumber: i + 1,
+      reps: s.reps,
+      weight: s.weight,
+      targetReps: s.reps,
+      targetWeight: s.weight,
+      actualReps: ex.sets[i]?.actualReps ?? null,
+      actualWeight: ex.sets[i]?.actualWeight ?? null,
+      completed: ex.sets[i]?.completed ?? false,
+      isBodyweight: ex.isBodyweight,
+      note: ex.sets[i]?.note ?? null,
+    }))
+    if (ex.currentSetIndex >= ex.sets.length) {
+      ex.currentSetIndex = Math.max(0, ex.sets.length - 1)
+    }
     persist()
   }
 
@@ -287,6 +314,7 @@ export const useWorkoutStore = defineStore('workout', () => {
     skipRest,
     skipExercise,
     addAdHocExercise,
+    updateExerciseSets,
     pauseWorkout,
     resumeWorkout,
     finishWorkout,

@@ -2,26 +2,45 @@
 import { ref } from 'vue'
 import { useWorkoutStore } from '../../../stores/workoutStore'
 import { useExerciseStore } from '../../../stores/exerciseStore'
-import BaseButton from '../../../components/BaseButton.vue'
 import SelectExercise from '../../../components/SelectExercise/index.vue'
+import ExerciseSetupDialog from '../../../components/ExerciseSetupDialog.vue'
 
 const store = useWorkoutStore()
 const exerciseStore = useExerciseStore()
-const addId = ref<number | null>(null)
 
-function add() {
-  const ex = exerciseStore.exercises.find((e) => e.id === addId.value)
+const selectedId = ref<number | null>(null)
+const dialogOpen = ref(false)
+const pendingExercise = ref<{ name: string; isBodyweight: boolean } | null>(null)
+
+function onExerciseSelected(id: number | null) {
+  if (id === null) return
+  const ex = exerciseStore.exercises.find((e) => e.id === id)
   if (!ex) return
-  store.addAdHocExercise({ name: ex.name ?? '', isBodyweight: false })
-  addId.value = null
+  pendingExercise.value = { name: ex.name ?? '', isBodyweight: ex.isBodyweight ?? false }
+  dialogOpen.value = true
+  selectedId.value = null
+}
+
+function onConfirm(sets: { reps: number | null; weight: number | null }[]) {
+  if (!pendingExercise.value) return
+  store.addAdHocExercise(pendingExercise.value, sets)
+  pendingExercise.value = null
+}
+
+function onClose() {
+  dialogOpen.value = false
+  pendingExercise.value = null
 }
 </script>
 
 <template>
-  <div class="flex gap-2 items-end mt-2">
-    <div class="flex-1">
-      <SelectExercise v-model="addId" label="Add Exercise" />
-    </div>
-    <BaseButton size="sm" variant="secondary" :disabled="addId === null" @click="add">Add</BaseButton>
-  </div>
+  <SelectExercise :model-value="selectedId" label="Add Exercise" @update:model-value="onExerciseSelected" />
+
+  <ExerciseSetupDialog
+    :open="dialogOpen"
+    :exercise-name="pendingExercise?.name ?? ''"
+    :is-bodyweight="pendingExercise?.isBodyweight"
+    @confirm="onConfirm"
+    @close="onClose"
+  />
 </template>

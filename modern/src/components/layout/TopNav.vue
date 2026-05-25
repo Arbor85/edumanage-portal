@@ -15,8 +15,8 @@ const titles: Record<string, string> = {
   '/workout/active': 'Active Workout',
   '/history': 'History',
   '/clients': 'Clients',
-  '/meetings': 'Schedule',
-  '/courses': 'Courses',
+  // '/meetings': 'Schedule',
+  // '/courses': 'Courses',
   '/profile': 'Profile',
 }
 

@@ -18,10 +18,10 @@ const navItems: { to: string; icon: Component; label: string; pulse?: boolean }[
   { to: '/routines', icon: ClipboardList, label: 'Workouts' },
   { to: '/plans', icon: Calendar, label: 'Plans' },
   { to: '/workout/active', icon: Play, label: 'Active', pulse: true },
-  { to: '/meetings', icon: CalendarDays, label: 'Schedule' },
+  // { to: '/meetings', icon: CalendarDays, label: 'Schedule' },
   { to: '/history', icon: BarChart2, label: 'Analytics' },
   { to: '/clients', icon: Users, label: 'Clients' },
-  { to: '/courses', icon: GraduationCap, label: 'Courses' },
+  // { to: '/courses', icon: GraduationCap, label: 'Courses' },
 ]
 </script>
 
