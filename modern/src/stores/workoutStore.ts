@@ -117,7 +117,7 @@ export const useWorkoutStore = defineStore('workout', () => {
     startElapsedTimer()
   }
 
-  function completeSet(actualReps?: number | null, actualWeight?: number | null, note?: string) {
+  function completeSet(actualReps?: number | null, actualWeight?: number | null, note?: string, actualDuration?: number | null) {
     if (!activeWorkout.value) return
     const aw = activeWorkout.value
     const exercise = aw.exercises[aw.currentExerciseIndex]
@@ -127,6 +127,7 @@ export const useWorkoutStore = defineStore('workout', () => {
 
     set.actualReps = actualReps ?? set.reps
     set.actualWeight = actualWeight ?? set.weight
+    set.actualDuration = actualDuration !== undefined ? actualDuration : set.duration
     set.completed = true
     set.note = note ?? set.note
 

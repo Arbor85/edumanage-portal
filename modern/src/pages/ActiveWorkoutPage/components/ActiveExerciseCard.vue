@@ -1,17 +1,17 @@
 <script setup lang="ts">
 import type { ActiveExercise } from '../../../types'
 import BaseButton from '../../../components/BaseButton.vue'
+import SetTimerRow from './SetTimerRow.vue'
 import { useWorkoutStore } from '../../../stores/workoutStore'
 import { Check } from 'lucide-vue-next'
 
-defineProps<{ exercise: ActiveExercise; isCurrent: boolean }>()
+const props = defineProps<{ exercise: ActiveExercise; isCurrent: boolean }>()
 const store = useWorkoutStore()
 
-function fmtDuration(sec: number | null) {
-  if (sec === null) return '—'
-  const m = Math.floor(sec / 60)
-  const s = sec % 60
-  return m > 0 ? `${m}m ${s}s` : `${s}s`
+const isTimeBased = () => props.exercise.activityTrackType === 'time'
+
+function onSetComplete(actualDuration: number | null) {
+  store.completeSet(null, null, undefined, actualDuration)
 }
 
 function fmtDistance(m: number | null) {
@@ -31,32 +31,49 @@ function fmtDistance(m: number | null) {
     </div>
 
     <div class="flex flex-col gap-1.5">
-      <div
-        v-for="(set, i) in exercise.sets"
-        :key="i"
-        class="flex items-center gap-3 text-sm p-2 rounded-xl"
-        :class="[
-          set.completed ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 line-through' : '',
-          isCurrent && i === exercise.currentSetIndex ? 'ring-1 ring-primary' : ''
-        ]"
-      >
-        <span class="w-5 text-center font-medium text-text-secondary">{{ i + 1 }}</span>
-        <span class="flex-1">
-          <template v-if="exercise.activityTrackType === 'time'">{{ fmtDuration(set.duration) }}</template>
-          <template v-else-if="exercise.activityTrackType === 'distance'">{{ fmtDistance(set.distance) }}</template>
-          <template v-else>
-            {{ set.reps ?? '—' }} reps
-            <span v-if="set.weight"> · {{ set.weight }}kg</span>
-          </template>
-        </span>
-        <BaseButton
-          v-if="isCurrent && !set.completed && i === exercise.currentSetIndex"
-          size="sm"
-          variant="primary"
-          @click="store.completeSet()"
-        ><Check class="w-4 h-4" /> Done</BaseButton>
-        <span v-else-if="set.completed" class="text-xs"><Check class="w-3.5 h-3.5 inline" /></span>
-      </div>
+      <!-- Time-based exercise: use timer row for each set -->
+      <template v-if="isTimeBased()">
+        <SetTimerRow
+          v-for="(set, i) in exercise.sets"
+          :key="i"
+          :set-index="i"
+          :duration="set.duration"
+          :completed="set.completed"
+          :is-current="isCurrent && i === exercise.currentSetIndex"
+          @complete="onSetComplete"
+        />
+      </template>
+
+      <!-- All other track types: standard rows -->
+      <template v-else>
+        <div
+          v-for="(set, i) in exercise.sets"
+          :key="i"
+          class="flex items-center gap-3 text-sm p-2 rounded-xl"
+          :class="[
+            set.completed ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 line-through' : '',
+            isCurrent && i === exercise.currentSetIndex ? 'ring-1 ring-primary' : '',
+          ]"
+        >
+          <span class="w-5 text-center font-medium text-text-secondary">{{ i + 1 }}</span>
+          <span class="flex-1">
+            <template v-if="exercise.activityTrackType === 'distance'">
+              {{ fmtDistance(set.distance) }}
+            </template>
+            <template v-else>
+              {{ set.reps ?? '—' }} reps
+              <span v-if="set.weight"> · {{ set.weight }}kg</span>
+            </template>
+          </span>
+          <BaseButton
+            v-if="isCurrent && !set.completed && i === exercise.currentSetIndex"
+            size="sm"
+            variant="primary"
+            @click="store.completeSet()"
+          ><Check class="w-4 h-4" /> Done</BaseButton>
+          <span v-else-if="set.completed" class="text-xs"><Check class="w-3.5 h-3.5 inline" /></span>
+        </div>
+      </template>
     </div>
   </div>
 </template>
