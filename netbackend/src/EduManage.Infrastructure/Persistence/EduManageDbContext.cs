@@ -22,6 +22,9 @@ public class EduManageDbContext : DbContext
     public DbSet<CompletedExercise> CompletedExercises { get; set; }
     public DbSet<CompletedSet> CompletedSets { get; set; }
     public DbSet<SourceWorkout> SourceWorkouts { get; set; }
+    public DbSet<DefaultWorkout> DefaultWorkouts { get; set; }
+    public DbSet<DefaultWorkoutExercise> DefaultWorkoutExercises { get; set; }
+    public DbSet<DefaultWorkoutSet> DefaultWorkoutSets { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -40,5 +43,8 @@ public class EduManageDbContext : DbContext
         modelBuilder.ApplyConfiguration(new CompletedExerciseConfiguration());
         modelBuilder.ApplyConfiguration(new CompletedSetConfiguration());
         modelBuilder.ApplyConfiguration(new SourceWorkoutConfiguration());
+        modelBuilder.ApplyConfiguration(new DefaultWorkoutConfiguration());
+        modelBuilder.ApplyConfiguration(new DefaultWorkoutExerciseConfiguration());
+        modelBuilder.ApplyConfiguration(new DefaultWorkoutSetConfiguration());
     }
 }

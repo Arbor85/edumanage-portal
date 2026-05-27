@@ -2,6 +2,7 @@
 using EduManage.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -9,9 +10,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EduManage.Infrastructure.Migrations
 {
     [DbContext(typeof(EduManageDbContext))]
-    partial class EduManageDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260527112921_DefaultWorkoutsRoutineShapeMigration")]
+    partial class DefaultWorkoutsRoutineShapeMigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.0");

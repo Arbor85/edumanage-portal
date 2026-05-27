@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { usePageTitle } from '../../../composables/usePageTitle'
-import type { RoutineOut, RoutineCreate, RoutineUpdate, RoutineExcercise, RoutineSet, ExcerciseOut } from '../../../types'
+import type { RoutineOut, RoutineCreate, RoutineUpdate, RoutineExcercise, RoutineSet, ExcerciseOut, DefaultWorkoutOut } from '../../../types'
 import { useRoutineStore } from '../../../stores/routineStore'
 import { useToast } from '../../../composables/useToast'
 import FullSizeDialog from '../../../components/FullSizeDialog/index.vue'
@@ -13,6 +13,7 @@ import EmptyState from '../../../components/EmptyState.vue'
 import { X, Plus, Dumbbell } from 'lucide-vue-next'
 import EditSet from '../../../components/EditSet/index.vue'
 import AddSetsDialog from '../../../components/AddSetsDialog/index.vue'
+import DefaultWorkoutPickerDialog from '../../../components/DefaultWorkoutPickerDialog/index.vue'
 
 const props = defineProps<{
   open: boolean
@@ -33,6 +34,7 @@ const confirmDelete = ref(false)
 const confirmDiscard = ref(false)
 const activeStepIndex = ref(0)
 const isExercisePickerOpen = ref(false)
+const isDefaultWorkoutPickerOpen = ref(false)
 const addSetsForExIdx = ref<number | null>(null)
 
 let savedSnapshot = ''
@@ -122,6 +124,18 @@ function onSetsAdded(sets: RoutineSet[]) {
   const ex = form.value.excercises[addSetsForExIdx.value!]
   ex.sets = [...(ex.sets ?? []), ...sets]
   addSetsForExIdx.value = null
+}
+
+function onDefaultWorkoutSelected(w: DefaultWorkoutOut) {
+  form.value.excercises = (w.excercises ?? []).map((ex) => ({
+    name: ex.name,
+    isBodyweight: ex.isBodyweight,
+    sets: (ex.sets ?? []).map((s) => ({ ...s })),
+  }))
+  if (nameIsAuto.value) {
+    form.value.name = w.name
+  }
+  activeStepIndex.value = 0
 }
 
 async function save() {
@@ -274,6 +288,7 @@ async function doDelete() {
     <template #footer>
       <div class="flex items-center gap-2">
         <BaseButton v-if="routine" variant="danger" @click="confirmDelete = true">Delete</BaseButton>
+        <BaseButton v-if="!routine" variant="ghost" @click="isDefaultWorkoutPickerOpen = true">Use default workout</BaseButton>
         <div class="flex-1" />
         <BaseButton variant="ghost" @click="requestClose">Cancel</BaseButton>
         <BaseButton variant="primary" :loading="saving" @click="save">{{ routine ? 'Save' : 'Create' }}</BaseButton>
@@ -314,5 +329,11 @@ async function doDelete() {
     :is-bodyweight="form.excercises[addSetsForExIdx].isBodyweight"
     @add="onSetsAdded"
     @close="addSetsForExIdx = null"
+  />
+
+  <DefaultWorkoutPickerDialog
+    :open="isDefaultWorkoutPickerOpen"
+    @close="isDefaultWorkoutPickerOpen = false"
+    @select="onDefaultWorkoutSelected"
   />
 </template>

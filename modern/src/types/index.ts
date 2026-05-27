@@ -25,6 +25,16 @@ export interface ExcerciseWriteRequest {
   isBodyweight: boolean
 }
 
+// ─── Default Workouts ─────────────────────────────────────────
+// API path: /api/default-workouts
+
+export interface DefaultWorkoutOut {
+  id: string | null
+  name: string | null
+  note: string | null
+  excercises: RoutineExcercise[] | null
+}
+
 // ─── Routines ─────────────────────────────────────────────────
 // API path: /api/routines
 

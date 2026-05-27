@@ -125,3 +125,9 @@ public sealed record WorkoutHistoryOut(
     int CompletedSets,
     IReadOnlyList<CompletedRoutineExcercise> Excercises,
     CompletedSourceWorkout SourceWorkout);
+
+public sealed record DefaultWorkoutOut(
+    string Id,
+    string Name,
+    string? Note,
+    IReadOnlyList<RoutineExcercise> Excercises);
