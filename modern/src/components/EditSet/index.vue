@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import type { RoutineSet } from '../../types'
+import type { RoutineSet, ActivityType, ActivityTrackType } from '../../types'
 import WeightPickerDialog from '../WeightPickerDialog/index.vue'
 
 type SetType = 'normal' | 'warmup' | 'failure' | 'drop'
@@ -16,7 +16,8 @@ const TYPE_META: Record<SetType, { letter: string; classes: string; label: strin
 
 const props = defineProps<{
   set: RoutineSet
-  isBodyweight?: boolean
+  activityType?: ActivityType
+  activityTrackType?: ActivityTrackType
 }>()
 
 const emit = defineEmits<{
@@ -24,6 +25,12 @@ const emit = defineEmits<{
 }>()
 
 const weightPickerOpen = ref(false)
+
+const trackType = computed(() => props.activityTrackType ?? 'repetitions')
+const showWeight = computed(() =>
+  (props.activityType === 'weighted' || props.activityType === 'machine' || props.activityType == null)
+  && trackType.value === 'repetitions'
+)
 
 const currentType = computed<SetType>(
   () => (TYPE_ORDER.includes(props.set.type as SetType) ? props.set.type as SetType : 'normal'),
@@ -39,6 +46,16 @@ function cycleType() {
 function updateReps(e: Event) {
   const val = parseInt((e.target as HTMLInputElement).value)
   emit('update:set', { ...props.set, reps: isNaN(val) ? null : val })
+}
+
+function updateDuration(e: Event) {
+  const val = parseInt((e.target as HTMLInputElement).value)
+  emit('update:set', { ...props.set, duration: isNaN(val) ? null : val })
+}
+
+function updateDistance(e: Event) {
+  const val = parseFloat((e.target as HTMLInputElement).value)
+  emit('update:set', { ...props.set, distance: isNaN(val) ? null : val })
 }
 
 function onWeightConfirm(kg: number) {
@@ -74,7 +91,7 @@ const weightDisplay = computed(() => {
     </button>
 
     <!-- Reps input -->
-    <div class="flex items-center rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-surface-dark overflow-hidden min-h-[44px]">
+    <div v-if="trackType === 'repetitions'" class="flex items-center rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-surface-dark overflow-hidden min-h-[44px]">
       <input
         :value="set.reps ?? ''"
         type="number"
@@ -87,9 +104,38 @@ const weightDisplay = computed(() => {
       <span class="pr-3 text-xs font-medium text-text-secondary dark:text-white/50 select-none">rep</span>
     </div>
 
-    <!-- Weight input — opens picker on click -->
+    <!-- Duration input (time) -->
+    <div v-else-if="trackType === 'time'" class="flex items-center rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-surface-dark overflow-hidden min-h-[44px]">
+      <input
+        :value="set.duration ?? ''"
+        type="number"
+        min="0"
+        inputmode="numeric"
+        placeholder="0"
+        class="w-16 px-3 py-2.5 text-sm text-center bg-transparent outline-none text-text-primary dark:text-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+        @input="updateDuration"
+      />
+      <span class="pr-3 text-xs font-medium text-text-secondary dark:text-white/50 select-none">sec</span>
+    </div>
+
+    <!-- Distance input (distance) -->
+    <div v-else-if="trackType === 'distance'" class="flex items-center rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-surface-dark overflow-hidden min-h-[44px]">
+      <input
+        :value="set.distance ?? ''"
+        type="number"
+        min="0"
+        step="10"
+        inputmode="decimal"
+        placeholder="0"
+        class="w-16 px-3 py-2.5 text-sm text-center bg-transparent outline-none text-text-primary dark:text-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+        @input="updateDistance"
+      />
+      <span class="pr-3 text-xs font-medium text-text-secondary dark:text-white/50 select-none">m</span>
+    </div>
+
+    <!-- Weight input (weighted / machine + repetitions only) -->
     <button
-      v-if="!isBodyweight"
+      v-if="showWeight"
       type="button"
       class="flex items-center rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-surface-dark overflow-hidden min-h-[44px] focus-visible:ring-2 focus-visible:ring-primary"
       :aria-label="`Weight: ${weightDisplay || '0'} kg. Tap to edit.`"

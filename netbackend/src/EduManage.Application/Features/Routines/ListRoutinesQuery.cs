@@ -21,8 +21,10 @@ public sealed record ListRoutinesQuery(string CurrentUserId) : IRequest<IReadOnl
         internal static RoutineOut MapToOut(Routine routine) =>
             new(routine.Name, routine.Notes, routine.Id, routine.UserId,
                 routine.Exercises.Select(e => new RoutineExcercise(
-                    e.Name, e.IsBodyweight,
-                    e.Sets.Select(s => new ContractsRoutineSet(s.Type, s.Reps, s.Weight, s.Notes)).ToList()
+                    e.Name,
+                    e.ActivityType,
+                    e.ActivityTrackType,
+                    e.Sets.Select(s => new ContractsRoutineSet(s.Type, s.Reps, s.Duration, s.Distance, s.Weight, s.Notes)).ToList()
                 )).ToList());
     }
 }

@@ -28,6 +28,8 @@ public sealed class RoutineExcerciseValidator : AbstractValidator<RoutineExcerci
     public RoutineExcerciseValidator()
     {
         RuleFor(request => request.Name).NotEmpty().MaximumLength(200);
+        RuleFor(request => request.ActivityType).IsInEnum();
+        RuleFor(request => request.ActivityTrackType).IsInEnum();
         RuleForEach(request => request.Sets).SetValidator(new RoutineSetValidator());
     }
 }
@@ -38,6 +40,8 @@ public sealed class RoutineSetValidator : AbstractValidator<RoutineSet>
     {
         RuleFor(request => request.Type).NotEmpty().MaximumLength(50);
         RuleFor(request => request.Reps).GreaterThanOrEqualTo(0).When(request => request.Reps.HasValue);
+        RuleFor(request => request.Duration).GreaterThanOrEqualTo(0).When(request => request.Duration.HasValue);
+        RuleFor(request => request.Distance).GreaterThanOrEqualTo(0).When(request => request.Distance.HasValue);
         RuleFor(request => request.Weight).GreaterThanOrEqualTo(0).When(request => request.Weight.HasValue);
         RuleFor(request => request.Note).MaximumLength(1000).When(request => request.Note is not null);
     }
@@ -67,6 +71,8 @@ public sealed class CompletedRoutineExcerciseValidator : AbstractValidator<Compl
     public CompletedRoutineExcerciseValidator()
     {
         RuleFor(request => request.Name).NotEmpty().MaximumLength(200);
+        RuleFor(request => request.ActivityType).IsInEnum();
+        RuleFor(request => request.ActivityTrackType).IsInEnum();
         RuleForEach(request => request.Sets).SetValidator(new CompletedRoutineSetValidator());
     }
 }
@@ -77,6 +83,8 @@ public sealed class CompletedRoutineSetValidator : AbstractValidator<CompletedRo
     {
         RuleFor(request => request.Type).NotEmpty().MaximumLength(50);
         RuleFor(request => request.Reps).GreaterThanOrEqualTo(0).When(request => request.Reps.HasValue);
+        RuleFor(request => request.Duration).GreaterThanOrEqualTo(0).When(request => request.Duration.HasValue);
+        RuleFor(request => request.Distance).GreaterThanOrEqualTo(0).When(request => request.Distance.HasValue);
         RuleFor(request => request.Weight).GreaterThanOrEqualTo(0).When(request => request.Weight.HasValue);
         RuleFor(request => request.Note).MaximumLength(1000).When(request => request.Note is not null);
     }

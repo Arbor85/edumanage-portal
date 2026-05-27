@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import type { ActivityType, ActivityTrackType } from '../../../types'
 import { useWorkoutStore } from '../../../stores/workoutStore'
 import { useExerciseStore } from '../../../stores/exerciseStore'
 import SelectExercise from '../../../components/SelectExercise/index.vue'
@@ -10,18 +11,26 @@ const exerciseStore = useExerciseStore()
 
 const selectedId = ref<number | null>(null)
 const dialogOpen = ref(false)
-const pendingExercise = ref<{ name: string; isBodyweight: boolean } | null>(null)
+const pendingExercise = ref<{
+  name: string
+  activityType: ActivityType
+  activityTrackType: ActivityTrackType
+} | null>(null)
 
 function onExerciseSelected(id: number | null) {
   if (id === null) return
   const ex = exerciseStore.exercises.find((e) => e.id === id)
   if (!ex) return
-  pendingExercise.value = { name: ex.name ?? '', isBodyweight: ex.isBodyweight ?? false }
+  pendingExercise.value = {
+    name: ex.name ?? '',
+    activityType: ex.activityType ?? 'weighted',
+    activityTrackType: ex.activityTrackType ?? 'repetitions',
+  }
   dialogOpen.value = true
   selectedId.value = null
 }
 
-function onConfirm(sets: { reps: number | null; weight: number | null }[]) {
+function onConfirm(sets: { reps: number | null; weight: number | null; duration: number | null; distance: number | null }[]) {
   if (!pendingExercise.value) return
   store.addAdHocExercise(pendingExercise.value, sets)
   pendingExercise.value = null
@@ -39,7 +48,8 @@ function onClose() {
   <ExerciseSetupDialog
     :open="dialogOpen"
     :exercise-name="pendingExercise?.name ?? ''"
-    :is-bodyweight="pendingExercise?.isBodyweight"
+    :activity-type="pendingExercise?.activityType"
+    :activity-track-type="pendingExercise?.activityTrackType"
     @confirm="onConfirm"
     @close="onClose"
   />

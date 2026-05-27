@@ -26,5 +26,8 @@ public sealed class ExcerciseWriteRequestValidator : AbstractValidator<Excercise
         RuleForEach(request => request.SecondaryMuscles)
             .MaximumLength(120)
             .When(request => request.SecondaryMuscles is not null);
+
+        RuleFor(request => request.ActivityType).IsInEnum();
+        RuleFor(request => request.ActivityTrackType).IsInEnum();
     }
 }

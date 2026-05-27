@@ -22,10 +22,13 @@ public sealed record ListDefaultWorkoutsQuery : IRequest<IReadOnlyList<DefaultWo
                 defaultWorkout.Notes,
                 defaultWorkout.Exercises.Select(defaultWorkoutExercise => new RoutineExcercise(
                     defaultWorkoutExercise.Name,
-                    defaultWorkoutExercise.IsBodyweight,
+                    defaultWorkoutExercise.ActivityType,
+                    defaultWorkoutExercise.ActivityTrackType,
                     defaultWorkoutExercise.Sets.Select(defaultWorkoutSet => new ContractsRoutineSet(
                         defaultWorkoutSet.Type,
                         defaultWorkoutSet.Reps,
+                        defaultWorkoutSet.Duration,
+                        defaultWorkoutSet.Distance,
                         defaultWorkoutSet.Weight,
                         defaultWorkoutSet.Notes)).ToList())).ToList());
     }

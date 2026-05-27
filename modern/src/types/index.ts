@@ -13,7 +13,8 @@ export interface ExcerciseOut {
   secondaryMuscles: string[] | null
   muscles: Muscle[] | null
   tags: string[] | null
-  isBodyweight: boolean
+  activityType: ActivityType
+  activityTrackType: ActivityTrackType
 }
 
 export interface ExcerciseWriteRequest {
@@ -22,8 +23,17 @@ export interface ExcerciseWriteRequest {
   primaryMuscle: string | null
   secondaryMuscles: string[] | null
   tags: string[] | null
-  isBodyweight: boolean
+  activityType: ActivityType
+  activityTrackType: ActivityTrackType
 }
+
+// ─── Activity enums ───────────────────────────────────────────
+
+/** How the exercise is performed */
+export type ActivityType = 'weighted' | 'bodyweight' | 'cardio' | 'machine'
+
+/** What metric is tracked per set */
+export type ActivityTrackType = 'repetitions' | 'time' | 'distance'
 
 // ─── Default Workouts ─────────────────────────────────────────
 // API path: /api/default-workouts
@@ -39,15 +49,18 @@ export interface DefaultWorkoutOut {
 // API path: /api/routines
 
 export interface RoutineSet {
-  type: string | null        // "normal" | "warmup" | "drop"
+  type: string | null        // "normal" | "warmup" | "drop" | "failure"
   reps: number | null
   weight: number | null
+  duration: number | null    // seconds, used when activityTrackType = 'time'
+  distance: number | null    // meters, used when activityTrackType = 'distance'
   note: string | null
 }
 
 export interface RoutineExcercise {
   name: string | null
-  isBodyweight: boolean
+  activityType: ActivityType
+  activityTrackType: ActivityTrackType
   sets: RoutineSet[] | null
 }
 
@@ -78,13 +91,16 @@ export interface CompletedRoutineSet {
   type: string | null
   reps: number | null
   weight: number | null
+  duration: number | null
+  distance: number | null
   note: string | null
   completed: boolean
 }
 
 export interface CompletedRoutineExcercise {
   name: string | null
-  isBodyweight: boolean
+  activityType: ActivityType
+  activityTrackType: ActivityTrackType
   sets: CompletedRoutineSet[] | null
 }
 
@@ -287,18 +303,24 @@ export interface ActiveSet {
   setNumber: number
   reps: number | null
   weight: number | null
+  duration: number | null
+  distance: number | null
   targetReps: number | null
   targetWeight: number | null
+  targetDuration: number | null
+  targetDistance: number | null
   actualReps: number | null
   actualWeight: number | null
+  actualDuration: number | null
+  actualDistance: number | null
   completed: boolean
-  isBodyweight: boolean
   note: string | null
 }
 
 export interface ActiveExercise {
   name: string
-  isBodyweight: boolean
+  activityType: ActivityType
+  activityTrackType: ActivityTrackType
   sets: ActiveSet[]
   currentSetIndex: number
   skipped: boolean

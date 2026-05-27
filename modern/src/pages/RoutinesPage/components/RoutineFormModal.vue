@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { usePageTitle } from '../../../composables/usePageTitle'
-import type { RoutineOut, RoutineCreate, RoutineUpdate, RoutineExcercise, RoutineSet, ExcerciseOut, DefaultWorkoutOut } from '../../../types'
+import type { RoutineOut, RoutineCreate, RoutineUpdate, RoutineExcercise, RoutineSet, ExcerciseOut, DefaultWorkoutOut, ActivityType, ActivityTrackType } from '../../../types'
 import { useRoutineStore } from '../../../stores/routineStore'
 import { useToast } from '../../../composables/useToast'
 import FullSizeDialog from '../../../components/FullSizeDialog/index.vue'
@@ -25,6 +25,13 @@ usePageTitle(() => props.routine ? 'Edit Routine' : 'New Routine', () => props.o
 
 const routineStore = useRoutineStore()
 const toast = useToast()
+
+const ACTIVITY_TYPE_BADGE: Record<ActivityType, { label: string; classes: string }> = {
+  weighted:   { label: 'Weighted',   classes: 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-400' },
+  machine:    { label: 'Machine',    classes: 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-400' },
+  bodyweight: { label: 'Bodyweight', classes: 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400' },
+  cardio:     { label: 'Cardio',     classes: 'bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-400' },
+}
 
 const form = ref<{ name: string | null; note: string | null; excercises: RoutineExcercise[] }>({
   name: null, note: null, excercises: []
@@ -69,7 +76,8 @@ watch(() => props.open, (val) => {
         note: props.routine.note,
         excercises: (props.routine.excercises ?? []).map((ex) => ({
           name: ex.name,
-          isBodyweight: ex.isBodyweight,
+          activityType: ex.activityType ?? 'weighted',
+          activityTrackType: ex.activityTrackType ?? 'repetitions',
           sets: (ex.sets ?? []).map((s) => ({ ...s })),
         })),
       }
@@ -91,11 +99,19 @@ function requestClose() {
   }
 }
 
+function defaultSetForTrackType(trackType: ActivityTrackType): RoutineSet {
+  if (trackType === 'time') return { type: 'normal', reps: null, weight: null, duration: 60, distance: null, note: null }
+  if (trackType === 'distance') return { type: 'normal', reps: null, weight: null, duration: null, distance: 1000, note: null }
+  return { type: 'normal', reps: 10, weight: null, duration: null, distance: null, note: null }
+}
+
 function onExercisePicked(ex: ExcerciseOut) {
+  const trackType: ActivityTrackType = ex.activityTrackType ?? 'repetitions'
   form.value.excercises.push({
     name: ex.name,
-    isBodyweight: ex.isBodyweight,
-    sets: [{ type: 'normal', reps: 10, weight: null, note: null }],
+    activityType: ex.activityType ?? 'weighted',
+    activityTrackType: trackType,
+    sets: [defaultSetForTrackType(trackType)],
   })
   activeStepIndex.value = form.value.excercises.length - 1
 }
@@ -129,7 +145,8 @@ function onSetsAdded(sets: RoutineSet[]) {
 function onDefaultWorkoutSelected(w: DefaultWorkoutOut) {
   form.value.excercises = (w.excercises ?? []).map((ex) => ({
     name: ex.name,
-    isBodyweight: ex.isBodyweight,
+    activityType: ex.activityType ?? 'weighted',
+    activityTrackType: ex.activityTrackType ?? 'repetitions',
     sets: (ex.sets ?? []).map((s) => ({ ...s })),
   }))
   if (nameIsAuto.value) {
@@ -217,8 +234,11 @@ async function doDelete() {
               {{ form.excercises[index].name }}
             </h2>
             <div class="flex items-center gap-4">
-              <span v-if="form.excercises[index].isBodyweight" class="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400">
-                Bodyweight
+              <span
+                class="text-xs font-semibold px-2 py-0.5 rounded-full"
+                :class="ACTIVITY_TYPE_BADGE[form.excercises[index].activityType ?? 'weighted'].classes"
+              >
+                {{ ACTIVITY_TYPE_BADGE[form.excercises[index].activityType ?? 'weighted'].label }}
               </span>
               <button
                 type="button"
@@ -240,7 +260,8 @@ async function doDelete() {
             >
               <EditSet
                 :set="set"
-                :is-bodyweight="form.excercises[index].isBodyweight"
+                :activity-type="form.excercises[index].activityType"
+                :activity-track-type="form.excercises[index].activityTrackType"
                 class="flex-1"
                 @update:set="form.excercises[index].sets![setIdx] = $event"
               />
@@ -325,8 +346,9 @@ async function doDelete() {
   <AddSetsDialog
     v-if="addSetsForExIdx !== null"
     :open="addSetsForExIdx !== null"
-    :base-set="form.excercises[addSetsForExIdx].sets?.at(-1) ?? { type: 'normal', reps: 10, weight: null, note: null }"
-    :is-bodyweight="form.excercises[addSetsForExIdx].isBodyweight"
+    :base-set="form.excercises[addSetsForExIdx].sets?.at(-1) ?? { type: 'normal', reps: 10, weight: null, duration: null, distance: null, note: null }"
+    :activity-type="form.excercises[addSetsForExIdx].activityType"
+    :activity-track-type="form.excercises[addSetsForExIdx].activityTrackType"
     @add="onSetsAdded"
     @close="addSetsForExIdx = null"
   />

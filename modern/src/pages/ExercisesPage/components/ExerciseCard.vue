@@ -1,8 +1,15 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import type { ExcerciseOut } from '../../../types'
+import type { ExcerciseOut, ActivityType } from '../../../types'
 import DifficultyBadge from '../../../components/DifficultyBadge.vue'
 import { Trash2, Dumbbell } from 'lucide-vue-next'
+
+const ACTIVITY_TYPE_BADGE: Record<ActivityType, { label: string; classes: string }> = {
+  weighted:   { label: 'Weighted',   classes: 'bg-blue-500/90' },
+  machine:    { label: 'Machine',    classes: 'bg-purple-500/90' },
+  bodyweight: { label: 'Bodyweight', classes: 'bg-emerald-500/90' },
+  cardio:     { label: 'Cardio',     classes: 'bg-orange-500/90' },
+}
 
 const props = defineProps<{ exercise: ExcerciseOut }>()
 defineEmits<{ edit: []; delete: [] }>()
@@ -70,9 +77,12 @@ function onImgError() {
       <!-- Difficulty badge: top-left -->
       <DifficultyBadge :level="difficultyLevel" class="absolute top-3 left-3" />
 
-      <!-- Bodyweight badge -->
-      <span v-if="exercise.isBodyweight" class="absolute bottom-3 right-3 inline-flex items-center px-1.5 py-0.5 rounded-md bg-emerald-500/90 text-white text-[10px] font-semibold uppercase tracking-wide">
-        Bodyweight
+      <!-- Activity type badge -->
+      <span
+        class="absolute bottom-3 right-3 inline-flex items-center px-1.5 py-0.5 rounded-md text-white text-[10px] font-semibold uppercase tracking-wide"
+        :class="ACTIVITY_TYPE_BADGE[exercise.activityType ?? 'weighted'].classes"
+      >
+        {{ ACTIVITY_TYPE_BADGE[exercise.activityType ?? 'weighted'].label }}
       </span>
 
       <!-- Muscle tags: bottom-left -->

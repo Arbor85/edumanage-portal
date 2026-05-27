@@ -6,6 +6,18 @@ import { Check } from 'lucide-vue-next'
 
 defineProps<{ exercise: ActiveExercise; isCurrent: boolean }>()
 const store = useWorkoutStore()
+
+function fmtDuration(sec: number | null) {
+  if (sec === null) return '—'
+  const m = Math.floor(sec / 60)
+  const s = sec % 60
+  return m > 0 ? `${m}m ${s}s` : `${s}s`
+}
+
+function fmtDistance(m: number | null) {
+  if (m === null) return '—'
+  return m >= 1000 ? `${(m / 1000).toFixed(2)}km` : `${m}m`
+}
 </script>
 
 <template>
@@ -29,7 +41,14 @@ const store = useWorkoutStore()
         ]"
       >
         <span class="w-5 text-center font-medium text-text-secondary">{{ i + 1 }}</span>
-        <span class="flex-1">{{ set.reps ?? '—' }} reps<span v-if="set.weight"> · {{ set.weight }}kg</span></span>
+        <span class="flex-1">
+          <template v-if="exercise.activityTrackType === 'time'">{{ fmtDuration(set.duration) }}</template>
+          <template v-else-if="exercise.activityTrackType === 'distance'">{{ fmtDistance(set.distance) }}</template>
+          <template v-else>
+            {{ set.reps ?? '—' }} reps
+            <span v-if="set.weight"> · {{ set.weight }}kg</span>
+          </template>
+        </span>
         <BaseButton
           v-if="isCurrent && !set.completed && i === exercise.currentSetIndex"
           size="sm"

@@ -25,8 +25,10 @@ public sealed record ListPlansQuery(string CurrentUserId) : IRequest<IReadOnlyLi
             var workoutOutputs = plan.Workouts.Select(pw => new PlanWorkoutOutput(
                 pw.Name, pw.Notes, pw.Id, pw.UserId,
                 [.. pw.Exercises.Select(e => new RoutineExcercise(
-                    e.Name, e.IsBodyweight,
-                    e.Sets.Select(s => new ContractsRoutineSet(s.Type, s.Reps, s.Weight, s.Notes)).ToList()
+                    e.Name,
+                    e.ActivityType,
+                    e.ActivityTrackType,
+                    e.Sets.Select(s => new ContractsRoutineSet(s.Type, s.Reps, s.Duration, s.Distance, s.Weight, s.Notes)).ToList()
                 ))],
                 pw.Date)).ToList();
 

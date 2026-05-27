@@ -33,11 +33,14 @@ public sealed record CompleteRoutineCommand(CompleteRoutineCreate Request, strin
                 Exercises = exercises.Select(e => new CompletedExercise
                 {
                     Name = e.Name,
-                    IsBodyweight = e.IsBodyweight,
+                    ActivityType = e.ActivityType,
+                    ActivityTrackType = e.ActivityTrackType,
                     Sets = e.Sets.Select(s => new CompletedSet
                     {
                         Type = s.Type,
                         Reps = s.Reps,
+                        Duration = s.Duration,
+                        Distance = s.Distance,
                         Weight = s.Weight,
                         Notes = s.Note,
                         Completed = s.Completed

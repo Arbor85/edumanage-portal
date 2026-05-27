@@ -41,11 +41,14 @@ public sealed record AddPlanCommand(PlanCreate Request, string CurrentUserId) : 
                     Exercises = w.Excercises.Select(e => new RoutineExercise
                     {
                         Name = e.Name,
-                        IsBodyweight = e.IsBodyweight,
+                        ActivityType = e.ActivityType,
+                        ActivityTrackType = e.ActivityTrackType,
                         Sets = e.Sets.Select(s => new DomainRoutineSet
                         {
                             Type = s.Type,
                             Reps = s.Reps,
+                            Duration = s.Duration,
+                            Distance = s.Distance,
                             Weight = s.Weight,
                             Notes = s.Note
                         }).ToList()

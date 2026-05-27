@@ -9,6 +9,8 @@ import type {
   CompleteRoutineCreate,
   CompletedRoutineExcercise,
   CompletedRoutineSet,
+  ActivityType,
+  ActivityTrackType,
 } from '../types'
 import * as routinesApi from '../services/routinesApi'
 
@@ -46,19 +48,25 @@ export const useWorkoutStore = defineStore('workout', () => {
   function buildActiveExercises(routine: RoutineOut): ActiveExercise[] {
     return (routine.excercises ?? []).map((ex) => ({
       name: ex.name ?? '',
-      isBodyweight: ex.isBodyweight,
+      activityType: ex.activityType ?? 'weighted',
+      activityTrackType: ex.activityTrackType ?? 'repetitions',
       skipped: false,
       currentSetIndex: 0,
       sets: (ex.sets ?? []).map((s, i) => ({
         setNumber: i + 1,
         reps: s.reps,
         weight: s.weight,
+        duration: s.duration ?? null,
+        distance: s.distance ?? null,
         targetReps: s.reps,
         targetWeight: s.weight,
+        targetDuration: s.duration ?? null,
+        targetDistance: s.distance ?? null,
         actualReps: null,
         actualWeight: null,
+        actualDuration: null,
+        actualDistance: null,
         completed: false,
-        isBodyweight: ex.isBodyweight,
         note: s.note,
       })),
     }))
@@ -158,27 +166,33 @@ export const useWorkoutStore = defineStore('workout', () => {
   }
 
   function addAdHocExercise(
-    ex: { name: string; isBodyweight: boolean },
-    sets?: { reps: number | null; weight: number | null }[]
+    ex: { name: string; activityType: ActivityType; activityTrackType: ActivityTrackType },
+    sets?: { reps: number | null; weight: number | null; duration: number | null; distance: number | null }[]
   ) {
     if (!activeWorkout.value) return
-    const { name, isBodyweight } = ex
-    const rawSets = sets?.length ? sets : [{ reps: null, weight: null }]
+    const { name, activityType, activityTrackType } = ex
+    const rawSets = sets?.length ? sets : [{ reps: null, weight: null, duration: null, distance: null }]
     const newEx: ActiveExercise = {
       name,
-      isBodyweight,
+      activityType,
+      activityTrackType,
       skipped: false,
       currentSetIndex: 0,
       sets: rawSets.map((s, i) => ({
         setNumber: i + 1,
         reps: s.reps,
         weight: s.weight,
+        duration: s.duration ?? null,
+        distance: s.distance ?? null,
         targetReps: s.reps,
         targetWeight: s.weight,
+        targetDuration: s.duration ?? null,
+        targetDistance: s.distance ?? null,
         actualReps: null,
         actualWeight: null,
+        actualDuration: null,
+        actualDistance: null,
         completed: false,
-        isBodyweight,
         note: null,
       })),
     }
@@ -189,7 +203,7 @@ export const useWorkoutStore = defineStore('workout', () => {
 
   function updateExerciseSets(
     exerciseIndex: number,
-    sets: { reps: number | null; weight: number | null }[]
+    sets: { reps: number | null; weight: number | null; duration: number | null; distance: number | null }[]
   ) {
     if (!activeWorkout.value) return
     const ex = activeWorkout.value.exercises[exerciseIndex]
@@ -198,12 +212,17 @@ export const useWorkoutStore = defineStore('workout', () => {
       setNumber: i + 1,
       reps: s.reps,
       weight: s.weight,
+      duration: s.duration ?? null,
+      distance: s.distance ?? null,
       targetReps: s.reps,
       targetWeight: s.weight,
+      targetDuration: s.duration ?? null,
+      targetDistance: s.distance ?? null,
       actualReps: ex.sets[i]?.actualReps ?? null,
       actualWeight: ex.sets[i]?.actualWeight ?? null,
+      actualDuration: ex.sets[i]?.actualDuration ?? null,
+      actualDistance: ex.sets[i]?.actualDistance ?? null,
       completed: ex.sets[i]?.completed ?? false,
-      isBodyweight: ex.isBodyweight,
       note: ex.sets[i]?.note ?? null,
     }))
     if (ex.currentSetIndex >= ex.sets.length) {
@@ -237,11 +256,14 @@ export const useWorkoutStore = defineStore('workout', () => {
 
     const excercises: CompletedRoutineExcercise[] = aw.exercises.map((ex) => ({
       name: ex.name,
-      isBodyweight: ex.isBodyweight,
+      activityType: ex.activityType,
+      activityTrackType: ex.activityTrackType,
       sets: ex.sets.map((s): CompletedRoutineSet => ({
         type: 'normal',
         reps: s.actualReps,
         weight: s.actualWeight,
+        duration: s.actualDuration ?? null,
+        distance: s.actualDistance ?? null,
         note: s.note,
         completed: s.completed,
       })),

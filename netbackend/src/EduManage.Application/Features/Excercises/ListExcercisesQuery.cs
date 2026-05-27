@@ -14,6 +14,15 @@ public sealed record ListExcercisesQuery : IRequest<IReadOnlyList<ExcerciseOut>>
         }
 
         internal static ExcerciseOut ToOut(EduManage.Domain.Entities.Exercise e) =>
-            new(e.Id, e.Name, e.ShortDescription, e.PrimaryMuscle, e.SecondaryMuscles, e.Muscles, e.Tags, e.IsBodyweight);
+            new(
+                e.Id,
+                e.Name,
+                e.ShortDescription,
+                e.PrimaryMuscle,
+                e.SecondaryMuscles,
+                e.Muscles,
+                e.Tags,
+                e.ActivityType,
+                e.ActivityTrackType);
     }
 }

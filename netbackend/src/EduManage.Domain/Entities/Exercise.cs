@@ -11,5 +11,6 @@ public class Exercise
     public IReadOnlyList<Muscle> Muscles { get; set; } = [];
 
     public List<string> Tags { get; set; } = [];
-    public bool IsBodyweight { get; set; } = false;
+    public ActivityType ActivityType { get; set; } = ActivityType.Weighted;
+    public ActivityTrackType ActivityTrackType { get; set; } = ActivityTrackType.Repetitions;
 }

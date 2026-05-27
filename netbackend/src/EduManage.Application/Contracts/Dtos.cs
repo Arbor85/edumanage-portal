@@ -26,9 +26,13 @@ public sealed record InvitationOut(
     string ImageUrl
 );
 
-public sealed record RoutineSet(string Type, int? Reps, double? Weight, string? Note);
+public sealed record RoutineSet(string Type, int? Reps, int? Duration, int? Distance, double? Weight, string? Note);
 
-public sealed record RoutineExcercise(string Name, bool IsBodyweight, IReadOnlyList<RoutineSet> Sets);
+public sealed record RoutineExcercise(
+    string Name,
+    ActivityType ActivityType,
+    ActivityTrackType ActivityTrackType,
+    IReadOnlyList<RoutineSet> Sets);
 
 public sealed record RoutineCreate(string Name, string? Note, IReadOnlyList<RoutineExcercise> Excercises);
 
@@ -87,7 +91,8 @@ public sealed record ExcerciseOut(
     IReadOnlyList<string> SecondaryMuscles,
     IReadOnlyList<Muscle> Muscles,
     IReadOnlyList<string> Tags,
-    bool IsBodyweight);
+    ActivityType ActivityType,
+    ActivityTrackType ActivityTrackType);
 
 public sealed record ExcerciseWriteRequest(
     string Name,
@@ -95,11 +100,23 @@ public sealed record ExcerciseWriteRequest(
     string PrimaryMuscle,
     IReadOnlyList<string>? SecondaryMuscles,
     IReadOnlyList<string>? Tags,
-    bool IsBodyweight = false);
+    ActivityType ActivityType = ActivityType.Weighted,
+    ActivityTrackType ActivityTrackType = ActivityTrackType.Repetitions);
 
-public sealed record CompletedRoutineSet(string Type, int? Reps, double? Weight, string? Note, bool Completed);
+public sealed record CompletedRoutineSet(
+    string Type,
+    int? Reps,
+    int? Duration,
+    int? Distance,
+    double? Weight,
+    string? Note,
+    bool Completed);
 
-public sealed record CompletedRoutineExcercise(string Name, bool IsBodyweight, IReadOnlyList<CompletedRoutineSet> Sets);
+public sealed record CompletedRoutineExcercise(
+    string Name,
+    ActivityType ActivityType,
+    ActivityTrackType ActivityTrackType,
+    IReadOnlyList<CompletedRoutineSet> Sets);
 
 public sealed record CompletedSourceWorkout(string Id, string Name, string Date);
 

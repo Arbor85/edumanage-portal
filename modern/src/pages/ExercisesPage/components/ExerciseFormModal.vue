@@ -7,10 +7,23 @@ import { useToast } from '../../../composables/useToast'
 import BaseModal from '../../../components/BaseModal.vue'
 import BaseInput from '../../../components/BaseInput.vue'
 import BaseTextarea from '../../../components/BaseTextarea.vue'
-import BaseCheckbox from '../../../components/BaseCheckbox.vue'
+import BaseSelect from '../../../components/BaseSelect.vue'
 import TagInput from '../../../components/TagInput.vue'
 import BaseButton from '../../../components/BaseButton.vue'
 import ConfirmDialog from '../../../components/ConfirmDialog.vue'
+
+const ACTIVITY_TYPE_OPTIONS = [
+  { value: 'weighted',   label: 'Weighted – free weights, barbells, dumbbells' },
+  { value: 'machine',    label: 'Machine – cable/pulley machines, fixed-path equipment' },
+  { value: 'bodyweight', label: 'Bodyweight – no added load, uses body weight' },
+  { value: 'cardio',     label: 'Cardio – running, cycling, rowing, etc.' },
+]
+
+const ACTIVITY_TRACK_OPTIONS = [
+  { value: 'repetitions', label: 'Repetitions – count reps per set' },
+  { value: 'time',        label: 'Time – track duration in seconds' },
+  { value: 'distance',    label: 'Distance – track distance in meters' },
+]
 
 const props = defineProps<{
   open: boolean
@@ -23,15 +36,31 @@ usePageTitle(() => props.exercise ? 'Edit Exercise' : 'New Exercise', () => prop
 const exerciseStore = useExerciseStore()
 const toast = useToast()
 
-const form = ref<ExcerciseWriteRequest>({ name: null, shortDescription: null, primaryMuscle: null, secondaryMuscles: [], tags: [], isBodyweight: false })
+const form = ref<ExcerciseWriteRequest>({
+  name: null, shortDescription: null, primaryMuscle: null,
+  secondaryMuscles: [], tags: [],
+  activityType: 'weighted', activityTrackType: 'repetitions',
+})
 const saving = ref(false)
 const confirmDelete = ref(false)
 
 watch(() => props.open, (val) => {
   if (val) {
     form.value = props.exercise
-      ? { name: props.exercise.name, shortDescription: props.exercise.shortDescription, primaryMuscle: props.exercise.primaryMuscle, secondaryMuscles: [...(props.exercise.secondaryMuscles ?? [])], tags: [...(props.exercise.tags ?? [])], isBodyweight: props.exercise.isBodyweight }
-      : { name: null, shortDescription: null, primaryMuscle: null, secondaryMuscles: [], tags: [], isBodyweight: false }
+      ? {
+          name: props.exercise.name,
+          shortDescription: props.exercise.shortDescription,
+          primaryMuscle: props.exercise.primaryMuscle,
+          secondaryMuscles: [...(props.exercise.secondaryMuscles ?? [])],
+          tags: [...(props.exercise.tags ?? [])],
+          activityType: props.exercise.activityType ?? 'weighted',
+          activityTrackType: props.exercise.activityTrackType ?? 'repetitions',
+        }
+      : {
+          name: null, shortDescription: null, primaryMuscle: null,
+          secondaryMuscles: [], tags: [],
+          activityType: 'weighted', activityTrackType: 'repetitions',
+        }
   }
 })
 
@@ -80,7 +109,18 @@ async function doDelete() {
         <label class="text-sm font-medium text-text-primary dark:text-white">Tags <span class="text-text-secondary font-normal">(include difficulty: Beginner / Intermediate / Advanced)</span></label>
         <TagInput :model-value="form.tags ?? []" placeholder="Add tag, press Enter" @update:model-value="form.tags = $event" />
       </div>
-      <BaseCheckbox v-model="form.isBodyweight" label="Bodyweight exercise" hint="No equipment or added weight required" />
+      <BaseSelect
+        :model-value="form.activityType"
+        label="Activity Type"
+        :options="ACTIVITY_TYPE_OPTIONS"
+        @update:model-value="form.activityType = $event as typeof form.activityType"
+      />
+      <BaseSelect
+        :model-value="form.activityTrackType"
+        label="Track Type"
+        :options="ACTIVITY_TRACK_OPTIONS"
+        @update:model-value="form.activityTrackType = $event as typeof form.activityTrackType"
+      />
     </form>
 
     <template #footer>

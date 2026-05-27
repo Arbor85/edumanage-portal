@@ -50,7 +50,15 @@ function formatDuration(s: number | null) {
                 :key="j"
                 class="text-xs bg-white dark:bg-white/10 rounded-lg px-2 py-0.5 text-text-secondary"
               >
-                {{ set.reps ?? '?' }} reps<span v-if="set.weight"> · {{ set.weight }}kg</span>
+                <template v-if="ex.activityTrackType === 'time'">
+                  {{ set.duration != null ? (Math.floor(set.duration / 60) > 0 ? `${Math.floor(set.duration / 60)}m ${set.duration % 60}s` : `${set.duration}s`) : '—' }}
+                </template>
+                <template v-else-if="ex.activityTrackType === 'distance'">
+                  {{ set.distance != null ? (set.distance >= 1000 ? `${(set.distance / 1000).toFixed(2)}km` : `${set.distance}m`) : '—' }}
+                </template>
+                <template v-else>
+                  {{ set.reps ?? '?' }} reps<span v-if="set.weight"> · {{ set.weight }}kg</span>
+                </template>
               </span>
             </div>
           </div>

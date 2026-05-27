@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.OpenApi.Models;
 using Scalar.AspNetCore;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -41,7 +43,12 @@ builder.Services
 		options.TokenValidationParameters.ValidateLifetime = true;
 		options.TokenValidationParameters.ClockSkew = TimeSpan.Zero;
 	});
-builder.Services.AddControllers();
+builder.Services
+	.AddControllers()
+	.AddJsonOptions(options =>
+	{
+		options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
+	});
 builder.Services.AddAuthorization(options =>
 {
 	options.AddPolicy("manage:clients", policy =>

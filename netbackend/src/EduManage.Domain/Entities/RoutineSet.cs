@@ -6,6 +6,8 @@ public class RoutineSet
     public int RoutineExerciseId { get; set; }
     public string Type { get; set; } = string.Empty;
     public int? Reps { get; set; }
+    public int? Duration { get; set; }
+    public int? Distance { get; set; }
     public double? Weight { get; set; }
     public string? Notes { get; set; }
 
