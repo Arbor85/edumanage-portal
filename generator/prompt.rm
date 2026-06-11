@@ -1,0 +1,349 @@
+Jesteś doświadczonym architektem .NET oraz data engineerem.
+
+Stwórz kompletną aplikację konsolową w C# (.NET 9), której celem jest zbudowanie możliwie największej i najwyższej jakości bazy ćwiczeń fitness, siłowych, bodybuilding, powerlifting, strongman, weightlifting, crossfit, mobility oraz gymnastics.
+
+Cel
+
+Aplikacja ma automatycznie:
+
+Pobrać dane z publicznie dostępnych źródeł.
+Scalć dane z wielu źródeł.
+Usunąć duplikaty.
+Ujednolicić nazwy.
+Przypisać mięśnie.
+Wygenerować krótki opis ćwiczenia.
+Wygenerować tagi.
+Wygenerować końcowy plik:
+exercises.json
+
+zawierający wszystkie ćwiczenia.
+
+Technologie
+
+Wymagania:
+
+.NET 9
+C#
+HttpClient
+System.Text.Json
+Async/Await
+Dependency Injection
+Logging
+Retry policy dla requestów
+Clean Architecture
+
+Projekt ma być podzielony na:
+
+src/
+
+ExerciseGenerator.Console
+ExerciseGenerator.Application
+ExerciseGenerator.Domain
+ExerciseGenerator.Infrastructure
+Źródła danych
+
+Załaduj dane z możliwie wielu źródeł.
+
+Priorytet:
+
+Wger API
+
+https://wger.de/en/software/api
+
+Pobierz:
+
+exercises
+muscles
+categories
+equipment
+ExerciseDB API
+
+https://rapidapi.com/justin-WFnsXH_t6/api/exercisedb
+
+Jeżeli wymaga klucza:
+
+przygotuj interfejs
+pobieranie ma być opcjonalne
+ExRx
+
+https://exrx.net
+
+Jeżeli scraping jest możliwy:
+
+pobierz nazwy ćwiczeń
+pobierz przypisane mięśnie
+MuscleWiki
+
+https://musclewiki.com
+
+Jeżeli scraping jest możliwy:
+
+pobierz nazwy ćwiczeń
+pobierz grupy mięśniowe
+CrossFit Exercise Library
+
+https://www.crossfit.com/exercises
+
+Pobierz:
+
+nazwy ćwiczeń
+opisy
+klasyfikację
+Model danych
+
+Użyj następującego modelu:
+
+public class Exercise
+{
+    public int Id { get; set; }
+
+    public string Name { get; set; }
+
+    public string ShortDescription { get; set; }
+
+    public string PrimaryMuscle { get; set; }
+
+    public List<string> SecondaryMuscles { get; set; }
+
+    public List<Muscle> Muscles { get; set; }
+
+    public List<string> Tags { get; set; }
+
+    public string ActivityType { get; set; }
+
+    public string ActivityTrackType { get; set; }
+}
+
+public class Muscle
+{
+    public string Name { get; set; }
+}
+Normalizacja nazw
+
+Scal ćwiczenia posiadające podobne nazwy.
+
+Przykłady:
+
+Back Squat
+Barbell Back Squat
+Barbell Squat
+
+powinny zostać sprowadzone do:
+
+Barbell Back Squat
+
+Przykłady:
+
+Pull-Up
+Pull Up
+Strict Pull Up
+
+powinny zostać sprowadzone do:
+
+Pull-Up
+
+Stosuj:
+
+fuzzy matching
+Levenshtein Distance
+token similarity
+
+Próg podobieństwa:
+
+90%
+Klasyfikacja mięśni
+
+Każde ćwiczenie musi mieć:
+
+{
+  "primaryMuscle": "",
+  "secondaryMuscles": [],
+  "muscles": []
+}
+
+Jeżeli źródło nie podaje wszystkich danych:
+
+wygeneruj je heurystycznie
+na podstawie kategorii ćwiczenia
+Generowanie opisów
+
+Jeżeli ćwiczenie nie posiada opisu:
+
+wygeneruj automatycznie krótki opis:
+
+maksymalnie:
+
+300 znaków
+
+Przykład:
+
+Stand with feet shoulder-width apart, bar resting on upper traps. Descend by pushing hips back and bending knees until thighs are parallel to the floor, then drive back up.
+
+Opis ma:
+
+być po angielsku
+zawierać instrukcję wykonania
+nie zawierać marketingu
+Tagi
+
+Automatycznie generuj tagi.
+
+Dostępne tagi:
+
+crossfit
+bodybuilding
+powerlifting
+strongman
+weightlifting
+gymnastics
+mobility
+cardio
+machine
+barbell
+dumbbell
+kettlebell
+bodyweight
+rings
+rope
+sled
+rowing
+running
+jumping
+olympic-lift
+compound
+isolation
+beginner
+intermediate
+advanced
+
+Ćwiczenie może posiadać wiele tagów.
+
+ActivityType
+
+Dozwolone wartości:
+
+weighted
+bodyweight
+distance
+duration
+calories
+machine
+
+Przykłady:
+
+Barbell Bench Press
+
+"activityType": "weighted"
+
+Pull-Up
+
+"activityType": "bodyweight"
+
+Running
+
+"activityType": "distance"
+
+Plank
+
+"activityType": "duration"
+ActivityTrackType
+
+Dozwolone wartości:
+
+repetitions
+distance
+duration
+calories
+
+Przykłady:
+
+Squat
+
+"activityTrackType": "repetitions"
+
+Running
+
+"activityTrackType": "distance"
+
+Plank
+
+"activityTrackType": "duration"
+Deduplikacja
+
+Przed zapisem:
+
+Usuń duplikaty.
+
+Duplikatem jest ćwiczenie które:
+
+ma identyczną nazwę
+lub podobieństwo > 90%
+
+Zostaw rekord z największą ilością danych.
+
+Walidacja
+
+Przed wygenerowaniem JSON:
+
+Sprawdź:
+
+brak pustej nazwy
+brak pustego PrimaryMuscle
+brak pustego ActivityType
+brak pustego ActivityTrackType
+
+Usuń niepoprawne rekordy.
+
+Wynik
+
+Wygeneruj kompletny kod źródłowy.
+
+Kod ma:
+
+kompilować się bez błędów
+zawierać wszystkie klasy
+zawierać dependency injection
+zawierać konfigurację
+zawierać README
+
+Po uruchomieniu:
+
+dotnet run
+
+powinien zostać wygenerowany:
+
+output/exercises.json
+
+zawierający wszystkie ćwiczenia w formacie:
+
+{
+  "id": 4,
+  "name": "Barbell Back Squat",
+  "shortDescription": "Stand with feet shoulder-width apart, bar resting on upper traps. Descend by pushing hips back and bending knees until thighs are parallel to the floor, then drive back up.",
+  "primaryMuscle": "Quadriceps",
+  "secondaryMuscles": [],
+  "muscles": [
+    {
+      "name": "Quadriceps"
+    }
+  ],
+  "tags": [
+    "barbell",
+    "compound",
+    "powerlifting"
+  ],
+  "activityType": "weighted",
+  "activityTrackType": "repetitions"
+}
+
+Dodatkowo wygeneruj raport:
+
+output/report.json
+
+zawierający:
+
+liczbę pobranych rekordów z każdego źródła
+liczbę duplikatów
+liczbę rekordów końcowych
+listę błędów walidacji
+czas wykonania procesu.

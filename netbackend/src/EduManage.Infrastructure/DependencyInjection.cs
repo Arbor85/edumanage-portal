@@ -25,7 +25,8 @@ public static class DependencyInjection
         services.AddScoped<IDefaultWorkoutRepository, DefaultWorkoutRepository>();
         services.AddScoped<IRoutineRepository, RoutineRepository>();
         services.AddScoped<IWorkoutHistoryRepository, WorkoutHistoryRepository>();
-
+        services.AddScoped<IEquipmentRepository, EquipmentRepository>();
+        services.AddScoped<IUserEquipmentRepository, UserEquipmentRepository>();
 
         return services;
     }

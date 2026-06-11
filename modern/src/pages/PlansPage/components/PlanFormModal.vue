@@ -271,7 +271,8 @@ function onExercisePicked(ex: ExcerciseOut) {
   if (!workout.excercises) workout.excercises = []
   workout.excercises.push({
     name: ex.name,
-    isBodyweight: ex.isBodyweight,
+    activityType: ex.activityType,
+    activityTrackType: ex.activityTrackType,
     sets: [{ type: 'normal', reps: 10, weight: null, note: null }],
   })
 }
@@ -477,7 +478,7 @@ async function doDelete() {
                   <div class="flex items-center justify-between gap-2">
                     <div class="flex items-center gap-2">
                       <span class="font-medium text-sm text-text-primary dark:text-white">{{ ex.name }}</span>
-                      <span v-if="ex.isBodyweight"
+                      <span v-if="ex.activityType === 'bodyweight'"
                         class="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400">
                         Bodyweight
                       </span>
@@ -491,7 +492,7 @@ async function doDelete() {
 
                   <div class="flex flex-col gap-2">
                     <div v-for="(set, si) in ex.sets ?? []" :key="si" class="flex items-center gap-2">
-                      <EditSet :set="set" :is-bodyweight="ex.isBodyweight" class="flex-1"
+                      <EditSet :set="set" :activity-type="ex.activityType" :activity-track-type="ex.activityTrackType" class="flex-1"
                         @update:set="form.workouts[index].excercises![ei].sets![si] = $event" />
                       <button type="button"
                         class="text-red-400 hover:text-red-600 text-lg leading-none p-1 focus-visible:ring-1 focus-visible:ring-primary rounded"
@@ -687,7 +688,9 @@ async function doDelete() {
 
   <AddSetsDialog v-if="addSetsForExIdx !== null" :open="addSetsForExIdx !== null"
     :base-set="form.workouts[activeWorkoutIndex]?.excercises?.[addSetsForExIdx]?.sets?.at(-1) ?? { type: 'normal', reps: 10, weight: null, note: null }"
-    :is-bodyweight="form.workouts[activeWorkoutIndex]?.excercises?.[addSetsForExIdx]?.isBodyweight" @add="onSetsAdded"
+    :activity-type="form.workouts[activeWorkoutIndex]?.excercises?.[addSetsForExIdx]?.activityType"
+    :activity-track-type="form.workouts[activeWorkoutIndex]?.excercises?.[addSetsForExIdx]?.activityTrackType"
+    @add="onSetsAdded"
     @close="addSetsForExIdx = null" />
 </template>
 

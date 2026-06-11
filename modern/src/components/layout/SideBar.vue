@@ -4,7 +4,7 @@ import { useWorkoutStore } from '../../stores/workoutStore'
 import { useAuthStore } from '../../stores/authStore'
 import {
   Home, Dumbbell, ClipboardList, Calendar, Play,
-  CalendarDays, BarChart2, Users, GraduationCap, User, LogOut
+  CalendarDays, BarChart2, Users, GraduationCap, User, LogOut, Package
 } from 'lucide-vue-next'
 import type { Component } from 'vue'
 
@@ -21,6 +21,7 @@ const navItems: { to: string; icon: Component; label: string; pulse?: boolean }[
   // { to: '/meetings', icon: CalendarDays, label: 'Schedule' },
   { to: '/history', icon: BarChart2, label: 'Analytics' },
   { to: '/clients', icon: Users, label: 'Clients' },
+  { to: '/equipment', icon: Package, label: 'Equipment' },
   // { to: '/courses', icon: GraduationCap, label: 'Courses' },
 ]
 </script>

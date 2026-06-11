@@ -53,6 +53,8 @@ builder.Services.AddAuthorization(options =>
 {
 	options.AddPolicy("manage:clients", policy =>
 		policy.Requirements.Add(new HasPermissionRequirement("manage:clients")));
+	options.AddPolicy("manage:equipment", policy =>
+		policy.Requirements.Add(new HasPermissionRequirement("manage:equipment")));
 });
 builder.Services.AddSingleton<IAuthorizationHandler, HasPermissionHandler>();
 builder.Services.AddEndpointsApiExplorer();

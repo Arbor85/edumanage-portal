@@ -297,6 +297,49 @@ export interface CourseUpdate {
   tags: string[] | null
 }
 
+// ─── Equipment ────────────────────────────────────────────────
+// API path: /api/equipment
+
+export type EquipmentType = 'bodyweight' | 'weight'
+
+export interface EquipmentOut {
+  id: string
+  name: string | null
+  equipmentType: EquipmentType
+  weightOptions: number[] | null
+  isCore: boolean
+}
+
+export interface EquipmentCreate {
+  name: string | null
+  equipmentType: EquipmentType
+  weightOptions: number[] | null
+}
+
+export interface EquipmentUpdate {
+  name: string | null
+  equipmentType: EquipmentType
+  weightOptions: number[] | null
+}
+
+// API path: /api/user-equipment
+
+export interface UserEquipmentOut {
+  equipmentId: string
+  name: string | null
+  equipmentType: EquipmentType
+  availableWeights: number[] | null
+}
+
+export interface UserEquipmentSave {
+  equipmentId: string
+  availableWeights: number[] | null
+}
+
+export interface UserEquipmentBatchUpdate {
+  equipment: UserEquipmentSave[]
+}
+
 // ─── Frontend-only ────────────────────────────────────────────
 
 export interface ActiveSet {

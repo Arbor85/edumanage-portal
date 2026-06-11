@@ -148,3 +148,28 @@ public sealed record DefaultWorkoutOut(
     string Name,
     string? Note,
     IReadOnlyList<RoutineExcercise> Excercises);
+
+public sealed record EquipmentOut(
+    string Id,
+    string? Name,
+    EquipmentType EquipmentType,
+    List<decimal>? WeightOptions,
+    bool IsCore);
+
+public sealed record EquipmentWriteRequest(
+    string? Name,
+    EquipmentType EquipmentType,
+    List<decimal>? WeightOptions);
+
+public sealed record UserEquipmentOut(
+    string EquipmentId,
+    string? Name,
+    EquipmentType EquipmentType,
+    List<decimal>? AvailableWeights);
+
+public sealed record UserEquipmentBatchUpdate(
+    List<UserEquipmentSave> Equipment);
+
+public sealed record UserEquipmentSave(
+    string EquipmentId,
+    List<decimal>? AvailableWeights);
