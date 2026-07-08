@@ -1,0 +1,18 @@
+<Project>
+
+    <!--
+        Ten plik celowo "przesłania" Directory.Build.props z repozytorium nadrzędnego
+        (swo-extension-mscsp), które wymusza net8.0 i traktuje ostrzeżenia jak błędy.
+        MSBuild zatrzymuje wyszukiwanie Directory.Build.props na pierwszym znalezionym
+        pliku idąc w górę drzewa katalogów - dzięki temu ten projekt edukacyjny
+        żyje niezależnie od reguł repozytorium głównego.
+    -->
+
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <IsPackable>false</IsPackable>
+    </PropertyGroup>
+
+</Project>
