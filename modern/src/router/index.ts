@@ -142,9 +142,30 @@ router.beforeEach(async (to) => {
     return { name: 'Login', query: { redirect: to.fullPath } }
   }
 
-  if (to.meta.requiresTrainer) {
-    const authStore = useAuthStore()
-    if (!authStore.isTrainer) return { path: '/' }
+  const authStore = useAuthStore()
+
+  if (to.meta.requiresTrainer && !authStore.isTrainer) {
+    return { path: '/' }
+  }
+
+  // Onboarding gate — skip for the onboarding route itself
+  if (to.name !== 'Onboarding' && !authStore.onboardingComplete) {
+    // Wait briefly for profile to load (it fetches async on auth)
+    if (authStore.userProfile === null) {
+      await new Promise<void>((resolve) => {
+        const stop = setInterval(() => {
+          if (authStore.userProfile !== null || !authStore.isAuthenticated) {
+            clearInterval(stop)
+            resolve()
+          }
+        }, 50)
+        // Timeout after 2s — if profile still null, assume new user → onboarding
+        setTimeout(() => { clearInterval(stop); resolve() }, 2000)
+      })
+    }
+    if (!authStore.onboardingComplete) {
+      return { name: 'Onboarding' }
+    }
   }
 
   return true
