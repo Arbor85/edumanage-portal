@@ -52,8 +52,7 @@ const router = createRouter({
     {
       path: '/progress',
       name: 'Progress',
-      // Phase 6 will introduce ProgressPage; using HistoryPage as placeholder
-      component: () => import('../pages/HistoryPage.vue'),
+      component: () => import('../pages/ProgressPage.vue'),
       meta: { requiresAuth: true },
     },
     {

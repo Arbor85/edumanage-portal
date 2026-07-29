@@ -49,7 +49,7 @@ onUnmounted(() => clearInterval(timer))
 
 async function finish() {
   await store.finishWorkout()
-  router.push('/history')
+  router.push('/progress')
 }
 </script>
 

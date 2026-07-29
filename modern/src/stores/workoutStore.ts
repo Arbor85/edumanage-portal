@@ -22,6 +22,7 @@ export const useWorkoutStore = defineStore('workout', () => {
   const activeWorkout = ref<ActiveWorkoutState | null>(null)
   const elapsedSeconds = ref(0)
   const restSecondsLeft = ref<number | null>(null)
+  const restTotalSeconds = ref<number>(90)
   const isResting = ref(false)
   const history = ref<WorkoutHistoryOut[]>([])
 
@@ -151,6 +152,20 @@ export const useWorkoutStore = defineStore('workout', () => {
     if (restHandle) clearInterval(restHandle)
     isResting.value = false
     restSecondsLeft.value = null
+  }
+
+  function startRest(seconds = 90) {
+    if (restHandle) clearInterval(restHandle)
+    restTotalSeconds.value = seconds
+    restSecondsLeft.value = seconds
+    isResting.value = true
+    restHandle = setInterval(() => {
+      if (!restSecondsLeft.value || restSecondsLeft.value <= 1) {
+        skipRest()
+      } else {
+        restSecondsLeft.value--
+      }
+    }, 1000)
   }
 
   function skipExercise() {
@@ -288,7 +303,26 @@ export const useWorkoutStore = defineStore('workout', () => {
       sourceWorkout: aw.sourceWorkout,
     }
 
-    const result = await routinesApi.completeRoutine(payload)
+    const localResult: WorkoutHistoryOut = {
+      id: null,
+      name: aw.routineName,
+      currentUserId: null,
+      mode: aw.mode,
+      startedAt: aw.startedAt,
+      completedAt,
+      durationSeconds: elapsedSeconds.value,
+      totalSets,
+      completedSets,
+      excercises,
+      sourceWorkout: aw.sourceWorkout,
+    }
+
+    let result = localResult
+    try {
+      result = await routinesApi.completeRoutine(payload)
+    } catch {
+      // API unavailable — use local result
+    }
 
     history.value.unshift(result)
     if (history.value.length > HISTORY_CAP) history.value.length = HISTORY_CAP
@@ -329,12 +363,14 @@ export const useWorkoutStore = defineStore('workout', () => {
     activeWorkout,
     elapsedSeconds,
     restSecondsLeft,
+    restTotalSeconds,
     isResting,
     history,
     startFromRoutine,
     startFromPlanWorkout,
     completeSet,
     skipRest,
+    startRest,
     skipExercise,
     addAdHocExercise,
     updateExerciseSets,

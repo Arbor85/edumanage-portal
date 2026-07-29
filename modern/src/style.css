@@ -75,6 +75,12 @@ html {
   transform: translateY(-8px);
 }
 
+/* ─── Bottom sheet slide-up animation ───────────────── */
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
 /* ─── Reduced motion ─────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
