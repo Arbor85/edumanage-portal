@@ -39,8 +39,7 @@ const router = createRouter({
     {
       path: '/',
       name: 'Today',
-      // Phase 4 will introduce TodayPage; using DashboardPage as placeholder
-      component: () => import('../pages/DashboardPage.vue'),
+      component: () => import('../pages/TodayPage.vue'),
       meta: { requiresAuth: true },
     },
     {
