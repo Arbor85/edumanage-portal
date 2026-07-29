@@ -45,8 +45,7 @@ const router = createRouter({
     {
       path: '/train',
       name: 'Train',
-      // Phase 7 will introduce TrainPage; using RoutinesPage as placeholder
-      component: () => import('../pages/RoutinesPage.vue'),
+      component: () => import('../pages/TrainPage.vue'),
       meta: { requiresAuth: true },
     },
     {
@@ -58,8 +57,7 @@ const router = createRouter({
     {
       path: '/explore',
       name: 'Explore',
-      // Phase 7 will introduce ExplorePage; using ExercisesPage as placeholder
-      component: () => import('../pages/ExercisesPage.vue'),
+      component: () => import('../pages/ExplorePage.vue'),
       meta: { requiresAuth: true },
     },
     {
@@ -80,6 +78,12 @@ const router = createRouter({
       path: '/coach/clients',
       name: 'CoachClients',
       component: () => import('../pages/ClientsPage.vue'),
+      meta: { requiresAuth: true, requiresTrainer: true },
+    },
+    {
+      path: '/coach/clients/:id',
+      name: 'CoachClientDetail',
+      component: () => import('../pages/coach/ClientDetailPage.vue'),
       meta: { requiresAuth: true, requiresTrainer: true },
     },
     {

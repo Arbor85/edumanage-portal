@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { Dumbbell, Clock, Layers, ChevronRight } from 'lucide-vue-next'
 import AppLayout from '../components/layout/AppLayout.vue'
@@ -10,6 +10,8 @@ import BodySilhouette from '../components/BodySilhouette.vue'
 import PRList from '../components/PRList.vue'
 import { useProgressStore } from '../stores/progressStore'
 import { useWorkoutStore } from '../stores/workoutStore'
+import { useCountUp } from '../composables/useCountUp'
+import { useIntersectionReveal } from '../composables/useIntersectionReveal'
 import type { WorkoutHistoryOut } from '../types'
 
 const router = useRouter()
@@ -19,13 +21,38 @@ const workoutStore = useWorkoutStore()
 type Tab = 'overview' | 'records' | 'history'
 const activeTab = ref<Tab>('overview')
 
-// Workout detail modal (reused from HistoryPage)
+// Workout detail modal
 const selected = ref<WorkoutHistoryOut | null>(null)
 
 // Chart data derived from progress store
 const chartData = computed(() =>
   progressStore.weeklyData.map((w) => ({ label: w.label, sets: w.sets }))
 )
+
+// ── Animated stat counters ─────────────────────────────────
+const statsEl = ref<HTMLElement | null>(null)
+const { isVisible: statsVisible } = useIntersectionReveal(statsEl)
+
+const workoutsTarget = computed(() => progressStore.totalWorkouts)
+const setsTarget = computed(() => progressStore.totalSets)
+const hoursTarget = computed(() => progressStore.totalHours)
+
+const { displayValue: workoutsDisplay, trigger: triggerWorkouts } = useCountUp(workoutsTarget)
+const { displayValue: setsDisplay, trigger: triggerSets } = useCountUp(setsTarget)
+const { displayValue: hoursDisplay, trigger: triggerHours } = useCountUp(hoursTarget)
+
+watch(statsVisible, (v) => {
+  if (v) { triggerWorkouts(); triggerSets(); triggerHours() }
+})
+
+// ── Section reveal on scroll ───────────────────────────────
+const chartEl = ref<HTMLElement | null>(null)
+const heatmapEl = ref<HTMLElement | null>(null)
+const bodyEl = ref<HTMLElement | null>(null)
+
+const { isVisible: chartVisible } = useIntersectionReveal(chartEl)
+const { isVisible: heatmapVisible } = useIntersectionReveal(heatmapEl)
+const { isVisible: bodyVisible } = useIntersectionReveal(bodyEl)
 
 function fmtDuration(seconds: number): string {
   const m = Math.floor(seconds / 60)
@@ -55,18 +82,18 @@ const TABS: { id: Tab; label: string }[] = [
         <h1 class="text-3xl font-black text-white">Progress</h1>
       </div>
 
-      <!-- Quick stat cards -->
-      <div class="grid grid-cols-3 gap-3 mb-6">
+      <!-- Quick stat cards (animated count-up) -->
+      <div ref="statsEl" class="grid grid-cols-3 gap-3 mb-6">
         <div class="bg-surface-card border border-white/5 rounded-2xl p-4 text-center">
-          <p class="text-2xl font-black text-primary">{{ progressStore.totalWorkouts }}</p>
+          <p class="text-2xl font-black text-primary tabular-nums">{{ workoutsDisplay }}</p>
           <p class="text-[10px] font-bold tracking-widest uppercase text-text-muted mt-1">Workouts</p>
         </div>
         <div class="bg-surface-card border border-white/5 rounded-2xl p-4 text-center">
-          <p class="text-2xl font-black text-primary">{{ progressStore.totalSets }}</p>
+          <p class="text-2xl font-black text-primary tabular-nums">{{ setsDisplay }}</p>
           <p class="text-[10px] font-bold tracking-widest uppercase text-text-muted mt-1">Total sets</p>
         </div>
         <div class="bg-surface-card border border-white/5 rounded-2xl p-4 text-center">
-          <p class="text-2xl font-black text-primary">{{ progressStore.totalHours }}h</p>
+          <p class="text-2xl font-black text-primary tabular-nums">{{ hoursDisplay }}h</p>
           <p class="text-[10px] font-bold tracking-widest uppercase text-text-muted mt-1">Active time</p>
         </div>
       </div>
@@ -89,23 +116,35 @@ const TABS: { id: Tab; label: string }[] = [
       <!-- ── Overview tab ─────────────────────────────────── -->
       <div v-if="activeTab === 'overview'" class="space-y-6">
 
-        <!-- Volume chart -->
-        <section class="bg-surface-card border border-white/5 rounded-2xl p-5">
+        <!-- Volume chart (reveal on scroll) -->
+        <section
+          ref="chartEl"
+          class="bg-surface-card border border-white/5 rounded-2xl p-5 transition-all duration-500"
+          :class="chartVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'"
+        >
           <p class="text-xs font-bold tracking-widest uppercase text-text-muted mb-4">Sets per week</p>
           <VolumeChart v-if="chartData.length" :data="chartData" />
           <SkeletonLoader v-else height="176px" rounded="rounded-xl" />
         </section>
 
-        <!-- Training heatmap -->
-        <section class="bg-surface-card border border-white/5 rounded-2xl p-5">
+        <!-- Training heatmap (reveal on scroll) -->
+        <section
+          ref="heatmapEl"
+          class="bg-surface-card border border-white/5 rounded-2xl p-5 transition-all duration-500 delay-100"
+          :class="heatmapVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'"
+        >
           <p class="text-xs font-bold tracking-widest uppercase text-text-muted mb-4">
             12 weeks at a glance
           </p>
           <TrainingHeatmap :data="progressStore.heatmapData" />
         </section>
 
-        <!-- Body silhouette / muscle frequency -->
-        <section class="bg-surface-card border border-white/5 rounded-2xl p-5">
+        <!-- Body silhouette / muscle frequency (reveal on scroll) -->
+        <section
+          ref="bodyEl"
+          class="bg-surface-card border border-white/5 rounded-2xl p-5 transition-all duration-500 delay-200"
+          :class="bodyVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'"
+        >
           <p class="text-xs font-bold tracking-widest uppercase text-text-muted mb-4">
             Muscles trained
           </p>

@@ -42,14 +42,17 @@ function fmtDate(iso: string): string {
     <!-- Records list -->
     <div v-else class="flex flex-col gap-2">
       <div
-        v-for="pr in records"
+        v-for="(pr, idx) in records"
         :key="pr.exerciseName"
         class="flex items-center gap-4 rounded-2xl bg-surface-card border border-white/5 p-4
                hover:border-white/10 transition-all"
       >
-        <!-- Icon -->
+        <!-- Icon (pulse on most recent PR) -->
         <div class="w-9 h-9 rounded-xl bg-accent/10 flex items-center justify-center flex-shrink-0">
-          <Zap class="w-4 h-4 text-accent" />
+          <Zap
+            class="w-4 h-4 text-accent"
+            :style="idx === 0 ? 'animation: prPulse 2s ease-in-out infinite' : ''"
+          />
         </div>
 
         <!-- Name + value -->
