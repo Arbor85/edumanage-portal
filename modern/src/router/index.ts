@@ -1,10 +1,11 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuth0 } from '@auth0/auth0-vue'
+import { useAuthStore } from '../stores/authStore'
 
 const router = createRouter({
   history: createWebHistory(),
   routes: [
-    // Public routes
+    // ── Public ──────────────────────────────────────────────────────────
     {
       path: '/login',
       name: 'Login',
@@ -26,34 +27,41 @@ const router = createRouter({
       component: () => import('../pages/JoinPage.vue'),
     },
 
-    // Protected routes
+    // ── Onboarding ───────────────────────────────────────────────────────
     {
-      path: '/',
-      redirect: '/dashboard',
+      path: '/onboarding',
+      name: 'Onboarding',
+      component: () => import('../pages/OnboardingPage.vue'),
       meta: { requiresAuth: true },
     },
+
+    // ── Client routes (all authenticated users) ──────────────────────────
     {
-      path: '/dashboard',
-      name: 'Dashboard',
+      path: '/',
+      name: 'Today',
+      // Phase 4 will introduce TodayPage; using DashboardPage as placeholder
       component: () => import('../pages/DashboardPage.vue'),
       meta: { requiresAuth: true },
     },
     {
-      path: '/exercises',
-      name: 'Exercises',
-      component: () => import('../pages/ExercisesPage.vue'),
-      meta: { requiresAuth: true },
-    },
-    {
-      path: '/routines',
-      name: 'Routines',
+      path: '/train',
+      name: 'Train',
+      // Phase 7 will introduce TrainPage; using RoutinesPage as placeholder
       component: () => import('../pages/RoutinesPage.vue'),
       meta: { requiresAuth: true },
     },
     {
-      path: '/plans',
-      name: 'Plans',
-      component: () => import('../pages/PlansPage.vue'),
+      path: '/progress',
+      name: 'Progress',
+      // Phase 6 will introduce ProgressPage; using HistoryPage as placeholder
+      component: () => import('../pages/HistoryPage.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/explore',
+      name: 'Explore',
+      // Phase 7 will introduce ExplorePage; using ExercisesPage as placeholder
+      component: () => import('../pages/ExercisesPage.vue'),
       meta: { requiresAuth: true },
     },
     {
@@ -63,41 +71,54 @@ const router = createRouter({
       meta: { requiresAuth: true },
     },
     {
-      path: '/history',
-      name: 'History',
-      component: () => import('../pages/HistoryPage.vue'),
-      meta: { requiresAuth: true },
-    },
-    {
-      path: '/clients',
-      name: 'Clients',
-      component: () => import('../pages/ClientsPage.vue'),
-      meta: { requiresAuth: true },
-    },
-    {
-      path: '/meetings',
-      name: 'Meetings',
-      component: () => import('../pages/MeetingsPage.vue'),
-      meta: { requiresAuth: true },
-    },
-    {
-      path: '/courses',
-      name: 'Courses',
-      component: () => import('../pages/CoursesPage.vue'),
-      meta: { requiresAuth: true },
-    },
-    {
-      path: '/equipment',
-      name: 'Equipment',
-      component: () => import('../pages/EquipmentPage.vue'),
-      meta: { requiresAuth: true },
-    },
-    {
       path: '/profile',
       name: 'Profile',
       component: () => import('../pages/ProfilePage.vue'),
       meta: { requiresAuth: true },
     },
+
+    // ── Coach routes (trainers only) ──────────────────────────────────────
+    {
+      path: '/coach/clients',
+      name: 'CoachClients',
+      component: () => import('../pages/ClientsPage.vue'),
+      meta: { requiresAuth: true, requiresTrainer: true },
+    },
+    {
+      path: '/coach/plans',
+      name: 'CoachPlans',
+      component: () => import('../pages/PlansPage.vue'),
+      meta: { requiresAuth: true, requiresTrainer: true },
+    },
+    {
+      path: '/coach/meetings',
+      name: 'CoachMeetings',
+      component: () => import('../pages/MeetingsPage.vue'),
+      meta: { requiresAuth: true, requiresTrainer: true },
+    },
+    {
+      path: '/coach/courses',
+      name: 'CoachCourses',
+      component: () => import('../pages/CoursesPage.vue'),
+      meta: { requiresAuth: true, requiresTrainer: true },
+    },
+    {
+      path: '/coach/equipment',
+      name: 'CoachEquipment',
+      component: () => import('../pages/EquipmentPage.vue'),
+      meta: { requiresAuth: true, requiresTrainer: true },
+    },
+
+    // ── Legacy redirects (old routes → new routes) ───────────────────────
+    { path: '/dashboard', redirect: '/' },
+    { path: '/exercises', redirect: '/explore' },
+    { path: '/routines', redirect: '/train' },
+    { path: '/history', redirect: '/progress' },
+    { path: '/clients', redirect: '/coach/clients' },
+    { path: '/plans', redirect: '/coach/plans' },
+    { path: '/meetings', redirect: '/coach/meetings' },
+    { path: '/courses', redirect: '/coach/courses' },
+    { path: '/equipment', redirect: '/coach/equipment' },
   ],
 })
 
@@ -106,7 +127,6 @@ router.beforeEach(async (to) => {
 
   const { isAuthenticated, isLoading } = useAuth0()
 
-  // Wait for auth0 to finish loading
   if (isLoading.value) {
     await new Promise<void>((resolve) => {
       const stop = setInterval(() => {
@@ -120,6 +140,11 @@ router.beforeEach(async (to) => {
 
   if (!isAuthenticated.value) {
     return { name: 'Login', query: { redirect: to.fullPath } }
+  }
+
+  if (to.meta.requiresTrainer) {
+    const authStore = useAuthStore()
+    if (!authStore.isTrainer) return { path: '/' }
   }
 
   return true

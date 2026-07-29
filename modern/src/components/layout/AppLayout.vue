@@ -2,6 +2,7 @@
 import SideBar from './SideBar.vue'
 import BottomNav from './BottomNav.vue'
 import NotificationToast from '../NotificationToast.vue'
+import ActiveWorkoutPill from '../ActiveWorkoutPill.vue'
 </script>
 
 <template>
@@ -13,6 +14,7 @@ import NotificationToast from '../NotificationToast.vue'
       </main>
     </div>
     <BottomNav />
+    <ActiveWorkoutPill />
     <NotificationToast />
   </div>
 </template>

@@ -1,19 +1,22 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
-import { useWorkoutStore } from '../../stores/workoutStore'
-import { Home, Dumbbell, Play, Calendar } from 'lucide-vue-next'
+import { Home, Dumbbell, TrendingUp, Compass, User } from 'lucide-vue-next'
 import type { Component } from 'vue'
 
 const route = useRoute()
-const workoutStore = useWorkoutStore()
 
-const items: { to: string; icon: Component; label: string; fab?: boolean }[] = [
-  { to: '/dashboard', icon: Home, label: 'Home' },
-  { to: '/exercises', icon: Dumbbell, label: 'Exercises' },
-  { to: '/workout/active', icon: Play, label: 'Workout', fab: true },
-  { to: '/plans', icon: Calendar, label: 'Plans' },
-  // { to: '/meetings', icon: CalendarDays, label: 'Schedule' },
+const items: { to: string; icon: Component; label: string }[] = [
+  { to: '/',         icon: Home,       label: 'Today' },
+  { to: '/train',    icon: Dumbbell,   label: 'Train' },
+  { to: '/progress', icon: TrendingUp, label: 'Progress' },
+  { to: '/explore',  icon: Compass,    label: 'Explore' },
+  { to: '/profile',  icon: User,       label: 'Profile' },
 ]
+
+function isActive(to: string) {
+  if (to === '/') return route.path === '/'
+  return route.path === to || route.path.startsWith(to + '/')
+}
 </script>
 
 <template>
@@ -23,20 +26,10 @@ const items: { to: string; icon: Component; label: string; fab?: boolean }[] = [
       :key="item.to"
       :to="item.to"
       class="flex flex-col items-center gap-0.5 py-2 px-3 min-h-[56px] text-xs font-medium transition-colors focus-visible:ring-2 focus-visible:ring-primary rounded-xl"
-      :class="[
-        item.fab ? '-mt-4' : '',
-        route.path === item.to ? 'text-primary' : 'text-text-secondary',
-      ]"
+      :class="isActive(item.to) ? 'text-primary' : 'text-text-secondary'"
     >
-      <span
-        v-if="item.fab"
-        class="w-12 h-12 rounded-full bg-primary flex items-center justify-center shadow-lg text-white text-lg"
-        :class="workoutStore.activeWorkout ? 'animate-pulse' : ''"
-      >
-        <component :is="item.icon" class="w-6 h-6" />
-      </span>
-      <component :is="item.icon" v-else class="text-xl w-5 h-5" />
-      <span v-if="!item.fab">{{ item.label }}</span>
+      <component :is="item.icon" class="w-5 h-5" />
+      <span>{{ item.label }}</span>
     </RouterLink>
   </nav>
 </template>

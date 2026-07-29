@@ -9,6 +9,12 @@ export const useAuthStore = defineStore('auth', () => {
   const isAuthenticated = computed(() => auth0IsAuthenticated.value)
   const user = computed(() => auth0User.value ?? null)
 
+  // Auth0 custom Action must add https://edumanage.app/roles claim to the token
+  const isTrainer = computed(() => {
+    const roles: string[] = user.value?.['https://edumanage.app/roles'] ?? []
+    return roles.includes('trainer')
+  })
+
   async function bootstrap() {
     // Auth0 handles token refresh internally; this is a hook for future setup
   }
@@ -17,5 +23,5 @@ export const useAuthStore = defineStore('auth', () => {
     auth0Logout({ logoutParams: { returnTo: window.location.origin + '/login' } })
   }
 
-  return { user, isLoading, isAuthenticated, bootstrap, logout }
+  return { user, isLoading, isAuthenticated, isTrainer, bootstrap, logout }
 })
