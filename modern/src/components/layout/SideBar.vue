@@ -4,8 +4,9 @@ import { useWorkoutStore } from '../../stores/workoutStore'
 import { useAuthStore } from '../../stores/authStore'
 import {
   Home, Dumbbell, ClipboardList, Calendar, Play,
-  CalendarDays, BarChart2, Users, GraduationCap, User, LogOut, Package
+  BarChart2, Users, User, LogOut, Package
 } from 'lucide-vue-next'
+import DarkModeToggle from '../DarkModeToggle.vue'
 import type { Component } from 'vue'
 
 const route = useRoute()
@@ -27,7 +28,7 @@ const navItems: { to: string; icon: Component; label: string; pulse?: boolean }[
 </script>
 
 <template>
-  <aside class="hidden lg:flex flex-col w-56 bg-surface-dark min-h-screen flex-shrink-0 px-4 py-6">
+  <aside class="hidden lg:flex flex-col w-56 bg-surface-card min-h-screen flex-shrink-0 px-4 py-6">
     <!-- Logo -->
     <div class="flex items-center gap-2 px-2 mb-8">
       <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white font-bold text-sm">E</div>
@@ -54,8 +55,12 @@ const navItems: { to: string; icon: Component; label: string; pulse?: boolean }[
       </RouterLink>
     </nav>
 
-    <!-- Bottom: profile + logout -->
+    <!-- Bottom: theme toggle + profile + logout -->
     <div class="border-t border-white/10 pt-4 flex flex-col gap-1">
+      <div class="flex items-center gap-3 px-3 py-2 min-h-[44px]">
+        <DarkModeToggle />
+        <span class="text-sm font-medium text-white/70">Theme</span>
+      </div>
       <RouterLink
         to="/profile"
         class="flex items-center gap-3 px-3 py-2.5 min-h-[44px] rounded-xl text-sm font-medium text-white/70 hover:text-white hover:bg-white/10 transition-colors"

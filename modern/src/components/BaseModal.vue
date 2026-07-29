@@ -33,7 +33,7 @@ onUnmounted(() => { document.body.style.overflow = '' })
 
         <!-- Panel -->
         <div
-          class="relative bg-white dark:bg-surface-dark rounded-t-2xl sm:rounded-2xl shadow-2xl flex flex-col w-full max-h-[90dvh] overflow-hidden"
+          class="relative bg-white dark:bg-surface-elevated rounded-t-2xl sm:rounded-2xl shadow-2xl flex flex-col w-full max-h-[90dvh] overflow-hidden"
           :class="{
             'sm:max-w-sm':  size === 'sm',
             'sm:max-w-lg':  size === 'md' || !size,
@@ -69,10 +69,12 @@ onUnmounted(() => { document.body.style.overflow = '' })
 </template>
 
 <style scoped>
-.modal-enter-active, .modal-leave-active { transition: opacity 0.2s ease; }
-.modal-enter-active .relative, .modal-leave-active .relative { transition: transform 0.2s ease; }
+.modal-enter-active,
+.modal-leave-active { transition: opacity 0.2s ease; }
+.modal-enter-active .relative,
+.modal-leave-active .relative { transition: transform 0.2s ease, opacity 0.2s ease; }
 .modal-enter-from { opacity: 0; }
-.modal-enter-from .relative { transform: translateY(24px); }
+.modal-enter-from .relative { transform: translateY(16px) scale(0.97); opacity: 0; }
 .modal-leave-to { opacity: 0; }
-.modal-leave-to .relative { transform: translateY(24px); }
+.modal-leave-to .relative { transform: translateY(16px) scale(0.97); opacity: 0; }
 </style>

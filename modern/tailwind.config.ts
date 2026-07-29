@@ -15,15 +15,24 @@ export default {
           light: '#E6FAF4',
           dark: '#00A67A',
         },
+        accent: {
+          DEFAULT: '#FF6B35',
+          dark: '#E55A25',
+        },
         surface: {
           DEFAULT: '#FFFFFF',
           muted: '#F7F8FA',
-          dark: '#1A1D23',
+          dark: '#141720',
+          page: '#0D0F12',
+          card: '#141720',
+          elevated: '#1C2030',
+          input: '#252A3A',
         },
         text: {
           primary: '#1A1D23',
-          secondary: '#6B7280',
+          secondary: '#8B92A5',
           inverse: '#FFFFFF',
+          muted: '#4A5168',
         },
         difficulty: {
           beginner: '#00C896',
@@ -44,9 +53,15 @@ export default {
           '&::-webkit-scrollbar': { width: '4px' },
           '&::-webkit-scrollbar-track': { background: 'transparent' },
           '&::-webkit-scrollbar-thumb': {
-            background: '#D1D5DB',
+            background: '#252A3A',
             borderRadius: '9999px',
           },
+        },
+        '.shadow-glow': {
+          boxShadow: '0 0 20px rgba(0, 200, 150, 0.15)',
+        },
+        '.shadow-glow-accent': {
+          boxShadow: '0 0 20px rgba(255, 107, 53, 0.2)',
         },
       })
     }),

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
 import { useWorkoutStore } from '../../stores/workoutStore'
-import { Home, Dumbbell, Play, Calendar, CalendarDays } from 'lucide-vue-next'
+import { Home, Dumbbell, Play, Calendar } from 'lucide-vue-next'
 import type { Component } from 'vue'
 
 const route = useRoute()
@@ -17,7 +17,7 @@ const items: { to: string; icon: Component; label: string; fab?: boolean }[] = [
 </script>
 
 <template>
-  <nav class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-surface dark:bg-surface-dark border-t border-gray-100 dark:border-white/10 flex items-center justify-around px-2 pb-safe">
+  <nav class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-surface dark:bg-surface-card border-t border-gray-100 dark:border-white/10 flex items-center justify-around px-2 pb-safe">
     <RouterLink
       v-for="item in items"
       :key="item.to"
