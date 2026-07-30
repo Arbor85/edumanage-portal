@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, nextTick } from 'vue'
+import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import { useWorkoutStore } from '../../stores/workoutStore'
 import { useAuthStore } from '../../stores/authStore'
@@ -41,40 +41,51 @@ const clientNavEl = ref<HTMLElement | null>(null)
 const coachNavEl  = ref<HTMLElement | null>(null)
 const pillReady   = ref(false)
 
-function pillStyle(navEl: HTMLElement | null, activeIdx: number) {
-  if (activeIdx === -1 || !navEl) return null
+interface PillPos { top: number; height: number }
+
+const clientPos = ref<PillPos | null>(null)
+const coachPos  = ref<PillPos | null>(null)
+
+function readPillPos(navEl: HTMLElement | null, items: typeof clientItems): PillPos | null {
+  if (!navEl) return null
   const links = Array.from(navEl.querySelectorAll<HTMLElement>(':scope > a'))
-  const el = links[activeIdx]
-  if (!el) return null
-  return {
-    height:     `${el.offsetHeight}px`,
-    transform:  `translateY(${el.offsetTop}px)`,
-    transition: pillReady.value ? 'transform 300ms cubic-bezier(0.32, 0.72, 0, 1)' : 'none',
-  }
+  const idx = items.findIndex(item => isActive(item.to))
+  if (idx === -1 || !links[idx]) return null
+  const el = links[idx]
+  if (!el.offsetHeight) return null
+  return { top: el.offsetTop, height: el.offsetHeight }
 }
 
-const clientActiveIdx = computed(() => clientItems.findIndex(item => isActive(item.to)))
-const coachActiveIdx  = computed(() => coachItems.findIndex(item => isActive(item.to)))
+function updatePills() {
+  clientPos.value = readPillPos(clientNavEl.value, clientItems)
+  coachPos.value  = readPillPos(coachNavEl.value,  coachItems)
+}
 
-const clientPill = computed(() => pillStyle(clientNavEl.value, clientActiveIdx.value))
-const coachPill  = computed(() => pillStyle(coachNavEl.value, coachActiveIdx.value))
+// Update after every route change once DOM has settled
+watch(() => route.path, () => nextTick(updatePills))
 
 onMounted(async () => {
+  await nextTick()
+  updatePills()
+  // Enable transition only after first placement so pill doesn't fly in on load
   await nextTick()
   pillReady.value = true
 })
 
 // ── Cursor glow ───────────────────────────────────────────────────────────────
 
-const asideEl      = ref<HTMLElement | null>(null)
-const glowY        = ref(0)
-const glowVisible  = ref(false)
+const asideEl     = ref<HTMLElement | null>(null)
+const glowY       = ref(0)
+const glowVisible = ref(false)
 
 function onMouseMove(e: MouseEvent) {
   const rect = asideEl.value?.getBoundingClientRect()
   if (!rect) return
   glowY.value = e.clientY - rect.top
 }
+
+// Active link index for coach section (needed for v-if on coach nav)
+const coachActiveIdx = computed(() => coachItems.findIndex(item => isActive(item.to)))
 </script>
 
 <template>
@@ -90,7 +101,7 @@ function onMouseMove(e: MouseEvent) {
       class="pointer-events-none absolute inset-0 z-0 transition-opacity duration-[400ms]"
       :style="{
         opacity: glowVisible ? 1 : 0,
-        background: `radial-gradient(140px circle at 50% ${glowY}px, rgba(0,200,150,0.07) 0%, transparent 100%)`,
+        background: `radial-gradient(180px circle at 50% ${glowY}px, rgba(0,200,150,0.12) 0%, transparent 100%)`,
       }"
     />
 
@@ -106,10 +117,11 @@ function onMouseMove(e: MouseEvent) {
     <nav ref="clientNavEl" class="relative flex-1 flex flex-col gap-1 z-10">
       <!-- Sliding active pill -->
       <div
-        v-if="clientPill"
+        v-if="clientPos"
         aria-hidden="true"
-        class="absolute left-0 right-0 bg-primary/20 rounded-xl pointer-events-none z-0"
-        :style="clientPill"
+        class="nav-pill absolute left-0 right-0 bg-primary/20 rounded-xl pointer-events-none z-0"
+        :class="{ 'nav-pill--ready': pillReady }"
+        :style="{ height: `${clientPos.height}px`, transform: `translateY(${clientPos.top}px)` }"
       />
 
       <RouterLink
@@ -119,7 +131,7 @@ function onMouseMove(e: MouseEvent) {
         class="relative z-10 flex items-center gap-3 px-3 py-2.5 min-h-[44px] rounded-xl text-sm font-medium transition-colors"
         :class="isActive(item.to)
           ? 'text-primary'
-          : 'text-white/60 hover:text-white hover:bg-white/8'"
+          : 'text-white/60 hover:text-white hover:bg-white/5'"
       >
         <component :is="item.icon" class="w-5 h-5 flex-shrink-0" />
         <span>{{ item.label }}</span>
@@ -137,10 +149,11 @@ function onMouseMove(e: MouseEvent) {
         <nav ref="coachNavEl" class="relative flex flex-col gap-1">
           <!-- Sliding active pill -->
           <div
-            v-if="coachPill"
+            v-if="coachPos && coachActiveIdx !== -1"
             aria-hidden="true"
-            class="absolute left-0 right-0 bg-primary/20 rounded-xl pointer-events-none z-0"
-            :style="coachPill"
+            class="nav-pill absolute left-0 right-0 bg-primary/20 rounded-xl pointer-events-none z-0"
+            :class="{ 'nav-pill--ready': pillReady }"
+            :style="{ height: `${coachPos.height}px`, transform: `translateY(${coachPos.top}px)` }"
           />
 
           <RouterLink
@@ -150,7 +163,7 @@ function onMouseMove(e: MouseEvent) {
             class="relative z-10 flex items-center gap-3 px-3 py-2.5 min-h-[44px] rounded-xl text-sm font-medium transition-colors"
             :class="isActive(item.to)
               ? 'text-primary'
-              : 'text-white/60 hover:text-white hover:bg-white/8'"
+              : 'text-white/60 hover:text-white hover:bg-white/5'"
           >
             <component :is="item.icon" class="w-5 h-5 flex-shrink-0" />
             <span>{{ item.label }}</span>
@@ -166,7 +179,7 @@ function onMouseMove(e: MouseEvent) {
         <span class="text-sm font-medium text-white/60">Theme</span>
       </div>
       <button
-        class="flex items-center gap-3 px-3 py-2.5 min-h-[44px] rounded-xl text-sm font-medium text-white/60 hover:text-white hover:bg-white/8 transition-colors w-full text-left focus-visible:ring-2 focus-visible:ring-primary"
+        class="flex items-center gap-3 px-3 py-2.5 min-h-[44px] rounded-xl text-sm font-medium text-white/60 hover:text-white hover:bg-white/5 transition-colors w-full text-left focus-visible:ring-2 focus-visible:ring-primary"
         @click="authStore.logout()"
       >
         <LogOut class="w-5 h-5 flex-shrink-0" />
@@ -175,3 +188,20 @@ function onMouseMove(e: MouseEvent) {
     </div>
   </aside>
 </template>
+
+<style scoped>
+.nav-pill {
+  /* No transition on first mount — pill snaps to position */
+  transition: none;
+}
+.nav-pill--ready {
+  /* Subsequent moves slide */
+  transition: transform 300ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-pill--ready {
+    transition: none;
+  }
+}
+</style>
