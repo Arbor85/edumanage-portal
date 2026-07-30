@@ -1,20 +1,5 @@
-<script setup lang="ts">
-import SideBar from './SideBar.vue'
-import BottomNav from './BottomNav.vue'
-import NotificationToast from '../NotificationToast.vue'
-import ActiveWorkoutPill from '../ActiveWorkoutPill.vue'
-</script>
-
 <template>
-  <div class="flex min-h-screen bg-surface-muted dark:bg-surface-page">
-    <SideBar />
-    <div class="flex-1 flex flex-col min-w-0">
-      <main class="flex-1 p-4 sm:p-6 pb-20 lg:pb-6 overflow-y-auto">
-        <slot />
-      </main>
-    </div>
-    <BottomNav />
-    <ActiveWorkoutPill />
-    <NotificationToast />
+  <div>
+    <slot />
   </div>
 </template>

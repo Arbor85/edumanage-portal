@@ -81,6 +81,26 @@ html {
   transform: translateY(-8px);
 }
 
+/* ─── Slide transitions (directional routing) ───────── */
+/* Both pages share the same grid cell — grid-column/row set by App.vue grid container */
+.slide-left-enter-active,
+.slide-left-leave-active,
+.slide-right-enter-active,
+.slide-right-leave-active {
+  transition: transform 280ms cubic-bezier(0.32, 0.72, 0, 1),
+              opacity 280ms cubic-bezier(0.23, 1, 0.32, 1);
+  grid-column: 1;
+  grid-row: 1;
+}
+
+/* slide-left: navigating deeper (higher nav index) */
+.slide-left-enter-from  { transform: translateX(60px);  opacity: 0; }
+.slide-left-leave-to    { transform: translateX(-60px); opacity: 0; }
+
+/* slide-right: navigating back (lower nav index) */
+.slide-right-enter-from { transform: translateX(-60px); opacity: 0; }
+.slide-right-leave-to   { transform: translateX(60px);  opacity: 0; }
+
 /* ─── PR bolt pulse ──────────────────────────────────── */
 @keyframes prPulse {
   0%, 100% { opacity: 1; transform: scale(1); }
@@ -102,6 +122,19 @@ html {
   }
   .page-enter-from,
   .page-leave-to {
+    transform: none !important;
+  }
+  /* Slide transitions: opacity-only fallback, no transform */
+  .slide-left-enter-active,
+  .slide-left-leave-active,
+  .slide-right-enter-active,
+  .slide-right-leave-active {
+    transition: opacity 150ms ease !important;
+  }
+  .slide-left-enter-from,
+  .slide-left-leave-to,
+  .slide-right-enter-from,
+  .slide-right-leave-to {
     transform: none !important;
   }
 }
