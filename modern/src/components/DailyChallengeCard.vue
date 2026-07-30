@@ -83,7 +83,7 @@ async function markDone() {
 
 <style scoped>
 .challenge-done-enter-active,
-.challenge-done-leave-active { transition: opacity 0.3s ease, transform 0.3s ease; }
+.challenge-done-leave-active { transition: opacity 0.3s cubic-bezier(0.23, 1, 0.32, 1), transform 0.3s cubic-bezier(0.23, 1, 0.32, 1); }
 .challenge-done-enter-from { opacity: 0; transform: translateY(6px); }
 .challenge-done-leave-to { opacity: 0; transform: translateY(-6px); position: absolute; }
 </style>

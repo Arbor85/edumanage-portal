@@ -10,7 +10,7 @@ defineEmits<{ action: [] }>()
 </script>
 
 <template>
-  <div class="flex flex-col items-center justify-center py-12 gap-3 text-center">
+  <div class="empty-state flex flex-col items-center justify-center py-12 gap-3 text-center">
     <component v-if="icon" :is="icon" class="w-10 h-10 text-text-secondary dark:text-white/40" />
     <p class="text-base font-semibold text-text-primary dark:text-white">{{ title }}</p>
     <p v-if="description" class="text-sm text-text-secondary max-w-xs">{{ description }}</p>
@@ -23,3 +23,20 @@ defineEmits<{ action: [] }>()
     </button>
   </div>
 </template>
+
+<style scoped>
+.empty-state {
+  transition: opacity 250ms cubic-bezier(0.23, 1, 0.32, 1), transform 250ms cubic-bezier(0.23, 1, 0.32, 1);
+  @starting-style {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .empty-state {
+    transition: opacity 150ms ease !important;
+    @starting-style { opacity: 0; transform: none; }
+  }
+}
+</style>

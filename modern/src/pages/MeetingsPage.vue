@@ -56,8 +56,10 @@ function onCalendarCreate(date: string) {
       />
     </div>
 
-    <MeetingList v-if="view === 'list'" :meetings="filtered()" :loading="meetingStore.isLoading" @edit="editTarget = $event" />
-    <MeetingCalendar v-else :meetings="filtered()" @edit="editTarget = $event" @create="onCalendarCreate" />
+    <Transition name="fade" mode="out-in">
+      <MeetingList v-if="view === 'list'" key="list" :meetings="filtered()" :loading="meetingStore.isLoading" @edit="editTarget = $event" />
+      <MeetingCalendar v-else key="calendar" :meetings="filtered()" @edit="editTarget = $event" @create="onCalendarCreate" />
+    </Transition>
 
     <MeetingFormModal
       :open="isCreateOpen || editTarget !== null"

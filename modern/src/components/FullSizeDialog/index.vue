@@ -33,6 +33,16 @@ onUnmounted(() => { document.body.style.overflow = '' })
 </template>
 
 <style scoped>
-.dialog-enter-active, .dialog-leave-active { transition: opacity 0.2s ease; }
-.dialog-enter-from, .dialog-leave-to { opacity: 0; }
+.dialog-enter-active, .dialog-leave-active {
+  transition: opacity 0.2s cubic-bezier(0.23, 1, 0.32, 1), transform 0.2s cubic-bezier(0.23, 1, 0.32, 1);
+}
+.dialog-enter-from { opacity: 0; transform: translateY(16px); }
+.dialog-leave-to { opacity: 0; transform: translateY(-8px); }
+
+@media (prefers-reduced-motion: reduce) {
+  .dialog-enter-active, .dialog-leave-active {
+    transition: opacity 0.15s ease !important;
+  }
+  .dialog-enter-from, .dialog-leave-to { transform: none !important; }
+}
 </style>

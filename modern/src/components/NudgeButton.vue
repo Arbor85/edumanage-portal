@@ -34,7 +34,7 @@ async function nudge() {
 
 <template>
   <button
-    class="relative w-8 h-8 flex items-center justify-center rounded-xl transition-all group/nudge"
+    class="relative w-8 h-8 flex items-center justify-center rounded-xl transition-[background-color,color] group/nudge"
     :class="isOnCooldown
       ? 'text-text-muted cursor-default bg-white/3'
       : 'text-text-secondary hover:text-primary hover:bg-primary/10 active:scale-95'"
@@ -44,7 +44,7 @@ async function nudge() {
   >
     <Bell
       class="w-3.5 h-3.5 transition-transform"
-      :class="{ 'animate-bounce': isLoading, 'opacity-40': isOnCooldown }"
+      :class="{ 'animate-spin': isLoading, 'opacity-40': isOnCooldown }"
     />
     <!-- Tooltip -->
     <span

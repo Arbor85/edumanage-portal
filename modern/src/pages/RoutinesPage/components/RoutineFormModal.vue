@@ -209,8 +209,10 @@ async function doDelete() {
     </template>
 
     <!-- Wizard or empty state -->
+    <Transition name="fade" mode="out-in">
     <ProcessWizard
       v-if="form.excercises.length"
+      :key="'wizard'"
       v-model="activeStepIndex"
       :steps="wizardSteps"
       class="h-full"
@@ -296,7 +298,7 @@ async function doDelete() {
     </ProcessWizard>
 
     <!-- Empty state when no exercises yet -->
-    <div v-else class="h-full flex flex-col items-center justify-center">
+    <div v-else key="empty" class="h-full flex flex-col items-center justify-center">
       <EmptyState
         :icon="Dumbbell"
         title="No exercises yet"
@@ -305,6 +307,7 @@ async function doDelete() {
         @action="isExercisePickerOpen = true"
       />
     </div>
+    </Transition>
 
     <template #footer>
       <div class="flex items-center gap-2">

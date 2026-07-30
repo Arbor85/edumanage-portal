@@ -37,7 +37,7 @@ const { toasts } = useToast()
 <style scoped>
 .toast-enter-active,
 .toast-leave-active {
-  transition: all 0.3s ease;
+  transition: opacity 0.3s cubic-bezier(0.23, 1, 0.32, 1), transform 0.3s cubic-bezier(0.23, 1, 0.32, 1);
 }
 .toast-enter-from {
   opacity: 0;
@@ -46,5 +46,16 @@ const { toasts } = useToast()
 .toast-leave-to {
   opacity: 0;
   transform: translateX(24px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast-enter-active,
+  .toast-leave-active {
+    transition: opacity 0.15s ease !important;
+  }
+  .toast-enter-from,
+  .toast-leave-to {
+    transform: none !important;
+  }
 }
 </style>

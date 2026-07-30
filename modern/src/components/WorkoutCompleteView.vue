@@ -54,7 +54,7 @@ async function share() {
 </script>
 
 <template>
-  <div class="flex flex-col items-center justify-center min-h-[80dvh] gap-8 px-4 text-center">
+  <div class="workout-complete flex flex-col items-center justify-center min-h-[80dvh] gap-8 px-4 text-center">
     <!-- Trophy icon -->
     <div class="w-24 h-24 rounded-full bg-primary/15 border border-primary/30 flex items-center justify-center">
       <Trophy class="w-12 h-12 text-primary" />
@@ -112,3 +112,20 @@ async function share() {
   <!-- Off-screen share card for html2canvas -->
   <WorkoutShareCard :history-item="historyItem" />
 </template>
+
+<style scoped>
+.workout-complete {
+  transition: opacity 400ms 80ms cubic-bezier(0.23, 1, 0.32, 1), transform 400ms 80ms cubic-bezier(0.23, 1, 0.32, 1);
+  @starting-style {
+    opacity: 0;
+    transform: scale(0.95) translateY(12px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .workout-complete {
+    transition: opacity 200ms 80ms ease !important;
+    @starting-style { opacity: 0; transform: none; }
+  }
+}
+</style>

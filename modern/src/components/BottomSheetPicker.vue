@@ -41,8 +41,7 @@ function confirm() {
 
       <!-- Sheet -->
       <div
-        class="relative w-full bg-surface-elevated rounded-t-3xl px-6 pb-10 pt-4 shadow-2xl
-               animate-[slideUp_0.25s_cubic-bezier(0.32,0.72,0,1)]"
+        class="sheet-panel relative w-full bg-surface-elevated rounded-t-3xl px-6 pb-10 pt-4 shadow-2xl"
       >
         <!-- Handle bar -->
         <div class="w-10 h-1 bg-white/20 rounded-full mx-auto mb-6" />
@@ -74,10 +73,22 @@ function confirm() {
 
         <button
           class="w-full h-14 bg-primary text-white font-bold text-base rounded-xl
-                 shadow-glow hover:bg-primary-dark active:scale-[0.97] transition-all"
+                 shadow-glow hover:bg-primary-dark active:scale-[0.97] transition-[background-color,transform]"
           @click="confirm"
         >Confirm</button>
       </div>
     </div>
   </Teleport>
 </template>
+
+<style scoped>
+.sheet-panel {
+  transform: translateY(0);
+  transition: transform 0.25s cubic-bezier(0.32, 0.72, 0, 1);
+  @starting-style { transform: translateY(100%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sheet-panel { transition: none; }
+}
+</style>

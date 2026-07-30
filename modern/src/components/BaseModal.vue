@@ -70,9 +70,10 @@ onUnmounted(() => { document.body.style.overflow = '' })
 
 <style scoped>
 .modal-enter-active,
-.modal-leave-active { transition: opacity 0.2s ease; }
+.modal-leave-active { transition: opacity 0.2s cubic-bezier(0.23, 1, 0.32, 1); }
 .modal-enter-active .relative,
-.modal-leave-active .relative { transition: transform 0.2s ease, opacity 0.2s ease; }
+.modal-leave-active .relative { transition: transform 0.2s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.2s cubic-bezier(0.23, 1, 0.32, 1); }
+
 .modal-enter-from { opacity: 0; }
 .modal-enter-from .relative { transform: translateY(16px) scale(0.97); opacity: 0; }
 .modal-leave-to { opacity: 0; }

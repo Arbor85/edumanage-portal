@@ -113,13 +113,14 @@ const TABS: { id: Tab; label: string }[] = [
         </button>
       </div>
 
+      <Transition name="fade" mode="out-in">
       <!-- ── Overview tab ─────────────────────────────────── -->
-      <div v-if="activeTab === 'overview'" class="space-y-6">
+      <div v-if="activeTab === 'overview'" :key="'overview'" class="space-y-6">
 
         <!-- Volume chart (reveal on scroll) -->
         <section
           ref="chartEl"
-          class="bg-surface-card border border-white/5 rounded-2xl p-5 transition-all duration-500"
+          class="bg-surface-card border border-white/5 rounded-2xl p-5 transition duration-500"
           :class="chartVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'"
         >
           <p class="text-xs font-bold tracking-widest uppercase text-text-muted mb-4">Sets per week</p>
@@ -130,7 +131,7 @@ const TABS: { id: Tab; label: string }[] = [
         <!-- Training heatmap (reveal on scroll) -->
         <section
           ref="heatmapEl"
-          class="bg-surface-card border border-white/5 rounded-2xl p-5 transition-all duration-500 delay-100"
+          class="bg-surface-card border border-white/5 rounded-2xl p-5 transition duration-500 delay-100"
           :class="heatmapVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'"
         >
           <p class="text-xs font-bold tracking-widest uppercase text-text-muted mb-4">
@@ -142,7 +143,7 @@ const TABS: { id: Tab; label: string }[] = [
         <!-- Body silhouette / muscle frequency (reveal on scroll) -->
         <section
           ref="bodyEl"
-          class="bg-surface-card border border-white/5 rounded-2xl p-5 transition-all duration-500 delay-200"
+          class="bg-surface-card border border-white/5 rounded-2xl p-5 transition duration-500 delay-200"
           :class="bodyVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'"
         >
           <p class="text-xs font-bold tracking-widest uppercase text-text-muted mb-4">
@@ -153,12 +154,12 @@ const TABS: { id: Tab; label: string }[] = [
       </div>
 
       <!-- ── Records tab ──────────────────────────────────── -->
-      <div v-else-if="activeTab === 'records'">
+      <div v-else-if="activeTab === 'records'" :key="'records'">
         <PRList :records="progressStore.personalRecords" />
       </div>
 
       <!-- ── History tab ──────────────────────────────────── -->
-      <div v-else-if="activeTab === 'history'">
+      <div v-else-if="activeTab === 'history'" :key="'history'">
         <!-- Empty state -->
         <div
           v-if="workoutStore.history.length === 0"
@@ -218,6 +219,7 @@ const TABS: { id: Tab; label: string }[] = [
           </button>
         </div>
       </div>
+      </Transition>
 
     </div>
 
@@ -234,7 +236,7 @@ const TABS: { id: Tab; label: string }[] = [
             <div class="flex items-center gap-3 mb-6">
               <button
                 class="w-9 h-9 rounded-xl bg-white/5 flex items-center justify-center text-text-secondary
-                       hover:bg-white/10 active:scale-95 transition-all"
+                       hover:bg-white/10 active:scale-95 transition"
                 @click="selected = null"
               >
                 ×

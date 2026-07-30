@@ -119,8 +119,9 @@ function fmtDate(iso: string): string {
         </button>
       </div>
 
+      <Transition name="fade" mode="out-in">
       <!-- ── My Routines tab ─────────────────────────────── -->
-      <div v-if="activeTab === 'routines'">
+      <div v-if="activeTab === 'routines'" :key="'routines'">
         <!-- Search -->
         <div class="relative mb-4">
           <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none">
@@ -210,7 +211,7 @@ function fmtDate(iso: string): string {
       </div>
 
       <!-- ── Active Plan tab ────────────────────────────── -->
-      <div v-else-if="activeTab === 'plan'">
+      <div v-else-if="activeTab === 'plan'" :key="'plan'">
         <!-- Loading -->
         <div v-if="planStore.isLoading" class="flex flex-col gap-3">
           <SkeletonLoader v-for="i in 5" :key="i" height="96px" rounded="rounded-2xl" />
@@ -311,6 +312,7 @@ function fmtDate(iso: string): string {
           </div>
         </div>
       </div>
+      </Transition>
     </div>
 
     <!-- Routine form modal (create / edit) -->

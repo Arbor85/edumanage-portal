@@ -57,7 +57,7 @@ function onImgError() {
 </script>
 
 <template>
-  <div class="rounded-2xl overflow-hidden group cursor-pointer hover:scale-[1.02] transition-transform bg-surface dark:bg-surface-dark shadow-sm border border-gray-100 dark:border-white/10" @click="$emit('edit')">
+  <div class="exercise-card rounded-2xl overflow-hidden group cursor-pointer transition-transform active:scale-[0.97] bg-surface dark:bg-surface-dark shadow-sm border border-gray-100 dark:border-white/10" @click="$emit('edit')">
     <!-- Image area -->
     <div class="relative aspect-[4/3] bg-gray-200 dark:bg-gray-700">
       <img
@@ -116,3 +116,9 @@ function onImgError() {
     </div>
   </div>
 </template>
+
+<style scoped>
+@media (hover: hover) and (pointer: fine) {
+  .exercise-card:hover { transform: scale(1.02); }
+}
+</style>

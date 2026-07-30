@@ -61,8 +61,10 @@ async function handleDelete() {
       />
     </div>
 
-    <CourseList v-if="view === 'list'" :courses="filtered" :loading="courseStore.isLoading" @edit="editTarget = $event" />
-    <CourseKanban v-else :courses="filtered" :loading="courseStore.isLoading" @edit="editTarget = $event" @delete="deleteTarget = $event" />
+    <Transition name="fade" mode="out-in">
+      <CourseList v-if="view === 'list'" key="list" :courses="filtered" :loading="courseStore.isLoading" @edit="editTarget = $event" />
+      <CourseKanban v-else key="kanban" :courses="filtered" :loading="courseStore.isLoading" @edit="editTarget = $event" @delete="deleteTarget = $event" />
+    </Transition>
 
     <CourseFormModal
       :open="isCreateOpen || editTarget !== null"

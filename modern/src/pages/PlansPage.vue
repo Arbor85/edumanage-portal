@@ -74,20 +74,23 @@ async function handleDelete() {
       />
     </div>
 
-    <PlanList
-      v-if="view === 'list'"
-      :plans="filtered"
-      :loading="planStore.isLoading"
-      @edit="editTarget = $event"
-    />
-
-    <PlanKanban
-      v-else
-      :plans="filtered"
-      :loading="planStore.isLoading"
-      @edit="editTarget = $event"
-      @delete="deleteTarget = $event"
-    />
+    <Transition name="fade" mode="out-in">
+      <PlanList
+        v-if="view === 'list'"
+        key="list"
+        :plans="filtered"
+        :loading="planStore.isLoading"
+        @edit="editTarget = $event"
+      />
+      <PlanKanban
+        v-else
+        key="kanban"
+        :plans="filtered"
+        :loading="planStore.isLoading"
+        @edit="editTarget = $event"
+        @delete="deleteTarget = $event"
+      />
+    </Transition>
 
     <PlanFormModal
       :open="isCreateOpen || editTarget !== null"

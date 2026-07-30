@@ -61,8 +61,10 @@ async function handleDelete() {
       />
     </div>
 
-    <ClientList v-if="view === 'list'" :clients="filtered" :loading="clientStore.isLoading" @edit="editTarget = $event" />
-    <ClientKanban v-else :clients="filtered" :loading="clientStore.isLoading" @edit="editTarget = $event" @delete="deleteTarget = $event" />
+    <Transition name="fade" mode="out-in">
+      <ClientList v-if="view === 'list'" key="list" :clients="filtered" :loading="clientStore.isLoading" @edit="editTarget = $event" />
+      <ClientKanban v-else key="kanban" :clients="filtered" :loading="clientStore.isLoading" @edit="editTarget = $event" @delete="deleteTarget = $event" />
+    </Transition>
 
     <ClientFormModal
       :open="isCreateOpen || editTarget !== null"

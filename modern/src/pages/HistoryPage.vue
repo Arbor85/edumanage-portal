@@ -28,8 +28,10 @@ const viewTarget = ref<WorkoutHistoryOut | null>(null)
       />
     </div>
 
-    <HistoryList v-if="view === 'list'" :history="workoutStore.history" @view="viewTarget = $event" />
-    <HistoryCalendar v-else :history="workoutStore.history" @view="viewTarget = $event" />
+    <Transition name="fade" mode="out-in">
+      <HistoryList v-if="view === 'list'" key="list" :history="workoutStore.history" @view="viewTarget = $event" />
+      <HistoryCalendar v-else key="calendar" :history="workoutStore.history" @view="viewTarget = $event" />
+    </Transition>
 
     <WorkoutDetailModal :open="viewTarget !== null" :workout="viewTarget" @close="viewTarget = null" />
   </AppLayout>

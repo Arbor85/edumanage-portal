@@ -108,7 +108,7 @@ watch(() => props.completed, (v) => { if (v) stop() })
     <div
       v-if="running"
       class="absolute inset-y-0 left-0 bg-primary/10 dark:bg-primary/20 rounded-xl pointer-events-none"
-      :style="{ width: `${progress * 100}%`, transition: 'width 1s linear' }"
+      :style="{ clipPath: `inset(0 ${(1 - progress) * 100}% 0 0 round 0.75rem)`, transition: 'clip-path 1s linear' }"
     />
 
     <!-- Circular ring + number -->

@@ -24,7 +24,7 @@ const dashOffset = computed(() => CIRC.value * (1 - Math.min(100, Math.max(0, pr
         stroke-linecap="round"
         :stroke-dasharray="CIRC"
         :stroke-dashoffset="dashOffset"
-        class="transition-all duration-700"
+        style="transition: stroke-dashoffset 700ms cubic-bezier(0.23, 1, 0.32, 1)"
       />
     </svg>
     <div class="absolute inset-0 flex flex-col items-center justify-center">
