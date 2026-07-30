@@ -24,9 +24,10 @@ export default {
           muted: '#F7F8FA',
           dark: '#141720',
           page: '#0D0F12',
-          card: '#141720',
-          elevated: '#1C2030',
-          input: '#252A3A',
+          // Adaptive: defined as CSS variables, respond to .dark class
+          card:     'rgb(var(--color-surface-card)     / <alpha-value>)',
+          elevated: 'rgb(var(--color-surface-elevated) / <alpha-value>)',
+          input:    'rgb(var(--color-surface-input)    / <alpha-value>)',
         },
         text: {
           primary: '#1A1D23',

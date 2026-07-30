@@ -91,7 +91,7 @@ const coachActiveIdx = computed(() => coachItems.findIndex(item => isActive(item
 <template>
   <aside
     ref="asideEl"
-    class="hidden lg:flex flex-col w-56 bg-surface-card min-h-screen flex-shrink-0 px-4 py-6 border-r border-white/5 relative"
+    class="hidden lg:flex flex-col w-56 bg-surface-card min-h-screen flex-shrink-0 px-4 py-6 border-r border-gray-200 dark:border-white/5 relative"
     @mousemove="onMouseMove"
     @mouseenter="glowVisible = true"
     @mouseleave="glowVisible = false"
@@ -110,7 +110,7 @@ const coachActiveIdx = computed(() => coachItems.findIndex(item => isActive(item
       <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white font-bold text-sm shadow-glow">
         E
       </div>
-      <span class="text-lg font-bold text-white">EduManage</span>
+      <span class="text-lg font-bold text-gray-900 dark:text-white">EduManage</span>
     </div>
 
     <!-- Client nav -->
@@ -131,7 +131,7 @@ const coachActiveIdx = computed(() => coachItems.findIndex(item => isActive(item
         class="relative z-10 flex items-center gap-3 px-3 py-2.5 min-h-[44px] rounded-xl text-sm font-medium transition-colors"
         :class="isActive(item.to)
           ? 'text-primary'
-          : 'text-white/60 hover:text-white hover:bg-white/5'"
+          : 'text-gray-500 dark:text-white/60 hover:text-gray-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5'"
       >
         <component :is="item.icon" class="w-5 h-5 flex-shrink-0" />
         <span>{{ item.label }}</span>
@@ -144,7 +144,7 @@ const coachActiveIdx = computed(() => coachItems.findIndex(item => isActive(item
 
     <!-- Coach section -->
     <div v-if="authStore.isTrainer" class="relative z-10 mt-4">
-      <div class="border-t border-white/10 pt-4">
+      <div class="border-t border-gray-200 dark:border-white/10 pt-4">
         <p class="px-3 mb-2 text-xs font-bold tracking-widest uppercase text-text-muted">Coach</p>
         <nav ref="coachNavEl" class="relative flex flex-col gap-1">
           <!-- Sliding active pill -->
@@ -163,7 +163,7 @@ const coachActiveIdx = computed(() => coachItems.findIndex(item => isActive(item
             class="relative z-10 flex items-center gap-3 px-3 py-2.5 min-h-[44px] rounded-xl text-sm font-medium transition-colors"
             :class="isActive(item.to)
               ? 'text-primary'
-              : 'text-white/60 hover:text-white hover:bg-white/5'"
+              : 'text-gray-500 dark:text-white/60 hover:text-gray-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5'"
           >
             <component :is="item.icon" class="w-5 h-5 flex-shrink-0" />
             <span>{{ item.label }}</span>
@@ -173,13 +173,13 @@ const coachActiveIdx = computed(() => coachItems.findIndex(item => isActive(item
     </div>
 
     <!-- Bottom: theme + logout -->
-    <div class="relative z-10 border-t border-white/10 pt-4 flex flex-col gap-1 mt-4">
+    <div class="relative z-10 border-t border-gray-200 dark:border-white/10 pt-4 flex flex-col gap-1 mt-4">
       <div class="flex items-center gap-3 px-3 py-2 min-h-[44px]">
         <DarkModeToggle />
-        <span class="text-sm font-medium text-white/60">Theme</span>
+        <span class="text-sm font-medium text-gray-500 dark:text-white/60">Theme</span>
       </div>
       <button
-        class="flex items-center gap-3 px-3 py-2.5 min-h-[44px] rounded-xl text-sm font-medium text-white/60 hover:text-white hover:bg-white/5 transition-colors w-full text-left focus-visible:ring-2 focus-visible:ring-primary"
+        class="flex items-center gap-3 px-3 py-2.5 min-h-[44px] rounded-xl text-sm font-medium text-gray-500 dark:text-white/60 hover:text-gray-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5 transition-colors w-full text-left focus-visible:ring-2 focus-visible:ring-primary"
         @click="authStore.logout()"
       >
         <LogOut class="w-5 h-5 flex-shrink-0" />

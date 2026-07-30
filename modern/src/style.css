@@ -13,6 +13,19 @@ html {
   font-size: 16px;
 }
 
+/* ─── Adaptive surface color tokens ─────────────────── */
+/* Values are RGB channels so Tailwind opacity modifiers work: bg-surface-card/20 */
+:root {
+  --color-surface-card:     255 255 255;   /* light: #FFFFFF  */
+  --color-surface-elevated: 247 248 250;   /* light: #F7F8FA  */
+  --color-surface-input:    240 242 245;   /* light: #F0F2F5  */
+}
+.dark {
+  --color-surface-card:     20 23 32;      /* dark:  #141720  */
+  --color-surface-elevated: 28 32 48;      /* dark:  #1C2030  */
+  --color-surface-input:    37 42 58;      /* dark:  #252A3A  */
+}
+
 /* ─── VueDatePicker design-system theme ─────────────── */
 :root {
   --dp-font-family: Inter, system-ui, sans-serif;
