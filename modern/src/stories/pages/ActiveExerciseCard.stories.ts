@@ -11,27 +11,38 @@ function seedWorkoutStore() {
 
 const mockExercise: ActiveExercise = {
   name: 'Barbell Squat',
-  isBodyweight: false,
-  currentSetIndex: 1,
+  activityType: 'weighted',
+  activityTrackType: 'repetitions',
   skipped: false,
+  supersetGroupId: null,
+  isDropSet: false,
   sets: [
     {
       setNumber: 1, reps: 10, weight: 60,
+      duration: null, distance: null,
       targetReps: 10, targetWeight: 60,
+      targetDuration: null, targetDistance: null,
       actualReps: 10, actualWeight: 60,
-      completed: true, isBodyweight: false, note: null,
+      actualDuration: null, actualDistance: null,
+      completed: true, note: null,
     },
     {
       setNumber: 2, reps: 8, weight: 80,
+      duration: null, distance: null,
       targetReps: 8, targetWeight: 80,
+      targetDuration: null, targetDistance: null,
       actualReps: null, actualWeight: null,
-      completed: false, isBodyweight: false, note: null,
+      actualDuration: null, actualDistance: null,
+      completed: false, note: null,
     },
     {
       setNumber: 3, reps: 8, weight: 80,
+      duration: null, distance: null,
       targetReps: 8, targetWeight: 80,
+      targetDuration: null, targetDistance: null,
       actualReps: null, actualWeight: null,
-      completed: false, isBodyweight: false, note: null,
+      actualDuration: null, actualDistance: null,
+      completed: false, note: null,
     },
   ],
 }
@@ -78,7 +89,6 @@ export const AllCompleted: Story = {
     isCurrent: false,
     exercise: {
       ...mockExercise,
-      currentSetIndex: 3,
       sets: mockExercise.sets.map((s) => ({ ...s, completed: true })),
     },
   },

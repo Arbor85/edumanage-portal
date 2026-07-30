@@ -19,8 +19,15 @@ const elapsed = computed(() => {
 const exerciseName = computed(() => {
   const workout = workoutStore.activeWorkout
   if (!workout) return ''
-  const current = workout.exercises[workout.currentExerciseIndex]
-  return current?.name ?? workout.routineName ?? 'Workout'
+  const step = workout.steps?.[workout.currentStepIndex]
+  if (!step) return workout.routineName ?? 'Workout'
+  if (step.type === 'normal-set' || step.type === 'drop-set') {
+    return workout.exercises[step.exerciseIndex]?.name ?? workout.routineName ?? 'Workout'
+  }
+  if (step.type === 'superset-round') {
+    return step.items.map(i => workout.exercises[i.exerciseIndex]?.name).filter(Boolean).join(' + ')
+  }
+  return workout.routineName ?? 'Workout'
 })
 </script>
 

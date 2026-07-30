@@ -74,11 +74,26 @@ export interface RoutineSet {
   note: string | null
 }
 
+export type SupersetColor = 'violet' | 'orange' | 'sky' | 'rose' | 'amber'
+
+export interface SupersetGroup {
+  id: string
+  name: string | null
+  color: SupersetColor
+}
+
+export interface DropConfig {
+  count: number                    // total sets including the starting set (min 2)
+  weightDecreasePercent: number    // e.g. 20 → each drop weight = previous × 0.80
+}
+
 export interface RoutineExcercise {
   name: string | null
   activityType: ActivityType
   activityTrackType: ActivityTrackType
   sets: RoutineSet[] | null
+  supersetGroupId: string | null
+  dropConfig: DropConfig | null
 }
 
 export interface RoutineOut {
@@ -87,19 +102,35 @@ export interface RoutineOut {
   name: string | null
   note: string | null
   excercises: RoutineExcercise[] | null
+  supersetGroups: SupersetGroup[]
 }
 
 export interface RoutineCreate {
   name: string | null
   note: string | null
   excercises: RoutineExcercise[] | null
+  supersetGroups: SupersetGroup[]
 }
 
 export interface RoutineUpdate {
   name: string | null
   note: string | null
   excercises: RoutineExcercise[] | null
+  supersetGroups: SupersetGroup[]
 }
+
+// ─── Workout steps (pre-computed at workout start) ────────────
+
+export interface SupersetStepItem {
+  exerciseIndex: number
+  setIndex: number
+  completed: boolean
+}
+
+export type WorkoutStep =
+  | { type: 'normal-set'; exerciseIndex: number; setIndex: number }
+  | { type: 'superset-round'; groupId: string; roundIndex: number; items: SupersetStepItem[] }
+  | { type: 'drop-set'; exerciseIndex: number; setIndex: number; isLastDrop: boolean }
 
 // ─── Complete Routine ──────────────────────────────────────────
 // API path: POST /api/routines/complete
@@ -382,8 +413,9 @@ export interface ActiveExercise {
   activityType: ActivityType
   activityTrackType: ActivityTrackType
   sets: ActiveSet[]
-  currentSetIndex: number
   skipped: boolean
+  supersetGroupId: string | null
+  isDropSet: boolean
 }
 
 export interface ActiveWorkoutState {
@@ -395,8 +427,8 @@ export interface ActiveWorkoutState {
   totalPausedSeconds: number
   elapsedSeconds: number
   exercises: ActiveExercise[]
-  currentExerciseIndex: number
-  currentSetIndex: number
+  steps: WorkoutStep[]
+  currentStepIndex: number
   paused: boolean
   status: 'in_progress' | 'paused' | 'completed'
 }

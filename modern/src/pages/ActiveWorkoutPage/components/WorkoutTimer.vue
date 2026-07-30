@@ -6,10 +6,23 @@ import CountdownTimer from '../../../components/CountdownTimer.vue'
 
 const store = useWorkoutStore()
 
-const currentEx = computed(() => store.activeWorkout?.exercises[store.activeWorkout.currentExerciseIndex ?? 0])
+const currentEx = computed(() => {
+  const aw = store.activeWorkout
+  if (!aw) return null
+  const step = aw.steps[aw.currentStepIndex]
+  if (!step) return null
+  const exIdx = step.type === 'normal-set' || step.type === 'drop-set'
+    ? step.exerciseIndex
+    : step.type === 'superset-round' ? step.items[0]?.exerciseIndex ?? 0 : 0
+  return aw.exercises[exIdx] ?? null
+})
 const currentSet = computed(() => {
-  if (!currentEx.value) return null
-  return currentEx.value.sets[currentEx.value.currentSetIndex ?? 0]
+  const aw = store.activeWorkout
+  if (!aw || !currentEx.value) return null
+  const step = aw.steps[aw.currentStepIndex]
+  if (!step) return null
+  const setIdx = step.type === 'normal-set' || step.type === 'drop-set' ? step.setIndex : 0
+  return currentEx.value.sets[setIdx] ?? null
 })
 </script>
 
@@ -25,7 +38,7 @@ const currentSet = computed(() => {
 
     <p v-if="currentEx" class="text-xl font-bold text-text-primary dark:text-white">{{ currentEx.name }}</p>
     <p v-if="currentSet" class="text-text-secondary text-sm">
-      Set {{ (currentEx?.currentSetIndex ?? 0) + 1 }} of {{ currentEx?.sets.length }}
+      Set {{ (store.activeWorkout?.currentStepIndex ?? 0) + 1 }} of {{ currentEx?.sets.length }}
       · {{ currentSet.reps ?? '?' }} reps
       <span v-if="currentSet.weight"> · {{ currentSet.weight }}kg</span>
     </p>

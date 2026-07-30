@@ -24,7 +24,7 @@ function openEdit(i: number) {
   editingIndex.value = i
 }
 
-function onEditConfirm(sets: { reps: number | null; weight: number | null }[]) {
+function onEditConfirm(sets: { reps: number | null; weight: number | null; duration: number | null; distance: number | null }[]) {
   if (editingIndex.value === null) return
   store.updateExerciseSets(editingIndex.value, sets)
   editingIndex.value = null
@@ -74,7 +74,7 @@ async function finish() {
           :key="i"
           class="group flex flex-col gap-1 px-2 py-2 rounded-xl transition-colors"
           :class="[
-            i === store.activeWorkout?.currentExerciseIndex
+            i === store.activeWorkout?.currentStepIndex
               ? 'bg-primary/10 dark:bg-primary/20'
               : ex.skipped
                 ? 'opacity-40'
@@ -84,7 +84,7 @@ async function finish() {
           <div class="flex items-start gap-1">
             <p
               class="text-xs font-medium leading-tight truncate flex-1"
-              :class="i === store.activeWorkout?.currentExerciseIndex ? 'text-primary' : 'text-text-primary dark:text-white'"
+              :class="i === store.activeWorkout?.currentStepIndex ? 'text-primary' : 'text-text-primary dark:text-white'"
             >{{ ex.name }}</p>
             <button
               class="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 rounded text-text-secondary hover:text-primary flex-shrink-0"
@@ -98,7 +98,7 @@ async function finish() {
               v-for="(set, si) in ex.sets"
               :key="si"
               class="w-2 h-2 rounded-full"
-              :class="set.completed ? 'bg-green-500' : i === store.activeWorkout?.currentExerciseIndex && si === ex.currentSetIndex ? 'bg-primary' : 'bg-gray-300 dark:bg-white/20'"
+              :class="set.completed ? 'bg-green-500' : 'bg-gray-300 dark:bg-white/20'"
             />
           </div>
         </div>
@@ -107,8 +107,8 @@ async function finish() {
       <!-- Right: current exercise only -->
       <div class="flex-1 flex flex-col gap-3 min-w-0">
         <ActiveExerciseCard
-          v-if="store.activeWorkout?.exercises[store.activeWorkout.currentExerciseIndex]"
-          :exercise="store.activeWorkout.exercises[store.activeWorkout.currentExerciseIndex]"
+          v-if="store.activeWorkout?.exercises.length"
+          :exercise="store.activeWorkout.exercises[0]"
           :is-current="true"
         />
         <WorkoutExerciseQueue />
@@ -118,8 +118,7 @@ async function finish() {
     <ExerciseSetupDialog
       :open="editingIndex !== null"
       :exercise-name="editingExercise?.name ?? ''"
-      :is-bodyweight="editingExercise?.isBodyweight"
-      :initial-sets="editingExercise?.sets.map(s => ({ reps: s.reps, weight: s.weight }))"
+      :initial-sets="editingExercise?.sets.map(s => ({ reps: s.reps, weight: s.weight, duration: s.duration, distance: s.distance }))"
       @confirm="onEditConfirm"
       @close="editingIndex = null"
     />

@@ -3,12 +3,14 @@ import { ref } from 'vue'
 import type {
   ActiveWorkoutState,
   ActiveExercise,
+  ActiveSet,
   RoutineOut,
   PlanWorkoutOutput,
   WorkoutHistoryOut,
   CompleteRoutineCreate,
   CompletedRoutineExcercise,
   CompletedRoutineSet,
+  WorkoutStep,
   ActivityType,
   ActivityTrackType,
 } from '../types'
@@ -17,6 +19,128 @@ import * as routinesApi from '../services/routinesApi'
 const LS_ACTIVE = 'activeWorkout'
 const LS_HISTORY = 'workoutHistory'
 const HISTORY_CAP = 100
+
+// Round weight to nearest 0.5 kg
+function roundHalf(n: number): number {
+  return Math.round(n * 2) / 2
+}
+
+function computeDropWeights(startWeight: number, count: number, decreasePercent: number): number[] {
+  const weights: number[] = [startWeight]
+  for (let i = 1; i < count; i++) {
+    weights.push(roundHalf(weights[i - 1] * (1 - decreasePercent / 100)))
+  }
+  return weights
+}
+
+function buildActiveExercises(routine: RoutineOut): ActiveExercise[] {
+  return (routine.excercises ?? []).map((ex) => {
+    const supersetGroupId = ex.supersetGroupId ?? null
+    const isDropSet = !!ex.dropConfig
+
+    let sets: ActiveSet[]
+
+    if (isDropSet && ex.dropConfig && ex.sets?.length) {
+      const startSet = ex.sets[0]
+      const weights = computeDropWeights(startSet.weight ?? 0, ex.dropConfig.count, ex.dropConfig.weightDecreasePercent)
+      sets = weights.map((w, i) => ({
+        setNumber: i + 1,
+        reps: null,
+        weight: w,
+        duration: null,
+        distance: null,
+        targetReps: null,
+        targetWeight: w,
+        targetDuration: null,
+        targetDistance: null,
+        actualReps: null,
+        actualWeight: null,
+        actualDuration: null,
+        actualDistance: null,
+        completed: false,
+        note: null,
+      }))
+    } else {
+      sets = (ex.sets ?? []).map((s, i) => ({
+        setNumber: i + 1,
+        reps: s.reps,
+        weight: s.weight,
+        duration: s.duration ?? null,
+        distance: s.distance ?? null,
+        targetReps: s.reps,
+        targetWeight: s.weight,
+        targetDuration: s.duration ?? null,
+        targetDistance: s.distance ?? null,
+        actualReps: null,
+        actualWeight: null,
+        actualDuration: null,
+        actualDistance: null,
+        completed: false,
+        note: s.note,
+      }))
+    }
+
+    return {
+      name: ex.name ?? '',
+      activityType: ex.activityType ?? 'weighted',
+      activityTrackType: ex.activityTrackType ?? 'repetitions',
+      skipped: false,
+      sets,
+      supersetGroupId,
+      isDropSet,
+    }
+  })
+}
+
+function computeSteps(exercises: ActiveExercise[]): WorkoutStep[] {
+  const steps: WorkoutStep[] = []
+  const processedGroups = new Set<string>()
+
+  for (let exIdx = 0; exIdx < exercises.length; exIdx++) {
+    const ex = exercises[exIdx]
+    const groupId = ex.supersetGroupId
+
+    if (groupId && !processedGroups.has(groupId)) {
+      processedGroups.add(groupId)
+      const groupExercises = exercises
+        .map((e, i) => ({ e, i }))
+        .filter(({ e }) => e.supersetGroupId === groupId)
+
+      const setCount = groupExercises[0]?.e.sets.length ?? 0
+      for (let round = 0; round < setCount; round++) {
+        steps.push({
+          type: 'superset-round',
+          groupId,
+          roundIndex: round,
+          items: groupExercises.map(({ i }) => ({
+            exerciseIndex: i,
+            setIndex: round,
+            completed: false,
+          })),
+        })
+      }
+    } else if (!groupId && ex.isDropSet) {
+      for (let setIdx = 0; setIdx < ex.sets.length; setIdx++) {
+        steps.push({
+          type: 'drop-set',
+          exerciseIndex: exIdx,
+          setIndex: setIdx,
+          isLastDrop: setIdx === ex.sets.length - 1,
+        })
+      }
+    } else if (!groupId) {
+      for (let setIdx = 0; setIdx < ex.sets.length; setIdx++) {
+        steps.push({
+          type: 'normal-set',
+          exerciseIndex: exIdx,
+          setIndex: setIdx,
+        })
+      }
+    }
+  }
+
+  return steps
+}
 
 export const useWorkoutStore = defineStore('workout', () => {
   const activeWorkout = ref<ActiveWorkoutState | null>(null)
@@ -46,34 +170,9 @@ export const useWorkoutStore = defineStore('workout', () => {
     }, 1000)
   }
 
-  function buildActiveExercises(routine: RoutineOut): ActiveExercise[] {
-    return (routine.excercises ?? []).map((ex) => ({
-      name: ex.name ?? '',
-      activityType: ex.activityType ?? 'weighted',
-      activityTrackType: ex.activityTrackType ?? 'repetitions',
-      skipped: false,
-      currentSetIndex: 0,
-      sets: (ex.sets ?? []).map((s, i) => ({
-        setNumber: i + 1,
-        reps: s.reps,
-        weight: s.weight,
-        duration: s.duration ?? null,
-        distance: s.distance ?? null,
-        targetReps: s.reps,
-        targetWeight: s.weight,
-        targetDuration: s.duration ?? null,
-        targetDistance: s.distance ?? null,
-        actualReps: null,
-        actualWeight: null,
-        actualDuration: null,
-        actualDistance: null,
-        completed: false,
-        note: s.note,
-      })),
-    }))
-  }
-
   function startFromRoutine(routine: RoutineOut) {
+    const exercises = buildActiveExercises(routine)
+    const steps = computeSteps(exercises)
     activeWorkout.value = {
       routineName: routine.name,
       mode: 'routine',
@@ -82,9 +181,9 @@ export const useWorkoutStore = defineStore('workout', () => {
       pausedAt: null,
       totalPausedSeconds: 0,
       elapsedSeconds: 0,
-      exercises: buildActiveExercises(routine),
-      currentExerciseIndex: 0,
-      currentSetIndex: 0,
+      exercises,
+      steps,
+      currentStepIndex: 0,
       paused: false,
       status: 'in_progress',
     }
@@ -99,7 +198,10 @@ export const useWorkoutStore = defineStore('workout', () => {
       name: workout.name,
       note: workout.note,
       excercises: workout.excercises,
+      supersetGroups: [],
     }
+    const exercises = buildActiveExercises(fakeRoutine)
+    const steps = computeSteps(exercises)
     activeWorkout.value = {
       routineName: workout.name,
       mode: 'plan',
@@ -108,9 +210,9 @@ export const useWorkoutStore = defineStore('workout', () => {
       pausedAt: null,
       totalPausedSeconds: 0,
       elapsedSeconds: 0,
-      exercises: buildActiveExercises(fakeRoutine),
-      currentExerciseIndex: 0,
-      currentSetIndex: 0,
+      exercises,
+      steps,
+      currentStepIndex: 0,
       paused: false,
       status: 'in_progress',
     }
@@ -118,34 +220,64 @@ export const useWorkoutStore = defineStore('workout', () => {
     startElapsedTimer()
   }
 
+  // Complete a normal-set or drop-set step, or a specific item within a superset-round step
   function completeSet(actualReps?: number | null, actualWeight?: number | null, note?: string, actualDuration?: number | null) {
     if (!activeWorkout.value) return
     const aw = activeWorkout.value
-    const exercise = aw.exercises[aw.currentExerciseIndex]
-    if (!exercise) return
-    const set = exercise.sets[aw.currentSetIndex]
-    if (!set) return
+    const step = aw.steps[aw.currentStepIndex]
+    if (!step) return
 
-    set.actualReps = actualReps ?? set.reps
-    set.actualWeight = actualWeight ?? set.weight
-    set.actualDuration = actualDuration !== undefined ? actualDuration : set.duration
-    set.completed = true
-    set.note = note ?? set.note
+    if (step.type === 'normal-set') {
+      const set = aw.exercises[step.exerciseIndex]?.sets[step.setIndex]
+      if (!set) return
+      set.actualReps = actualReps ?? set.reps
+      set.actualWeight = actualWeight ?? set.weight
+      set.actualDuration = actualDuration !== undefined ? actualDuration : set.duration
+      set.completed = true
+      if (note !== undefined) set.note = note
+      aw.currentStepIndex++
+      persist()
+      startRest(90)
 
-    // Advance
-    if (aw.currentSetIndex < exercise.sets.length - 1) {
-      aw.currentSetIndex++
-      exercise.currentSetIndex = aw.currentSetIndex
-    } else {
-      // Move to next exercise
-      let nextIdx = aw.currentExerciseIndex + 1
-      while (nextIdx < aw.exercises.length && aw.exercises[nextIdx].skipped) nextIdx++
-      if (nextIdx < aw.exercises.length) {
-        aw.currentExerciseIndex = nextIdx
-        aw.currentSetIndex = 0
-      }
+    } else if (step.type === 'drop-set') {
+      const set = aw.exercises[step.exerciseIndex]?.sets[step.setIndex]
+      if (!set) return
+      set.actualReps = actualReps ?? null
+      set.actualWeight = actualWeight ?? set.weight
+      set.completed = true
+      if (note !== undefined) set.note = note
+      aw.currentStepIndex++
+      persist()
+      if (step.isLastDrop) startRest(90)
     }
-    persist()
+  }
+
+  // Complete the currently active item within a superset-round step
+  function completeSupersetItem(actualReps: number | null, actualWeight: number | null, actualDuration?: number | null) {
+    if (!activeWorkout.value) return
+    const aw = activeWorkout.value
+    const step = aw.steps[aw.currentStepIndex]
+    if (!step || step.type !== 'superset-round') return
+
+    const item = step.items.find(i => !i.completed)
+    if (!item) return
+
+    const set = aw.exercises[item.exerciseIndex]?.sets[item.setIndex]
+    if (set) {
+      set.actualReps = actualReps ?? set.reps
+      set.actualWeight = actualWeight ?? set.weight
+      set.actualDuration = actualDuration !== undefined ? actualDuration : set.duration
+      set.completed = true
+    }
+    item.completed = true
+
+    if (step.items.every(i => i.completed)) {
+      aw.currentStepIndex++
+      persist()
+      startRest(90)
+    } else {
+      persist()
+    }
   }
 
   function skipRest() {
@@ -171,13 +303,31 @@ export const useWorkoutStore = defineStore('workout', () => {
   function skipExercise() {
     if (!activeWorkout.value) return
     const aw = activeWorkout.value
-    aw.exercises[aw.currentExerciseIndex].skipped = true
-    let nextIdx = aw.currentExerciseIndex + 1
-    while (nextIdx < aw.exercises.length && aw.exercises[nextIdx].skipped) nextIdx++
-    if (nextIdx < aw.exercises.length) {
-      aw.currentExerciseIndex = nextIdx
-      aw.currentSetIndex = 0
+    const step = aw.steps[aw.currentStepIndex]
+    if (!step) return
+
+    // Collect exercise indices to skip
+    const toSkip = new Set<number>()
+    if (step.type === 'normal-set' || step.type === 'drop-set') {
+      toSkip.add(step.exerciseIndex)
+    } else if (step.type === 'superset-round') {
+      step.items.forEach(i => toSkip.add(i.exerciseIndex))
     }
+
+    toSkip.forEach(idx => { aw.exercises[idx].skipped = true })
+
+    // Advance past all steps belonging to these exercises
+    while (aw.currentStepIndex < aw.steps.length) {
+      const s = aw.steps[aw.currentStepIndex]
+      const involves = (
+        (s.type === 'normal-set' && toSkip.has(s.exerciseIndex)) ||
+        (s.type === 'drop-set' && toSkip.has(s.exerciseIndex)) ||
+        (s.type === 'superset-round' && s.items.some(i => toSkip.has(i.exerciseIndex)))
+      )
+      if (!involves) break
+      aw.currentStepIndex++
+    }
+
     persist()
   }
 
@@ -193,7 +343,8 @@ export const useWorkoutStore = defineStore('workout', () => {
       activityType,
       activityTrackType,
       skipped: false,
-      currentSetIndex: 0,
+      supersetGroupId: null,
+      isDropSet: false,
       sets: rawSets.map((s, i) => ({
         setNumber: i + 1,
         reps: s.reps,
@@ -212,8 +363,18 @@ export const useWorkoutStore = defineStore('workout', () => {
         note: null,
       })),
     }
-    const insertAt = activeWorkout.value.currentExerciseIndex + 1
-    activeWorkout.value.exercises.splice(insertAt, 0, newEx)
+
+    const exerciseIndex = activeWorkout.value.exercises.length
+    activeWorkout.value.exercises.push(newEx)
+
+    const newSteps: WorkoutStep[] = newEx.sets.map((_, setIdx) => ({
+      type: 'normal-set' as const,
+      exerciseIndex,
+      setIndex: setIdx,
+    }))
+
+    const insertAt = activeWorkout.value.currentStepIndex + 1
+    activeWorkout.value.steps.splice(insertAt, 0, ...newSteps)
     persist()
   }
 
@@ -241,9 +402,6 @@ export const useWorkoutStore = defineStore('workout', () => {
       completed: ex.sets[i]?.completed ?? false,
       note: ex.sets[i]?.note ?? null,
     }))
-    if (ex.currentSetIndex >= ex.sets.length) {
-      ex.currentSetIndex = Math.max(0, ex.sets.length - 1)
-    }
     persist()
   }
 
@@ -275,7 +433,7 @@ export const useWorkoutStore = defineStore('workout', () => {
       activityType: ex.activityType,
       activityTrackType: ex.activityTrackType,
       sets: ex.sets.map((s): CompletedRoutineSet => ({
-        type: 'normal',
+        type: ex.isDropSet ? 'drop' : 'normal',
         reps: s.actualReps,
         weight: s.actualWeight,
         duration: s.actualDuration ?? null,
@@ -340,9 +498,15 @@ export const useWorkoutStore = defineStore('workout', () => {
     try {
       const raw = localStorage.getItem(LS_ACTIVE)
       if (raw) {
-        activeWorkout.value = JSON.parse(raw) as ActiveWorkoutState
-        if (activeWorkout.value.status === 'in_progress') {
-          startElapsedTimer()
+        const parsed = JSON.parse(raw) as ActiveWorkoutState
+        // Validate new format (steps array required)
+        if (!parsed.steps || parsed.currentStepIndex === undefined) {
+          localStorage.removeItem(LS_ACTIVE)
+        } else {
+          activeWorkout.value = parsed
+          if (activeWorkout.value.status === 'in_progress') {
+            startElapsedTimer()
+          }
         }
       }
     } catch {
@@ -369,6 +533,7 @@ export const useWorkoutStore = defineStore('workout', () => {
     startFromRoutine,
     startFromPlanWorkout,
     completeSet,
+    completeSupersetItem,
     skipRest,
     startRest,
     skipExercise,

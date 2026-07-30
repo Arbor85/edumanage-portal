@@ -5,7 +5,7 @@ import SetTimerRow from './SetTimerRow.vue'
 import { useWorkoutStore } from '../../../stores/workoutStore'
 import { Check } from 'lucide-vue-next'
 
-const props = defineProps<{ exercise: ActiveExercise; isCurrent: boolean }>()
+const props = defineProps<{ exercise: ActiveExercise; isCurrent: boolean; currentSetIndex?: number }>()
 const store = useWorkoutStore()
 
 const isTimeBased = () => props.exercise.activityTrackType === 'time'
@@ -39,7 +39,7 @@ function fmtDistance(m: number | null) {
           :set-index="i"
           :duration="set.duration"
           :completed="set.completed"
-          :is-current="isCurrent && i === exercise.currentSetIndex"
+          :is-current="isCurrent && i === (props.currentSetIndex ?? 0)"
           @complete="onSetComplete"
         />
       </template>
@@ -52,7 +52,7 @@ function fmtDistance(m: number | null) {
           class="flex items-center gap-3 text-sm p-2 rounded-xl"
           :class="[
             set.completed ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 line-through' : '',
-            isCurrent && i === exercise.currentSetIndex ? 'ring-1 ring-primary' : '',
+            isCurrent && i === (props.currentSetIndex ?? 0) ? 'ring-1 ring-primary' : '',
           ]"
         >
           <span class="w-5 text-center font-medium text-text-secondary">{{ i + 1 }}</span>
@@ -66,7 +66,7 @@ function fmtDistance(m: number | null) {
             </template>
           </span>
           <BaseButton
-            v-if="isCurrent && !set.completed && i === exercise.currentSetIndex"
+            v-if="isCurrent && !set.completed && i === (props.currentSetIndex ?? 0)"
             size="sm"
             variant="primary"
             @click="store.completeSet()"

@@ -27,7 +27,7 @@ function start() {
 }
 
 function startBlank() {
-  workoutStore.startFromRoutine({ id: null, userId: null, name: 'Ad-hoc Workout', note: null, excercises: [] })
+  workoutStore.startFromRoutine({ id: null, userId: null, name: 'Ad-hoc Workout', note: null, excercises: [], supersetGroups: [] })
 }
 </script>
 
