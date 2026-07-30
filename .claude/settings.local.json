@@ -6,7 +6,8 @@
       "Bash(npx vue-tsc *)",
       "Bash(node_modules/.bin/vue-tsc --noEmit)",
       "Bash(node -e \"require\\('chart.js'\\); console.log\\('chart.js ok'\\)\")",
-      "Bash(npx skills *)"
+      "Bash(npx skills *)",
+      "Bash(./node_modules/.bin/vue-tsc *)"
     ]
   }
 }
