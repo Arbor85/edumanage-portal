@@ -14,5 +14,8 @@ public class RoutineConfiguration : IEntityTypeConfiguration<Routine>
             .WithOne(re => re.Routine)
             .HasForeignKey(re => re.RoutineId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Property(r => r.SupersetGroupsJson)
+            .HasDefaultValue("[]");
     }
 }

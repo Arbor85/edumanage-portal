@@ -2,6 +2,7 @@ using EduManage.Application.Common.Exceptions;
 using EduManage.Application.Contracts;
 using EduManage.Domain.Entities;
 using MediatR;
+using System.Text.Json;
 using DomainRoutineSet = EduManage.Domain.Entities.RoutineSet;
 
 namespace EduManage.Application.Features.Routines;
@@ -10,6 +11,8 @@ public sealed record UpdateRoutineCommand(string RoutineId, RoutineUpdate Reques
 {
     internal sealed class Handler(IRoutineRepository repository) : IRequestHandler<UpdateRoutineCommand, RoutineOut>
     {
+        private static readonly JsonSerializerOptions SerializerOptions = new(JsonSerializerDefaults.Web);
+
         public async Task<RoutineOut> Handle(UpdateRoutineCommand request, CancellationToken cancellationToken)
         {
             var routine = await repository.GetByIdAsync(request.RoutineId, cancellationToken)
@@ -22,11 +25,14 @@ public sealed record UpdateRoutineCommand(string RoutineId, RoutineUpdate Reques
 
             routine.Name = request.Request.Name;
             routine.Notes = request.Request.Note;
+            routine.SupersetGroupsJson = JsonSerializer.Serialize(request.Request.SupersetGroups ?? [], SerializerOptions);
             routine.Exercises = request.Request.Excercises.Select(e => new RoutineExercise
             {
                 Name = e.Name,
                 ActivityType = e.ActivityType,
                 ActivityTrackType = e.ActivityTrackType,
+                SupersetGroupId = e.SupersetGroupId,
+                DropConfigJson = e.DropConfig == null ? null : JsonSerializer.Serialize(e.DropConfig, SerializerOptions),
                 Sets = e.Sets.Select(s => new DomainRoutineSet
                 {
                     Type = s.Type,

@@ -7,5 +7,7 @@ public class Routine
     public string? Notes { get; set; }
     public string? UserId { get; set; }
 
+    public string SupersetGroupsJson { get; set; } = "[]";
+
     public ICollection<RoutineExercise> Exercises { get; set; } = [];
 }

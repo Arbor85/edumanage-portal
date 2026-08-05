@@ -28,23 +28,30 @@ public sealed record InvitationOut(
 
 public sealed record RoutineSet(string Type, int? Reps, int? Duration, int? Distance, double? Weight, string? Note);
 
+public sealed record SupersetGroup(string Id, string? Name, string Color);
+
+public sealed record DropConfig(int Count, double WeightDecreasePercent);
+
 public sealed record RoutineExcercise(
     string Name,
     ActivityType ActivityType,
     ActivityTrackType ActivityTrackType,
-    IReadOnlyList<RoutineSet> Sets);
+    IReadOnlyList<RoutineSet> Sets,
+    string? SupersetGroupId = null,
+    DropConfig? DropConfig = null);
 
-public sealed record RoutineCreate(string Name, string? Note, IReadOnlyList<RoutineExcercise> Excercises);
+public sealed record RoutineCreate(string Name, string? Note, IReadOnlyList<RoutineExcercise> Excercises, IReadOnlyList<SupersetGroup>? SupersetGroups = null);
 
-public sealed record RoutineUpdate(string Name, string? Note, IReadOnlyList<RoutineExcercise> Excercises);
+public sealed record RoutineUpdate(string Name, string? Note, IReadOnlyList<RoutineExcercise> Excercises, IReadOnlyList<SupersetGroup>? SupersetGroups = null);
 
-public sealed record RoutineOut(string Name, string? Note, string Id, string? UserId, IReadOnlyList<RoutineExcercise> Excercises);
+public sealed record RoutineOut(string Name, string? Note, string Id, string? UserId, IReadOnlyList<RoutineExcercise> Excercises, IReadOnlyList<SupersetGroup> SupersetGroups);
 
 public sealed record PlanWorkoutInput(
     string Name,
     string? Note,
     IReadOnlyList<RoutineExcercise> Excercises,
-    string Date);
+    string Date,
+    IReadOnlyList<SupersetGroup>? SupersetGroups = null);
 
 public sealed record PlanWorkoutOutput(
     string Name,
@@ -52,7 +59,8 @@ public sealed record PlanWorkoutOutput(
     string Id,
     string? UserId,
     IReadOnlyList<RoutineExcercise> Excercises,
-    string Date);
+    string Date,
+    IReadOnlyList<SupersetGroup> SupersetGroups);
 
 public sealed record PlanCreate(string Name, string? ClientId, string? Note, IReadOnlyList<PlanWorkoutInput> Workouts);
 

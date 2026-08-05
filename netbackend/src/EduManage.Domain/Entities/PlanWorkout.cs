@@ -9,6 +9,8 @@ public class PlanWorkout
     public string? UserId { get; set; }
     public string Date { get; set; } = string.Empty;
 
+    public string SupersetGroupsJson { get; set; } = "[]";
+
     public Plan? Plan { get; set; }
     public ICollection<RoutineExercise> Exercises { get; set; } = [];
 }

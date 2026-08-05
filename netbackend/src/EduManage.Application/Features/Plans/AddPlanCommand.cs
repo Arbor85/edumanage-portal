@@ -2,6 +2,7 @@ using EduManage.Application.Common.Exceptions;
 using EduManage.Application.Contracts;
 using EduManage.Domain.Entities;
 using MediatR;
+using System.Text.Json;
 using DomainRoutineSet = EduManage.Domain.Entities.RoutineSet;
 
 namespace EduManage.Application.Features.Plans;
@@ -10,6 +11,8 @@ public sealed record AddPlanCommand(PlanCreate Request, string CurrentUserId) : 
 {
     internal sealed class Handler(IPlanRepository repository, IClientRepository clientRepository) : IRequestHandler<AddPlanCommand, PlanOut>
     {
+        private static readonly JsonSerializerOptions SerializerOptions = new(JsonSerializerDefaults.Web);
+
         public async Task<PlanOut> Handle(AddPlanCommand request, CancellationToken cancellationToken)
         {
             if (!string.IsNullOrWhiteSpace(request.Request.ClientId))
@@ -38,11 +41,14 @@ public sealed record AddPlanCommand(PlanCreate Request, string CurrentUserId) : 
                     Notes = w.Note,
                     UserId = request.CurrentUserId,
                     Date = w.Date,
+                    SupersetGroupsJson = JsonSerializer.Serialize(w.SupersetGroups ?? [], SerializerOptions),
                     Exercises = w.Excercises.Select(e => new RoutineExercise
                     {
                         Name = e.Name,
                         ActivityType = e.ActivityType,
                         ActivityTrackType = e.ActivityTrackType,
+                        SupersetGroupId = e.SupersetGroupId,
+                        DropConfigJson = e.DropConfig == null ? null : JsonSerializer.Serialize(e.DropConfig, SerializerOptions),
                         Sets = e.Sets.Select(s => new DomainRoutineSet
                         {
                             Type = s.Type,

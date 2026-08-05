@@ -1,6 +1,7 @@
 using EduManage.Application.Contracts;
 using EduManage.Domain.Entities;
 using MediatR;
+using System.Text.Json;
 using ContractsRoutineSet = EduManage.Application.Contracts.RoutineSet;
 
 namespace EduManage.Application.Features.Routines;
@@ -18,13 +19,18 @@ public sealed record ListRoutinesQuery(string CurrentUserId) : IRequest<IReadOnl
             return routines.Select(MapToOut).ToList();
         }
 
+        private static readonly JsonSerializerOptions SerializerOptions = new(JsonSerializerDefaults.Web);
+
         internal static RoutineOut MapToOut(Routine routine) =>
             new(routine.Name, routine.Notes, routine.Id, routine.UserId,
                 routine.Exercises.Select(e => new RoutineExcercise(
                     e.Name,
                     e.ActivityType,
                     e.ActivityTrackType,
-                    e.Sets.Select(s => new ContractsRoutineSet(s.Type, s.Reps, s.Duration, s.Distance, s.Weight, s.Notes)).ToList()
-                )).ToList());
+                    e.Sets.Select(s => new ContractsRoutineSet(s.Type, s.Reps, s.Duration, s.Distance, s.Weight, s.Notes)).ToList(),
+                    e.SupersetGroupId,
+                    e.DropConfigJson == null ? null : JsonSerializer.Deserialize<DropConfig>(e.DropConfigJson, SerializerOptions)
+                )).ToList(),
+                JsonSerializer.Deserialize<List<SupersetGroup>>(routine.SupersetGroupsJson, SerializerOptions) ?? []);
     }
 }

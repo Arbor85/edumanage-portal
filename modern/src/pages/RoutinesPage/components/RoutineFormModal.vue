@@ -303,8 +303,6 @@ function addToSuperset(exIdx: number) {
   const activeSupersets = form.value.supersetGroups
   if (activeSupersets.length === 0) {
     createNewSuperset(exIdx)
-  } else if (activeSupersets.length === 1) {
-    joinSuperset(exIdx, activeSupersets[0].id)
   } else {
     supersetPickerFor.value = exIdx
   }

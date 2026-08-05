@@ -1,6 +1,7 @@
 using EduManage.Application.Contracts;
 using EduManage.Domain.Entities;
 using MediatR;
+using System.Text.Json;
 using ContractsRoutineSet = EduManage.Application.Contracts.RoutineSet;
 
 namespace EduManage.Application.Features.Plans;
@@ -20,6 +21,8 @@ public sealed record ListPlansQuery(string CurrentUserId) : IRequest<IReadOnlyLi
             return [.. plans.Select(MapToOut)];
         }
 
+        private static readonly JsonSerializerOptions SerializerOptions = new(JsonSerializerDefaults.Web);
+
         internal static PlanOut MapToOut(Plan plan)
         {
             var workoutOutputs = plan.Workouts.Select(pw => new PlanWorkoutOutput(
@@ -28,9 +31,12 @@ public sealed record ListPlansQuery(string CurrentUserId) : IRequest<IReadOnlyLi
                     e.Name,
                     e.ActivityType,
                     e.ActivityTrackType,
-                    e.Sets.Select(s => new ContractsRoutineSet(s.Type, s.Reps, s.Duration, s.Distance, s.Weight, s.Notes)).ToList()
+                    e.Sets.Select(s => new ContractsRoutineSet(s.Type, s.Reps, s.Duration, s.Distance, s.Weight, s.Notes)).ToList(),
+                    e.SupersetGroupId,
+                    e.DropConfigJson == null ? null : JsonSerializer.Deserialize<DropConfig>(e.DropConfigJson, SerializerOptions)
                 ))],
-                pw.Date)).ToList();
+                pw.Date,
+                JsonSerializer.Deserialize<List<SupersetGroup>>(pw.SupersetGroupsJson, SerializerOptions) ?? [])).ToList();
 
             var clientOut = plan.Client is not null
                 ? new ClientOut(plan.Client.Name, plan.Client.Tags, plan.Client.ImageUrl,

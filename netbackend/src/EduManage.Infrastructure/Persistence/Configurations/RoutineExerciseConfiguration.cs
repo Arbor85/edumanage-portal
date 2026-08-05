@@ -19,5 +19,8 @@ public class RoutineExerciseConfiguration : IEntityTypeConfiguration<RoutineExer
             .WithOne(rs => rs.RoutineExercise)
             .HasForeignKey(rs => rs.RoutineExerciseId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Property(re => re.SupersetGroupId);
+        builder.Property(re => re.DropConfigJson);
     }
 }
