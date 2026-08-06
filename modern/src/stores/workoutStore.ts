@@ -331,6 +331,62 @@ export const useWorkoutStore = defineStore('workout', () => {
     persist()
   }
 
+  function addToSuperset(sourceExIdx: number, targetExIdx: number) {
+    if (!activeWorkout.value) return
+    const aw = activeWorkout.value
+    const sourceEx = aw.exercises[sourceExIdx]
+    const targetEx = aw.exercises[targetExIdx]
+    if (!sourceEx || !targetEx || sourceExIdx === targetExIdx) return
+
+    let groupId: string
+
+    if (targetEx.supersetGroupId) {
+      groupId = targetEx.supersetGroupId
+    } else {
+      groupId = Math.random().toString(36).slice(2) + Date.now().toString(36)
+      targetEx.supersetGroupId = groupId
+    }
+
+    // If source was in a different superset, remove it and dissolve if only 1 member remains
+    if (sourceEx.supersetGroupId && sourceEx.supersetGroupId !== groupId) {
+      const oldGroupId = sourceEx.supersetGroupId
+      sourceEx.supersetGroupId = null
+      const remaining = aw.exercises.filter(e => e.supersetGroupId === oldGroupId)
+      if (remaining.length <= 1) {
+        remaining.forEach(e => { e.supersetGroupId = null })
+      }
+    }
+
+    sourceEx.supersetGroupId = groupId
+
+    // Recompute steps and sync completion state from exercise sets
+    const newSteps = computeSteps(aw.exercises)
+    let newCurrentIdx = 0
+    for (let i = 0; i < newSteps.length; i++) {
+      const step = newSteps[i]
+      if (step.type === 'normal-set' || step.type === 'drop-set') {
+        if (aw.exercises[step.exerciseIndex]?.sets[step.setIndex]?.completed) {
+          newCurrentIdx = i + 1
+        } else {
+          break
+        }
+      } else if (step.type === 'superset-round') {
+        step.items.forEach(item => {
+          item.completed = aw.exercises[item.exerciseIndex]?.sets[item.setIndex]?.completed ?? false
+        })
+        if (step.items.every(item => item.completed)) {
+          newCurrentIdx = i + 1
+        } else {
+          break
+        }
+      }
+    }
+
+    aw.steps = newSteps
+    aw.currentStepIndex = newCurrentIdx
+    persist()
+  }
+
   function addAdHocExercise(
     ex: { name: string; activityType: ActivityType; activityTrackType: ActivityTrackType },
     sets?: { reps: number | null; weight: number | null; duration: number | null; distance: number | null }[]
@@ -537,6 +593,7 @@ export const useWorkoutStore = defineStore('workout', () => {
     skipRest,
     startRest,
     skipExercise,
+    addToSuperset,
     addAdHocExercise,
     updateExerciseSets,
     pauseWorkout,

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { Pause, Play, Check, ChevronLeft, Dumbbell, SkipForward } from 'lucide-vue-next'
+import { Pause, Play, Check, ChevronLeft, Dumbbell, SkipForward, Link2, X } from 'lucide-vue-next'
 import ActiveWorkoutLayout from '../components/layout/ActiveWorkoutLayout.vue'
 import WorkoutCompleteView from '../components/WorkoutCompleteView.vue'
 import BottomSheetPicker from '../components/BottomSheetPicker.vue'
@@ -22,6 +22,7 @@ onMounted(() => exerciseStore.fetch())
 
 // ── State ─────────────────────────────────────────────────
 const completedWorkout = ref<WorkoutHistoryOut | null>(null)
+const supersetDialogForExIdx = ref<number | null>(null)
 const confirmFinish = ref(false)
 const isFinishing = ref(false)
 
@@ -136,6 +137,17 @@ function updatePickerValue(val: number) {
   if (pickerField.value === 'reps') editingReps.value = val
   else if (pickerField.value === 'weight') editingWeight.value = val
   pickerField.value = null
+}
+
+function openSupersetDialog(exIdx: number) {
+  supersetDialogForExIdx.value = exIdx
+}
+
+function handleAddToSuperset(targetExIdx: number) {
+  const sourceIdx = supersetDialogForExIdx.value
+  if (sourceIdx === null) return
+  store.addToSuperset(sourceIdx, targetExIdx)
+  supersetDialogForExIdx.value = null
 }
 
 function completeCurrentSet(actualDuration?: number | null) {
@@ -483,14 +495,24 @@ function onWorkoutDone() {
           <div class="mb-5">
             <div class="flex items-start justify-between gap-3 mb-2">
               <h2 class="text-2xl font-black text-white leading-tight">{{ currentEx.name }}</h2>
-              <button
-                class="flex-shrink-0 flex items-center gap-1 text-xs text-text-muted px-2.5 py-1.5 rounded-lg
-                       bg-white/5 hover:bg-white/10 active:scale-95 transition-all mt-0.5"
-                @click="store.skipExercise()"
-              >
-                <SkipForward class="w-3.5 h-3.5" />
-                Skip
-              </button>
+              <div class="flex items-center gap-1.5 mt-0.5 flex-shrink-0">
+                <button
+                  class="flex items-center gap-1 text-xs text-text-muted px-2.5 py-1.5 rounded-lg
+                         bg-white/5 hover:bg-white/10 active:scale-95 transition-all"
+                  @click="openSupersetDialog((currentStep as any).exerciseIndex)"
+                >
+                  <Link2 class="w-3.5 h-3.5" />
+                  Superset
+                </button>
+                <button
+                  class="flex items-center gap-1 text-xs text-text-muted px-2.5 py-1.5 rounded-lg
+                         bg-white/5 hover:bg-white/10 active:scale-95 transition-all"
+                  @click="store.skipExercise()"
+                >
+                  <SkipForward class="w-3.5 h-3.5" />
+                  Skip
+                </button>
+              </div>
             </div>
             <MuscleDiagram :exercise-name="currentEx.name" :activity-type="currentEx.activityType" />
           </div>
@@ -659,6 +681,65 @@ function onWorkoutDone() {
       @confirm="finish"
       @cancel="confirmFinish = false"
     />
+
+    <!-- Superset exercise picker -->
+    <Teleport to="body">
+      <Transition
+        enter-from-class="opacity-0"
+        enter-active-class="transition-opacity duration-150"
+        leave-to-class="opacity-0"
+        leave-active-class="transition-opacity duration-150"
+      >
+        <div
+          v-if="supersetDialogForExIdx !== null && workout"
+          class="fixed inset-0 z-50 flex items-end justify-center bg-black/60"
+          @click.self="supersetDialogForExIdx = null"
+        >
+          <Transition
+            enter-from-class="translate-y-full"
+            enter-active-class="transition-transform duration-200 ease-out"
+            leave-to-class="translate-y-full"
+            leave-active-class="transition-transform duration-150 ease-in"
+          >
+            <div
+              v-if="supersetDialogForExIdx !== null"
+              class="bg-surface-card border border-white/10 rounded-t-2xl w-full max-w-lg pb-8"
+            >
+              <div class="flex items-center justify-between px-4 pt-4 pb-3 border-b border-white/5">
+                <h3 class="font-black text-white">Add to superset with…</h3>
+                <button
+                  class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center
+                         hover:bg-white/10 active:scale-95 transition-all"
+                  @click="supersetDialogForExIdx = null"
+                >
+                  <X class="w-4 h-4 text-text-muted" />
+                </button>
+              </div>
+
+              <div class="px-4 pt-3 flex flex-col gap-2 max-h-80 overflow-y-auto">
+                <template v-for="(ex, i) in workout.exercises" :key="i">
+                  <button
+                    v-if="i !== supersetDialogForExIdx && !ex.skipped"
+                    class="flex items-center gap-3 p-3 rounded-xl text-left transition-all"
+                    :class="ex.supersetGroupId
+                      ? 'bg-violet-500/10 border border-violet-500/20 hover:bg-violet-500/20'
+                      : 'bg-white/5 border border-white/5 hover:bg-white/10'"
+                    @click="handleAddToSuperset(i)"
+                  >
+                    <div class="flex-1 min-w-0">
+                      <p class="text-white font-semibold text-sm truncate">{{ ex.name }}</p>
+                      <p v-if="ex.supersetGroupId" class="text-xs text-violet-400 mt-0.5">In a superset · tap to join</p>
+                      <p v-else class="text-xs text-text-muted mt-0.5">Create new superset</p>
+                    </div>
+                    <Link2 class="w-4 h-4 text-text-muted flex-shrink-0" />
+                  </button>
+                </template>
+              </div>
+            </div>
+          </Transition>
+        </div>
+      </Transition>
+    </Teleport>
 
   </ActiveWorkoutLayout>
 </template>
