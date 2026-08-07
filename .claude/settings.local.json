@@ -7,7 +7,16 @@
       "Bash(node_modules/.bin/vue-tsc --noEmit)",
       "Bash(node -e \"require\\('chart.js'\\); console.log\\('chart.js ok'\\)\")",
       "Bash(npx skills *)",
-      "Bash(./node_modules/.bin/vue-tsc *)"
+      "Bash(./node_modules/.bin/vue-tsc *)",
+      "Bash(dotnet run *)",
+      "Bash(find *)",
+      "Bash(dotnet build *)",
+      "Bash(tasklist)",
+      "PowerShell(Stop-Process *)",
+      "Bash(curl -s -X POST http://localhost:5090/api/routines -H 'Content-Type: application/json' -d '{ *)",
+      "Bash(python -m json.tool)",
+      "Bash(curl -s -X POST http://localhost:5090/api/routines -H \"Content-Type: application/json\" -d '{\"name\":\"Superset Test\",\"note\":null,\"excercises\":[{\"name\":\"Bench\",\"activityType\":\"weighted\",\"activityTrackType\":\"repetitions\",\"sets\":[{\"type\":\"normal\",\"reps\":8,\"weight\":80,\"duration\":null,\"distance\":null,\"note\":null}],\"supersetGroupId\":\"g1\",\"dropConfig\":null},{\"name\":\"Fly\",\"activityType\":\"weighted\",\"activityTrackType\":\"repetitions\",\"sets\":[{\"type\":\"normal\",\"reps\":8,\"weight\":20,\"duration\":null,\"distance\":null,\"note\":null}],\"supersetGroupId\":\"g1\",\"dropConfig\":null}],\"supersetGroups\":[{\"id\":\"g1\",\"name\":\"Upper\",\"color\":\"violet\"}]}')",
+      "Bash(xargs grep *)"
     ]
   }
 }
