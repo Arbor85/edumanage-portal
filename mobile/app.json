@@ -1,0 +1,34 @@
+{
+  "expo": {
+    "name": "EduManage",
+    "slug": "edumanage-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "edumanage",
+    "userInterfaceStyle": "dark",
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.edumanage.mobile"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#09090b"
+      },
+      "package": "com.edumanage.mobile"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      [
+        "react-native-auth0",
+        {
+          "domain": "your-auth0-domain.auth0.com"
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
