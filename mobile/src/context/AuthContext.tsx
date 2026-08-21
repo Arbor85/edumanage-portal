@@ -40,7 +40,7 @@ function AuthInner({ children }: { children: React.ReactNode }) {
     if (user) {
       setIsAuthenticated(true)
       const roles: string[] = ((user as Record<string, unknown>)[ROLES_CLAIM] as string[]) ?? []
-      setIsTrainer(roles.includes('trainer'))
+      setIsTrainer(roles.includes('gym-trainer'))
       getCredentials().then(creds => {
         if (creds?.accessToken) setAuthToken(creds.accessToken)
       }).catch(() => {})

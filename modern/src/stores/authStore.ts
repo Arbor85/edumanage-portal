@@ -14,7 +14,7 @@ export const useAuthStore = defineStore('auth', () => {
   // Auth0 custom Action must add https://edumanage.app/roles claim to the token
   const isTrainer = computed(() => {
     const roles: string[] = user.value?.['https://edumanage.app/roles'] ?? []
-    return roles.includes('trainer')
+    return roles.includes('gym-trainer')
   })
 
   const userProfile = ref<UserProfile | null>(null)

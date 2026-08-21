@@ -22,13 +22,15 @@ async function logout() {
     <PageHeader title="Profile" subtitle="Your account information." />
 
     <div class="max-w-md flex flex-col gap-6">
-      <div class="bg-white dark:bg-surface-dark rounded-2xl border border-gray-100 dark:border-white/10 p-6 flex flex-col items-center gap-3">
+      <div
+        class="bg-white dark:bg-surface-dark rounded-2xl border border-gray-100 dark:border-white/10 p-6 flex flex-col items-center gap-3">
         <BaseAvatar :src="authStore.user?.picture" :name="authStore.user?.name ?? ''" size="lg" />
         <p class="text-xl font-bold text-text-primary dark:text-white">{{ authStore.user?.name ?? '—' }}</p>
         <p class="text-sm text-text-secondary">{{ authStore.user?.email ?? '—' }}</p>
       </div>
 
-      <div class="bg-white dark:bg-surface-dark rounded-2xl border border-gray-100 dark:border-white/10 divide-y divide-gray-100 dark:divide-white/5">
+      <div
+        class="bg-white dark:bg-surface-dark rounded-2xl border border-gray-100 dark:border-white/10 divide-y divide-gray-100 dark:divide-white/5">
         <div class="p-4 flex items-center gap-3">
           <span class="text-text-secondary text-sm w-28">Name</span>
           <span class="text-text-primary dark:text-white text-sm">{{ authStore.user?.name ?? '—' }}</span>
@@ -41,6 +43,16 @@ async function logout() {
           <span class="text-text-secondary text-sm w-28">Nickname</span>
           <span class="text-text-primary dark:text-white text-sm">{{ authStore.user?.nickname ?? '—' }}</span>
         </div>
+      </div>
+
+      <div
+        class="bg-white dark:bg-surface-dark rounded-2xl border border-gray-100 dark:border-white/10 p-4 flex flex-col gap-2">
+        <p class="text-xs font-semibold uppercase tracking-wide text-text-secondary">Roles</p>
+        <p class="text-xs">
+          <span class="text-text-secondary">Trainer: </span>
+          <span :class="authStore.isTrainer ? 'text-green-500 font-bold' : 'text-red-500 font-bold'">{{
+            authStore.isTrainer }}</span>
+        </p>
       </div>
 
       <BaseButton variant="danger" @click="logout">Log Out</BaseButton>
