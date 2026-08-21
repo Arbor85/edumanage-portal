@@ -5,6 +5,7 @@ import { Pause, Play, Check, ChevronLeft, Dumbbell, SkipForward, Link2, X, Plus 
 import ActiveWorkoutLayout from '../components/layout/ActiveWorkoutLayout.vue'
 import WorkoutCompleteView from '../components/WorkoutCompleteView.vue'
 import BottomSheetPicker from '../components/BottomSheetPicker.vue'
+import WeightPickerDialog from '../components/WeightPickerDialog/index.vue'
 import RestTimerOverlay from '../components/RestTimerOverlay.vue'
 import MuscleDiagram from '../components/MuscleDiagram.vue'
 import ConfirmDialog from '../components/ConfirmDialog.vue'
@@ -12,11 +13,13 @@ import WorkoutStartPanel from './ActiveWorkoutPage/components/WorkoutStartPanel.
 import SetTimerRow from './ActiveWorkoutPage/components/SetTimerRow.vue'
 import { useWorkoutStore } from '../stores/workoutStore'
 import { useExerciseStore } from '../stores/exerciseStore'
+import { useWeightUnit } from '../composables/useWeightUnit'
 import type { WorkoutHistoryOut } from '../types'
 
 const store = useWorkoutStore()
 const exerciseStore = useExerciseStore()
 const router = useRouter()
+const { unit, toggle, toDisplay } = useWeightUnit()
 
 onMounted(() => exerciseStore.fetch())
 
@@ -26,11 +29,19 @@ const supersetDialogForExIdx = ref<number | null>(null)
 const supersetCreateStep = ref(false)
 const confirmFinish = ref(false)
 const isFinishing = ref(false)
+const unitSwitchConfirmOpen = ref(false)
+const pendingUnit = ref<'kg' | 'lbs'>('lbs')
 
-type PickerField = 'reps' | 'weight'
-const pickerField = ref<PickerField | null>(null)
+const pickerField = ref<'reps' | null>(null)
+const weightPickerOpen = ref(false)
 const editingReps = ref(0)
 const editingWeight = ref(0)
+
+function wt(kg: number | null | undefined): string {
+  if (kg === null || kg === undefined) return '0'
+  const d = toDisplay(kg)
+  return d % 1 === 0 ? String(d) : d.toFixed(2)
+}
 
 // ── Workout / step derived state ──────────────────────────
 const workout = computed(() => store.activeWorkout)
@@ -130,14 +141,28 @@ watch(
 )
 
 // ── Actions ───────────────────────────────────────────────
-function openPicker(field: PickerField) {
+function openPicker(field: 'reps') {
   pickerField.value = field
 }
 
 function updatePickerValue(val: number) {
-  if (pickerField.value === 'reps') editingReps.value = val
-  else if (pickerField.value === 'weight') editingWeight.value = val
+  editingReps.value = val
   pickerField.value = null
+}
+
+function onWeightConfirm(kg: number) {
+  editingWeight.value = kg
+  weightPickerOpen.value = false
+}
+
+function onUnitChanged(newUnit: 'kg' | 'lbs') {
+  pendingUnit.value = newUnit
+  unitSwitchConfirmOpen.value = true
+}
+
+function doUnitSwitch() {
+  toggle()
+  unitSwitchConfirmOpen.value = false
 }
 
 function openSupersetDialog(exIdx: number) {
@@ -392,7 +417,7 @@ function onWorkoutDone() {
                   <!-- Completed item: show actuals -->
                   <p v-if="item.completed" class="text-xs text-green-400">
                     {{ workout.exercises[item.exerciseIndex]?.sets[item.setIndex]?.actualWeight !== null
-                        ? `${workout.exercises[item.exerciseIndex]?.sets[item.setIndex]?.actualWeight}kg × `
+                        ? `${wt(workout.exercises[item.exerciseIndex]?.sets[item.setIndex]?.actualWeight)}${unit} × `
                         : '' }}
                     {{ workout.exercises[item.exerciseIndex]?.sets[item.setIndex]?.actualReps }} reps
                   </p>
@@ -405,9 +430,9 @@ function onWorkoutDone() {
                         v-if="supersetItemHasWeight"
                         class="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-surface-input border border-white/10
                                text-white font-bold text-sm active:scale-95 transition-all"
-                        @click="openPicker('weight')"
+                        @click="weightPickerOpen = true"
                       >
-                        {{ editingWeight }}<span class="text-text-muted text-xs ml-0.5">kg</span>
+                        {{ wt(editingWeight) }}<span class="text-text-muted text-xs ml-0.5">{{ unit }}</span>
                       </button>
                       <span v-if="supersetItemHasWeight" class="text-text-muted text-sm">×</span>
 
@@ -434,7 +459,7 @@ function onWorkoutDone() {
                   <!-- Upcoming item: show target -->
                   <p v-else class="text-xs text-text-secondary mt-1">
                     {{ workout.exercises[item.exerciseIndex]?.sets[item.setIndex]?.weight !== null
-                        ? `${workout.exercises[item.exerciseIndex]?.sets[item.setIndex]?.weight}kg × `
+                        ? `${wt(workout.exercises[item.exerciseIndex]?.sets[item.setIndex]?.weight)}${unit} × `
                         : '' }}
                     {{ workout.exercises[item.exerciseIndex]?.sets[item.setIndex]?.reps }} reps
                   </p>
@@ -467,7 +492,7 @@ function onWorkoutDone() {
                 class="text-sm font-semibold"
                 :class="si === (currentStep as any).setIndex ? 'text-white' : set.completed ? 'text-green-400' : 'text-text-muted'"
               >
-                {{ set.weight ?? set.targetWeight }}kg<span v-if="si < currentEx.sets.length - 1" class="text-text-muted mx-1">→</span>
+                {{ wt(set.weight ?? set.targetWeight) }}{{ unit }}<span v-if="si < currentEx.sets.length - 1" class="text-text-muted mx-1">→</span>
               </span>
             </div>
             <p class="text-xs text-text-secondary">
@@ -499,7 +524,7 @@ function onWorkoutDone() {
 
               <div class="flex items-center gap-2 flex-1">
                 <span class="text-sm font-semibold" :class="set.completed ? 'text-green-400' : 'text-text-secondary'">
-                  {{ set.actualWeight ?? set.weight ?? set.targetWeight }}kg
+                  {{ wt(set.actualWeight ?? set.weight ?? set.targetWeight) }}{{ unit }}
                 </span>
                 <span class="text-text-muted text-sm">×</span>
 
@@ -617,16 +642,16 @@ function onWorkoutDone() {
                     v-if="hasWeight && !set.completed && i === (currentStep as any).setIndex"
                     class="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-surface-input border border-white/10
                            text-white font-bold text-sm active:scale-95 transition-all"
-                    @click="openPicker('weight')"
+                    @click="weightPickerOpen = true"
                   >
-                    {{ i === (currentStep as any).setIndex ? editingWeight : (set.weight ?? 0) }}
-                    <span class="text-text-muted text-xs">kg</span>
+                    {{ wt(i === (currentStep as any).setIndex ? editingWeight : (set.weight ?? 0)) }}
+                    <span class="text-text-muted text-xs">{{ unit }}</span>
                   </button>
                   <span
                     v-else-if="hasWeight"
                     class="text-sm font-semibold"
                     :class="set.completed ? 'text-green-400' : 'text-text-secondary'"
-                  >{{ set.actualWeight ?? set.weight ?? 0 }}kg</span>
+                  >{{ wt(set.actualWeight ?? set.weight ?? 0) }}{{ unit }}</span>
 
                   <span v-if="hasWeight" class="text-text-muted text-sm">×</span>
 
@@ -705,15 +730,22 @@ function onWorkoutDone() {
       @close="pickerField = null"
     />
 
-    <BottomSheetPicker
-      v-if="pickerField === 'weight'"
+    <WeightPickerDialog
+      :open="weightPickerOpen"
       :model-value="editingWeight"
-      unit="kg"
-      label="Weight"
-      :step="2.5"
-      :min="0"
-      @update:model-value="updatePickerValue"
-      @close="pickerField = null"
+      :in-active-workout="true"
+      @update:model-value="onWeightConfirm"
+      @close="weightPickerOpen = false"
+      @unit-changed="onUnitChanged"
+    />
+
+    <ConfirmDialog
+      :open="unitSwitchConfirmOpen"
+      :title="`Switch to ${pendingUnit}?`"
+      :message="`All weights will display in ${pendingUnit}. Your recorded and target weights are unchanged — just shown in the new unit.`"
+      confirm-label="Switch"
+      @confirm="doUnitSwitch"
+      @cancel="unitSwitchConfirmOpen = false"
     />
 
     <ConfirmDialog

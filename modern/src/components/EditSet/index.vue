@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue'
 import type { RoutineSet, ActivityType, ActivityTrackType } from '../../types'
 import WeightPickerDialog from '../WeightPickerDialog/index.vue'
+import { useWeightUnit } from '../../composables/useWeightUnit'
 
 type SetType = 'normal' | 'warmup' | 'failure' | 'drop'
 
@@ -23,6 +24,8 @@ const props = defineProps<{
 const emit = defineEmits<{
   'update:set': [set: RoutineSet]
 }>()
+
+const { unit, toDisplay } = useWeightUnit()
 
 const weightPickerOpen = ref(false)
 
@@ -65,9 +68,8 @@ function onWeightConfirm(kg: number) {
 
 const weightDisplay = computed(() => {
   if (props.set.weight === null || props.set.weight === undefined) return ''
-  return props.set.weight % 1 === 0
-    ? String(props.set.weight)
-    : props.set.weight.toFixed(2)
+  const d = toDisplay(props.set.weight)
+  return d % 1 === 0 ? String(d) : d.toFixed(2)
 })
 </script>
 
@@ -144,7 +146,7 @@ const weightDisplay = computed(() => {
       <span class="w-16 px-3 py-2.5 text-sm text-center text-text-primary dark:text-white tabular-nums">
         {{ weightDisplay || '—' }}
       </span>
-      <span class="pr-3 text-xs font-medium text-text-secondary dark:text-white/50 select-none">kg</span>
+      <span class="pr-3 text-xs font-medium text-text-secondary dark:text-white/50 select-none">{{ unit }}</span>
     </button>
   </div>
 
