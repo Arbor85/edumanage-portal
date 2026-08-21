@@ -17,7 +17,7 @@ public static class ExerciseSeedExtensions
         using var scope = serviceProvider.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<EduManageDbContext>();
 
-        await dbContext.Database.EnsureCreatedAsync(cancellationToken);
+        await dbContext.Database.MigrateAsync(cancellationToken);
 
         var jsonStream = typeof(DependencyInjection).Assembly
             .GetManifestResourceStream("EduManage.Infrastructure.gym_exercises.json");

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { Pause, Play, Check, ChevronLeft, Dumbbell, SkipForward, Link2, X } from 'lucide-vue-next'
+import { Pause, Play, Check, ChevronLeft, Dumbbell, SkipForward, Link2, X, Plus } from 'lucide-vue-next'
 import ActiveWorkoutLayout from '../components/layout/ActiveWorkoutLayout.vue'
 import WorkoutCompleteView from '../components/WorkoutCompleteView.vue'
 import BottomSheetPicker from '../components/BottomSheetPicker.vue'
@@ -23,6 +23,7 @@ onMounted(() => exerciseStore.fetch())
 // ── State ─────────────────────────────────────────────────
 const completedWorkout = ref<WorkoutHistoryOut | null>(null)
 const supersetDialogForExIdx = ref<number | null>(null)
+const supersetCreateStep = ref(false)
 const confirmFinish = ref(false)
 const isFinishing = ref(false)
 
@@ -141,13 +142,55 @@ function updatePickerValue(val: number) {
 
 function openSupersetDialog(exIdx: number) {
   supersetDialogForExIdx.value = exIdx
+  supersetCreateStep.value = false
+}
+
+function closeSupersetDialog() {
+  supersetDialogForExIdx.value = null
+  supersetCreateStep.value = false
+}
+
+// Existing superset groups the source exercise could join (excludes its own current group)
+const existingSupersets = computed(() => {
+  const sourceIdx = supersetDialogForExIdx.value
+  if (!workout.value || sourceIdx === null) return []
+  const groups = new Map<string, number[]>()
+  workout.value.exercises.forEach((ex, i) => {
+    if (ex.supersetGroupId) {
+      const members = groups.get(ex.supersetGroupId) ?? []
+      members.push(i)
+      groups.set(ex.supersetGroupId, members)
+    }
+  })
+  return Array.from(groups.entries())
+    .filter(([, members]) => !members.includes(sourceIdx))
+    .map(([groupId, members]) => ({
+      groupId,
+      names: members.map(i => workout.value!.exercises[i]?.name ?? '').filter(Boolean).join(' + '),
+    }))
+})
+
+// Standalone exercises (not already in a superset) available to pair with when creating a new one
+const standaloneExercises = computed(() => {
+  const sourceIdx = supersetDialogForExIdx.value
+  if (!workout.value || sourceIdx === null) return []
+  return workout.value.exercises
+    .map((ex, i) => ({ ex, i }))
+    .filter(({ ex, i }) => i !== sourceIdx && !ex.skipped && !ex.supersetGroupId)
+})
+
+function handleJoinSuperset(groupId: string) {
+  const sourceIdx = supersetDialogForExIdx.value
+  if (sourceIdx === null) return
+  store.joinSuperset(sourceIdx, groupId)
+  closeSupersetDialog()
 }
 
 function handleAddToSuperset(targetExIdx: number) {
   const sourceIdx = supersetDialogForExIdx.value
   if (sourceIdx === null) return
   store.addToSuperset(sourceIdx, targetExIdx)
-  supersetDialogForExIdx.value = null
+  closeSupersetDialog()
 }
 
 function completeCurrentSet(actualDuration?: number | null) {
@@ -682,7 +725,7 @@ function onWorkoutDone() {
       @cancel="confirmFinish = false"
     />
 
-    <!-- Superset exercise picker -->
+    <!-- Superset picker: choose an existing superset or create a new one -->
     <Teleport to="body">
       <Transition
         enter-from-class="opacity-0"
@@ -693,7 +736,7 @@ function onWorkoutDone() {
         <div
           v-if="supersetDialogForExIdx !== null && workout"
           class="fixed inset-0 z-50 flex items-end justify-center bg-black/60"
-          @click.self="supersetDialogForExIdx = null"
+          @click.self="closeSupersetDialog"
         >
           <Transition
             enter-from-class="translate-y-full"
@@ -706,34 +749,77 @@ function onWorkoutDone() {
               class="bg-surface-card border border-white/10 rounded-t-2xl w-full max-w-lg pb-8"
             >
               <div class="flex items-center justify-between px-4 pt-4 pb-3 border-b border-white/5">
-                <h3 class="font-black text-white">Add to superset with…</h3>
+                <h3 class="font-black text-white">
+                  {{ supersetCreateStep ? 'Create new superset with…' : 'Add to superset' }}
+                </h3>
                 <button
                   class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center
                          hover:bg-white/10 active:scale-95 transition-all"
-                  @click="supersetDialogForExIdx = null"
+                  @click="closeSupersetDialog"
                 >
                   <X class="w-4 h-4 text-text-muted" />
                 </button>
               </div>
 
-              <div class="px-4 pt-3 flex flex-col gap-2 max-h-80 overflow-y-auto">
-                <template v-for="(ex, i) in workout.exercises" :key="i">
-                  <button
-                    v-if="i !== supersetDialogForExIdx && !ex.skipped"
-                    class="flex items-center gap-3 p-3 rounded-xl text-left transition-all"
-                    :class="ex.supersetGroupId
-                      ? 'bg-violet-500/10 border border-violet-500/20 hover:bg-violet-500/20'
-                      : 'bg-white/5 border border-white/5 hover:bg-white/10'"
-                    @click="handleAddToSuperset(i)"
-                  >
-                    <div class="flex-1 min-w-0">
-                      <p class="text-white font-semibold text-sm truncate">{{ ex.name }}</p>
-                      <p v-if="ex.supersetGroupId" class="text-xs text-violet-400 mt-0.5">In a superset · tap to join</p>
-                      <p v-else class="text-xs text-text-muted mt-0.5">Create new superset</p>
-                    </div>
-                    <Link2 class="w-4 h-4 text-text-muted flex-shrink-0" />
-                  </button>
-                </template>
+              <!-- Step 1: pick an existing superset, or start creating a new one -->
+              <div v-if="!supersetCreateStep" class="px-4 pt-3 flex flex-col gap-2 max-h-80 overflow-y-auto">
+                <button
+                  v-for="group in existingSupersets"
+                  :key="group.groupId"
+                  class="flex items-center gap-3 p-3 rounded-xl text-left transition-all
+                         bg-violet-500/10 border border-violet-500/20 hover:bg-violet-500/20"
+                  @click="handleJoinSuperset(group.groupId)"
+                >
+                  <div class="flex-1 min-w-0">
+                    <p class="text-white font-semibold text-sm truncate">{{ group.names }}</p>
+                    <p class="text-xs text-violet-400 mt-0.5">Existing superset · tap to join</p>
+                  </div>
+                  <Link2 class="w-4 h-4 text-text-muted flex-shrink-0" />
+                </button>
+
+                <p v-if="existingSupersets.length === 0" class="text-xs text-text-muted px-1 py-2">
+                  No supersets yet in this workout.
+                </p>
+
+                <button
+                  class="flex items-center gap-3 p-3 rounded-xl text-left transition-all
+                         bg-white/5 border border-dashed border-white/15 hover:bg-white/10"
+                  @click="supersetCreateStep = true"
+                >
+                  <div class="flex-1 min-w-0">
+                    <p class="text-white font-semibold text-sm">Create new superset</p>
+                    <p class="text-xs text-text-muted mt-0.5">Pair with another exercise</p>
+                  </div>
+                  <Plus class="w-4 h-4 text-text-muted flex-shrink-0" />
+                </button>
+              </div>
+
+              <!-- Step 2: pick a standalone exercise to pair with (creates a new group) -->
+              <div v-else class="px-4 pt-3 flex flex-col gap-2 max-h-80 overflow-y-auto">
+                <button
+                  v-for="{ ex, i } in standaloneExercises"
+                  :key="i"
+                  class="flex items-center gap-3 p-3 rounded-xl text-left transition-all
+                         bg-white/5 border border-white/5 hover:bg-white/10"
+                  @click="handleAddToSuperset(i)"
+                >
+                  <div class="flex-1 min-w-0">
+                    <p class="text-white font-semibold text-sm truncate">{{ ex.name }}</p>
+                  </div>
+                  <Link2 class="w-4 h-4 text-text-muted flex-shrink-0" />
+                </button>
+
+                <p v-if="standaloneExercises.length === 0" class="text-xs text-text-muted px-1 py-2">
+                  No other exercises available to pair with.
+                </p>
+
+                <button
+                  class="flex items-center gap-2 p-3 rounded-xl text-left text-xs text-text-muted
+                         hover:bg-white/5 transition-all"
+                  @click="supersetCreateStep = false"
+                >
+                  ← Back to superset list
+                </button>
               </div>
             </div>
           </Transition>

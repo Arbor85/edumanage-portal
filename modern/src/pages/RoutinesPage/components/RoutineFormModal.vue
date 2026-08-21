@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, nextTick, onUnmounted } from 'vue'
 import { usePageTitle } from '../../../composables/usePageTitle'
 import type {
   RoutineOut, RoutineCreate, RoutineUpdate, RoutineExcercise, RoutineSet,
@@ -178,6 +178,76 @@ const exerciseBlocks = computed<ExerciseBlock[]>(() => {
   return blocks
 })
 
+// ── Off-screen exercises indicator ─────────────────────────────
+
+const listEl = ref<HTMLElement | null>(null)
+const blockEls = new Map<number, HTMLElement>()
+const offscreenAbove = ref<string[]>([])
+const offscreenBelow = ref<string[]>([])
+let listObserver: MutationObserver | null = null
+
+function setBlockEl(bi: number, el: unknown) {
+  if (el) blockEls.set(bi, el as HTMLElement)
+  else blockEls.delete(bi)
+}
+
+function blockLabel(block: ExerciseBlock): string {
+  if (block.type === 'superset') {
+    const group = getGroup(block.groupId)
+    if (group?.name) return group.name
+    const names = block.exerciseIndices
+      .map(i => form.value.excercises[i]?.name)
+      .filter(Boolean) as string[]
+    return names.join(' + ') || 'Superset'
+  }
+  return form.value.excercises[block.exerciseIndex]?.name || 'Exercise'
+}
+
+function summarize(names: string[]): string {
+  if (names.length <= 2) return names.join(', ')
+  return `${names.slice(0, 2).join(', ')} +${names.length - 2} more`
+}
+
+function recomputeOffscreen() {
+  const container = listEl.value
+  if (!container) {
+    offscreenAbove.value = []
+    offscreenBelow.value = []
+    return
+  }
+  const cRect = container.getBoundingClientRect()
+  const above: string[] = []
+  const below: string[] = []
+  exerciseBlocks.value.forEach((block, bi) => {
+    const el = blockEls.get(bi)
+    if (!el) return
+    const r = el.getBoundingClientRect()
+    if (r.bottom <= cRect.top) above.push(blockLabel(block))
+    else if (r.top >= cRect.bottom) below.push(blockLabel(block))
+  })
+  if (above.join() !== offscreenAbove.value.join()) offscreenAbove.value = above
+  if (below.join() !== offscreenBelow.value.join()) offscreenBelow.value = below
+}
+
+watch(listEl, (el) => {
+  listObserver?.disconnect()
+  listObserver = null
+  if (!el) {
+    offscreenAbove.value = []
+    offscreenBelow.value = []
+    return
+  }
+  listObserver = new MutationObserver(() => nextTick(recomputeOffscreen))
+  listObserver.observe(el, { childList: true, subtree: true })
+  nextTick(recomputeOffscreen)
+})
+
+window.addEventListener('resize', recomputeOffscreen)
+onUnmounted(() => {
+  listObserver?.disconnect()
+  window.removeEventListener('resize', recomputeOffscreen)
+})
+
 // ── Helpers ───────────────────────────────────────────────────
 
 function getGroup(id: string): SupersetGroup | undefined {
@@ -300,12 +370,7 @@ function onDefaultWorkoutSelected(w: DefaultWorkoutOut) {
 // ── Superset management ───────────────────────────────────────
 
 function addToSuperset(exIdx: number) {
-  const activeSupersets = form.value.supersetGroups
-  if (activeSupersets.length === 0) {
-    createNewSuperset(exIdx)
-  } else {
-    supersetPickerFor.value = exIdx
-  }
+  supersetPickerFor.value = exIdx
   openMenuFor.value = null
 }
 
@@ -465,16 +530,24 @@ async function doDelete() {
     </template>
 
     <!-- Body: flat exercise list or empty state -->
+    <div class="relative h-full">
     <Transition name="fade" mode="out-in">
 
       <!-- Exercise list -->
-      <div v-if="form.excercises.length" key="list" class="flex flex-col gap-3 overflow-y-auto flex-1 p-4">
+      <div
+        v-if="form.excercises.length"
+        key="list"
+        ref="listEl"
+        class="flex flex-col gap-3 overflow-y-auto custom-scrollbar h-full p-4"
+        @scroll="recomputeOffscreen"
+      >
 
         <template v-for="(block, bi) in exerciseBlocks" :key="bi">
 
           <!-- ── Superset block ── -->
           <div
             v-if="block.type === 'superset'"
+            :ref="(el) => setBlockEl(bi, el)"
             class="rounded-2xl border-2 p-1"
             :class="[
               SUPERSET_COLORS[getGroup(block.groupId)?.color ?? 'violet'].border,
@@ -629,6 +702,7 @@ async function doDelete() {
           <!-- ── Normal or drop-set exercise block ── -->
           <div
             v-else
+            :ref="(el) => setBlockEl(bi, el)"
             class="rounded-2xl bg-surface-card border border-gray-100 dark:border-white/5 p-3 flex flex-col gap-3"
             @click.self="openMenuFor = null"
           >
@@ -811,6 +885,28 @@ async function doDelete() {
 
     </Transition>
 
+      <!-- Off-screen exercises indicator -->
+      <div
+        v-if="offscreenAbove.length || offscreenBelow.length"
+        class="absolute top-3 right-3 z-10 flex flex-col items-end gap-1.5 pointer-events-none"
+      >
+        <div
+          v-if="offscreenAbove.length"
+          class="pointer-events-auto max-w-[220px] px-2.5 py-1.5 rounded-full bg-gray-900/85 dark:bg-black/70 text-white text-[11px] font-medium shadow-lg backdrop-blur-sm truncate"
+          :title="offscreenAbove.join(', ')"
+        >
+          ↑ {{ offscreenAbove.length }} above · {{ summarize(offscreenAbove) }}
+        </div>
+        <div
+          v-if="offscreenBelow.length"
+          class="pointer-events-auto max-w-[220px] px-2.5 py-1.5 rounded-full bg-gray-900/85 dark:bg-black/70 text-white text-[11px] font-medium shadow-lg backdrop-blur-sm truncate"
+          :title="offscreenBelow.join(', ')"
+        >
+          ↓ {{ offscreenBelow.length }} below · {{ summarize(offscreenBelow) }}
+        </div>
+      </div>
+    </div>
+
     <template #footer>
       <div class="flex items-center gap-2">
         <BaseButton v-if="routine" variant="danger" @click="confirmDelete = true">Delete</BaseButton>
@@ -865,41 +961,46 @@ async function doDelete() {
     @select="onDefaultWorkoutSelected"
   />
 
-  <!-- Superset picker (when multiple supersets exist) -->
-  <div
-    v-if="supersetPickerFor !== null"
-    class="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40"
-    @click.self="supersetPickerFor = null"
-  >
-    <div class="w-full max-w-sm bg-surface-card rounded-t-2xl sm:rounded-2xl p-4 flex flex-col gap-2 shadow-xl">
-      <p class="text-sm font-bold text-text-primary dark:text-white px-1 pb-1">Add to superset</p>
-      <button
-        v-for="group in form.supersetGroups"
-        :key="group.id"
-        type="button"
-        class="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
-        @click="joinSuperset(supersetPickerFor!, group.id); supersetPickerFor = null"
-      >
-        <span class="w-4 h-4 rounded-full flex-shrink-0" :class="SUPERSET_COLORS[group.color].dot" />
-        <span class="text-sm font-medium text-text-primary dark:text-white">{{ group.name ?? 'Superset' }}</span>
-      </button>
-      <button
-        type="button"
-        class="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
-        @click="createNewSuperset(supersetPickerFor!); supersetPickerFor = null"
-      >
-        <Plus class="w-4 h-4 text-primary" />
-        <span class="text-sm font-medium text-primary">New superset</span>
-      </button>
-      <button
-        type="button"
-        class="mt-1 w-full py-2.5 rounded-xl bg-gray-100 dark:bg-white/10 text-sm font-medium text-text-secondary"
-        @click="supersetPickerFor = null"
-      >
-        Cancel
-      </button>
+  <!-- Superset picker (choose an existing superset or create a new one) -->
+  <Teleport to="body">
+    <div
+      v-if="supersetPickerFor !== null"
+      class="fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-black/40"
+      @click.self="supersetPickerFor = null"
+    >
+      <div class="w-full max-w-sm bg-surface-card rounded-t-2xl sm:rounded-2xl p-4 flex flex-col gap-2 shadow-xl">
+        <p class="text-sm font-bold text-text-primary dark:text-white px-1 pb-1">Add to superset</p>
+        <button
+          v-for="group in form.supersetGroups"
+          :key="group.id"
+          type="button"
+          class="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
+          @click="joinSuperset(supersetPickerFor!, group.id); supersetPickerFor = null"
+        >
+          <span class="w-4 h-4 rounded-full flex-shrink-0" :class="SUPERSET_COLORS[group.color].dot" />
+          <span class="text-sm font-medium text-text-primary dark:text-white">{{ group.name ?? 'Superset' }}</span>
+        </button>
+        <p v-if="form.supersetGroups.length === 0" class="text-xs text-text-secondary px-1 pb-1">
+          No supersets yet in this routine.
+        </p>
+        <button
+          type="button"
+          class="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
+          @click="createNewSuperset(supersetPickerFor!); supersetPickerFor = null"
+        >
+          <Plus class="w-4 h-4 text-primary" />
+          <span class="text-sm font-medium text-primary">New superset</span>
+        </button>
+        <button
+          type="button"
+          class="mt-1 w-full py-2.5 rounded-xl bg-gray-100 dark:bg-white/10 text-sm font-medium text-text-secondary"
+          @click="supersetPickerFor = null"
+        >
+          Cancel
+        </button>
+      </div>
     </div>
-  </div>
+  </Teleport>
 
   <!-- Drop set config dialog -->
   <div

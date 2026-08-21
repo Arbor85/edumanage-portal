@@ -331,35 +331,8 @@ export const useWorkoutStore = defineStore('workout', () => {
     persist()
   }
 
-  function addToSuperset(sourceExIdx: number, targetExIdx: number) {
-    if (!activeWorkout.value) return
-    const aw = activeWorkout.value
-    const sourceEx = aw.exercises[sourceExIdx]
-    const targetEx = aw.exercises[targetExIdx]
-    if (!sourceEx || !targetEx || sourceExIdx === targetExIdx) return
-
-    let groupId: string
-
-    if (targetEx.supersetGroupId) {
-      groupId = targetEx.supersetGroupId
-    } else {
-      groupId = Math.random().toString(36).slice(2) + Date.now().toString(36)
-      targetEx.supersetGroupId = groupId
-    }
-
-    // If source was in a different superset, remove it and dissolve if only 1 member remains
-    if (sourceEx.supersetGroupId && sourceEx.supersetGroupId !== groupId) {
-      const oldGroupId = sourceEx.supersetGroupId
-      sourceEx.supersetGroupId = null
-      const remaining = aw.exercises.filter(e => e.supersetGroupId === oldGroupId)
-      if (remaining.length <= 1) {
-        remaining.forEach(e => { e.supersetGroupId = null })
-      }
-    }
-
-    sourceEx.supersetGroupId = groupId
-
-    // Recompute steps and sync completion state from exercise sets
+  // Recompute steps and resync currentStepIndex/completion flags after regrouping exercises
+  function resyncSteps(aw: ActiveWorkoutState) {
     const newSteps = computeSteps(aw.exercises)
     let newCurrentIdx = 0
     for (let i = 0; i < newSteps.length; i++) {
@@ -385,6 +358,59 @@ export const useWorkoutStore = defineStore('workout', () => {
     aw.steps = newSteps
     aw.currentStepIndex = newCurrentIdx
     persist()
+  }
+
+  // Remove an exercise from its current superset group, dissolving the group if only 1 member remains
+  function leaveSuperset(aw: ActiveWorkoutState, ex: ActiveExercise) {
+    if (!ex.supersetGroupId) return
+    const oldGroupId = ex.supersetGroupId
+    ex.supersetGroupId = null
+    const remaining = aw.exercises.filter(e => e.supersetGroupId === oldGroupId)
+    if (remaining.length <= 1) {
+      remaining.forEach(e => { e.supersetGroupId = null })
+    }
+  }
+
+  // Create a brand-new superset pairing sourceExIdx with targetExIdx
+  function addToSuperset(sourceExIdx: number, targetExIdx: number) {
+    if (!activeWorkout.value) return
+    const aw = activeWorkout.value
+    const sourceEx = aw.exercises[sourceExIdx]
+    const targetEx = aw.exercises[targetExIdx]
+    if (!sourceEx || !targetEx || sourceExIdx === targetExIdx) return
+
+    let groupId: string
+
+    if (targetEx.supersetGroupId) {
+      groupId = targetEx.supersetGroupId
+    } else {
+      groupId = Math.random().toString(36).slice(2) + Date.now().toString(36)
+      targetEx.supersetGroupId = groupId
+    }
+
+    if (sourceEx.supersetGroupId && sourceEx.supersetGroupId !== groupId) {
+      leaveSuperset(aw, sourceEx)
+    }
+
+    sourceEx.supersetGroupId = groupId
+    resyncSteps(aw)
+  }
+
+  // Assign an exercise into an already-existing superset group
+  function joinSuperset(sourceExIdx: number, groupId: string) {
+    if (!activeWorkout.value) return
+    const aw = activeWorkout.value
+    const sourceEx = aw.exercises[sourceExIdx]
+    if (!sourceEx) return
+    const groupExists = aw.exercises.some(e => e.supersetGroupId === groupId)
+    if (!groupExists) return
+
+    if (sourceEx.supersetGroupId && sourceEx.supersetGroupId !== groupId) {
+      leaveSuperset(aw, sourceEx)
+    }
+
+    sourceEx.supersetGroupId = groupId
+    resyncSteps(aw)
   }
 
   function addAdHocExercise(
@@ -594,6 +620,7 @@ export const useWorkoutStore = defineStore('workout', () => {
     startRest,
     skipExercise,
     addToSuperset,
+    joinSuperset,
     addAdHocExercise,
     updateExerciseSets,
     pauseWorkout,
