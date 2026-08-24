@@ -10,7 +10,7 @@ import PageHeader from '../components/layout/PageHeader.vue'
 import ListSearchBar from '../components/ListSearchBar.vue'
 import BaseButton from '../components/BaseButton.vue'
 import RoutineList from './RoutinesPage/components/RoutineList.vue'
-import RoutineFormModal from './RoutinesPage/components/RoutineFormModal.vue'
+import RoutineFormModal from '../components/RoutineFormModal/index.vue'
 
 const routineStore = useRoutineStore()
 const exerciseStore = useExerciseStore()

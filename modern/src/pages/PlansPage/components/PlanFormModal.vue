@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { usePageTitle } from '../../../composables/usePageTitle'
-import type { PlanOut, PlanCreate, PlanUpdate, PlanWorkoutInput, RoutineOut, ClientOut, RoutineExcercise, RoutineSet, ExcerciseOut } from '../../../types'
+import type { PlanOut, PlanCreate, PlanUpdate, PlanWorkoutInput, RoutineOut, ClientOut, RoutineExcercise } from '../../../types'
 import { usePlanStore } from '../../../stores/planStore'
 import { useClientStore } from '../../../stores/clientStore'
 import { useToast } from '../../../composables/useToast'
@@ -14,9 +14,7 @@ import BaseDatePicker from '../../../components/BaseDatePicker.vue'
 import EmptyState from '../../../components/EmptyState.vue'
 import ClientPickerDialog from '../../../components/ClientPickerDialog/index.vue'
 import RoutinePickerDialog from '../../../components/RoutinePickerDialog/index.vue'
-import ExercisePickerDialog from '../../../components/ExercisePickerDialog/index.vue'
-import EditSet from '../../../components/EditSet/index.vue'
-import AddSetsDialog from '../../../components/AddSetsDialog/index.vue'
+import RoutineFormModal from '../../../components/RoutineFormModal/index.vue'
 import { X, Plus, CalendarDays, Copy, LayoutList, ChevronLeft, ChevronRight } from 'lucide-vue-next'
 
 const props = defineProps<{ open: boolean; plan: PlanOut | null }>()
@@ -42,8 +40,7 @@ const confirmDiscard = ref(false)
 const activeWorkoutIndex = ref(0)
 const isClientPickerOpen = ref(false)
 const isRoutinePickerOpen = ref(false)
-const isExercisePickerOpen = ref(false)
-const addSetsForExIdx = ref<number | null>(null)
+const editingWorkoutIndex = ref<number | null>(null)
 const nameIsAuto = ref(false)
 const planView = ref<'wizard' | 'calendar'>('wizard')
 const calendarCursor = ref(new Date())
@@ -265,39 +262,10 @@ function addBlankWorkout() {
   activeWorkoutIndex.value = form.value.workouts.length - 1
 }
 
-function onExercisePicked(ex: ExcerciseOut) {
-  const workout = form.value.workouts[activeWorkoutIndex.value]
-  if (!workout) return
-  if (!workout.excercises) workout.excercises = []
-  workout.excercises.push({
-    name: ex.name,
-    activityType: ex.activityType,
-    activityTrackType: ex.activityTrackType,
-    sets: [{ type: 'normal', reps: 10, weight: null, note: null }],
-  })
-}
-
-function removeExercise(workoutIdx: number, exIdx: number) {
-  form.value.workouts[workoutIdx].excercises!.splice(exIdx, 1)
-}
-
-function addSet(workoutIdx: number, exIdx: number) {
-  const sets = form.value.workouts[workoutIdx].excercises![exIdx].sets ?? []
-  const last = sets[sets.length - 1]
-  form.value.workouts[workoutIdx].excercises![exIdx].sets = [
-    ...sets,
-    last ? { ...last } : { type: 'normal', reps: 10, weight: null, note: null },
-  ]
-}
-
-function removeSet(workoutIdx: number, exIdx: number, setIdx: number) {
-  form.value.workouts[workoutIdx].excercises![exIdx].sets!.splice(setIdx, 1)
-}
-
-function onSetsAdded(sets: RoutineSet[]) {
-  const ex = form.value.workouts[activeWorkoutIndex.value].excercises![addSetsForExIdx.value!]
-  ex.sets = [...(ex.sets ?? []), ...sets]
-  addSetsForExIdx.value = null
+function onWorkoutSave(updated: PlanWorkoutInput) {
+  if (editingWorkoutIndex.value === null) return
+  form.value.workouts[editingWorkoutIndex.value] = updated
+  editingWorkoutIndex.value = null
 }
 
 function openScheduleCopy(index: number) {
@@ -469,52 +437,31 @@ async function doDelete() {
                   @input="form.workouts[index].note = ($event.target as HTMLTextAreaElement).value || null" />
               </div>
 
-              <!-- Exercises -->
-              <div class="flex flex-col gap-3">
+              <!-- Exercises summary -->
+              <div class="flex flex-col gap-2">
                 <p class="text-xs font-semibold uppercase tracking-wide text-text-secondary">Exercises</p>
 
-                <div v-for="(ex, ei) in form.workouts[index].excercises ?? []" :key="ei"
-                  class="flex flex-col gap-3 p-3 rounded-xl border border-gray-100 dark:border-white/10">
-                  <div class="flex items-center justify-between gap-2">
-                    <div class="flex items-center gap-2">
-                      <span class="font-medium text-sm text-text-primary dark:text-white">{{ ex.name }}</span>
-                      <span v-if="ex.activityType === 'bodyweight'"
-                        class="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400">
-                        Bodyweight
-                      </span>
-                    </div>
-                    <button type="button"
-                      class="text-sm text-red-500 hover:text-red-600 font-medium focus-visible:ring-1 focus-visible:ring-primary rounded flex-shrink-0"
-                      @click="removeExercise(index, ei)">
-                      Remove
-                    </button>
-                  </div>
-
-                  <div class="flex flex-col gap-2">
-                    <div v-for="(set, si) in ex.sets ?? []" :key="si" class="flex items-center gap-2">
-                      <EditSet :set="set" :activity-type="ex.activityType" :activity-track-type="ex.activityTrackType" class="flex-1"
-                        @update:set="form.workouts[index].excercises![ei].sets![si] = $event" />
-                      <button type="button"
-                        class="text-red-400 hover:text-red-600 text-lg leading-none p-1 focus-visible:ring-1 focus-visible:ring-primary rounded"
-                        aria-label="Remove set" @click="removeSet(index, ei, si)">×</button>
-                    </div>
-                  </div>
-
-                  <div class="flex items-center gap-4">
-                    <button type="button"
-                      class="text-sm text-primary font-medium hover:underline focus-visible:ring-1 focus-visible:ring-primary rounded"
-                      @click="addSet(index, ei)">+ Add set</button>
-                    <button type="button"
-                      class="text-sm text-primary font-medium hover:underline focus-visible:ring-1 focus-visible:ring-primary rounded"
-                      @click="addSetsForExIdx = ei">+ Add sets…</button>
+                <div v-if="(form.workouts[index].excercises ?? []).length" class="flex flex-col gap-1.5">
+                  <div
+                    v-for="(ex, ei) in form.workouts[index].excercises"
+                    :key="ei"
+                    class="flex items-center justify-between gap-2 px-3 py-2 rounded-xl bg-gray-50 dark:bg-white/5"
+                  >
+                    <span class="text-sm text-text-primary dark:text-white font-medium truncate">{{ ex.name }}</span>
+                    <span class="text-xs text-text-secondary flex-shrink-0">
+                      {{ (ex.sets ?? []).length }} set{{ (ex.sets ?? []).length !== 1 ? 's' : '' }}
+                    </span>
                   </div>
                 </div>
 
-                <button type="button"
-                  class="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm text-primary font-medium hover:bg-primary/10 transition-colors w-full"
-                  @click="isExercisePickerOpen = true">
-                  <Plus class="w-4 h-4" />
-                  Add exercise
+                <p v-else class="text-sm text-text-secondary italic px-1">No exercises yet</p>
+
+                <button
+                  type="button"
+                  class="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium border border-gray-200 dark:border-white/10 text-text-secondary dark:text-white/60 hover:border-primary hover:text-primary transition-colors w-full"
+                  @click="editingWorkoutIndex = index"
+                >
+                  Edit exercises
                 </button>
               </div>
             </div>
@@ -628,7 +575,12 @@ async function doDelete() {
 
   <RoutinePickerDialog :open="isRoutinePickerOpen" @select="onRoutinePicked" @close="isRoutinePickerOpen = false" />
 
-  <ExercisePickerDialog :open="isExercisePickerOpen" @select="onExercisePicked" @close="isExercisePickerOpen = false" />
+  <RoutineFormModal
+    :open="editingWorkoutIndex !== null"
+    :embedded-workout="editingWorkoutIndex !== null ? form.workouts[editingWorkoutIndex] : undefined"
+    @save="onWorkoutSave"
+    @close="editingWorkoutIndex = null"
+  />
 
   <!-- Schedule copy dialog -->
   <Teleport to="body">
@@ -686,12 +638,6 @@ async function doDelete() {
     </div>
   </Teleport>
 
-  <AddSetsDialog v-if="addSetsForExIdx !== null" :open="addSetsForExIdx !== null"
-    :base-set="form.workouts[activeWorkoutIndex]?.excercises?.[addSetsForExIdx]?.sets?.at(-1) ?? { type: 'normal', reps: 10, weight: null, note: null }"
-    :activity-type="form.workouts[activeWorkoutIndex]?.excercises?.[addSetsForExIdx]?.activityType"
-    :activity-track-type="form.workouts[activeWorkoutIndex]?.excercises?.[addSetsForExIdx]?.activityTrackType"
-    @add="onSetsAdded"
-    @close="addSetsForExIdx = null" />
 </template>
 
 <style scoped>
