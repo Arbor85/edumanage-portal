@@ -54,7 +54,7 @@ async function downloadFile(url, destPath) {
 async function main() {
   await mkdir(IMAGES_OUT_DIR, { recursive: true });
 
-  console.log('Fetching exercises.json...');
+  console.log(`Fetching exercises.json... (${EXERCISES_JSON_URL})`);
   const res = await fetch(EXERCISES_JSON_URL);
   if (!res.ok) throw new Error(`Failed to fetch exercises: ${res.status}`);
   const exercises = await res.json();
