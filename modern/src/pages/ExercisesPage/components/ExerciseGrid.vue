@@ -17,10 +17,6 @@ defineEmits<{ edit: [ex: ExcerciseOut]; delete: [ex: ExcerciseOut]; 'open-muscle
     <div v-if="loading" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
       <div v-for="i in 8" :key="i" class="rounded-2xl overflow-hidden">
         <SkeletonBlock height="0" class="aspect-[4/3]" />
-        <div class="p-3 space-y-1.5">
-          <SkeletonBlock height="1rem" width="70%" />
-          <SkeletonBlock height="0.75rem" width="40%" />
-        </div>
       </div>
     </div>
 
@@ -35,9 +31,10 @@ defineEmits<{ edit: [ex: ExcerciseOut]; delete: [ex: ExcerciseOut]; 'open-muscle
     <!-- Grid -->
     <div v-else class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
       <ExerciseCard
-        v-for="ex in exercises"
+        v-for="(ex, i) in exercises"
         :key="ex.id"
         :exercise="ex"
+        :index="i"
         @edit="$emit('edit', ex)"
         @delete="$emit('delete', ex)"
         @open-muscle-dialog="$emit('open-muscle-dialog', ex)"
