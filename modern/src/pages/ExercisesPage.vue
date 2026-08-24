@@ -125,7 +125,7 @@ function openEdit(ex: ExcerciseOut) {
     />
 
     <MuscleDistributionDialog
-      v-if="muscleDialogTarget"
+      :open="muscleDialogTarget !== null"
       :exercise="muscleDialogTarget"
       @close="muscleDialogTarget = null"
     />
