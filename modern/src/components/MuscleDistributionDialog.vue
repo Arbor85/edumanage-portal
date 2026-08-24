@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { watch } from 'vue'
-import { X } from 'lucide-vue-next'
+import { ref, watch, onUnmounted } from 'vue'
+import { X, Loader2 } from 'lucide-vue-next'
 import ExerciseMuscleView from './ExerciseMuscleView.vue'
 import type { ExcerciseOut } from '../types'
+import { fetchMuscleVisualization, isApiConfigured } from '../services/muscleVisualizerApi'
 
 const props = defineProps<{
   open: boolean
@@ -10,9 +11,29 @@ const props = defineProps<{
 }>()
 const emit = defineEmits<{ close: [] }>()
 
+const apiImageUrl = ref<string | null>(null)
+const loading = ref(false)
+
+watch(
+  () => props.open && props.exercise,
+  async (val) => {
+    if (!val || !props.exercise) { apiImageUrl.value = null; return }
+    if (!isApiConfigured()) return
+
+    loading.value = true
+    apiImageUrl.value = null
+    apiImageUrl.value = await fetchMuscleVisualization(
+      props.exercise.primaryMuscle ?? '',
+      (props.exercise.secondaryMuscles ?? []) as string[],
+    )
+    loading.value = false
+  },
+)
+
 watch(() => props.open, (val) => {
   document.body.style.overflow = val ? 'hidden' : ''
 })
+onUnmounted(() => { document.body.style.overflow = '' })
 </script>
 
 <template>
@@ -43,7 +64,7 @@ watch(() => props.open, (val) => {
           <div class="flex items-center justify-between px-5 py-4 border-b border-white/8 flex-shrink-0">
             <div>
               <p class="text-[10px] uppercase tracking-widest text-text-muted mb-0.5 font-semibold">Muscle Distribution</p>
-              <h3 class="text-sm font-semibold text-text-primary dark:text-white capitalize leading-tight">{{ exercise!.name }}</h3>
+              <h3 class="text-sm font-semibold text-text-primary dark:text-white capitalize leading-tight">{{ exercise.name }}</h3>
             </div>
             <button
               class="close-btn"
@@ -56,10 +77,32 @@ watch(() => props.open, (val) => {
 
           <!-- Body -->
           <div class="flex-1 overflow-y-auto custom-scrollbar p-5">
+
+            <!-- API image (when key is configured) -->
+            <template v-if="isApiConfigured()">
+              <div v-if="loading" class="flex justify-center items-center py-16">
+                <Loader2 class="w-8 h-8 text-primary animate-spin" />
+              </div>
+              <img
+                v-else-if="apiImageUrl"
+                :src="apiImageUrl"
+                :alt="`Muscle diagram for ${exercise.name}`"
+                class="w-full rounded-xl"
+              />
+              <ExerciseMuscleView
+                v-else
+                :primary-muscle="exercise.primaryMuscle ?? ''"
+                :secondary-muscles="(exercise.secondaryMuscles ?? []) as string[]"
+              />
+            </template>
+
+            <!-- SVG fallback (no API key) -->
             <ExerciseMuscleView
-              :primary-muscle="exercise!.primaryMuscle ?? ''"
-              :secondary-muscles="exercise!.secondaryMuscles as string[]"
+              v-else
+              :primary-muscle="exercise.primaryMuscle ?? ''"
+              :secondary-muscles="(exercise.secondaryMuscles ?? []) as string[]"
             />
+
           </div>
         </div>
       </div>

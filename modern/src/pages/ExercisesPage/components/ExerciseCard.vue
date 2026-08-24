@@ -83,7 +83,7 @@ const staggerDelay = computed(() => `${(props.index ?? 0) * 40}ms`)
         <DifficultyBadge :level="difficultyLevel" />
 
         <!-- Action buttons: fade in on hover, not teleport -->
-        <div class="flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-150 ease-out">
+        <div class="flex gap-1.5 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-150 ease-out">
           <button
             class="action-btn"
             aria-label="Muscle distribution"
