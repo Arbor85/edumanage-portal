@@ -132,12 +132,6 @@ const metaChips = computed(() => {
                 >
                   {{ badge.label }}
                 </span>
-                <span
-                  v-if="exercise.primaryMuscle"
-                  class="inline-flex items-center px-2 py-0.5 rounded bg-white/10 text-white/70 text-[10px] font-semibold uppercase tracking-wide capitalize"
-                >
-                  {{ exercise.primaryMuscle }}
-                </span>
               </div>
             </div>
           </div>
@@ -163,9 +157,21 @@ const metaChips = computed(() => {
                 </span>
               </div>
 
+              <!-- Muscle tags -->
+              <div v-if="exercise.primaryMuscle">
+                <p class="section-label">Muscles</p>
+                <div class="flex flex-wrap gap-2">
+                  <span class="muscle-tag muscle-tag--primary capitalize">{{ exercise.primaryMuscle }}</span>
+                  <span
+                    v-for="m in (exercise.secondaryMuscles ?? [])"
+                    :key="m"
+                    class="muscle-tag muscle-tag--secondary capitalize"
+                  >{{ m }}</span>
+                </div>
+              </div>
+
               <!-- Muscle diagram -->
               <div v-if="exercise.primaryMuscle">
-                <p class="section-label">Affected Muscles</p>
                 <ExerciseMuscleView
                   :primary-muscle="exercise.primaryMuscle"
                   :secondary-muscles="exercise.secondaryMuscles as string[] | undefined"
@@ -280,6 +286,26 @@ const metaChips = computed(() => {
 }
 .close-hero-btn:active {
   transform: scale(0.92);
+}
+
+.muscle-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid transparent;
+}
+.muscle-tag--primary {
+  background: rgba(0, 200, 150, 0.15);
+  border-color: rgba(0, 200, 150, 0.3);
+  color: rgb(0, 200, 150);
+}
+.muscle-tag--secondary {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.55);
 }
 
 .section-label {

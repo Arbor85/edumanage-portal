@@ -14,7 +14,7 @@ defineEmits<{ edit: [ex: ExcerciseOut]; delete: [ex: ExcerciseOut]; 'open-muscle
 <template>
   <div>
     <!-- Loading: skeleton grid -->
-    <div v-if="loading" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
+    <div v-if="loading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
       <div v-for="i in 8" :key="i" class="rounded-2xl overflow-hidden">
         <SkeletonBlock height="0" class="aspect-[4/3]" />
       </div>
@@ -29,7 +29,7 @@ defineEmits<{ edit: [ex: ExcerciseOut]; delete: [ex: ExcerciseOut]; 'open-muscle
     />
 
     <!-- Grid -->
-    <div v-else class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
+    <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
       <ExerciseCard
         v-for="(ex, i) in exercises"
         :key="ex.id"

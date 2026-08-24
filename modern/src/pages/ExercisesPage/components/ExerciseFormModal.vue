@@ -100,7 +100,10 @@ async function doDelete() {
     <form class="flex flex-col gap-4" @submit.prevent="save">
       <BaseInput v-model="form.name" label="Name" placeholder="e.g. Bench Press" />
       <BaseTextarea v-model="form.shortDescription" label="Description" placeholder="Brief description..." :rows="2" />
-      <BaseInput v-model="form.primaryMuscle" label="Primary Muscle" placeholder="e.g. Chest" />
+      <div class="flex flex-col gap-1">
+        <label class="text-sm font-medium text-text-primary dark:text-white">Primary Muscle</label>
+        <TagInput :model-value="!!form.primaryMuscle ? [form.primaryMuscle] : []" placeholder="Add muscle, press Enter" @update:model-value="form.primaryMuscle = $event[0]" />
+      </div>
       <div class="flex flex-col gap-1">
         <label class="text-sm font-medium text-text-primary dark:text-white">Secondary Muscles</label>
         <TagInput :model-value="form.secondaryMuscles ?? []" placeholder="Add muscle, press Enter" @update:model-value="form.secondaryMuscles = $event" />
