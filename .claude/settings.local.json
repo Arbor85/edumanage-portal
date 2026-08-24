@@ -18,7 +18,11 @@
       "Bash(curl -s -X POST http://localhost:5090/api/routines -H \"Content-Type: application/json\" -d '{\"name\":\"Superset Test\",\"note\":null,\"excercises\":[{\"name\":\"Bench\",\"activityType\":\"weighted\",\"activityTrackType\":\"repetitions\",\"sets\":[{\"type\":\"normal\",\"reps\":8,\"weight\":80,\"duration\":null,\"distance\":null,\"note\":null}],\"supersetGroupId\":\"g1\",\"dropConfig\":null},{\"name\":\"Fly\",\"activityType\":\"weighted\",\"activityTrackType\":\"repetitions\",\"sets\":[{\"type\":\"normal\",\"reps\":8,\"weight\":20,\"duration\":null,\"distance\":null,\"note\":null}],\"supersetGroupId\":\"g1\",\"dropConfig\":null}],\"supersetGroups\":[{\"id\":\"g1\",\"name\":\"Upper\",\"color\":\"violet\"}]}')",
       "Bash(xargs grep *)",
       "Bash(wmic process *)",
-      "Bash(netstat -ano)"
+      "Bash(netstat -ano)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(curl -s \"https://raw.githubusercontent.com/hasaneyldrm/exercises-dataset/main/data/exercises.json\")",
+      "Bash(curl *)"
     ]
   }
 }

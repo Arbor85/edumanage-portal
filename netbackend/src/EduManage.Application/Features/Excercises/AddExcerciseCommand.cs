@@ -19,7 +19,16 @@ public sealed record AddExcerciseCommand(ExcerciseWriteRequest Request) : IReque
                 Muscles = [],
                 Tags = request.Request.Tags?.ToList() ?? [],
                 ActivityType = request.Request.ActivityType,
-                ActivityTrackType = request.Request.ActivityTrackType
+                ActivityTrackType = request.Request.ActivityTrackType,
+                Instructions = request.Request.Instructions?.ToList(),
+                Equipment = request.Request.Equipment,
+                Level = request.Request.Level,
+                Force = request.Request.Force,
+                Mechanic = request.Request.Mechanic,
+                Category = request.Request.Category,
+                ImagePath = request.Request.ImagePath,
+                GifPath = request.Request.GifPath,
+                DatasetId = request.Request.DatasetId
             };
 
             await repository.AddAsync(exercise, cancellationToken);

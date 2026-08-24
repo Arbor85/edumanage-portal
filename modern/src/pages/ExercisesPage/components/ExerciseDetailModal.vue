@@ -5,6 +5,7 @@ import BaseModal from '../../../components/BaseModal.vue'
 import DifficultyBadge from '../../../components/DifficultyBadge.vue'
 import BaseBadge from '../../../components/BaseBadge.vue'
 import BaseButton from '../../../components/BaseButton.vue'
+import ExerciseMuscleView from '../../../components/ExerciseMuscleView.vue'
 import { computed } from 'vue'
 
 const props = defineProps<{
@@ -61,6 +62,25 @@ const difficultyLevel = computed(() => {
         <div class="flex flex-wrap gap-1.5">
           <BaseBadge v-for="m in exercise.muscles" :key="m.name ?? ''" :label="m.name ?? ''" />
         </div>
+      </div>
+
+      <div v-if="exercise.primaryMuscle" class="mb-4">
+        <p class="text-xs font-semibold uppercase tracking-wider text-text-secondary mb-3">Affected Muscles</p>
+        <ExerciseMuscleView
+          :primary-muscle="exercise.primaryMuscle"
+          :secondary-muscles="exercise.secondaryMuscles as string[] | undefined"
+        />
+      </div>
+
+      <div v-if="(exercise.instructions ?? []).length" class="mb-4">
+        <p class="text-xs font-semibold uppercase tracking-wider text-text-secondary mb-2">Instructions</p>
+        <ol class="space-y-1.5 list-decimal list-inside">
+          <li
+            v-for="(step, i) in exercise.instructions"
+            :key="i"
+            class="text-sm text-text-secondary dark:text-white/70 leading-relaxed"
+          >{{ step }}</li>
+        </ol>
       </div>
     </template>
 

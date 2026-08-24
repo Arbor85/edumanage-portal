@@ -27,5 +27,10 @@ public class ExerciseConfiguration : IEntityTypeConfiguration<Exercise>
             .HasConversion(
                 muscles => JsonSerializer.Serialize(muscles, (JsonSerializerOptions?)null),
                 json => (IReadOnlyList<Muscle>)(JsonSerializer.Deserialize<List<Muscle>>(json, (JsonSerializerOptions?)null) ?? new List<Muscle>()));
+
+        builder.Property(e => e.Instructions)
+            .HasConversion(
+                v => v == null ? null : JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
+                json => string.IsNullOrEmpty(json) ? null : JsonSerializer.Deserialize<List<string>>(json, (JsonSerializerOptions?)null));
     }
 }

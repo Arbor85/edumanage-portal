@@ -43,8 +43,23 @@ export const mockClients: ClientOut[] = [
   },
 ]
 
+const EXERCISE_DEFAULTS = {
+  activityType: 'weighted' as const,
+  activityTrackType: 'repetitions' as const,
+  instructions: null,
+  equipment: null,
+  level: null,
+  force: null,
+  mechanic: null,
+  category: null,
+  imagePath: null,
+  gifPath: null,
+  datasetId: null,
+}
+
 export const mockExercises: ExcerciseOut[] = [
   {
+    ...EXERCISE_DEFAULTS,
     id: 1,
     name: 'Barbell Squat',
     shortDescription: 'Compound lower body movement',
@@ -54,6 +69,7 @@ export const mockExercises: ExcerciseOut[] = [
     tags: ['strength', 'compound'],
   },
   {
+    ...EXERCISE_DEFAULTS,
     id: 2,
     name: 'Bench Press',
     shortDescription: 'Compound chest press',
@@ -63,6 +79,7 @@ export const mockExercises: ExcerciseOut[] = [
     tags: ['strength', 'compound', 'push'],
   },
   {
+    ...EXERCISE_DEFAULTS,
     id: 3,
     name: 'Deadlift',
     shortDescription: 'Full-body hinge movement',
@@ -72,6 +89,7 @@ export const mockExercises: ExcerciseOut[] = [
     tags: ['strength', 'compound', 'pull'],
   },
   {
+    ...EXERCISE_DEFAULTS,
     id: 4,
     name: 'Pull-Up',
     shortDescription: 'Upper back and biceps',

@@ -23,6 +23,15 @@ public sealed record ListExcercisesQuery : IRequest<IReadOnlyList<ExcerciseOut>>
                 e.Muscles,
                 e.Tags,
                 e.ActivityType,
-                e.ActivityTrackType);
+                e.ActivityTrackType,
+                e.Instructions,
+                e.Equipment,
+                e.Level,
+                e.Force,
+                e.Mechanic,
+                e.Category,
+                e.ImagePath,
+                e.GifPath,
+                e.DatasetId);
     }
 }

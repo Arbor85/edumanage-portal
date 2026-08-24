@@ -100,7 +100,16 @@ public sealed record ExcerciseOut(
     IReadOnlyList<Muscle> Muscles,
     IReadOnlyList<string> Tags,
     ActivityType ActivityType,
-    ActivityTrackType ActivityTrackType);
+    ActivityTrackType ActivityTrackType,
+    IReadOnlyList<string>? Instructions = null,
+    string? Equipment = null,
+    string? Level = null,
+    string? Force = null,
+    string? Mechanic = null,
+    string? Category = null,
+    string? ImagePath = null,
+    string? GifPath = null,
+    string? DatasetId = null);
 
 public sealed record ExcerciseWriteRequest(
     string Name,
@@ -109,7 +118,16 @@ public sealed record ExcerciseWriteRequest(
     IReadOnlyList<string>? SecondaryMuscles,
     IReadOnlyList<string>? Tags,
     ActivityType ActivityType = ActivityType.Weighted,
-    ActivityTrackType ActivityTrackType = ActivityTrackType.Repetitions);
+    ActivityTrackType ActivityTrackType = ActivityTrackType.Repetitions,
+    IReadOnlyList<string>? Instructions = null,
+    string? Equipment = null,
+    string? Level = null,
+    string? Force = null,
+    string? Mechanic = null,
+    string? Category = null,
+    string? ImagePath = null,
+    string? GifPath = null,
+    string? DatasetId = null);
 
 public sealed record CompletedRoutineSet(
     string Type,

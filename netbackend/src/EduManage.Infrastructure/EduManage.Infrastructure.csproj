@@ -23,6 +23,7 @@
 
   <ItemGroup>
     <EmbeddedResource Include="gym_exercises.json" />
+    <EmbeddedResource Include="gym_exercises_full.json" Condition="Exists('gym_exercises_full.json')" />
   </ItemGroup>
 
 </Project>

@@ -12,6 +12,7 @@ import ExerciseGrid from './ExercisesPage/components/ExerciseGrid.vue'
 import ExerciseFormModal from './ExercisesPage/components/ExerciseFormModal.vue'
 import ExerciseDetailModal from './ExercisesPage/components/ExerciseDetailModal.vue'
 import ConfirmDialog from '../components/ConfirmDialog.vue'
+import MuscleDistributionDialog from '../components/MuscleDistributionDialog.vue'
 import { useToast } from '../composables/useToast'
 import { Search } from 'lucide-vue-next'
 
@@ -26,6 +27,7 @@ const isCreateOpen = ref(false)
 const editTarget = ref<ExcerciseOut | null>(null)
 const detailTarget = ref<ExcerciseOut | null>(null)
 const confirmDeleteTarget = ref<ExcerciseOut | null>(null)
+const muscleDialogTarget = ref<ExcerciseOut | null>(null)
 
 onMounted(() => exerciseStore.fetch())
 
@@ -90,6 +92,7 @@ function openEdit(ex: ExcerciseOut) {
       :loading="exerciseStore.isLoading"
       @edit="openEdit"
       @delete="(ex) => (confirmDeleteTarget = ex)"
+      @open-muscle-dialog="(ex) => (muscleDialogTarget = ex)"
     />
 
     <!-- Load More -->
@@ -119,6 +122,12 @@ function openEdit(ex: ExcerciseOut) {
       variant="danger"
       @confirm="handleDelete(confirmDeleteTarget!)"
       @cancel="confirmDeleteTarget = null"
+    />
+
+    <MuscleDistributionDialog
+      v-if="muscleDialogTarget"
+      :exercise="muscleDialogTarget"
+      @close="muscleDialogTarget = null"
     />
   </AppLayout>
 </template>

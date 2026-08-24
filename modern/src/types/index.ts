@@ -32,6 +32,15 @@ export interface ExcerciseOut {
   tags: string[] | null
   activityType: ActivityType
   activityTrackType: ActivityTrackType
+  instructions: string[] | null
+  equipment: string | null
+  level: string | null
+  force: string | null
+  mechanic: string | null
+  category: string | null
+  imagePath: string | null
+  gifPath: string | null
+  datasetId: string | null
 }
 
 export interface ExcerciseWriteRequest {
@@ -42,6 +51,15 @@ export interface ExcerciseWriteRequest {
   tags: string[] | null
   activityType: ActivityType
   activityTrackType: ActivityTrackType
+  instructions?: string[] | null
+  equipment?: string | null
+  level?: string | null
+  force?: string | null
+  mechanic?: string | null
+  category?: string | null
+  imagePath?: string | null
+  gifPath?: string | null
+  datasetId?: string | null
 }
 
 // ─── Activity enums ───────────────────────────────────────────

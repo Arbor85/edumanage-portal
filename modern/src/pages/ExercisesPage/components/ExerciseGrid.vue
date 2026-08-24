@@ -8,7 +8,7 @@ defineProps<{
   exercises: ExcerciseOut[]
   loading: boolean
 }>()
-defineEmits<{ edit: [ex: ExcerciseOut]; delete: [ex: ExcerciseOut] }>()
+defineEmits<{ edit: [ex: ExcerciseOut]; delete: [ex: ExcerciseOut]; 'open-muscle-dialog': [ex: ExcerciseOut] }>()
 </script>
 
 <template>
@@ -40,6 +40,7 @@ defineEmits<{ edit: [ex: ExcerciseOut]; delete: [ex: ExcerciseOut] }>()
         :exercise="ex"
         @edit="$emit('edit', ex)"
         @delete="$emit('delete', ex)"
+        @open-muscle-dialog="$emit('open-muscle-dialog', ex)"
       />
     </div>
   </div>

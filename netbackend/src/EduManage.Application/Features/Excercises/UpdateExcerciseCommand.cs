@@ -21,6 +21,15 @@ public sealed record UpdateExcerciseCommand(int Id, ExcerciseWriteRequest Reques
             exercise.Tags = request.Request.Tags?.ToList() ?? [];
             exercise.ActivityType = request.Request.ActivityType;
             exercise.ActivityTrackType = request.Request.ActivityTrackType;
+            exercise.Instructions = request.Request.Instructions?.ToList();
+            exercise.Equipment = request.Request.Equipment;
+            exercise.Level = request.Request.Level;
+            exercise.Force = request.Request.Force;
+            exercise.Mechanic = request.Request.Mechanic;
+            exercise.Category = request.Request.Category;
+            exercise.ImagePath = request.Request.ImagePath;
+            exercise.GifPath = request.Request.GifPath;
+            exercise.DatasetId = request.Request.DatasetId;
 
             await repository.UpdateAsync(exercise, cancellationToken);
             return ListExcercisesQuery.Handler.ToOut(exercise);

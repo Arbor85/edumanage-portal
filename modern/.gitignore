@@ -25,3 +25,6 @@ dist-ssr
 
 *storybook.log
 storybook-static
+
+# Downloaded exercise images (seeded locally, move to CDN later)
+public/images/exercises/

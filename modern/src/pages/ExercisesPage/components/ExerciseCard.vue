@@ -2,7 +2,7 @@
 import { computed, ref } from 'vue'
 import type { ExcerciseOut, ActivityType } from '../../../types'
 import DifficultyBadge from '../../../components/DifficultyBadge.vue'
-import { Trash2, Dumbbell } from 'lucide-vue-next'
+import { Trash2, Dumbbell, Activity } from 'lucide-vue-next'
 
 const ACTIVITY_TYPE_BADGE: Record<ActivityType, { label: string; classes: string }> = {
   weighted:   { label: 'Weighted',   classes: 'bg-blue-500/90' },
@@ -12,7 +12,7 @@ const ACTIVITY_TYPE_BADGE: Record<ActivityType, { label: string; classes: string
 }
 
 const props = defineProps<{ exercise: ExcerciseOut }>()
-defineEmits<{ edit: []; delete: [] }>()
+defineEmits<{ edit: []; delete: []; 'open-muscle-dialog': [] }>()
 
 const difficultyLevel = computed(() => {
   const tags = props.exercise.tags ?? []
@@ -25,31 +25,16 @@ const difficultyLevel = computed(() => {
   return null
 })
 
-const MUSCLE_IMAGES: Record<string, string> = {
-  chest: '/images/benchpress.png',
-  back: '/images/muscles/deadlift.jpg',
-  shoulders: '/images/muscles/shoulders.jpg',
-  biceps: '/images/muscles/biceps.jpg',
-  triceps: '/images/muscles/triceps.jpg',
-  legs: '/images/muscles/legs.jpg',
-  quads: '/images/muscles/quads.jpg',
-  hamstrings: '/images/muscles/hamstrings.jpg',
-  glutes: '/images/muscles/glutes.jpg',
-  abs: '/images/muscles/abs.jpg',
-  core: '/images/muscles/core.jpg',
-  calves: '/images/muscles/calves.jpg',
-  forearms: '/images/muscles/forearms.jpg',
-  cardio: '/images/muscles/cardio.jpg',
-}
-
 const FALLBACK = '/images/benchpress.png'
 
-const imageUrl = computed(() => {
-  const key = (props.exercise.primaryMuscle ?? '').toLowerCase().trim()
-  return MUSCLE_IMAGES[key] ?? FALLBACK
-})
-
+const isHovered = ref(false)
 const imgError = ref(false)
+
+const imageUrl = computed(() => {
+  if (imgError.value) return null
+  if (isHovered.value && props.exercise.gifPath) return props.exercise.gifPath
+  return props.exercise.imagePath ?? FALLBACK
+})
 
 function onImgError() {
   imgError.value = true
@@ -57,11 +42,16 @@ function onImgError() {
 </script>
 
 <template>
-  <div class="exercise-card rounded-2xl overflow-hidden group cursor-pointer transition-transform active:scale-[0.97] bg-surface dark:bg-surface-dark shadow-sm border border-gray-100 dark:border-white/10" @click="$emit('edit')">
+  <div
+    class="exercise-card rounded-2xl overflow-hidden group cursor-pointer transition-transform active:scale-[0.97] bg-surface dark:bg-surface-dark shadow-sm border border-gray-100 dark:border-white/10"
+    @click="$emit('edit')"
+    @mouseenter="isHovered = true"
+    @mouseleave="isHovered = false"
+  >
     <!-- Image area -->
     <div class="relative aspect-[4/3] bg-gray-200 dark:bg-gray-700">
       <img
-        v-if="!imgError"
+        v-if="imageUrl"
         :src="imageUrl"
         :alt="exercise.name ?? ''"
         class="w-full h-full object-cover"
@@ -99,8 +89,13 @@ function onImgError() {
         </span>
       </div>
 
-      <!-- Delete icon: top-right, hover only -->
+      <!-- Action buttons: top-right, hover only -->
       <div class="absolute top-3 right-3 hidden group-hover:flex gap-1">
+        <button
+          class="w-7 h-7 bg-white/90 rounded-lg flex items-center justify-center hover:bg-primary/20 transition-colors focus-visible:ring-2 focus-visible:ring-primary"
+          aria-label="Muscle distribution"
+          @click.stop="$emit('open-muscle-dialog')"
+        ><Activity class="w-3.5 h-3.5 text-primary" /></button>
         <button
           class="w-7 h-7 bg-white/90 rounded-lg flex items-center justify-center hover:bg-red-50 transition-colors focus-visible:ring-2 focus-visible:ring-primary"
           aria-label="Delete exercise"
