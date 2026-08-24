@@ -1,5 +1,6 @@
 const API_KEY = import.meta.env.VITE_RAPIDAPI_KEY as string | undefined
-const BASE_URL = 'https://muscle-visualizer-api.p.rapidapi.com/v1/visualize/workout'
+const BASE_URL = 'https://muscle-visualizer-api.p.rapidapi.com/api/v1/visualize/heatmap'
+const COLORS = '#E74C3C,#F39C12,#3498DB,#2ECC71,#9B59B6,#1ABC9C,#F1C40F,#E67E22,#34495E,#7F8C8D,#BDC3C7,#95A5A6,#D35400,#C0392B,#8E44AD,#2980B9,#27AE60,#16A085,#F39C12,#D35400,#7F8C8D,#BDC3C7,#95A5A6,#34495E,#2C3E50,#1ABC9C,#27AE60,#16A085,#F1C40F,#F39C12,#E67E22,#D35400,#C0392B,#8E44AD,#2980B9,#3498DB,#2ECC71,#9B59B6';
 
 // Maps dataset muscle names (lowercase) → API-accepted names
 const MUSCLE_TO_API: Record<string, string> = {
@@ -39,28 +40,33 @@ export function isApiConfigured(): boolean {
 }
 
 export async function fetchMuscleVisualization(
-  primaryMuscle: string,
-  secondaryMuscles: string[] = [],
+  muscles: string[] = [],
 ): Promise<string | null> {
-  if (!API_KEY) return null
+  if (!API_KEY) {
+    return null;
+  }
 
-  const primary = toApiName(primaryMuscle)
-  if (!primary) return null
+  const mappedMuscles = muscles.map(toApiName).filter((m): m is string => m !== null);
 
-  const secondaries = secondaryMuscles.map(toApiName).filter(Boolean) as string[]
+  const cacheKey = `$muscles_${mappedMuscles.join(',')}`;
+  if (cache.has(cacheKey)) {
+    return cache.get(cacheKey)!;
+  }
 
-  const cacheKey = `${primary}|${secondaries.join(',')}`
-  if (cache.has(cacheKey)) return cache.get(cacheKey)!
 
   const url = new URL(BASE_URL)
-  url.searchParams.set('primary_muscles', primary)
-  if (secondaries.length) url.searchParams.set('secondary_muscles', secondaries.join(','))
+  url.searchParams.set('muscles', mappedMuscles.join(',').toUpperCase());
+  url.searchParams.set('colors', COLORS.split(',').filter((_, index) => index < mappedMuscles.length).join(','));
+  url.searchParams.set('gender', 'male');
+  url.searchParams.set('background', 'transparent');
+  url.searchParams.set('size', 'small');
+  url.searchParams.set('format', 'jpeg');
 
   try {
     const res = await fetch(url.toString(), {
       headers: {
         'X-RapidAPI-Key': API_KEY,
-        'X-RapidAPI-Host': 'muscle-visualizer-api.p.rapidapi.com',
+        'x-rapidapi-host': 'muscle-visualizer-api.p.rapidapi.com',
       },
     })
     if (!res.ok) return null
