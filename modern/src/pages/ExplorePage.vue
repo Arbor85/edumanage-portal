@@ -5,6 +5,7 @@ import AppLayout from '../components/layout/AppLayout.vue'
 import ExerciseGrid from './ExercisesPage/components/ExerciseGrid.vue'
 import ExerciseFormModal from './ExercisesPage/components/ExerciseFormModal.vue'
 import ExerciseDetailModal from './ExercisesPage/components/ExerciseDetailModal.vue'
+import MuscleDistributionDialog from '../components/MuscleDistributionDialog.vue'
 import ConfirmDialog from '../components/ConfirmDialog.vue'
 import { useExerciseStore } from '../stores/exerciseStore'
 import { useAuthStore } from '../stores/authStore'
@@ -22,6 +23,7 @@ const isCreateOpen = ref(false)
 const editTarget = ref<ExcerciseOut | null>(null)
 const detailTarget = ref<ExcerciseOut | null>(null)
 const confirmDeleteTarget = ref<ExcerciseOut | null>(null)
+const muscleDialogTarget = ref<ExcerciseOut | null>(null)
 
 onMounted(() => {
   exerciseStore.fetch()
@@ -128,6 +130,7 @@ async function handleDelete(ex: ExcerciseOut) {
         :loading="exerciseStore.isLoading"
         @edit="openEdit"
         @delete="(ex) => (confirmDeleteTarget = ex)"
+        @open-muscle-dialog="(ex) => (muscleDialogTarget = ex)"
       />
 
       <!-- Load more -->
@@ -164,6 +167,11 @@ async function handleDelete(ex: ExcerciseOut) {
       variant="danger"
       @confirm="handleDelete(confirmDeleteTarget!)"
       @cancel="confirmDeleteTarget = null"
+    />
+    <MuscleDistributionDialog
+      :open="muscleDialogTarget !== null"
+      :exercise="muscleDialogTarget"
+      @close="muscleDialogTarget = null"
     />
   </AppLayout>
 </template>

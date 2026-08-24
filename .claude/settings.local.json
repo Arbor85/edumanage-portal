@@ -25,7 +25,9 @@
       "Bash(curl *)",
       "Bash(node scripts/seed-exercises.js)",
       "Bash(python3)",
-      "WebFetch(domain:muscle-visualizer.exercisedb.dev)"
+      "WebFetch(domain:muscle-visualizer.exercisedb.dev)",
+      "Read(//c/Program Files/Google/Chrome/Application/**)",
+      "Read(//c/Program Files \\\\\\(x86\\\\\\)/Microsoft/Edge/Application/**)"
     ]
   }
 }
