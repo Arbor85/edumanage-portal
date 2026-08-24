@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 import type { ExcerciseOut, ActivityType } from '../../../types'
 import DifficultyBadge from '../../../components/DifficultyBadge.vue'
 import { Trash2, Dumbbell, Activity } from 'lucide-vue-next'
+import { exerciseImageMap } from '../../../data/exerciseImageMap'
 
 const ACTIVITY_TYPE_BADGE: Record<ActivityType, { label: string; classes: string }> = {
   weighted:   { label: 'Weighted',   classes: 'bg-blue-500/90' },
@@ -30,10 +31,15 @@ const FALLBACK = '/images/benchpress.png'
 const isHovered = ref(false)
 const imgError = ref(false)
 
+const mapEntry = computed(() => exerciseImageMap[(props.exercise.name ?? '').toLowerCase()])
+
+const resolvedImagePath = computed(() => props.exercise.imagePath ?? mapEntry.value?.imagePath ?? null)
+const resolvedGifPath = computed(() => props.exercise.gifPath ?? mapEntry.value?.gifPath ?? null)
+
 const imageUrl = computed(() => {
   if (imgError.value) return null
-  if (isHovered.value && props.exercise.gifPath) return props.exercise.gifPath
-  return props.exercise.imagePath ?? FALLBACK
+  if (isHovered.value && resolvedGifPath.value) return resolvedGifPath.value
+  return resolvedImagePath.value ?? FALLBACK
 })
 
 function onImgError() {
