@@ -1,32 +1,36 @@
 services:
   backend:
     build:
-      context: ./backend
+      context: ./netbackend
       dockerfile: Dockerfile
     container_name: edumanage-backend
     ports:
-      - "8000:8000"
+      - "5090:5090"
     environment:
-      - DATABASE_URL=sqlite:////data/app.db
+      - ConnectionStrings__DefaultConnection=Data Source=/data/edumanage.db
+      - Authentication__Auth0__Domain=${AUTH0_DOMAIN}
+      - Authentication__Auth0__Audience=${AUTH0_AUDIENCE}
+      # Allow direct API access from host during development (nginx proxy handles prod)
+      - AllowedOrigins__0=http://localhost:80
+      - AllowedOrigins__1=http://localhost
     volumes:
-      - ./backend:/app
-      - backend_db:/data
+      - db_data:/data
 
-  web:
+  frontend:
     build:
-      context: ./web
+      context: ./modern
       dockerfile: Dockerfile
-    container_name: edumanage-web
+      args:
+        # VITE_API_BASE_URL is intentionally empty — nginx proxies /api to backend
+        VITE_API_BASE_URL: ""
+        VITE_AUTH0_DOMAIN: ${AUTH0_DOMAIN}
+        VITE_AUTH0_CLIENT_ID: ${AUTH0_CLIENT_ID}
+        VITE_AUTH0_AUDIENCE: ${AUTH0_AUDIENCE}
+    container_name: edumanage-frontend
+    ports:
+      - "80:80"
     depends_on:
       - backend
-    ports:
-      - "3000:3000"
-    environment:
-      - VITE_API_BASE_URL=http://localhost:8000
-      - VITE_API_SECURE_URL=http://localhost:8000/api
-    volumes:
-      - ./web:/app
-      - /app/node_modules
 
 volumes:
-  backend_db:
+  db_data:
