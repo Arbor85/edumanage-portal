@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useExerciseStore } from '../../stores/exerciseStore'
+import { exerciseImageMap } from '../../data/exerciseImageMap'
+import type { ExcerciseOut } from '../../types'
 import BaseBadge from '../BaseBadge.vue'
 import BaseModal from '../BaseModal.vue'
 
@@ -35,6 +37,13 @@ function close() {
   open.value = false
   search.value = ''
 }
+
+const FALLBACK = '/images/benchpress.png'
+
+function exerciseImageSrc(ex: ExcerciseOut): string {
+  const mapEntry = exerciseImageMap[(ex.name ?? '').toLowerCase()]
+  return ex.imagePath ?? mapEntry?.imagePath ?? FALLBACK
+}
 </script>
 
 <template>
@@ -64,10 +73,16 @@ function close() {
           <li v-for="ex in filtered" :key="ex.id">
             <button
               type="button"
-              class="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-text-primary dark:text-white rounded-lg hover:bg-gray-50 dark:hover:bg-white/5 min-h-[44px]"
+              class="w-full flex items-center gap-2 px-2 py-1.5 text-sm text-text-primary dark:text-white rounded-lg hover:bg-gray-50 dark:hover:bg-white/5 min-h-[44px]"
               :class="modelValue === ex.id ? 'bg-primary/10' : ''"
               @click="pick(ex.id)"
             >
+              <img
+                :src="exerciseImageSrc(ex)"
+                :alt="ex.name ?? ''"
+                class="w-9 h-9 rounded-md object-cover flex-shrink-0 bg-gray-100 dark:bg-white/10"
+                @error="($event.target as HTMLImageElement).src = FALLBACK"
+              />
               <span class="flex-1 text-left truncate">{{ ex.name }}</span>
               <BaseBadge v-if="ex.primaryMuscle" :label="ex.primaryMuscle" />
             </button>

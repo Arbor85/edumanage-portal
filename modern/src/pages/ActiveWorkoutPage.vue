@@ -2,6 +2,13 @@
 import { ref, computed, watch, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { Pause, Play, Check, ChevronLeft, Dumbbell, SkipForward, Link2, X, Plus } from 'lucide-vue-next'
+import { exerciseImageMap } from '../data/exerciseImageMap'
+
+const EXERCISE_FALLBACK = '/images/benchpress.png'
+function exerciseImageSrc(name: string | null | undefined): string {
+  const entry = exerciseImageMap[(name ?? '').toLowerCase()]
+  return entry?.imagePath ?? EXERCISE_FALLBACK
+}
 import ActiveWorkoutLayout from '../components/layout/ActiveWorkoutLayout.vue'
 import WorkoutCompleteView from '../components/WorkoutCompleteView.vue'
 import BottomSheetPicker from '../components/BottomSheetPicker.vue'
@@ -410,9 +417,17 @@ function onWorkoutDone() {
                 </span>
 
                 <div class="flex-1 min-w-0">
-                  <p class="text-sm font-bold text-white mb-1">
-                    {{ workout.exercises[item.exerciseIndex]?.name }}
-                  </p>
+                  <div class="flex items-center gap-2 mb-1">
+                    <img
+                      :src="exerciseImageSrc(workout.exercises[item.exerciseIndex]?.name)"
+                      :alt="workout.exercises[item.exerciseIndex]?.name ?? ''"
+                      class="w-8 h-8 rounded-md object-cover flex-shrink-0 bg-white/10"
+                      @error="($event.target as HTMLImageElement).src = EXERCISE_FALLBACK"
+                    />
+                    <p class="text-sm font-bold text-white">
+                      {{ workout.exercises[item.exerciseIndex]?.name }}
+                    </p>
+                  </div>
 
                   <!-- Completed item: show actuals -->
                   <p v-if="item.completed" class="text-xs text-green-400">
@@ -473,7 +488,15 @@ function onWorkoutDone() {
         <template v-else-if="currentStep?.type === 'drop-set' && currentEx">
           <div class="mb-5">
             <div class="flex items-start justify-between gap-3 mb-1">
-              <h2 class="text-2xl font-black text-white leading-tight">{{ currentEx.name }}</h2>
+              <div class="flex items-start gap-3 min-w-0">
+                <img
+                  :src="exerciseImageSrc(currentEx.name)"
+                  :alt="currentEx.name ?? ''"
+                  class="w-12 h-12 rounded-xl object-cover flex-shrink-0 bg-white/10"
+                  @error="($event.target as HTMLImageElement).src = EXERCISE_FALLBACK"
+                />
+                <h2 class="text-2xl font-black text-white leading-tight">{{ currentEx.name }}</h2>
+              </div>
               <button
                 class="flex-shrink-0 flex items-center gap-1 text-xs text-text-muted px-2.5 py-1.5 rounded-lg
                        bg-white/5 hover:bg-white/10 active:scale-95 transition-all mt-0.5"
@@ -562,7 +585,15 @@ function onWorkoutDone() {
           <!-- Exercise name + muscle tags -->
           <div class="mb-5">
             <div class="flex items-start justify-between gap-3 mb-2">
-              <h2 class="text-2xl font-black text-white leading-tight">{{ currentEx.name }}</h2>
+              <div class="flex items-start gap-3 min-w-0">
+                <img
+                  :src="exerciseImageSrc(currentEx.name)"
+                  :alt="currentEx.name ?? ''"
+                  class="w-12 h-12 rounded-xl object-cover flex-shrink-0 bg-white/10"
+                  @error="($event.target as HTMLImageElement).src = EXERCISE_FALLBACK"
+                />
+                <h2 class="text-2xl font-black text-white leading-tight">{{ currentEx.name }}</h2>
+              </div>
               <div class="flex items-center gap-1.5 mt-0.5 flex-shrink-0">
                 <button
                   class="flex items-center gap-1 text-xs text-text-muted px-2.5 py-1.5 rounded-lg
@@ -691,7 +722,17 @@ function onWorkoutDone() {
             v-if="workout.currentStepIndex < workout.steps.length - 1"
             class="mt-6 flex items-center gap-3 px-4 py-3 rounded-2xl bg-surface-card border border-white/5"
           >
-            <Dumbbell class="w-4 h-4 text-text-muted flex-shrink-0" />
+            <img
+              :src="exerciseImageSrc((() => {
+                const next = workout.steps[workout.currentStepIndex + 1]
+                if (!next) return null
+                if (next.type === 'normal-set' || next.type === 'drop-set') return workout.exercises[next.exerciseIndex]?.name ?? null
+                if (next.type === 'superset-round') return workout.exercises[next.items[0]?.exerciseIndex]?.name ?? null
+                return null
+              })())"
+              class="w-9 h-9 rounded-lg object-cover flex-shrink-0 bg-white/10"
+              @error="($event.target as HTMLImageElement).src = EXERCISE_FALLBACK"
+            />
             <div class="min-w-0">
               <p class="text-xs text-text-muted font-semibold uppercase tracking-widest">Up next</p>
               <p class="text-sm text-white font-semibold truncate">

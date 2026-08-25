@@ -17,6 +17,13 @@ import EditSet from '../EditSet/index.vue'
 import AddSetsDialog from '../AddSetsDialog/index.vue'
 import DefaultWorkoutPickerDialog from '../DefaultWorkoutPickerDialog/index.vue'
 import { X, Plus, Dumbbell, MoreVertical, ChevronUp, ChevronDown } from 'lucide-vue-next'
+import { exerciseImageMap } from '../../data/exerciseImageMap'
+
+const EXERCISE_FALLBACK = '/images/benchpress.png'
+function exerciseImageSrc(name: string | null): string {
+  const entry = exerciseImageMap[(name ?? '').toLowerCase()]
+  return entry?.imagePath ?? EXERCISE_FALLBACK
+}
 
 const props = defineProps<{
   open: boolean
@@ -648,6 +655,12 @@ async function doDelete() {
                 <!-- Exercise header -->
                 <div class="flex items-center justify-between gap-2">
                   <div class="flex items-center gap-2 min-w-0">
+                    <img
+                      :src="exerciseImageSrc(form.excercises[exIdx].name)"
+                      :alt="form.excercises[exIdx].name ?? ''"
+                      class="w-9 h-9 rounded-lg object-cover flex-shrink-0 bg-gray-100 dark:bg-white/10"
+                      @error="($event.target as HTMLImageElement).src = EXERCISE_FALLBACK"
+                    />
                     <span
                       class="text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0"
                       :class="ACTIVITY_TYPE_BADGE[form.excercises[exIdx].activityType ?? 'weighted'].classes"
@@ -745,6 +758,12 @@ async function doDelete() {
             <!-- Exercise header -->
             <div class="flex items-center justify-between gap-2">
               <div class="flex items-center gap-2 min-w-0">
+                <img
+                  :src="exerciseImageSrc(form.excercises[block.exerciseIndex].name)"
+                  :alt="form.excercises[block.exerciseIndex].name ?? ''"
+                  class="w-9 h-9 rounded-lg object-cover flex-shrink-0 bg-gray-100 dark:bg-white/10"
+                  @error="($event.target as HTMLImageElement).src = EXERCISE_FALLBACK"
+                />
                 <span
                   class="text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0"
                   :class="ACTIVITY_TYPE_BADGE[form.excercises[block.exerciseIndex].activityType ?? 'weighted'].classes"

@@ -2,6 +2,13 @@
 import { usePageTitle } from '../../../composables/usePageTitle'
 import type { WorkoutHistoryOut } from '../../../types'
 import BaseModal from '../../../components/BaseModal.vue'
+import { exerciseImageMap } from '../../../data/exerciseImageMap'
+
+const EXERCISE_FALLBACK = '/images/benchpress.png'
+function exerciseImageSrc(name: string | null): string {
+  const entry = exerciseImageMap[(name ?? '').toLowerCase()]
+  return entry?.imagePath ?? EXERCISE_FALLBACK
+}
 
 const props = defineProps<{ open: boolean; workout: WorkoutHistoryOut | null }>()
 defineEmits<{ close: [] }>()
@@ -43,7 +50,15 @@ function formatDuration(s: number | null) {
             :key="i"
             class="bg-gray-50 dark:bg-white/5 rounded-xl p-3"
           >
-            <p class="font-medium text-sm text-text-primary dark:text-white">{{ ex.name }}</p>
+            <div class="flex items-center gap-2 mb-1">
+              <img
+                :src="exerciseImageSrc(ex.name)"
+                :alt="ex.name ?? ''"
+                class="w-9 h-9 rounded-lg object-cover flex-shrink-0 bg-gray-100 dark:bg-white/10"
+                @error="($event.target as HTMLImageElement).src = EXERCISE_FALLBACK"
+              />
+              <p class="font-medium text-sm text-text-primary dark:text-white">{{ ex.name }}</p>
+            </div>
             <div class="flex flex-wrap gap-2 mt-1">
               <span
                 v-for="(set, j) in ex.sets ?? []"
