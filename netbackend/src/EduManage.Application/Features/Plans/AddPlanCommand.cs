@@ -9,7 +9,11 @@ namespace EduManage.Application.Features.Plans;
 
 public sealed record AddPlanCommand(PlanCreate Request, string CurrentUserId) : IRequest<PlanOut>
 {
-    internal sealed class Handler(IPlanRepository repository, IClientRepository clientRepository) : IRequestHandler<AddPlanCommand, PlanOut>
+    internal sealed class Handler(
+        IPlanRepository repository,
+        IClientRepository clientRepository,
+        IMeetingRepository meetingRepository)
+        : IRequestHandler<AddPlanCommand, PlanOut>
     {
         private static readonly JsonSerializerOptions SerializerOptions = new(JsonSerializerDefaults.Web);
 
@@ -21,20 +25,31 @@ public sealed record AddPlanCommand(PlanCreate Request, string CurrentUserId) : 
                     ?? throw new NotFoundException($"Client '{request.Request.ClientId}' was not found.");
 
                 if (client.TrainerUserId != request.CurrentUserId)
-                {
                     throw new UnauthorizedAccessException($"You do not have permission to create plans for client '{request.Request.ClientId}'.");
-                }
             }
 
-            var plan = new Plan
+            var workouts = new List<PlanWorkout>();
+
+            foreach (var w in request.Request.Workouts)
             {
-                Id = Guid.NewGuid().ToString("N"),
-                UserId = request.CurrentUserId,
-                Name = request.Request.Name,
-                ClientId = request.Request.ClientId,
-                Notes = request.Request.Note,
-                Status = "Draft",
-                Workouts = request.Request.Workouts.Select(w => new PlanWorkout
+                string? meetingId = null;
+                bool isMeeting = w.IsMeeting && !string.IsNullOrWhiteSpace(request.Request.ClientId);
+
+                if (isMeeting)
+                {
+                    var meeting = new Meeting
+                    {
+                        Id = Guid.NewGuid().ToString("N"),
+                        ClientId = request.Request.ClientId!,
+                        StartsAt = BuildStartsAt(w.Date, w.MeetingStartTime),
+                        Price = w.MeetingPrice ?? 0,
+                        UserId = request.CurrentUserId
+                    };
+                    await meetingRepository.AddAsync(meeting, cancellationToken);
+                    meetingId = meeting.Id;
+                }
+
+                workouts.Add(new PlanWorkout
                 {
                     Id = Guid.NewGuid().ToString("N"),
                     Name = w.Name,
@@ -42,6 +57,10 @@ public sealed record AddPlanCommand(PlanCreate Request, string CurrentUserId) : 
                     UserId = request.CurrentUserId,
                     Date = w.Date,
                     SupersetGroupsJson = JsonSerializer.Serialize(w.SupersetGroups ?? [], SerializerOptions),
+                    IsMeeting = isMeeting,
+                    MeetingId = meetingId,
+                    MeetingPrice = w.MeetingPrice,
+                    MeetingStartTime = w.MeetingStartTime,
                     Exercises = w.Excercises.Select(e => new RoutineExercise
                     {
                         Name = e.Name,
@@ -59,11 +78,28 @@ public sealed record AddPlanCommand(PlanCreate Request, string CurrentUserId) : 
                             Notes = s.Note
                         }).ToList()
                     }).ToList()
-                }).ToList()
+                });
+            }
+
+            var plan = new Plan
+            {
+                Id = Guid.NewGuid().ToString("N"),
+                UserId = request.CurrentUserId,
+                Name = request.Request.Name,
+                ClientId = request.Request.ClientId,
+                Notes = request.Request.Note,
+                Status = "Draft",
+                Workouts = workouts
             };
 
             await repository.AddAsync(plan, cancellationToken);
             return ListPlansQuery.Handler.MapToOut(plan);
+        }
+
+        private static string BuildStartsAt(string date, string? time)
+        {
+            var t = string.IsNullOrWhiteSpace(time) ? "00:00" : time;
+            return $"{date}T{t}:00";
         }
     }
 }

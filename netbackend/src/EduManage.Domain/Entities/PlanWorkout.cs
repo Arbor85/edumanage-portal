@@ -11,6 +11,11 @@ public class PlanWorkout
 
     public string SupersetGroupsJson { get; set; } = "[]";
 
+    public bool IsMeeting { get; set; }
+    public string? MeetingId { get; set; }
+    public double? MeetingPrice { get; set; }
+    public string? MeetingStartTime { get; set; }
+
     public Plan? Plan { get; set; }
     public ICollection<RoutineExercise> Exercises { get; set; } = [];
 }

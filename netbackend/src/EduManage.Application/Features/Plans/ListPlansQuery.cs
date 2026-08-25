@@ -36,7 +36,11 @@ public sealed record ListPlansQuery(string CurrentUserId) : IRequest<IReadOnlyLi
                     e.DropConfigJson == null ? null : JsonSerializer.Deserialize<DropConfig>(e.DropConfigJson, SerializerOptions)
                 ))],
                 pw.Date,
-                JsonSerializer.Deserialize<List<SupersetGroup>>(pw.SupersetGroupsJson, SerializerOptions) ?? [])).ToList();
+                JsonSerializer.Deserialize<List<SupersetGroup>>(pw.SupersetGroupsJson, SerializerOptions) ?? [],
+                pw.IsMeeting,
+                pw.MeetingId,
+                pw.MeetingPrice,
+                pw.MeetingStartTime)).ToList();
 
             var clientOut = plan.Client is not null
                 ? new ClientOut(plan.Client.Name, plan.Client.Tags, plan.Client.ImageUrl,

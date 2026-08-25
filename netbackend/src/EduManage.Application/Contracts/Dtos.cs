@@ -51,7 +51,11 @@ public sealed record PlanWorkoutInput(
     string? Note,
     IReadOnlyList<RoutineExcercise> Excercises,
     string Date,
-    IReadOnlyList<SupersetGroup>? SupersetGroups = null);
+    IReadOnlyList<SupersetGroup>? SupersetGroups = null,
+    bool IsMeeting = false,
+    string? MeetingId = null,
+    double? MeetingPrice = null,
+    string? MeetingStartTime = null);
 
 public sealed record PlanWorkoutOutput(
     string Name,
@@ -60,7 +64,11 @@ public sealed record PlanWorkoutOutput(
     string? UserId,
     IReadOnlyList<RoutineExcercise> Excercises,
     string Date,
-    IReadOnlyList<SupersetGroup> SupersetGroups);
+    IReadOnlyList<SupersetGroup> SupersetGroups,
+    bool IsMeeting = false,
+    string? MeetingId = null,
+    double? MeetingPrice = null,
+    string? MeetingStartTime = null);
 
 public sealed record PlanCreate(string Name, string? ClientId, string? Note, IReadOnlyList<PlanWorkoutInput> Workouts);
 

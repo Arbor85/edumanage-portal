@@ -212,6 +212,10 @@ export interface PlanWorkoutInput {
   user_id: string | null
   excercises: RoutineExcercise[] | null
   date: string | null
+  isMeeting?: boolean
+  meetingId?: string | null
+  meetingPrice?: number | null
+  meetingStartTime?: string | null
 }
 
 export interface PlanWorkoutOutput {
@@ -221,6 +225,10 @@ export interface PlanWorkoutOutput {
   note: string | null
   excercises: RoutineExcercise[] | null
   date: string | null
+  isMeeting?: boolean
+  meetingId?: string | null
+  meetingPrice?: number | null
+  meetingStartTime?: string | null
 }
 
 export interface PlanOut {

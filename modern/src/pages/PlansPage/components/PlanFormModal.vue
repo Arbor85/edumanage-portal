@@ -180,6 +180,8 @@ function onCellDrop(dateStr: string, e: DragEvent) {
     form.value.workouts.push({
       id: null, name: src.name, note: src.note, user_id: null,
       excercises: JSON.parse(JSON.stringify(src.excercises)), date: dateStr,
+      isMeeting: src.isMeeting ?? false, meetingId: null,
+      meetingPrice: src.meetingPrice ?? null, meetingStartTime: src.meetingStartTime ?? null,
     })
   } else {
     form.value.workouts[draggingIdx.value].date = dateStr
@@ -218,6 +220,10 @@ watch(() => props.open, (val) => {
       workouts: (props.plan.workouts ?? []).map((w) => ({
         id: w.id, name: w.name, note: w.note, user_id: w.userId,
         excercises: w.excercises, date: w.date,
+        isMeeting: w.isMeeting ?? false,
+        meetingId: w.meetingId ?? null,
+        meetingPrice: w.meetingPrice ?? null,
+        meetingStartTime: w.meetingStartTime ?? null,
       })),
     }
     nameIsAuto.value = false
@@ -253,12 +259,13 @@ function onRoutinePicked(routine: RoutineOut) {
     user_id: null,
     excercises: routine.excercises as RoutineExcercise[],
     date: null,
+    isMeeting: false, meetingId: null, meetingPrice: null, meetingStartTime: null,
   })
   activeWorkoutIndex.value = form.value.workouts.length - 1
 }
 
 function addBlankWorkout() {
-  form.value.workouts.push({ id: null, name: null, note: null, user_id: null, excercises: [], date: null })
+  form.value.workouts.push({ id: null, name: null, note: null, user_id: null, excercises: [], date: null, isMeeting: false, meetingId: null, meetingPrice: null, meetingStartTime: null })
   activeWorkoutIndex.value = form.value.workouts.length - 1
 }
 
@@ -435,6 +442,54 @@ async function doDelete() {
                 <textarea :value="form.workouts[index].note ?? ''" rows="2" placeholder="Optional note…"
                   class="px-3 py-2.5 rounded-xl border border-gray-200 dark:border-white/10 text-sm bg-white dark:bg-surface-dark text-text-primary dark:text-white placeholder:text-text-secondary outline-none resize-none focus-visible:ring-2 focus-visible:ring-primary"
                   @input="form.workouts[index].note = ($event.target as HTMLTextAreaElement).value || null" />
+              </div>
+
+              <!-- Meeting toggle -->
+              <div class="flex flex-col gap-3">
+                <div class="flex items-center justify-between gap-3">
+                  <div>
+                    <p class="text-sm font-medium text-text-primary dark:text-white">Schedule as meeting</p>
+                    <p v-if="!form.clientId" class="text-xs text-text-secondary mt-0.5">Assign a client to the plan to enable</p>
+                  </div>
+                  <button
+                    type="button"
+                    :disabled="!form.clientId"
+                    class="relative w-10 h-6 rounded-full transition-colors flex-shrink-0 disabled:opacity-40 disabled:cursor-not-allowed"
+                    :class="form.workouts[index].isMeeting ? 'bg-primary' : 'bg-gray-200 dark:bg-white/20'"
+                    @click="form.clientId && (form.workouts[index].isMeeting = !form.workouts[index].isMeeting)"
+                  >
+                    <span
+                      class="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform"
+                      :class="form.workouts[index].isMeeting ? 'translate-x-4' : 'translate-x-0'"
+                    />
+                  </button>
+                </div>
+
+                <template v-if="form.workouts[index].isMeeting">
+                  <div class="flex gap-3">
+                    <div class="flex-1 flex flex-col gap-1">
+                      <label class="text-xs font-medium text-text-secondary">Start time</label>
+                      <input
+                        type="time"
+                        :value="form.workouts[index].meetingStartTime ?? '09:00'"
+                        class="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-surface-dark text-sm text-text-primary dark:text-white outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                        @change="form.workouts[index].meetingStartTime = ($event.target as HTMLInputElement).value"
+                      />
+                    </div>
+                    <div class="flex-1 flex flex-col gap-1">
+                      <label class="text-xs font-medium text-text-secondary">Price</label>
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        :value="form.workouts[index].meetingPrice ?? 0"
+                        placeholder="0"
+                        class="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-surface-dark text-sm text-text-primary dark:text-white outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                        @input="form.workouts[index].meetingPrice = parseFloat(($event.target as HTMLInputElement).value) || null"
+                      />
+                    </div>
+                  </div>
+                </template>
               </div>
 
               <!-- Exercises summary -->
