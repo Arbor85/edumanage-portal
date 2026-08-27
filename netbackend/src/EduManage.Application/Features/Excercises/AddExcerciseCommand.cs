@@ -32,7 +32,7 @@ public sealed record AddExcerciseCommand(ExcerciseWriteRequest Request) : IReque
             };
 
             await repository.AddAsync(exercise, cancellationToken);
-            return ListExcercisesQuery.Handler.ToOut(exercise);
+            return ListExcercisesQuery.Handler.ToOut(exercise, null);
         }
 
         internal static List<string> NormalizeSecondaryMuscles(string primaryMuscle, IReadOnlyList<string>? secondaryMuscles)

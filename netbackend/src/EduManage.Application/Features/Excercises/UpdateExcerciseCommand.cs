@@ -32,7 +32,7 @@ public sealed record UpdateExcerciseCommand(int Id, ExcerciseWriteRequest Reques
             exercise.DatasetId = request.Request.DatasetId;
 
             await repository.UpdateAsync(exercise, cancellationToken);
-            return ListExcercisesQuery.Handler.ToOut(exercise);
+            return ListExcercisesQuery.Handler.ToOut(exercise, null);
         }
     }
 }

@@ -13,7 +13,7 @@ public sealed record GetExcerciseQuery(int Id) : IRequest<ExcerciseOut>
             var exercise = await repository.GetByIdAsync(request.Id, cancellationToken)
                 ?? throw new NotFoundException($"Excercise '{request.Id}' was not found.");
 
-            return ListExcercisesQuery.Handler.ToOut(exercise);
+            return ListExcercisesQuery.Handler.ToOut(exercise, null);
         }
     }
 }

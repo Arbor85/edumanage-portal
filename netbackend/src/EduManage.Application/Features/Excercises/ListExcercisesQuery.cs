@@ -1,19 +1,31 @@
 using EduManage.Application.Contracts;
+using EduManage.Domain.Entities;
 using MediatR;
 
 namespace EduManage.Application.Features.Excercises;
 
-public sealed record ListExcercisesQuery : IRequest<IReadOnlyList<ExcerciseOut>>
+public sealed record ListExcercisesQuery(string? CurrentUserId = null) : IRequest<IReadOnlyList<ExcerciseOut>>
 {
-    internal sealed class Handler(IExerciseRepository repository) : IRequestHandler<ListExcercisesQuery, IReadOnlyList<ExcerciseOut>>
+    internal sealed class Handler(
+        IExerciseRepository repository,
+        IUserExercisePreferenceRepository prefRepository)
+        : IRequestHandler<ListExcercisesQuery, IReadOnlyList<ExcerciseOut>>
     {
         public async Task<IReadOnlyList<ExcerciseOut>> Handle(ListExcercisesQuery request, CancellationToken cancellationToken)
         {
             var exercises = await repository.ListAsync(cancellationToken);
-            return exercises.Select(ToOut).ToList();
+
+            Dictionary<int, UserExercisePreference> prefLookup = [];
+            if (request.CurrentUserId is not null)
+            {
+                var prefs = await prefRepository.GetByUserIdAsync(request.CurrentUserId);
+                prefLookup = prefs.ToDictionary(p => p.ExerciseId);
+            }
+
+            return exercises.Select(e => ToOut(e, prefLookup.GetValueOrDefault(e.Id))).ToList();
         }
 
-        internal static ExcerciseOut ToOut(EduManage.Domain.Entities.Exercise e) =>
+        internal static ExcerciseOut ToOut(Exercise e, UserExercisePreference? pref) =>
             new(
                 e.Id,
                 e.Name,
@@ -32,6 +44,8 @@ public sealed record ListExcercisesQuery : IRequest<IReadOnlyList<ExcerciseOut>>
                 e.Category,
                 e.ImagePath,
                 e.GifPath,
-                e.DatasetId);
+                e.DatasetId,
+                pref?.IsDirectFavourite ?? false,
+                pref?.UsageCount ?? 0);
     }
 }

@@ -12,3 +12,6 @@ export const updateExercise = (id: number, d: ExcerciseWriteRequest): Promise<Ex
 
 export const deleteExercise = (id: number): Promise<void> =>
   apiClient.delete(`/api/excercises/${id}`).then(() => undefined)
+
+export const toggleFavourite = (id: number): Promise<void> =>
+  apiClient.post(`/api/excercises/${id}/favourite`).then(() => undefined)

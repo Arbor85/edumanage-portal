@@ -41,6 +41,8 @@ export interface ExcerciseOut {
   imagePath: string | null
   gifPath: string | null
   datasetId: string | null
+  isDirectFavourite: boolean
+  usageCount: number
 }
 
 export interface ExcerciseWriteRequest {
@@ -112,6 +114,7 @@ export interface RoutineExcercise {
   sets: RoutineSet[] | null
   supersetGroupId: string | null
   dropConfig: DropConfig | null
+  exerciseId: number | null
 }
 
 export interface RoutineOut {

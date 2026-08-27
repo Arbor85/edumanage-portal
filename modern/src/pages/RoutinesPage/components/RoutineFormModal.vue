@@ -7,6 +7,7 @@ import type {
   SupersetGroup, SupersetColor, DropConfig,
 } from '../../../types'
 import { useRoutineStore } from '../../../stores/routineStore'
+import { useExerciseStore } from '../../../stores/exerciseStore'
 import { useToast } from '../../../composables/useToast'
 import FullSizeDialog from '../../../components/FullSizeDialog/index.vue'
 import ExercisePickerDialog from '../../../components/ExercisePickerDialog/index.vue'
@@ -16,7 +17,8 @@ import EmptyState from '../../../components/EmptyState.vue'
 import EditSet from '../../../components/EditSet/index.vue'
 import AddSetsDialog from '../../../components/AddSetsDialog/index.vue'
 import DefaultWorkoutPickerDialog from '../../../components/DefaultWorkoutPickerDialog/index.vue'
-import { X, Plus, Dumbbell, MoreVertical, ChevronUp, ChevronDown } from 'lucide-vue-next'
+import ExerciseMuscleView from '../../../components/ExerciseMuscleView.vue'
+import { X, Plus, Dumbbell, MoreVertical, ChevronUp, ChevronDown, Activity } from 'lucide-vue-next'
 import { exerciseImageMap } from '../../../data/exerciseImageMap'
 
 const EXERCISE_FALLBACK = '/images/benchpress.png'
@@ -34,6 +36,7 @@ const emit = defineEmits<{ close: [] }>()
 usePageTitle(() => props.routine ? 'Edit Routine' : 'New Routine', () => props.open)
 
 const routineStore = useRoutineStore()
+const exerciseStore = useExerciseStore()
 const toast = useToast()
 
 // ── Color config ──────────────────────────────────────────────
@@ -94,6 +97,23 @@ const confirmDelete = ref(false)
 const confirmDiscard = ref(false)
 const isExercisePickerOpen = ref(false)
 const isDefaultWorkoutPickerOpen = ref(false)
+const showMuscleSheet = ref(false)
+
+const routineMuscleData = computed(() => {
+  const primary = new Set<string>()
+  const secondary = new Set<string>()
+  for (const ex of form.value.excercises) {
+    const stored = ex.exerciseId
+      ? exerciseStore.exercises.find((e) => e.id === ex.exerciseId)
+      : null
+    if (stored?.primaryMuscle) primary.add(stored.primaryMuscle)
+    for (const m of stored?.secondaryMuscles ?? []) secondary.add(m)
+  }
+  return {
+    primaryMuscle: [...primary][0] ?? '',
+    secondaryMuscles: [...primary].slice(1).concat([...secondary].filter((m) => !primary.has(m))),
+  }
+})
 const addSetsForExIdx = ref<number | null>(null)
 
 // per-exercise ⋮ menu
@@ -143,6 +163,7 @@ watch(() => props.open, (val) => {
           sets: (ex.sets ?? []).map((s) => ({ ...s })),
           supersetGroupId: ex.supersetGroupId ?? null,
           dropConfig: ex.dropConfig ?? null,
+          exerciseId: ex.exerciseId ?? null,
         })),
         supersetGroups: (props.routine.supersetGroups ?? []).map(g => ({ ...g })),
       }
@@ -310,16 +331,33 @@ function defaultSetForTrackType(trackType: ActivityTrackType): RoutineSet {
   return { type: 'normal', reps: 10, weight: null, duration: null, distance: null, note: null }
 }
 
-function onExercisePicked(ex: ExcerciseOut) {
+function addSingleExercise(ex: ExcerciseOut, supersetGroupId: string | null = null) {
   const trackType: ActivityTrackType = ex.activityTrackType ?? 'repetitions'
   form.value.excercises.push({
     name: ex.name,
     activityType: ex.activityType ?? 'weighted',
     activityTrackType: trackType,
     sets: [defaultSetForTrackType(trackType)],
-    supersetGroupId: null,
+    supersetGroupId,
     dropConfig: null,
+    exerciseId: ex.id,
   })
+}
+
+function onExercisesAdded(exercises: ExcerciseOut[]) {
+  for (const ex of exercises) addSingleExercise(ex)
+}
+
+function onExercisesAddedAsSuperset(exercises: ExcerciseOut[]) {
+  const color = nextAvailableColor()
+  const id = generateId()
+  const name = exercises.map((e) => e.name).join(' / ')
+  form.value.supersetGroups.push({ id, name, color })
+  const setCount = 1
+  for (const ex of exercises) {
+    addSingleExercise(ex, id)
+  }
+  syncGroupSetCounts(id, setCount)
 }
 
 function removeExercise(i: number) {
@@ -369,6 +407,7 @@ function onDefaultWorkoutSelected(w: DefaultWorkoutOut) {
     sets: (ex.sets ?? []).map((s) => ({ ...s })),
     supersetGroupId: null,
     dropConfig: null,
+    exerciseId: ex.exerciseId ?? null,
   }))
   form.value.supersetGroups = []
   if (nameIsAuto.value) form.value.name = w.name
@@ -526,6 +565,15 @@ async function doDelete() {
         autofocus
         class="flex-1 text-lg font-semibold bg-transparent outline-none text-text-primary dark:text-white placeholder:text-text-secondary placeholder:font-normal"
       />
+      <button
+        type="button"
+        class="p-1.5 rounded-lg text-text-secondary hover:text-text-primary dark:text-white/60 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 min-h-[44px] min-w-[44px] flex items-center justify-center focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-30 disabled:cursor-not-allowed"
+        aria-label="View muscle targets"
+        :disabled="form.excercises.length === 0"
+        @click="showMuscleSheet = true"
+      >
+        <Activity class="w-5 h-5" />
+      </button>
       <button
         type="button"
         class="p-1.5 rounded-lg text-text-secondary hover:text-text-primary dark:text-white/60 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 min-h-[44px] min-w-[44px] flex items-center justify-center focus-visible:ring-2 focus-visible:ring-primary"
@@ -961,8 +1009,46 @@ async function doDelete() {
   <ExercisePickerDialog
     :open="isExercisePickerOpen"
     @close="isExercisePickerOpen = false"
-    @select="onExercisePicked"
+    @add="onExercisesAdded"
+    @add-as-superset="onExercisesAddedAsSuperset"
   />
+
+  <!-- Muscle targets sheet -->
+  <Teleport to="body">
+    <Transition name="fade">
+      <div
+        v-if="showMuscleSheet"
+        class="fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-black/40"
+        @click.self="showMuscleSheet = false"
+      >
+        <div class="w-full max-w-sm bg-surface-card rounded-t-2xl sm:rounded-2xl shadow-xl flex flex-col max-h-[80vh]">
+          <div class="flex items-center justify-between px-4 pt-4 pb-3 border-b border-gray-100 dark:border-white/10 flex-shrink-0">
+            <p class="text-sm font-bold text-text-primary dark:text-white">Muscle targets</p>
+            <button
+              type="button"
+              class="p-1.5 rounded-lg text-text-secondary hover:text-text-primary dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10"
+              @click="showMuscleSheet = false"
+            >
+              <X class="w-4 h-4" />
+            </button>
+          </div>
+          <div class="overflow-y-auto custom-scrollbar p-4 flex-1 flex flex-col items-center gap-3">
+            <ExerciseMuscleView
+              :primary-muscle="routineMuscleData.primaryMuscle"
+              :secondary-muscles="routineMuscleData.secondaryMuscles"
+            />
+            <div v-if="routineMuscleData.primaryMuscle" class="flex flex-wrap gap-2 justify-center">
+              <span class="flex items-center gap-1.5 text-xs font-medium text-text-primary dark:text-white">
+                <span class="w-2.5 h-2.5 rounded-full bg-red-500 flex-shrink-0" />
+                Primary: {{ [...new Set(form.excercises.map(e => exerciseStore.exercises.find(s => s.id === e.exerciseId)?.primaryMuscle).filter(Boolean))].join(', ') }}
+              </span>
+            </div>
+            <p v-else class="text-sm text-text-secondary text-center">No muscle data available for the current exercises.</p>
+          </div>
+        </div>
+      </div>
+    </Transition>
+  </Teleport>
 
   <AddSetsDialog
     v-if="addSetsForExIdx !== null"

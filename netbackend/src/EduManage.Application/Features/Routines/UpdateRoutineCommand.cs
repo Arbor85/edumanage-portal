@@ -9,7 +9,10 @@ namespace EduManage.Application.Features.Routines;
 
 public sealed record UpdateRoutineCommand(string RoutineId, RoutineUpdate Request, string CurrentUserId) : IRequest<RoutineOut>
 {
-    internal sealed class Handler(IRoutineRepository repository) : IRequestHandler<UpdateRoutineCommand, RoutineOut>
+    internal sealed class Handler(
+        IRoutineRepository repository,
+        IUserExercisePreferenceRepository prefRepository)
+        : IRequestHandler<UpdateRoutineCommand, RoutineOut>
     {
         private static readonly JsonSerializerOptions SerializerOptions = new(JsonSerializerDefaults.Web);
 
@@ -19,9 +22,7 @@ public sealed record UpdateRoutineCommand(string RoutineId, RoutineUpdate Reques
                 ?? throw new NotFoundException($"Routine '{request.RoutineId}' was not found.");
 
             if (routine.UserId != request.CurrentUserId)
-            {
                 throw new UnauthorizedAccessException($"You do not have permission to update routine '{request.RoutineId}'.");
-            }
 
             routine.Name = request.Request.Name;
             routine.Notes = request.Request.Note;
@@ -31,6 +32,7 @@ public sealed record UpdateRoutineCommand(string RoutineId, RoutineUpdate Reques
                 Name = e.Name,
                 ActivityType = e.ActivityType,
                 ActivityTrackType = e.ActivityTrackType,
+                ExerciseId = e.ExerciseId,
                 SupersetGroupId = e.SupersetGroupId,
                 DropConfigJson = e.DropConfig == null ? null : JsonSerializer.Serialize(e.DropConfig, SerializerOptions),
                 Sets = e.Sets.Select(s => new DomainRoutineSet
@@ -45,6 +47,15 @@ public sealed record UpdateRoutineCommand(string RoutineId, RoutineUpdate Reques
             }).ToList();
 
             await repository.UpdateAsync(routine, cancellationToken);
+
+            var exerciseIds = request.Request.Excercises
+                .Where(e => e.ExerciseId.HasValue)
+                .Select(e => e.ExerciseId!.Value)
+                .Distinct();
+
+            foreach (var exerciseId in exerciseIds)
+                await prefRepository.UpsertAsync(request.CurrentUserId, exerciseId, pref => pref.UsageCount++);
+
             return ListRoutinesQuery.Handler.MapToOut(routine);
         }
     }

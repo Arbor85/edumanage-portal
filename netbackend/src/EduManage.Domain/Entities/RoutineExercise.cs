@@ -9,6 +9,7 @@ public class RoutineExercise
     public ActivityType ActivityType { get; set; } = ActivityType.Weighted;
     public ActivityTrackType ActivityTrackType { get; set; } = ActivityTrackType.Repetitions;
 
+    public int? ExerciseId { get; set; }
     public string? SupersetGroupId { get; set; }
     public string? DropConfigJson { get; set; }
 

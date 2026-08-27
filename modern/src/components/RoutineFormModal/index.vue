@@ -172,6 +172,7 @@ watch(() => props.open, (val) => {
           sets: (ex.sets ?? []).map((s) => ({ ...s })),
           supersetGroupId: ex.supersetGroupId ?? null,
           dropConfig: ex.dropConfig ?? null,
+          exerciseId: ex.exerciseId ?? null,
         })),
         supersetGroups: (props.routine.supersetGroups ?? []).map(g => ({ ...g })),
       }
@@ -346,7 +347,31 @@ function onExercisePicked(ex: ExcerciseOut) {
     sets: [defaultSetForTrackType(trackType)],
     supersetGroupId: null,
     dropConfig: null,
+    exerciseId: ex.id,
   })
+}
+
+function onExercisesAdded(exercises: ExcerciseOut[]) {
+  for (const ex of exercises) onExercisePicked(ex)
+}
+
+function onExercisesAddedAsSuperset(exercises: ExcerciseOut[]) {
+  const color = nextAvailableColor()
+  const id = generateId()
+  form.value.supersetGroups.push({ id, name: exercises.map((e) => e.name).join(' / '), color })
+  for (const ex of exercises) {
+    const trackType: ActivityTrackType = ex.activityTrackType ?? 'repetitions'
+    form.value.excercises.push({
+      name: ex.name,
+      activityType: ex.activityType ?? 'weighted',
+      activityTrackType: trackType,
+      sets: [defaultSetForTrackType(trackType)],
+      supersetGroupId: id,
+      dropConfig: null,
+      exerciseId: ex.id,
+    })
+  }
+  syncGroupSetCounts(id, 1)
 }
 
 function removeExercise(i: number) {
@@ -394,6 +419,7 @@ function onDefaultWorkoutSelected(w: DefaultWorkoutOut) {
     sets: (ex.sets ?? []).map((s) => ({ ...s })),
     supersetGroupId: null,
     dropConfig: null,
+    exerciseId: ex.exerciseId ?? null,
   }))
   form.value.supersetGroups = []
   if (nameIsAuto.value) form.value.name = w.name
@@ -1001,7 +1027,8 @@ async function doDelete() {
   <ExercisePickerDialog
     :open="isExercisePickerOpen"
     @close="isExercisePickerOpen = false"
-    @select="onExercisePicked"
+    @add="onExercisesAdded"
+    @add-as-superset="onExercisesAddedAsSuperset"
   />
 
   <AddSetsDialog

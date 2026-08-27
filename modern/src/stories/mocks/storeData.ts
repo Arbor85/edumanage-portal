@@ -55,6 +55,8 @@ const EXERCISE_DEFAULTS = {
   imagePath: null,
   gifPath: null,
   datasetId: null,
+  isDirectFavourite: false,
+  usageCount: 0,
 }
 
 export const mockExercises: ExcerciseOut[] = [

@@ -8,7 +8,10 @@ namespace EduManage.Application.Features.Routines;
 
 public sealed record AddRoutineCommand(RoutineCreate Request, string CurrentUserId) : IRequest<RoutineOut>
 {
-    internal sealed class Handler(IRoutineRepository repository) : IRequestHandler<AddRoutineCommand, RoutineOut>
+    internal sealed class Handler(
+        IRoutineRepository repository,
+        IUserExercisePreferenceRepository prefRepository)
+        : IRequestHandler<AddRoutineCommand, RoutineOut>
     {
         private static readonly JsonSerializerOptions SerializerOptions = new(JsonSerializerDefaults.Web);
 
@@ -26,6 +29,7 @@ public sealed record AddRoutineCommand(RoutineCreate Request, string CurrentUser
                     Name = e.Name,
                     ActivityType = e.ActivityType,
                     ActivityTrackType = e.ActivityTrackType,
+                    ExerciseId = e.ExerciseId,
                     SupersetGroupId = e.SupersetGroupId,
                     DropConfigJson = e.DropConfig == null ? null : JsonSerializer.Serialize(e.DropConfig, SerializerOptions),
                     Sets = e.Sets.Select(s => new DomainRoutineSet
@@ -41,6 +45,15 @@ public sealed record AddRoutineCommand(RoutineCreate Request, string CurrentUser
             };
 
             await repository.AddAsync(routine, cancellationToken);
+
+            var exerciseIds = request.Request.Excercises
+                .Where(e => e.ExerciseId.HasValue)
+                .Select(e => e.ExerciseId!.Value)
+                .Distinct();
+
+            foreach (var exerciseId in exerciseIds)
+                await prefRepository.UpsertAsync(request.CurrentUserId, exerciseId, pref => pref.UsageCount++);
+
             return ListRoutinesQuery.Handler.MapToOut(routine);
         }
     }

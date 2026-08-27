@@ -1,16 +1,17 @@
 using EduManage.Application.Common.Exceptions;
 using EduManage.Application.Contracts;
 using EduManage.Application.Features.Excercises;
+using EduManage.Api.Services;
 
 namespace EduManage.Api.Controllers;
 
 [ApiController]
 [Route("api/excercises")]
-public sealed class ExcercisesController(ISender mediator) : ControllerBase
+public sealed class ExcercisesController(ISender mediator, ICurrentUserService currentUserService) : ControllerBase
 {
     [HttpGet]
     public Task<IReadOnlyList<ExcerciseOut>> ListExcercises(CancellationToken cancellationToken) =>
-        mediator.Send(new ListExcercisesQuery(), cancellationToken);
+        mediator.Send(new ListExcercisesQuery(currentUserService.GetCurrentUserId()), cancellationToken);
 
     [HttpGet("{id:int}")]
     public async Task<ActionResult<ExcerciseOut>> GetExcercise([FromRoute] int id, CancellationToken cancellationToken)
@@ -52,6 +53,22 @@ public sealed class ExcercisesController(ISender mediator) : ControllerBase
         try
         {
             await mediator.Send(new DeleteExcerciseCommand(id), cancellationToken);
+            return NoContent();
+        }
+        catch (NotFoundException ex)
+        {
+            return NotFound(new { detail = ex.Message });
+        }
+    }
+
+    [HttpPost("{id:int}/favourite")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public async Task<IActionResult> ToggleFavourite([FromRoute] int id, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await mediator.Send(new ToggleExcerciseFavouriteCommand(id, currentUserService.GetCurrentUserId()!), cancellationToken);
             return NoContent();
         }
         catch (NotFoundException ex)

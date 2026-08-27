@@ -27,6 +27,7 @@ public class EduManageDbContext : DbContext
     public DbSet<DefaultWorkoutSet> DefaultWorkoutSets { get; set; }
     public DbSet<Equipment> Equipment { get; set; }
     public DbSet<UserEquipment> UserEquipment { get; set; }
+    public DbSet<UserExercisePreference> UserExercisePreferences { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -50,5 +51,6 @@ public class EduManageDbContext : DbContext
         modelBuilder.ApplyConfiguration(new DefaultWorkoutSetConfiguration());
         modelBuilder.ApplyConfiguration(new EquipmentConfiguration());
         modelBuilder.ApplyConfiguration(new UserEquipmentConfiguration());
+        modelBuilder.ApplyConfiguration(new UserExercisePreferenceConfiguration());
     }
 }

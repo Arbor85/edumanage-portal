@@ -29,7 +29,8 @@ public sealed record ListRoutinesQuery(string CurrentUserId) : IRequest<IReadOnl
                     e.ActivityTrackType,
                     e.Sets.Select(s => new ContractsRoutineSet(s.Type, s.Reps, s.Duration, s.Distance, s.Weight, s.Notes)).ToList(),
                     e.SupersetGroupId,
-                    e.DropConfigJson == null ? null : JsonSerializer.Deserialize<DropConfig>(e.DropConfigJson, SerializerOptions)
+                    e.DropConfigJson == null ? null : JsonSerializer.Deserialize<DropConfig>(e.DropConfigJson, SerializerOptions),
+                    e.ExerciseId
                 )).ToList(),
                 JsonSerializer.Deserialize<List<SupersetGroup>>(routine.SupersetGroupsJson, SerializerOptions) ?? []);
     }

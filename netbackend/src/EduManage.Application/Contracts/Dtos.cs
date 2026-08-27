@@ -38,7 +38,8 @@ public sealed record RoutineExcercise(
     ActivityTrackType ActivityTrackType,
     IReadOnlyList<RoutineSet> Sets,
     string? SupersetGroupId = null,
-    DropConfig? DropConfig = null);
+    DropConfig? DropConfig = null,
+    int? ExerciseId = null);
 
 public sealed record RoutineCreate(string Name, string? Note, IReadOnlyList<RoutineExcercise> Excercises, IReadOnlyList<SupersetGroup>? SupersetGroups = null);
 
@@ -117,7 +118,9 @@ public sealed record ExcerciseOut(
     string? Category = null,
     string? ImagePath = null,
     string? GifPath = null,
-    string? DatasetId = null);
+    string? DatasetId = null,
+    bool IsDirectFavourite = false,
+    int UsageCount = 0);
 
 public sealed record ExcerciseWriteRequest(
     string Name,
