@@ -12,21 +12,13 @@ public sealed class HasPermissionHandler : AuthorizationHandler<HasPermissionReq
     /// <inheritdoc />
     protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, HasPermissionRequirement requirement)
     {
-        var permissionsClaim = context.User.FindFirst("permissions");
-
-        if (permissionsClaim is null)
-        {
-            return Task.CompletedTask;
-        }
-
-        var permissions = permissionsClaim.Value.Split(' ');
+        var permissions = context.User.FindAll("permissions").Select(c => c.Value);
 
         if (permissions.Contains(requirement.Permission))
         {
             context.Succeed(requirement);
         }
-        // menage:clients
-        // manage:clients
+
         return Task.CompletedTask;
     }
 }

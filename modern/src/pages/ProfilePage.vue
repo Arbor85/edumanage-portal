@@ -53,6 +53,11 @@ async function logout() {
           <span :class="authStore.isTrainer ? 'text-green-500 font-bold' : 'text-red-500 font-bold'">{{
             authStore.isTrainer }}</span>
         </p>
+        <p class="text-xs">
+          <span class="text-text-secondary">Organizer: </span>
+          <span :class="authStore.isOrganizer ? 'text-green-500 font-bold' : 'text-red-500 font-bold'">{{
+            authStore.isOrganizer }}</span>
+        </p>
       </div>
 
       <BaseButton variant="danger" @click="logout">Log Out</BaseButton>
