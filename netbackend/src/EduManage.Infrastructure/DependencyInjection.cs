@@ -28,6 +28,14 @@ public static class DependencyInjection
         services.AddScoped<IEquipmentRepository, EquipmentRepository>();
         services.AddScoped<IUserEquipmentRepository, UserEquipmentRepository>();
         services.AddScoped<IUserExercisePreferenceRepository, UserExercisePreferenceRepository>();
+        services.AddScoped<IOrganizationRepository, OrganizationRepository>();
+        services.AddScoped<IOrganizationMembershipRepository, OrganizationMembershipRepository>();
+        services.AddScoped<ITrainerAvailabilityRepository, TrainerAvailabilityRepository>();
+        services.AddScoped<IBuildingRepository, BuildingRepository>();
+        services.AddScoped<IBuildingAvailabilityRepository, BuildingAvailabilityRepository>();
+        services.AddScoped<ITrainerCourseAssociationRepository, TrainerCourseAssociationRepository>();
+        services.AddScoped<ISchedulePlanRepository, SchedulePlanRepository>();
+        services.AddScoped<IScheduleEntryRepository, ScheduleEntryRepository>();
 
         return services;
     }

@@ -28,6 +28,14 @@ public class EduManageDbContext : DbContext
     public DbSet<Equipment> Equipment { get; set; }
     public DbSet<UserEquipment> UserEquipment { get; set; }
     public DbSet<UserExercisePreference> UserExercisePreferences { get; set; }
+    public DbSet<Organization> Organizations { get; set; }
+    public DbSet<OrganizationMembership> OrganizationMemberships { get; set; }
+    public DbSet<TrainerAvailability> TrainerAvailabilities { get; set; }
+    public DbSet<Building> Buildings { get; set; }
+    public DbSet<BuildingAvailability> BuildingAvailabilities { get; set; }
+    public DbSet<TrainerCourseAssociation> TrainerCourseAssociations { get; set; }
+    public DbSet<SchedulePlan> SchedulePlans { get; set; }
+    public DbSet<ScheduleEntry> ScheduleEntries { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -52,5 +60,13 @@ public class EduManageDbContext : DbContext
         modelBuilder.ApplyConfiguration(new EquipmentConfiguration());
         modelBuilder.ApplyConfiguration(new UserEquipmentConfiguration());
         modelBuilder.ApplyConfiguration(new UserExercisePreferenceConfiguration());
+        modelBuilder.ApplyConfiguration(new OrganizationConfiguration());
+        modelBuilder.ApplyConfiguration(new OrganizationMembershipConfiguration());
+        modelBuilder.ApplyConfiguration(new TrainerAvailabilityConfiguration());
+        modelBuilder.ApplyConfiguration(new BuildingConfiguration());
+        modelBuilder.ApplyConfiguration(new BuildingAvailabilityConfiguration());
+        modelBuilder.ApplyConfiguration(new TrainerCourseAssociationConfiguration());
+        modelBuilder.ApplyConfiguration(new SchedulePlanConfiguration());
+        modelBuilder.ApplyConfiguration(new ScheduleEntryConfiguration());
     }
 }

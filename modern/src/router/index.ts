@@ -111,6 +111,46 @@ const router = createRouter({
       meta: { requiresAuth: true, requiresTrainer: true },
     },
 
+    // ── Trainer schedule (read-only) ─────────────────────────────────────
+    {
+      path: '/my-schedule',
+      name: 'MySchedule',
+      component: () => import('../pages/MySchedulePage.vue'),
+      meta: { requiresAuth: true, requiresTrainer: true },
+    },
+
+    // ── Organizer routes ──────────────────────────────────────────────────
+    {
+      path: '/organizer',
+      name: 'OrganizerDashboard',
+      component: () => import('../pages/organizer/OrganizerDashboardPage.vue'),
+      meta: { requiresAuth: true, requiresOrganizer: true },
+    },
+    {
+      path: '/organizer/trainers',
+      name: 'OrganizerTrainers',
+      component: () => import('../pages/organizer/OrganizerTrainersPage.vue'),
+      meta: { requiresAuth: true, requiresOrganizer: true },
+    },
+    {
+      path: '/organizer/buildings',
+      name: 'OrganizerBuildings',
+      component: () => import('../pages/organizer/OrganizerBuildingsPage.vue'),
+      meta: { requiresAuth: true, requiresOrganizer: true },
+    },
+    {
+      path: '/organizer/schedule-plans',
+      name: 'OrganizerSchedulePlans',
+      component: () => import('../pages/organizer/OrganizerSchedulePlansPage.vue'),
+      meta: { requiresAuth: true, requiresOrganizer: true },
+    },
+    {
+      path: '/organizer/schedule-plans/:id',
+      name: 'OrganizerSchedulePlanDetail',
+      component: () => import('../pages/organizer/OrganizerSchedulePlanDetailPage.vue'),
+      meta: { requiresAuth: true, requiresOrganizer: true },
+    },
+
     // ── Legacy redirects (old routes → new routes) ───────────────────────
     { path: '/dashboard', redirect: '/' },
     { path: '/exercises', redirect: '/explore' },
@@ -147,6 +187,10 @@ router.beforeEach(async (to) => {
   const authStore = useAuthStore()
 
   if (to.meta.requiresTrainer && !authStore.isTrainer) {
+    return { path: '/' }
+  }
+
+  if (to.meta.requiresOrganizer && !authStore.isOrganizer) {
     return { path: '/' }
   }
 

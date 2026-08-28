@@ -6,6 +6,7 @@ import { useAuthStore } from '../../stores/authStore'
 import {
   Home, Dumbbell, TrendingUp, Compass, User,
   Users, ClipboardList, Calendar, BookOpen, Package, LogOut,
+  Building2, LayoutDashboard, CalendarDays,
 } from 'lucide-vue-next'
 import DarkModeToggle from '../DarkModeToggle.vue'
 import type { Component } from 'vue'
@@ -28,6 +29,14 @@ const coachItems: { to: string; icon: Component; label: string }[] = [
   { to: '/coach/meetings',  icon: Calendar,      label: 'Meetings' },
   { to: '/coach/courses',   icon: BookOpen,      label: 'Courses' },
   { to: '/coach/equipment', icon: Package,       label: 'Equipment' },
+  { to: '/my-schedule',     icon: CalendarDays,  label: 'My Schedule' },
+]
+
+const organizerItems: { to: string; icon: Component; label: string }[] = [
+  { to: '/organizer',                  icon: LayoutDashboard, label: 'Dashboard' },
+  { to: '/organizer/trainers',         icon: Users,           label: 'Trainers' },
+  { to: '/organizer/buildings',        icon: Building2,       label: 'Buildings' },
+  { to: '/organizer/schedule-plans',   icon: CalendarDays,    label: 'Schedules' },
 ]
 
 function isActive(to: string) {
@@ -86,6 +95,7 @@ function onMouseMove(e: MouseEvent) {
 
 // Active link index for coach section (needed for v-if on coach nav)
 const coachActiveIdx = computed(() => coachItems.findIndex(item => isActive(item.to)))
+const organizerActiveIdx = computed(() => organizerItems.findIndex(item => isActive(item.to)))
 </script>
 
 <template>
@@ -158,6 +168,27 @@ const coachActiveIdx = computed(() => coachItems.findIndex(item => isActive(item
 
           <RouterLink
             v-for="item in coachItems"
+            :key="item.to"
+            :to="item.to"
+            class="relative z-10 flex items-center gap-3 px-3 py-2.5 min-h-[44px] rounded-xl text-sm font-medium transition-colors"
+            :class="isActive(item.to)
+              ? 'text-primary'
+              : 'text-gray-500 dark:text-white/60 hover:text-gray-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5'"
+          >
+            <component :is="item.icon" class="w-5 h-5 flex-shrink-0" />
+            <span>{{ item.label }}</span>
+          </RouterLink>
+        </nav>
+      </div>
+    </div>
+
+    <!-- Organizer section -->
+    <div v-if="authStore.isOrganizer" class="relative z-10 mt-4">
+      <div class="border-t border-gray-200 dark:border-white/10 pt-4">
+        <p class="px-3 mb-2 text-xs font-bold tracking-widest uppercase text-text-muted">Organizer</p>
+        <nav class="relative flex flex-col gap-1">
+          <RouterLink
+            v-for="item in organizerItems"
             :key="item.to"
             :to="item.to"
             class="relative z-10 flex items-center gap-3 px-3 py-2.5 min-h-[44px] rounded-xl text-sm font-medium transition-colors"

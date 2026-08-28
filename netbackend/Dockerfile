@@ -1,6 +1,7 @@
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
 
+COPY nuget.config .
 COPY ["src/EduManage.Api/EduManage.Api.csproj", "src/EduManage.Api/"]
 COPY ["src/EduManage.Application/EduManage.Application.csproj", "src/EduManage.Application/"]
 COPY ["src/EduManage.Domain/EduManage.Domain.csproj", "src/EduManage.Domain/"]

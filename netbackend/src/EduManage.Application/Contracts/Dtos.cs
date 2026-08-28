@@ -210,3 +210,81 @@ public sealed record UserEquipmentBatchUpdate(
 public sealed record UserEquipmentSave(
     string EquipmentId,
     List<decimal>? AvailableWeights);
+
+// Organization
+public sealed record OrganizationCreate(string Name);
+public sealed record OrganizationOut(string Id, string Name, string OwnerId, string InviteCode, int TrainerCount);
+public sealed record OrganizationMemberOut(string TrainerUserId, string JoinedAt);
+
+// TrainerAvailability
+public sealed record AvailabilityCreate(IReadOnlyList<string> DaysOfWeek, string StartTime, string EndTime, string ValidFrom, string ValidTo);
+public sealed record AvailabilityUpdate(IReadOnlyList<string> DaysOfWeek, string StartTime, string EndTime, string ValidFrom, string ValidTo);
+public sealed record AvailabilityOut(string Id, string OrganizationId, string TrainerUserId, IReadOnlyList<string> DaysOfWeek, string StartTime, string EndTime, string ValidFrom, string ValidTo);
+
+// Building
+public sealed record BuildingCreate(string Name, string Address, int Capacity);
+public sealed record BuildingUpdate(string Name, string Address, int Capacity);
+public sealed record BuildingOut(string Id, string OrganizationId, string Name, string Address, int Capacity);
+
+// BuildingAvailability
+public sealed record BuildingAvailabilityCreate(IReadOnlyList<string> DaysOfWeek, string StartTime, string EndTime, string ValidFrom, string ValidTo);
+public sealed record BuildingAvailabilityUpdate(IReadOnlyList<string> DaysOfWeek, string StartTime, string EndTime, string ValidFrom, string ValidTo);
+public sealed record BuildingAvailabilityOut(string Id, string BuildingId, IReadOnlyList<string> DaysOfWeek, string StartTime, string EndTime, string ValidFrom, string ValidTo);
+
+// TrainerCourseAssociation
+public sealed record TrainerCourseAssociationCreate(string TrainerId, string CourseId);
+public sealed record TrainerCourseAssociationOut(string Id, string OrganizationId, string TrainerUserId, string CourseId);
+
+// SchedulePlan
+public sealed record SchedulePlanCreate(string Name);
+public sealed record SchedulePlanUpdate(string Name);
+public sealed record SchedulePlanOut(string Id, string OrganizationId, string Name, string Status, string CreatedAt);
+
+// ScheduleEntry
+public sealed record ScheduleEntryCreate(
+    string TrainerUserId,
+    string BuildingId,
+    string CourseId,
+    bool IsRecurring,
+    IReadOnlyList<string>? DaysOfWeek,
+    string? ValidFrom,
+    string? ValidTo,
+    string? Date,
+    string StartTime,
+    string EndTime);
+public sealed record ScheduleEntryUpdate(
+    string TrainerUserId,
+    string BuildingId,
+    string CourseId,
+    bool IsRecurring,
+    IReadOnlyList<string>? DaysOfWeek,
+    string? ValidFrom,
+    string? ValidTo,
+    string? Date,
+    string StartTime,
+    string EndTime);
+public sealed record ScheduleEntryOut(
+    string Id,
+    string SchedulePlanId,
+    string TrainerUserId,
+    string BuildingId,
+    string CourseId,
+    bool IsRecurring,
+    IReadOnlyList<string> DaysOfWeek,
+    string? ValidFrom,
+    string? ValidTo,
+    string? Date,
+    string StartTime,
+    string EndTime,
+    bool HasMismatch);
+
+// AutoSchedule
+public sealed record AutoScheduleRequest(
+    IReadOnlyList<string> CourseIds,
+    IReadOnlyList<string> BuildingIds,
+    IReadOnlyList<string> TrainerIds);
+public sealed record AutoScheduleResult(
+    IReadOnlyList<ScheduleEntryOut> Scheduled,
+    IReadOnlyList<UnscheduledCourse> Unscheduled);
+public sealed record UnscheduledCourse(string CourseId, string CourseName, string Reason);
+public sealed record ConfirmAutoScheduleRequest(IReadOnlyList<ScheduleEntryCreate> Entries);

@@ -461,3 +461,158 @@ export interface ActiveWorkoutState {
   paused: boolean
   status: 'in_progress' | 'paused' | 'completed'
 }
+
+// ─── Organizer / Scheduling ───────────────────────────────────
+
+export interface OrganizationOut {
+  id: string
+  name: string
+  ownerId: string
+  inviteCode: string
+  trainerCount: number
+}
+
+export interface OrganizationCreate {
+  name: string
+}
+
+export interface OrganizationMemberOut {
+  trainerUserId: string
+  joinedAt: string
+}
+
+export interface AvailabilityCreate {
+  daysOfWeek: string[]
+  startTime: string
+  endTime: string
+  validFrom: string
+  validTo: string
+}
+
+export interface AvailabilityOut {
+  id: string
+  organizationId: string
+  trainerUserId: string
+  daysOfWeek: string[]
+  startTime: string
+  endTime: string
+  validFrom: string
+  validTo: string
+}
+
+export interface BuildingCreate {
+  name: string
+  address: string
+  capacity: number
+}
+
+export interface BuildingUpdate {
+  name: string
+  address: string
+  capacity: number
+}
+
+export interface BuildingOut {
+  id: string
+  organizationId: string
+  name: string
+  address: string
+  capacity: number
+}
+
+export interface BuildingAvailabilityCreate {
+  daysOfWeek: string[]
+  startTime: string
+  endTime: string
+  validFrom: string
+  validTo: string
+}
+
+export interface BuildingAvailabilityOut {
+  id: string
+  buildingId: string
+  daysOfWeek: string[]
+  startTime: string
+  endTime: string
+  validFrom: string
+  validTo: string
+}
+
+export interface TrainerCourseAssociationCreate {
+  trainerId: string
+  courseId: string
+}
+
+export interface TrainerCourseAssociationOut {
+  id: string
+  organizationId: string
+  trainerUserId: string
+  courseId: string
+}
+
+export interface SchedulePlanCreate {
+  name: string
+}
+
+export interface SchedulePlanUpdate {
+  name: string
+}
+
+export interface SchedulePlanOut {
+  id: string
+  organizationId: string
+  name: string
+  status: 'Draft' | 'Published'
+  createdAt: string
+}
+
+export interface ScheduleEntryCreate {
+  trainerUserId: string
+  buildingId: string
+  courseId: string
+  isRecurring: boolean
+  daysOfWeek?: string[]
+  validFrom?: string
+  validTo?: string
+  date?: string
+  startTime: string
+  endTime: string
+}
+
+export interface ScheduleEntryOut {
+  id: string
+  schedulePlanId: string
+  trainerUserId: string
+  buildingId: string
+  courseId: string
+  isRecurring: boolean
+  daysOfWeek: string[]
+  validFrom?: string
+  validTo?: string
+  date?: string
+  startTime: string
+  endTime: string
+  hasMismatch: boolean
+}
+
+export interface AutoScheduleRequest {
+  courseIds: string[]
+  buildingIds: string[]
+  trainerIds: string[]
+}
+
+export interface AutoScheduleResult {
+  scheduled: ScheduleEntryOut[]
+  unscheduled: UnscheduledCourse[]
+}
+
+export interface UnscheduledCourse {
+  courseId: string
+  courseName: string
+  reason: string
+}
+
+export interface ConfirmAutoScheduleRequest {
+  entries: ScheduleEntryCreate[]
+}
+

@@ -17,6 +17,11 @@ export const useAuthStore = defineStore('auth', () => {
     return roles.includes('gym-trainer')
   })
 
+  const isOrganizer = computed(() => {
+    const roles: string[] = user.value?.['https://edumanage.app/roles'] ?? []
+    return roles.includes('gym-organizer')
+  })
+
   const userProfile = ref<UserProfile | null>(null)
   const onboardingComplete = computed(() => userProfile.value?.onboardingComplete ?? false)
 
@@ -44,5 +49,5 @@ export const useAuthStore = defineStore('auth', () => {
     auth0Logout({ logoutParams: { returnTo: window.location.origin + '/login' } })
   }
 
-  return { user, isLoading, isAuthenticated, isTrainer, userProfile, onboardingComplete, setProfile, bootstrap, logout }
+  return { user, isLoading, isAuthenticated, isTrainer, isOrganizer, userProfile, onboardingComplete, setProfile, bootstrap, logout }
 })
