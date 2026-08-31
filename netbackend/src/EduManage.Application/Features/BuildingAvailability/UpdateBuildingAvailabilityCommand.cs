@@ -15,8 +15,8 @@ public sealed record UpdateBuildingAvailabilityCommand(string AvailabilityId, Bu
             entity.DaysOfWeek = [.. request.Request.DaysOfWeek];
             entity.StartTime = request.Request.StartTime;
             entity.EndTime = request.Request.EndTime;
-            entity.ValidFrom = request.Request.ValidFrom;
-            entity.ValidTo = request.Request.ValidTo;
+            entity.ValidFrom = string.IsNullOrEmpty(request.Request.ValidFrom) ? null : request.Request.ValidFrom;
+            entity.ValidTo = string.IsNullOrEmpty(request.Request.ValidTo) ? null : request.Request.ValidTo;
             await repo.UpdateAsync(entity, cancellationToken);
             return new BuildingAvailabilityOut(entity.Id, entity.BuildingId, entity.DaysOfWeek, entity.StartTime, entity.EndTime, entity.ValidFrom, entity.ValidTo);
         }

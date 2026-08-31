@@ -3,6 +3,7 @@ using System;
 using EduManage.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EduManage.Infrastructure.Migrations
 {
     [DbContext(typeof(EduManageDbContext))]
-    partial class EduManageDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260831142949_ScheduleEntryIntervalRecurrence")]
+    partial class ScheduleEntryIntervalRecurrence
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.0");
@@ -624,6 +627,13 @@ namespace EduManage.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Date")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DaysOfWeek")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("EndTime")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -631,20 +641,10 @@ namespace EduManage.Infrastructure.Migrations
                     b.Property<bool>("HasMismatch")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("RecurrenceInterval")
+                    b.Property<bool>("IsRecurring")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("RecurrenceType")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT")
-                        .HasDefaultValue("none");
-
                     b.Property<string>("SchedulePlanId")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("StartDate")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
@@ -656,7 +656,10 @@ namespace EduManage.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("ValidUntil")
+                    b.Property<string>("ValidFrom")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ValidTo")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");

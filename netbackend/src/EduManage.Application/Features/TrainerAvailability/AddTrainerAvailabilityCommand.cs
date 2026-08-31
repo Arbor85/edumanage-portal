@@ -22,8 +22,8 @@ public sealed record AddTrainerAvailabilityCommand(string OwnerId, string Traine
                 DaysOfWeek = [.. request.Request.DaysOfWeek],
                 StartTime = request.Request.StartTime,
                 EndTime = request.Request.EndTime,
-                ValidFrom = request.Request.ValidFrom,
-                ValidTo = request.Request.ValidTo
+                ValidFrom = string.IsNullOrEmpty(request.Request.ValidFrom) ? null : request.Request.ValidFrom,
+                ValidTo = string.IsNullOrEmpty(request.Request.ValidTo) ? null : request.Request.ValidTo
             };
             await repo.AddAsync(entity, cancellationToken);
             return new AvailabilityOut(entity.Id, entity.OrganizationId, entity.TrainerUserId, entity.DaysOfWeek, entity.StartTime, entity.EndTime, entity.ValidFrom, entity.ValidTo);

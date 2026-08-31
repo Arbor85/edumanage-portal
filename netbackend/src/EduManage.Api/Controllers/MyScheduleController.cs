@@ -5,7 +5,6 @@ using EduManage.Application.Features.ScheduleEntries;
 namespace EduManage.Api.Controllers;
 
 [ApiController]
-[Authorize(Policy = "view:schedule")]
 [Route("api/my-schedule")]
 public sealed class MyScheduleController(ISender mediator, ICurrentUserService currentUserService) : ControllerBase
 {

@@ -8,48 +8,36 @@ internal static class ScheduleEntryHelpers
 {
     internal static ScheduleEntryOut ToOut(EduManage.Domain.Entities.ScheduleEntry e) =>
         new(e.Id, e.SchedulePlanId, e.TrainerUserId, e.BuildingId, e.CourseId,
-            e.IsRecurring, e.DaysOfWeek, e.ValidFrom, e.ValidTo, e.Date,
-            e.StartTime, e.EndTime, e.HasMismatch);
+            e.StartDate, e.StartTime, e.EndTime, e.RecurrenceType, e.RecurrenceInterval, e.ValidUntil, e.HasMismatch);
 
     internal static bool ComputeMismatch(
         ScheduleEntryCreate req,
         IReadOnlyList<TrainerAvailabilityEntity> trainerAvail,
         IReadOnlyList<BuildingAvailabilityEntity> buildingAvail)
     {
-        if (req.IsRecurring)
+        var startDate = DateOnly.Parse(req.StartDate);
+        var dayOfWeek = startDate.DayOfWeek.ToString();
+
+        bool DateRangeCovers(string? slotValidFrom, string? slotValidTo)
         {
-            var days = req.DaysOfWeek ?? [];
-            var trainerCovers = trainerAvail.Any(a =>
-                days.All(d => a.DaysOfWeek.Contains(d)) &&
-                string.Compare(a.StartTime, req.StartTime, StringComparison.Ordinal) <= 0 &&
-                string.Compare(a.EndTime, req.EndTime, StringComparison.Ordinal) >= 0 &&
-                string.Compare(a.ValidFrom, req.ValidFrom, StringComparison.Ordinal) <= 0 &&
-                string.Compare(a.ValidTo, req.ValidTo, StringComparison.Ordinal) >= 0);
-            var buildingCovers = buildingAvail.Any(a =>
-                days.All(d => a.DaysOfWeek.Contains(d)) &&
-                string.Compare(a.StartTime, req.StartTime, StringComparison.Ordinal) <= 0 &&
-                string.Compare(a.EndTime, req.EndTime, StringComparison.Ordinal) >= 0 &&
-                string.Compare(a.ValidFrom, req.ValidFrom, StringComparison.Ordinal) <= 0 &&
-                string.Compare(a.ValidTo, req.ValidTo, StringComparison.Ordinal) >= 0);
-            return !trainerCovers || !buildingCovers;
+            if (slotValidFrom != null && string.Compare(slotValidFrom, req.StartDate, StringComparison.Ordinal) > 0) return false;
+            if (slotValidTo != null && req.ValidUntil != null && string.Compare(slotValidTo, req.ValidUntil, StringComparison.Ordinal) < 0) return false;
+            return true;
         }
-        else
-        {
-            if (req.Date is null) return true;
-            var dayOfWeek = DateTime.Parse(req.Date).DayOfWeek.ToString();
-            var trainerCovers = trainerAvail.Any(a =>
-                a.DaysOfWeek.Contains(dayOfWeek) &&
-                string.Compare(a.StartTime, req.StartTime, StringComparison.Ordinal) <= 0 &&
-                string.Compare(a.EndTime, req.EndTime, StringComparison.Ordinal) >= 0 &&
-                string.Compare(a.ValidFrom, req.Date, StringComparison.Ordinal) <= 0 &&
-                string.Compare(a.ValidTo, req.Date, StringComparison.Ordinal) >= 0);
-            var buildingCovers = buildingAvail.Any(a =>
-                a.DaysOfWeek.Contains(dayOfWeek) &&
-                string.Compare(a.StartTime, req.StartTime, StringComparison.Ordinal) <= 0 &&
-                string.Compare(a.EndTime, req.EndTime, StringComparison.Ordinal) >= 0 &&
-                string.Compare(a.ValidFrom, req.Date, StringComparison.Ordinal) <= 0 &&
-                string.Compare(a.ValidTo, req.Date, StringComparison.Ordinal) >= 0);
-            return !trainerCovers || !buildingCovers;
-        }
+
+        bool TimeRangeCovers(string slotStart, string slotEnd) =>
+            string.Compare(slotStart, req.StartTime, StringComparison.Ordinal) <= 0 &&
+            string.Compare(slotEnd, req.EndTime, StringComparison.Ordinal) >= 0;
+
+        bool DayCovers(IReadOnlyList<string> days) =>
+            days.Count == 0 || days.Contains(dayOfWeek);
+
+        var trainerCovers = trainerAvail.Any(a =>
+            DayCovers(a.DaysOfWeek) && TimeRangeCovers(a.StartTime, a.EndTime) && DateRangeCovers(a.ValidFrom, a.ValidTo));
+
+        var buildingCovers = buildingAvail.Any(a =>
+            DayCovers(a.DaysOfWeek) && TimeRangeCovers(a.StartTime, a.EndTime) && DateRangeCovers(a.ValidFrom, a.ValidTo));
+
+        return !trainerCovers || !buildingCovers;
     }
 }

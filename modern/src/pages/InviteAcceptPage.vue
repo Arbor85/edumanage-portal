@@ -55,6 +55,10 @@ async function accept() {
     await invitationsApi.acceptInvitation(code, {
       invitationCode: code,
       imageUrl: user.value?.picture ?? null,
+      email: null,
+      firstName: null,
+      lastName: null,
+      gender: null,
     })
     toast.success('Invitation accepted! Welcome.')
     router.push('/dashboard')

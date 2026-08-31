@@ -26,6 +26,11 @@ const router = createRouter({
       name: 'Join',
       component: () => import('../pages/JoinPage.vue'),
     },
+    {
+      path: '/trainer-join/:code',
+      name: 'TrainerJoin',
+      component: () => import('../pages/TrainerJoinPage.vue'),
+    },
 
     // ── Onboarding ───────────────────────────────────────────────────────
     {
@@ -129,25 +134,25 @@ const router = createRouter({
     {
       path: '/organizer/trainers',
       name: 'OrganizerTrainers',
-      component: () => import('../pages/organizer/OrganizerTrainersPage.vue'),
+      component: () => import('../pages/organizer/trainers/OrganizerTrainersPage.vue'),
       meta: { requiresAuth: true, requiresOrganizer: true },
     },
     {
       path: '/organizer/buildings',
       name: 'OrganizerBuildings',
-      component: () => import('../pages/organizer/OrganizerBuildingsPage.vue'),
+      component: () => import('../pages/organizer/buildings/OrganizerBuildingsPage.vue'),
       meta: { requiresAuth: true, requiresOrganizer: true },
     },
     {
       path: '/organizer/schedule-plans',
       name: 'OrganizerSchedulePlans',
-      component: () => import('../pages/organizer/OrganizerSchedulePlansPage.vue'),
+      component: () => import('../pages/organizer/schedule-plans/OrganizerSchedulePlansPage.vue'),
       meta: { requiresAuth: true, requiresOrganizer: true },
     },
     {
       path: '/organizer/schedule-plans/:id',
       name: 'OrganizerSchedulePlanDetail',
-      component: () => import('../pages/organizer/OrganizerSchedulePlanDetailPage.vue'),
+      component: () => import('../pages/organizer/schedule-plan-detail/OrganizerSchedulePlanDetailPage.vue'),
       meta: { requiresAuth: true, requiresOrganizer: true },
     },
 

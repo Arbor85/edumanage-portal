@@ -14,8 +14,21 @@ public class InvitationsController(ISender mediator, ICurrentUserService current
 {
     [HttpGet]
     [Route("{invitationCode}")]
-    public Task<InvitationOut> GetInvitation(string invitationCode, CancellationToken cancellationToken) =>
-        mediator.Send(new GetInvitationQuery(invitationCode), cancellationToken);
+    public async Task<ActionResult<InvitationOut>> GetInvitation(string invitationCode, CancellationToken cancellationToken)
+    {
+        try
+        {
+            return Ok(await mediator.Send(new GetInvitationQuery(invitationCode), cancellationToken));
+        }
+        catch (Application.Common.Exceptions.NotFoundException ex)
+        {
+            return NotFound(new { detail = ex.Message });
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Conflict(new { detail = ex.Message });
+        }
+    }
 
     [HttpPost]
     [Authorize]

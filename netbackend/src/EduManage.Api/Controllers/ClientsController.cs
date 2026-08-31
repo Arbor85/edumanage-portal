@@ -6,7 +6,6 @@ using EduManage.Application.Features.Clients;
 namespace EduManage.Api.Controllers;
 
 [ApiController]
-[Authorize(Policy = "manage:clients")]
 [Route("api/clients")]
 public sealed class ClientsController(ISender mediator, ICurrentUserService currentUserService) : ControllerBase
 {

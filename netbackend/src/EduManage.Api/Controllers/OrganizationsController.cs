@@ -8,7 +8,6 @@ using EduManage.Application.Features.TrainerCourseAssociations;
 namespace EduManage.Api.Controllers;
 
 [ApiController]
-[Authorize(Policy = "manage:organization")]
 [Route("api/organizations")]
 public sealed class OrganizationsController(ISender mediator, ICurrentUserService currentUserService) : ControllerBase
 {
@@ -63,13 +62,19 @@ public sealed class OrganizationsController(ISender mediator, ICurrentUserServic
     [HttpPost("join/{code}")]
     [AllowAnonymous]
     [Authorize]
-    public async Task<ActionResult<OrganizationMemberOut>> JoinOrganization([FromRoute] string code, CancellationToken cancellationToken)
+    public async Task<ActionResult<OrganizationMemberOut>> JoinOrganization(
+        [FromRoute] string code,
+        [FromBody] JoinOrganizationRequest? request,
+        CancellationToken cancellationToken)
     {
         var userId = currentUserService.GetCurrentUserId();
         if (userId is null) return Unauthorized();
         try
         {
-            return Ok(await mediator.Send(new JoinOrganizationCommand(userId, code), cancellationToken));
+            return Ok(await mediator.Send(new JoinOrganizationCommand(
+                userId, code,
+                request?.FirstName, request?.LastName,
+                request?.InitialAvailabilities), cancellationToken));
         }
         catch (NotFoundException ex)
         {

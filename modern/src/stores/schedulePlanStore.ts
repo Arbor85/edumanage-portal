@@ -144,13 +144,12 @@ export const useSchedulePlanStore = defineStore('schedulePlan', () => {
       trainerUserId: e.trainerUserId,
       buildingId: e.buildingId,
       courseId: e.courseId,
-      isRecurring: e.isRecurring,
-      daysOfWeek: e.daysOfWeek,
-      validFrom: e.validFrom,
-      validTo: e.validTo,
-      date: e.date,
+      startDate: e.startDate,
       startTime: e.startTime,
       endTime: e.endTime,
+      recurrenceType: e.recurrenceType,
+      recurrenceInterval: e.recurrenceInterval,
+      validUntil: e.validUntil,
     }))
     entries.value = await api.confirmAutoSchedule(planId, { entries: payload })
     autoScheduleProposal.value = null

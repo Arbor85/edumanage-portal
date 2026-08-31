@@ -8,7 +8,6 @@ using EduManage.Application.Features.SchedulePlans;
 namespace EduManage.Api.Controllers;
 
 [ApiController]
-[Authorize(Roles = "gym-organizer")]
 [Route("api/schedule-plans")]
 public sealed class SchedulePlansController(ISender mediator, ICurrentUserService currentUserService) : ControllerBase
 {

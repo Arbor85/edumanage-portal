@@ -214,12 +214,13 @@ public sealed record UserEquipmentSave(
 // Organization
 public sealed record OrganizationCreate(string Name);
 public sealed record OrganizationOut(string Id, string Name, string OwnerId, string InviteCode, int TrainerCount);
-public sealed record OrganizationMemberOut(string TrainerUserId, string JoinedAt);
+public sealed record OrganizationMemberOut(string TrainerUserId, string JoinedAt, string? FirstName = null, string? LastName = null);
+public sealed record JoinOrganizationRequest(string? FirstName, string? LastName, IReadOnlyList<AvailabilityCreate>? InitialAvailabilities);
 
 // TrainerAvailability
-public sealed record AvailabilityCreate(IReadOnlyList<string> DaysOfWeek, string StartTime, string EndTime, string ValidFrom, string ValidTo);
-public sealed record AvailabilityUpdate(IReadOnlyList<string> DaysOfWeek, string StartTime, string EndTime, string ValidFrom, string ValidTo);
-public sealed record AvailabilityOut(string Id, string OrganizationId, string TrainerUserId, IReadOnlyList<string> DaysOfWeek, string StartTime, string EndTime, string ValidFrom, string ValidTo);
+public sealed record AvailabilityCreate(IReadOnlyList<string> DaysOfWeek, string StartTime, string EndTime, string? ValidFrom, string? ValidTo);
+public sealed record AvailabilityUpdate(IReadOnlyList<string> DaysOfWeek, string StartTime, string EndTime, string? ValidFrom, string? ValidTo);
+public sealed record AvailabilityOut(string Id, string OrganizationId, string TrainerUserId, IReadOnlyList<string> DaysOfWeek, string StartTime, string EndTime, string? ValidFrom, string? ValidTo);
 
 // Building
 public sealed record BuildingCreate(string Name, string Address, int Capacity);
@@ -227,9 +228,9 @@ public sealed record BuildingUpdate(string Name, string Address, int Capacity);
 public sealed record BuildingOut(string Id, string OrganizationId, string Name, string Address, int Capacity);
 
 // BuildingAvailability
-public sealed record BuildingAvailabilityCreate(IReadOnlyList<string> DaysOfWeek, string StartTime, string EndTime, string ValidFrom, string ValidTo);
-public sealed record BuildingAvailabilityUpdate(IReadOnlyList<string> DaysOfWeek, string StartTime, string EndTime, string ValidFrom, string ValidTo);
-public sealed record BuildingAvailabilityOut(string Id, string BuildingId, IReadOnlyList<string> DaysOfWeek, string StartTime, string EndTime, string ValidFrom, string ValidTo);
+public sealed record BuildingAvailabilityCreate(IReadOnlyList<string> DaysOfWeek, string StartTime, string EndTime, string? ValidFrom, string? ValidTo);
+public sealed record BuildingAvailabilityUpdate(IReadOnlyList<string> DaysOfWeek, string StartTime, string EndTime, string? ValidFrom, string? ValidTo);
+public sealed record BuildingAvailabilityOut(string Id, string BuildingId, IReadOnlyList<string> DaysOfWeek, string StartTime, string EndTime, string? ValidFrom, string? ValidTo);
 
 // TrainerCourseAssociation
 public sealed record TrainerCourseAssociationCreate(string TrainerId, string CourseId);
@@ -245,37 +246,34 @@ public sealed record ScheduleEntryCreate(
     string TrainerUserId,
     string BuildingId,
     string CourseId,
-    bool IsRecurring,
-    IReadOnlyList<string>? DaysOfWeek,
-    string? ValidFrom,
-    string? ValidTo,
-    string? Date,
+    string StartDate,
     string StartTime,
-    string EndTime);
+    string EndTime,
+    string RecurrenceType,
+    int? RecurrenceInterval = null,
+    string? ValidUntil = null);
 public sealed record ScheduleEntryUpdate(
     string TrainerUserId,
     string BuildingId,
     string CourseId,
-    bool IsRecurring,
-    IReadOnlyList<string>? DaysOfWeek,
-    string? ValidFrom,
-    string? ValidTo,
-    string? Date,
+    string StartDate,
     string StartTime,
-    string EndTime);
+    string EndTime,
+    string RecurrenceType,
+    int? RecurrenceInterval = null,
+    string? ValidUntil = null);
 public sealed record ScheduleEntryOut(
     string Id,
     string SchedulePlanId,
     string TrainerUserId,
     string BuildingId,
     string CourseId,
-    bool IsRecurring,
-    IReadOnlyList<string> DaysOfWeek,
-    string? ValidFrom,
-    string? ValidTo,
-    string? Date,
+    string StartDate,
     string StartTime,
     string EndTime,
+    string RecurrenceType,
+    int? RecurrenceInterval,
+    string? ValidUntil,
     bool HasMismatch);
 
 // AutoSchedule

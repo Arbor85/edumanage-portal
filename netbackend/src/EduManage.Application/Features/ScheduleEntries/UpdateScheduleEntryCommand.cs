@@ -22,8 +22,8 @@ public sealed record UpdateScheduleEntryCommand(
 
             var create = new ScheduleEntryCreate(
                 request.Request.TrainerUserId, request.Request.BuildingId, request.Request.CourseId,
-                request.Request.IsRecurring, request.Request.DaysOfWeek, request.Request.ValidFrom,
-                request.Request.ValidTo, request.Request.Date, request.Request.StartTime, request.Request.EndTime);
+                request.Request.StartDate, request.Request.StartTime, request.Request.EndTime,
+                request.Request.RecurrenceType, request.Request.RecurrenceInterval, request.Request.ValidUntil);
 
             var trainerAvail = await trainerAvailRepo.ListByTrainerAndOrgAsync(request.Request.TrainerUserId, request.OrgId, cancellationToken);
             var buildingAvail = await buildingAvailRepo.ListByBuildingAsync(request.Request.BuildingId, cancellationToken);
@@ -31,13 +31,12 @@ public sealed record UpdateScheduleEntryCommand(
             entry.TrainerUserId = request.Request.TrainerUserId;
             entry.BuildingId = request.Request.BuildingId;
             entry.CourseId = request.Request.CourseId;
-            entry.IsRecurring = request.Request.IsRecurring;
-            entry.DaysOfWeek = [.. (request.Request.DaysOfWeek ?? [])];
-            entry.ValidFrom = request.Request.ValidFrom;
-            entry.ValidTo = request.Request.ValidTo;
-            entry.Date = request.Request.Date;
+            entry.StartDate = request.Request.StartDate;
             entry.StartTime = request.Request.StartTime;
             entry.EndTime = request.Request.EndTime;
+            entry.RecurrenceType = request.Request.RecurrenceType;
+            entry.RecurrenceInterval = request.Request.RecurrenceInterval;
+            entry.ValidUntil = request.Request.ValidUntil;
             entry.HasMismatch = ScheduleEntryHelpers.ComputeMismatch(create, trainerAvail, buildingAvail);
 
             await repo.UpdateAsync(entry, cancellationToken);

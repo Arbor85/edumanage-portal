@@ -29,13 +29,19 @@ function entriesForDay(day: number | null) {
   const month = currentMonth.value.getMonth()
   const date = new Date(year, month, day)
   const dateStr = date.toISOString().slice(0, 10)
-  const dayName = date.toLocaleDateString('en-US', { weekday: 'long' })
 
   return store.entries.filter((e) => {
-    if (!e.isRecurring) return e.date === dateStr
-    if (!e.daysOfWeek.includes(dayName)) return false
-    if (e.validFrom && dateStr < e.validFrom) return false
-    if (e.validTo && dateStr > e.validTo) return false
+    if (e.recurrenceType === 'none') return e.startDate === dateStr
+    if (e.recurrenceType === 'weekly') {
+      const entryDow = new Date(e.startDate).getDay()
+      if (date.getDay() !== entryDow) return false
+    } else if (e.recurrenceType === 'every-n-days') {
+      const interval = e.recurrenceInterval ?? 1
+      const diffDays = Math.round((date.getTime() - new Date(e.startDate).getTime()) / 86400000)
+      if (diffDays < 0 || diffDays % interval !== 0) return false
+    }
+    if (dateStr < e.startDate) return false
+    if (e.validUntil && dateStr > e.validUntil) return false
     return true
   })
 }
@@ -95,17 +101,14 @@ const monthLabel = computed(() =>
               <p class="text-sm font-semibold text-gray-900 dark:text-white">Course {{ entry.courseId.slice(0, 8) }}…</p>
               <p class="text-xs text-text-secondary mt-1">Building {{ entry.buildingId.slice(0, 8) }}…</p>
               <p class="text-xs text-primary mt-1">
-                <template v-if="entry.isRecurring">
-                  {{ entry.daysOfWeek.map(d => d.slice(0, 3)).join(', ') }} · {{ entry.startTime }}–{{ entry.endTime }}
-                  <span class="text-text-muted ml-1">{{ entry.validFrom }} → {{ entry.validTo }}</span>
-                </template>
-                <template v-else>
-                  {{ entry.date }} · {{ entry.startTime }}–{{ entry.endTime }}
-                </template>
+                {{ entry.startDate }} · {{ entry.startTime }}–{{ entry.endTime }}
+                <span v-if="entry.recurrenceType !== 'none' && entry.validUntil" class="text-text-muted ml-1">
+                  → {{ entry.validUntil }}
+                </span>
               </p>
             </div>
-            <span class="px-2 py-0.5 bg-primary/10 text-primary text-xs rounded-lg font-medium">
-              {{ entry.isRecurring ? 'Recurring' : 'One-off' }}
+            <span class="px-2 py-0.5 bg-primary/10 text-primary text-xs rounded-lg font-medium capitalize">
+              {{ entry.recurrenceType === 'none' ? 'Once' : entry.recurrenceType === 'every-n-days' ? `Every ${entry.recurrenceInterval}d` : entry.recurrenceType }}
             </span>
           </div>
         </div>

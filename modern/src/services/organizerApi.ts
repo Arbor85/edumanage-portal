@@ -3,6 +3,7 @@ import type {
   OrganizationCreate,
   OrganizationOut,
   OrganizationMemberOut,
+  JoinOrganizationRequest,
   AvailabilityCreate,
   AvailabilityOut,
   TrainerCourseAssociationCreate,
@@ -18,8 +19,8 @@ export const getMyOrganization = (): Promise<OrganizationOut> =>
 export const generateInvite = (): Promise<OrganizationOut> =>
   apiClient.post<OrganizationOut>('/api/organizations/invite').then((r) => r.data)
 
-export const joinOrganization = (code: string): Promise<OrganizationMemberOut> =>
-  apiClient.post<OrganizationMemberOut>(`/api/organizations/join/${code}`).then((r) => r.data)
+export const joinOrganization = (code: string, body?: JoinOrganizationRequest): Promise<OrganizationMemberOut> =>
+  apiClient.post<OrganizationMemberOut>(`/api/organizations/join/${code}`, body ?? {}).then((r) => r.data)
 
 export const listTrainers = (): Promise<OrganizationMemberOut[]> =>
   apiClient.get<OrganizationMemberOut[]>('/api/organizations/trainers').then((r) => r.data)

@@ -1,4 +1,5 @@
 using EduManage.Application.Contracts;
+using EduManage.Application.Features.ScheduleEntries;
 using EduManage.Domain.Entities;
 using MediatR;
 
@@ -19,9 +20,6 @@ public sealed record ConfirmAutoScheduleCommand(string PlanId, string OrgId, Con
             var result = new List<ScheduleEntryOut>();
             foreach (var req in request.Request.Entries)
             {
-                var trainerAvail = await trainerAvailRepo.ListByTrainerAndOrgAsync(req.TrainerUserId, request.OrgId, cancellationToken);
-                var buildingAvail = await buildingAvailRepo.ListByBuildingAsync(req.BuildingId, cancellationToken);
-
                 var entry = new ScheduleEntry
                 {
                     Id = Guid.NewGuid().ToString("N"),
@@ -29,20 +27,16 @@ public sealed record ConfirmAutoScheduleCommand(string PlanId, string OrgId, Con
                     TrainerUserId = req.TrainerUserId,
                     BuildingId = req.BuildingId,
                     CourseId = req.CourseId,
-                    IsRecurring = req.IsRecurring,
-                    DaysOfWeek = [.. (req.DaysOfWeek ?? [])],
-                    ValidFrom = req.ValidFrom,
-                    ValidTo = req.ValidTo,
-                    Date = req.Date,
+                    StartDate = req.StartDate,
                     StartTime = req.StartTime,
                     EndTime = req.EndTime,
+                    RecurrenceType = req.RecurrenceType,
+                    RecurrenceInterval = req.RecurrenceInterval,
+                    ValidUntil = req.ValidUntil,
                     HasMismatch = false
                 };
                 await entryRepo.AddAsync(entry, cancellationToken);
-                result.Add(new ScheduleEntryOut(
-                    entry.Id, entry.SchedulePlanId, entry.TrainerUserId, entry.BuildingId, entry.CourseId,
-                    entry.IsRecurring, entry.DaysOfWeek, entry.ValidFrom, entry.ValidTo,
-                    entry.Date, entry.StartTime, entry.EndTime, entry.HasMismatch));
+                result.Add(ScheduleEntryHelpers.ToOut(entry));
             }
             return result;
         }

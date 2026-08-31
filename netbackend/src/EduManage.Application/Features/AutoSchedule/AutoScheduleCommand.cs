@@ -28,7 +28,6 @@ public sealed record AutoScheduleCommand(string OwnerId, string PlanId, AutoSche
             var scheduled = new List<ScheduleEntryOut>();
             var unscheduled = new List<UnscheduledCourse>();
 
-            // Track what we schedule in this run to detect conflicts within the run
             var bookedSlots = new List<(string TrainerId, string BuildingId, string Day, string Start, string End)>();
 
             foreach (var courseId in request.Request.CourseIds)
@@ -48,7 +47,6 @@ public sealed record AutoScheduleCommand(string OwnerId, string PlanId, AutoSche
                     continue;
                 }
 
-                // Sort trainers by fewest existing scheduled entries (most available first)
                 var trainerLoad = qualifiedTrainers
                     .OrderBy(t => existingEntries.Count(e => e.TrainerUserId == t) + scheduled.Count(s => s.TrainerUserId == t))
                     .ToList();
@@ -67,46 +65,40 @@ public sealed record AutoScheduleCommand(string OwnerId, string PlanId, AutoSche
                             .OrderBy(a => a.ValidFrom).ThenBy(a => a.StartTime)
                             .ToList();
 
-                        // Find overlapping slots
                         foreach (var tSlot in trainerAvails)
                         {
                             foreach (var bSlot in buildingAvails)
                             {
-                                // Date range overlap
                                 var fromMax = string.Compare(tSlot.ValidFrom, bSlot.ValidFrom, StringComparison.Ordinal) >= 0 ? tSlot.ValidFrom : bSlot.ValidFrom;
                                 var toMin = string.Compare(tSlot.ValidTo, bSlot.ValidTo, StringComparison.Ordinal) <= 0 ? tSlot.ValidTo : bSlot.ValidTo;
-                                if (string.Compare(fromMax, toMin, StringComparison.Ordinal) > 0) continue;
+                                if (fromMax != null && toMin != null && string.Compare(fromMax, toMin, StringComparison.Ordinal) > 0) continue;
 
-                                // Day overlap
-                                var commonDays = tSlot.DaysOfWeek.Intersect(bSlot.DaysOfWeek).ToList();
+                                IEnumerable<string> tDays = tSlot.DaysOfWeek.Count > 0 ? tSlot.DaysOfWeek : AllDays;
+                                IEnumerable<string> bDays = bSlot.DaysOfWeek.Count > 0 ? bSlot.DaysOfWeek : AllDays;
+                                var commonDays = tDays.Intersect(bDays).ToList();
                                 if (commonDays.Count == 0) continue;
 
-                                // Time overlap
                                 var startMax = string.Compare(tSlot.StartTime, bSlot.StartTime, StringComparison.Ordinal) >= 0 ? tSlot.StartTime : bSlot.StartTime;
                                 var endMin = string.Compare(tSlot.EndTime, bSlot.EndTime, StringComparison.Ordinal) <= 0 ? tSlot.EndTime : bSlot.EndTime;
                                 if (string.Compare(startMax, endMin, StringComparison.Ordinal) >= 0) continue;
 
-                                // Check conflicts against existing entries and current run
                                 foreach (var day in commonDays)
                                 {
-                                    var trainerConflict = existingEntries.Any(e =>
-                                        e.TrainerUserId == trainerId && e.IsRecurring &&
-                                        e.DaysOfWeek.Contains(day) &&
-                                        TimesOverlap(e.StartTime, e.EndTime, startMax, endMin)) ||
+                                    var trainerConflict =
+                                        existingEntries.Any(e => e.TrainerUserId == trainerId && EntryCoversDay(e, day) && TimesOverlap(e.StartTime, e.EndTime, startMax, endMin)) ||
                                         bookedSlots.Any(b => b.TrainerId == trainerId && b.Day == day && TimesOverlap(b.Start, b.End, startMax, endMin));
 
-                                    var buildingConflict = existingEntries.Any(e =>
-                                        e.BuildingId == buildingId && e.IsRecurring &&
-                                        e.DaysOfWeek.Contains(day) &&
-                                        TimesOverlap(e.StartTime, e.EndTime, startMax, endMin)) ||
+                                    var buildingConflict =
+                                        existingEntries.Any(e => e.BuildingId == buildingId && EntryCoversDay(e, day) && TimesOverlap(e.StartTime, e.EndTime, startMax, endMin)) ||
                                         bookedSlots.Any(b => b.BuildingId == buildingId && b.Day == day && TimesOverlap(b.Start, b.End, startMax, endMin));
 
                                     if (!trainerConflict && !buildingConflict)
                                     {
-                                        bookedSlots.Add((trainerId, buildingId, day, startMax, endMin));
+                                        bookedSlots.Add((TrainerId: trainerId, BuildingId: buildingId, Day: day, Start: startMax, End: endMin));
+                                        var startDate = NextWeekday(day, fromMax);
                                         scheduled.Add(new ScheduleEntryOut(
                                             string.Empty, request.PlanId, trainerId, buildingId, courseId,
-                                            true, [day], fromMax, toMin, null, startMax, endMin, false));
+                                            startDate, startMax, endMin, "weekly", null, toMin, false));
                                         found = true;
                                         break;
                                     }
@@ -129,6 +121,26 @@ public sealed record AutoScheduleCommand(string OwnerId, string PlanId, AutoSche
             }
 
             return new AutoScheduleResult(scheduled, unscheduled);
+        }
+
+        private static readonly string[] AllDays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+
+        private static bool EntryCoversDay(ScheduleEntry e, string day)
+        {
+            if (e.RecurrenceType == "daily") return true;
+            if (e.RecurrenceType == "weekly")
+                return DateOnly.TryParse(e.StartDate, out var d) && d.DayOfWeek.ToString() == day;
+            if (e.RecurrenceType == "none")
+                return DateOnly.TryParse(e.StartDate, out var d) && d.DayOfWeek.ToString() == day;
+            return false;
+        }
+
+        private static string NextWeekday(string dayName, string? fromDate)
+        {
+            var anchor = fromDate != null && DateOnly.TryParse(fromDate, out var parsed) ? parsed : DateOnly.FromDateTime(DateTime.UtcNow);
+            var target = Enum.Parse<DayOfWeek>(dayName);
+            var daysUntil = ((int)target - (int)anchor.DayOfWeek + 7) % 7;
+            return anchor.AddDays(daysUntil).ToString("yyyy-MM-dd");
         }
 
         private static bool TimesOverlap(string s1, string e1, string s2, string e2) =>

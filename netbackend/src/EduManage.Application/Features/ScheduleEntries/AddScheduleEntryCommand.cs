@@ -28,13 +28,12 @@ public sealed record AddScheduleEntryCommand(
                 TrainerUserId = request.Request.TrainerUserId,
                 BuildingId = request.Request.BuildingId,
                 CourseId = request.Request.CourseId,
-                IsRecurring = request.Request.IsRecurring,
-                DaysOfWeek = [.. (request.Request.DaysOfWeek ?? [])],
-                ValidFrom = request.Request.ValidFrom,
-                ValidTo = request.Request.ValidTo,
-                Date = request.Request.Date,
+                StartDate = request.Request.StartDate,
                 StartTime = request.Request.StartTime,
                 EndTime = request.Request.EndTime,
+                RecurrenceType = request.Request.RecurrenceType,
+                RecurrenceInterval = request.Request.RecurrenceInterval,
+                ValidUntil = request.Request.ValidUntil,
                 HasMismatch = hasMismatch
             };
             await repo.AddAsync(entry, cancellationToken);

@@ -13,7 +13,6 @@ public sealed class EquipmentController(ISender mediator) : ControllerBase
         mediator.Send(new ListEquipmentQuery(), cancellationToken);
 
     [HttpPost]
-    [Authorize(Policy = "manage:equipment")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     public async Task<ActionResult<EquipmentOut>> AddEquipment([FromBody] EquipmentWriteRequest request, CancellationToken cancellationToken)
     {
@@ -22,7 +21,6 @@ public sealed class EquipmentController(ISender mediator) : ControllerBase
     }
 
     [HttpPut("{id:guid}")]
-    [Authorize(Policy = "manage:equipment")]
     public async Task<ActionResult<EquipmentOut>> UpdateEquipment([FromRoute] Guid id, [FromBody] EquipmentWriteRequest request, CancellationToken cancellationToken)
     {
         try
@@ -40,7 +38,6 @@ public sealed class EquipmentController(ISender mediator) : ControllerBase
     }
 
     [HttpDelete("{id:guid}")]
-    [Authorize(Policy = "manage:equipment")]
     public async Task<IActionResult> DeleteEquipment([FromRoute] Guid id, CancellationToken cancellationToken)
     {
         try

@@ -45,7 +45,7 @@ const publishedPlans = computed(() => schedulePlanStore.plans.filter((p) => p.st
 </script>
 
 <template>
-  <div class="max-w-4xl mx-auto">
+  <div>
     <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Organizer Dashboard</h1>
 
     <!-- Create org prompt -->

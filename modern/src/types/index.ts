@@ -479,14 +479,22 @@ export interface OrganizationCreate {
 export interface OrganizationMemberOut {
   trainerUserId: string
   joinedAt: string
+  firstName?: string | null
+  lastName?: string | null
+}
+
+export interface JoinOrganizationRequest {
+  firstName?: string | null
+  lastName?: string | null
+  initialAvailabilities?: AvailabilityCreate[]
 }
 
 export interface AvailabilityCreate {
   daysOfWeek: string[]
   startTime: string
   endTime: string
-  validFrom: string
-  validTo: string
+  validFrom: string | null
+  validTo: string | null
 }
 
 export interface AvailabilityOut {
@@ -496,8 +504,8 @@ export interface AvailabilityOut {
   daysOfWeek: string[]
   startTime: string
   endTime: string
-  validFrom: string
-  validTo: string
+  validFrom: string | null
+  validTo: string | null
 }
 
 export interface BuildingCreate {
@@ -524,8 +532,8 @@ export interface BuildingAvailabilityCreate {
   daysOfWeek: string[]
   startTime: string
   endTime: string
-  validFrom: string
-  validTo: string
+  validFrom: string | null
+  validTo: string | null
 }
 
 export interface BuildingAvailabilityOut {
@@ -534,8 +542,8 @@ export interface BuildingAvailabilityOut {
   daysOfWeek: string[]
   startTime: string
   endTime: string
-  validFrom: string
-  validTo: string
+  validFrom: string | null
+  validTo: string | null
 }
 
 export interface TrainerCourseAssociationCreate {
@@ -570,13 +578,12 @@ export interface ScheduleEntryCreate {
   trainerUserId: string
   buildingId: string
   courseId: string
-  isRecurring: boolean
-  daysOfWeek?: string[]
-  validFrom?: string
-  validTo?: string
-  date?: string
+  startDate: string
   startTime: string
   endTime: string
+  recurrenceType: 'none' | 'daily' | 'weekly' | 'every-n-days'
+  recurrenceInterval?: number | null
+  validUntil?: string | null
 }
 
 export interface ScheduleEntryOut {
@@ -585,13 +592,12 @@ export interface ScheduleEntryOut {
   trainerUserId: string
   buildingId: string
   courseId: string
-  isRecurring: boolean
-  daysOfWeek: string[]
-  validFrom?: string
-  validTo?: string
-  date?: string
+  startDate: string
   startTime: string
   endTime: string
+  recurrenceType: 'none' | 'daily' | 'weekly' | 'every-n-days'
+  recurrenceInterval?: number | null
+  validUntil?: string | null
   hasMismatch: boolean
 }
 

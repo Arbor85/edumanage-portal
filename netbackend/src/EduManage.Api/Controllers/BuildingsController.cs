@@ -7,7 +7,6 @@ using EduManage.Application.Features.Buildings;
 namespace EduManage.Api.Controllers;
 
 [ApiController]
-[Authorize(Policy = "manage:organization")]
 [Route("api/buildings")]
 public sealed class BuildingsController(ISender mediator, ICurrentUserService currentUserService) : ControllerBase
 {
