@@ -82,6 +82,30 @@ interface Occurrence {
   color: typeof COLOR_PALETTE[0]
 }
 
+interface LayoutOccurrence extends Occurrence {
+  colIndex: number
+  colTotal: number
+}
+
+function layoutDay(occs: Occurrence[]): LayoutOccurrence[] {
+  if (occs.length === 0) return []
+  const sorted = [...occs].sort((a, b) => a.topPx - b.topPx)
+  const laneEnds: number[] = []
+  const assigned: Array<{ occ: Occurrence; lane: number }> = []
+  for (const occ of sorted) {
+    let lane = laneEnds.findIndex(end => end <= occ.topPx)
+    if (lane === -1) lane = laneEnds.length
+    laneEnds[lane] = occ.topPx + occ.heightPx
+    assigned.push({ occ, lane })
+  }
+  return assigned.map(({ occ, lane }) => {
+    const colTotal = assigned
+      .filter(({ occ: o }) => o.topPx < occ.topPx + occ.heightPx && occ.topPx < o.topPx + o.heightPx)
+      .reduce((max, { lane: l }) => Math.max(max, l + 1), 1)
+    return { ...occ, colIndex: lane, colTotal }
+  })
+}
+
 function timeToSlot(time: string): number {
   const [h, m] = time.split(':').map(Number)
   return (h - HOUR_START) * 2 + Math.floor(m / 30)
@@ -130,6 +154,18 @@ const occurrences = computed<Occurrence[]>(() => {
       })
     }
   }
+  return result
+})
+
+const layoutByDay = computed(() => {
+  const byDay = new Map<number, Occurrence[]>()
+  for (const occ of occurrences.value) {
+    const list = byDay.get(occ.dayIndex) ?? []
+    list.push(occ)
+    byDay.set(occ.dayIndex, list)
+  }
+  const result = new Map<number, LayoutOccurrence[]>()
+  byDay.forEach((occs, dayIdx) => result.set(dayIdx, layoutDay(occs)))
   return result
 })
 
@@ -286,11 +322,16 @@ const totalGridWidth = computed(() => `${56 + 7 * COL_MIN_WIDTH}px`)
                 />
 
                 <!-- Entry blocks -->
-                <template v-for="occ in occurrences.filter(o => o.dayIndex === colIdx)" :key="occ.entry.id + occ.date">
+                <template v-for="occ in (layoutByDay.get(colIdx) ?? [])" :key="occ.entry.id + occ.date">
                   <div
-                    class="absolute left-1 right-1 rounded-xl overflow-hidden cursor-grab active:cursor-grabbing select-none transition-all duration-150 shadow-sm group"
-                    :class="[occ.color.cls, dragging?.occ.entry.id === occ.entry.id ? 'opacity-30 scale-95' : 'opacity-95 hover:opacity-100 hover:shadow-md hover:-translate-y-px hover:scale-[1.01] hover:z-10']"
-                    :style="{ top: occ.topPx + 2 + 'px', height: occ.heightPx - 4 + 'px' }"
+                    class="absolute rounded-xl overflow-hidden cursor-grab active:cursor-grabbing select-none transition-all duration-150 shadow-sm group"
+                    :class="[occ.color.cls, dragging?.occ.entry.id === occ.entry.id ? 'opacity-30 scale-95' : 'opacity-95 hover:opacity-100 hover:shadow-md hover:-translate-y-px hover:z-10']"
+                    :style="{
+                      top: occ.topPx + 2 + 'px',
+                      height: occ.heightPx - 4 + 'px',
+                      left: `calc(${occ.colIndex / occ.colTotal * 100}% + 2px)`,
+                      width: `calc(${100 / occ.colTotal}% - 4px)`,
+                    }"
                     draggable="true"
                     @dragstart="onDragStart($event, occ)"
                     @dragend="onDragEnd"

@@ -1,151 +1,148 @@
 <script setup lang="ts">
-import { onMounted, ref, computed } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useMyScheduleStore } from '../stores/myScheduleStore'
-import { CalendarDays, List } from 'lucide-vue-next'
+import { useCourseStore } from '../stores/courseStore'
+import { useSchedulePlanStore } from '../stores/schedulePlanStore'
+import { CalendarDays, List, RotateCcw, Clock, MapPin } from 'lucide-vue-next'
+import SkeletonBlock from '../components/SkeletonBlock.vue'
+import EmptyState from '../components/EmptyState.vue'
+import ScheduleCalendarView from './organizer/schedule-plan-detail/components/ScheduleCalendarView.vue'
 
 const store = useMyScheduleStore()
+const courseStore = useCourseStore()
+const planStore = useSchedulePlanStore()
 const viewMode = ref<'list' | 'calendar'>('list')
 
-onMounted(async () => {
-  await store.fetch()
-})
+onMounted(() => Promise.all([store.fetch(), courseStore.fetch(), planStore.fetchBuildings()]))
 
-// Calendar state
-const currentMonth = ref(new Date())
-
-const calendarDays = computed(() => {
-  const year = currentMonth.value.getFullYear()
-  const month = currentMonth.value.getMonth()
-  const firstDay = new Date(year, month, 1).getDay()
-  const daysInMonth = new Date(year, month + 1, 0).getDate()
-  const days: (number | null)[] = Array(firstDay).fill(null)
-  for (let d = 1; d <= daysInMonth; d++) days.push(d)
-  return days
-})
-
-function entriesForDay(day: number | null) {
-  if (!day) return []
-  const year = currentMonth.value.getFullYear()
-  const month = currentMonth.value.getMonth()
-  const date = new Date(year, month, day)
-  const dateStr = date.toISOString().slice(0, 10)
-
-  return store.entries.filter((e) => {
-    if (e.recurrenceType === 'none') return e.startDate === dateStr
-    if (e.recurrenceType === 'weekly') {
-      const entryDow = new Date(e.startDate).getDay()
-      if (date.getDay() !== entryDow) return false
-    } else if (e.recurrenceType === 'every-n-days') {
-      const interval = e.recurrenceInterval ?? 1
-      const diffDays = Math.round((date.getTime() - new Date(e.startDate).getTime()) / 86400000)
-      if (diffDays < 0 || diffDays % interval !== 0) return false
-    }
-    if (dateStr < e.startDate) return false
-    if (e.validUntil && dateStr > e.validUntil) return false
-    return true
-  })
+function courseName(id: string) {
+  return courseStore.courses.find(c => c.id === id)?.name ?? id
 }
 
-function prevMonth() {
-  currentMonth.value = new Date(currentMonth.value.getFullYear(), currentMonth.value.getMonth() - 1, 1)
+function buildingName(id: string) {
+  return planStore.buildings.find(b => b.id === id)?.name ?? id
 }
 
-function nextMonth() {
-  currentMonth.value = new Date(currentMonth.value.getFullYear(), currentMonth.value.getMonth() + 1, 1)
+function recurrenceLabel(e: { recurrenceType: string; recurrenceInterval?: number | null }) {
+  if (e.recurrenceType === 'none') return 'Once'
+  if (e.recurrenceType === 'daily') return 'Daily'
+  if (e.recurrenceType === 'weekly') return 'Weekly'
+  if (e.recurrenceType === 'every-n-days') return `Every ${e.recurrenceInterval ?? '?'} days`
+  return e.recurrenceType
 }
 
-const monthLabel = computed(() =>
-  currentMonth.value.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
-)
+function formatDate(iso: string) {
+  return new Date(iso).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })
+}
+
+const COLOR_BARS = [
+  'bg-violet-500', 'bg-sky-500', 'bg-emerald-500', 'bg-amber-500',
+  'bg-rose-500', 'bg-indigo-500', 'bg-teal-500', 'bg-orange-500',
+]
 </script>
 
 <template>
-  <div class="max-w-4xl mx-auto">
+  <div>
+    <!-- Header -->
     <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold text-gray-900 dark:text-white">My Schedule</h1>
-      <div class="flex gap-1 bg-black/5 dark:bg-white/5 rounded-xl p-1">
+      <div>
+        <h1 class="text-2xl font-bold text-text-primary dark:text-white tracking-tight">My Schedule</h1>
+        <p class="text-sm text-text-secondary mt-0.5">Your upcoming sessions and recurring classes</p>
+      </div>
+      <div class="flex items-center gap-2">
         <button
-          class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
-          :class="viewMode === 'list' ? 'bg-white dark:bg-white/10 text-gray-900 dark:text-white shadow-sm' : 'text-text-secondary'"
-          @click="viewMode = 'list'"
+          class="w-8 h-8 flex items-center justify-center rounded-lg text-text-secondary hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+          title="Refresh"
+          @click="store.fetch()"
         >
-          <List class="w-4 h-4" /> List
+          <RotateCcw class="w-4 h-4" />
         </button>
-        <button
-          class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
-          :class="viewMode === 'calendar' ? 'bg-white dark:bg-white/10 text-gray-900 dark:text-white shadow-sm' : 'text-text-secondary'"
-          @click="viewMode = 'calendar'"
-        >
-          <CalendarDays class="w-4 h-4" /> Calendar
-        </button>
+        <div class="flex gap-1 bg-black/5 dark:bg-white/5 rounded-xl p-1">
+          <button
+            class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold transition-all duration-150"
+            :class="viewMode === 'list' ? 'bg-white dark:bg-white/10 text-text-primary dark:text-white shadow-sm' : 'text-text-secondary'"
+            @click="viewMode = 'list'"
+          >
+            <List class="w-4 h-4" /> List
+          </button>
+          <button
+            class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold transition-all duration-150"
+            :class="viewMode === 'calendar' ? 'bg-white dark:bg-white/10 text-text-primary dark:text-white shadow-sm' : 'text-text-secondary'"
+            @click="viewMode = 'calendar'"
+          >
+            <CalendarDays class="w-4 h-4" /> Calendar
+          </button>
+        </div>
       </div>
     </div>
 
-    <div v-if="store.isLoading" class="text-text-secondary text-sm">Loading…</div>
-
-    <div v-else-if="store.entries.length === 0" class="text-center py-12">
-      <CalendarDays class="w-12 h-12 text-text-muted mx-auto mb-3" />
-      <p class="text-text-secondary text-sm">No schedule has been published for you yet.</p>
+    <!-- Loading -->
+    <div v-if="store.isLoading" class="flex flex-col gap-3">
+      <SkeletonBlock v-for="i in 4" :key="i" height="5rem" />
     </div>
+
+    <!-- Empty -->
+    <EmptyState
+      v-else-if="store.entries.length === 0"
+      :icon="CalendarDays"
+      title="No schedule yet"
+      description="No schedule has been published for you yet."
+    />
 
     <template v-else>
-      <!-- List view -->
-      <div v-if="viewMode === 'list'" class="flex flex-col gap-3">
-        <div
-          v-for="entry in store.entries"
-          :key="entry.id"
-          class="bg-surface-card dark:bg-surface-card rounded-2xl border border-gray-200 dark:border-white/10 px-5 py-4"
-        >
-          <div class="flex items-start justify-between">
-            <div>
-              <p class="text-sm font-semibold text-gray-900 dark:text-white">Course {{ entry.courseId.slice(0, 8) }}…</p>
-              <p class="text-xs text-text-secondary mt-1">Building {{ entry.buildingId.slice(0, 8) }}…</p>
-              <p class="text-xs text-primary mt-1">
-                {{ entry.startDate }} · {{ entry.startTime }}–{{ entry.endTime }}
-                <span v-if="entry.recurrenceType !== 'none' && entry.validUntil" class="text-text-muted ml-1">
-                  → {{ entry.validUntil }}
-                </span>
-              </p>
-            </div>
-            <span class="px-2 py-0.5 bg-primary/10 text-primary text-xs rounded-lg font-medium capitalize">
-              {{ entry.recurrenceType === 'none' ? 'Once' : entry.recurrenceType === 'every-n-days' ? `Every ${entry.recurrenceInterval}d` : entry.recurrenceType }}
-            </span>
-          </div>
-        </div>
-      </div>
+      <Transition name="fade" mode="out-in">
 
-      <!-- Calendar view -->
-      <div v-else>
-        <div class="flex items-center justify-between mb-4">
-          <button class="px-3 py-1.5 rounded-xl text-sm text-text-secondary hover:bg-black/5 dark:hover:bg-white/5" @click="prevMonth">← Prev</button>
-          <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ monthLabel }}</p>
-          <button class="px-3 py-1.5 rounded-xl text-sm text-text-secondary hover:bg-black/5 dark:hover:bg-white/5" @click="nextMonth">Next →</button>
-        </div>
-
-        <div class="grid grid-cols-7 gap-1 mb-1">
-          <div v-for="d in ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']" :key="d" class="text-center text-xs text-text-muted py-1">{{ d }}</div>
-        </div>
-
-        <div class="grid grid-cols-7 gap-1">
+        <!-- List view -->
+        <div v-if="viewMode === 'list'" key="list" class="flex flex-col gap-2">
           <div
-            v-for="(day, i) in calendarDays"
-            :key="i"
-            class="min-h-[80px] rounded-xl p-1.5"
-            :class="day ? 'bg-surface-card dark:bg-surface-card border border-gray-200 dark:border-white/10' : ''"
+            v-for="(entry, idx) in store.entries"
+            :key="entry.id"
+            class="stagger-item flex items-stretch bg-surface dark:bg-surface-card rounded-xl border border-gray-100 dark:border-white/6 shadow-sm overflow-hidden transition-all duration-200 hover:-translate-y-px hover:shadow-card"
+            :style="{ animationDelay: idx * 35 + 'ms' }"
           >
-            <template v-if="day">
-              <p class="text-xs text-text-secondary mb-1">{{ day }}</p>
-              <div
-                v-for="entry in entriesForDay(day)"
-                :key="entry.id"
-                class="px-1.5 py-0.5 rounded-md bg-primary/10 text-primary text-xs mb-0.5 truncate"
-              >
-                {{ entry.startTime }}–{{ entry.endTime }}
+            <div class="w-1 flex-shrink-0" :class="COLOR_BARS[idx % COLOR_BARS.length]" />
+            <div class="flex-1 flex items-center gap-4 px-4 py-3.5 min-w-0">
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 mb-2">
+                  <span class="text-sm font-bold text-text-primary dark:text-white truncate">
+                    {{ courseName(entry.courseId) }}
+                  </span>
+                  <span class="px-1.5 py-0.5 bg-primary/10 text-primary text-[11px] rounded-md font-semibold flex-shrink-0">
+                    {{ recurrenceLabel(entry) }}
+                  </span>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-1">
+                  <div class="flex items-center gap-1.5">
+                    <Clock class="w-3 h-3 text-text-secondary flex-shrink-0" />
+                    <span class="text-xs text-text-secondary tabular-nums font-medium">
+                      {{ formatDate(entry.startDate) }} · {{ entry.startTime }}–{{ entry.endTime }}
+                    </span>
+                  </div>
+                  <div class="flex items-center gap-1.5">
+                    <MapPin class="w-3 h-3 text-text-secondary flex-shrink-0" />
+                    <span class="text-xs text-text-secondary truncate">{{ buildingName(entry.buildingId) }}</span>
+                  </div>
+                </div>
+                <p v-if="entry.validUntil && entry.recurrenceType !== 'none'" class="text-[11px] text-text-secondary mt-1.5">
+                  Until {{ formatDate(entry.validUntil) }}
+                </p>
               </div>
-            </template>
+            </div>
           </div>
         </div>
-      </div>
+
+        <!-- Calendar view — same component as organizer -->
+        <ScheduleCalendarView
+          v-else
+          key="calendar"
+          :entries="store.entries"
+          :course-name="courseName"
+          :building-name="buildingName"
+          :trainer-label="() => ''"
+          @move="() => {}"
+        />
+
+      </Transition>
     </template>
   </div>
 </template>
