@@ -17,14 +17,12 @@ public sealed record AddCourseCommand(CourseCreate Request) : IRequest<CourseOut
                 Name = request.Request.Name,
                 Type = request.Request.Type,
                 Size = request.Request.Size,
-                PriceValue = request.Request.Price.Value,
-                PriceCurrency = request.Request.Price.Currency,
+                DurationMinutes = request.Request.DurationMinutes,
                 Description = request.Request.Description
             };
 
             await repository.AddAsync(course, cancellationToken);
-            return new CourseOut(course.Id, course.UserId, course.Name, course.Type, course.Size,
-                new CoursePrice(course.PriceValue, course.PriceCurrency), course.Description);
+            return new CourseOut(course.Id, course.UserId, course.Name, course.Type, course.Size, course.DurationMinutes, course.Description);
         }
     }
 }

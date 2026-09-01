@@ -92,13 +92,17 @@ public sealed record MeetingUpdate(string ClientId, string StartsAt, double Pric
 
 public sealed record MeetingOut(string ClientId, string StartsAt, double Price, string Id, string? UserId);
 
-public sealed record CoursePrice(double Value, string Currency);
+public sealed record CourseCreate(string Name, string Type, int? Size, int DurationMinutes, string? Description);
 
-public sealed record CourseCreate(string Name, string Type, int? Size, CoursePrice Price, string? Description);
+public sealed record CourseUpdate(string Name, string Type, int? Size, int DurationMinutes, string? Description);
 
-public sealed record CourseUpdate(string Name, string Type, int? Size, CoursePrice Price, string? Description);
+public sealed record CourseOut(string Id, string? UserId, string Name, string Type, int? Size, int? DurationMinutes, string? Description);
 
-public sealed record CourseOut(string Id, string? UserId, string Name, string Type, int? Size, CoursePrice Price, string? Description);
+public sealed record CourseAvailabilityCreate(IReadOnlyList<string> DaysOfWeek, string StartTime, string EndTime, string? ValidFrom, string? ValidTo);
+
+public sealed record CourseAvailabilityUpdate(IReadOnlyList<string> DaysOfWeek, string StartTime, string EndTime, string? ValidFrom, string? ValidTo);
+
+public sealed record CourseAvailabilityOut(string Id, string CourseId, IReadOnlyList<string> DaysOfWeek, string StartTime, string EndTime, string? ValidFrom, string? ValidTo);
 
 public sealed record ExcerciseOut(
     int Id,

@@ -16,13 +16,11 @@ public sealed record UpdateCourseCommand(string CourseId, CourseUpdate Request) 
             course.Name = request.Request.Name;
             course.Type = request.Request.Type;
             course.Size = request.Request.Size;
-            course.PriceValue = request.Request.Price.Value;
-            course.PriceCurrency = request.Request.Price.Currency;
+            course.DurationMinutes = request.Request.DurationMinutes;
             course.Description = request.Request.Description;
 
             await repository.UpdateAsync(course, cancellationToken);
-            return new CourseOut(course.Id, course.UserId, course.Name, course.Type, course.Size,
-                new CoursePrice(course.PriceValue, course.PriceCurrency), course.Description);
+            return new CourseOut(course.Id, course.UserId, course.Name, course.Type, course.Size, course.DurationMinutes, course.Description);
         }
     }
 }

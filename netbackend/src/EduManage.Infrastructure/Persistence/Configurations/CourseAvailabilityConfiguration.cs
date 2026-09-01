@@ -5,9 +5,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace EduManage.Infrastructure.Persistence.Configurations;
 
-public class BuildingAvailabilityConfiguration : IEntityTypeConfiguration<BuildingAvailability>
+public class CourseAvailabilityConfiguration : IEntityTypeConfiguration<CourseAvailability>
 {
-    public void Configure(EntityTypeBuilder<BuildingAvailability> builder)
+    public void Configure(EntityTypeBuilder<CourseAvailability> builder)
     {
         builder.HasKey(a => a.Id);
         builder.Property(a => a.DaysOfWeek)

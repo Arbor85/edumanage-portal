@@ -9,5 +9,9 @@ public class CourseConfiguration : IEntityTypeConfiguration<Course>
     public void Configure(EntityTypeBuilder<Course> builder)
     {
         builder.HasKey(c => c.Id);
+        builder.HasMany(c => c.Availabilities)
+            .WithOne(a => a.Course)
+            .HasForeignKey(a => a.CourseId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

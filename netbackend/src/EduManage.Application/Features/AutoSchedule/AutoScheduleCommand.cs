@@ -82,23 +82,32 @@ public sealed record AutoScheduleCommand(string OwnerId, string PlanId, AutoSche
                                 var endMin = string.Compare(tSlot.EndTime, bSlot.EndTime, StringComparison.Ordinal) <= 0 ? tSlot.EndTime : bSlot.EndTime;
                                 if (string.Compare(startMax, endMin, StringComparison.Ordinal) >= 0) continue;
 
+                                // Size the slot to exactly course.DurationMinutes
+                                var slotEnd = endMin;
+                                if (course?.DurationMinutes is { } dur)
+                                {
+                                    var computed = AddMinutes(startMax, dur);
+                                    if (string.Compare(computed, endMin, StringComparison.Ordinal) > 0) continue;
+                                    slotEnd = computed;
+                                }
+
                                 foreach (var day in commonDays)
                                 {
                                     var trainerConflict =
-                                        existingEntries.Any(e => e.TrainerUserId == trainerId && EntryCoversDay(e, day) && TimesOverlap(e.StartTime, e.EndTime, startMax, endMin)) ||
-                                        bookedSlots.Any(b => b.TrainerId == trainerId && b.Day == day && TimesOverlap(b.Start, b.End, startMax, endMin));
+                                        existingEntries.Any(e => e.TrainerUserId == trainerId && EntryCoversDay(e, day) && TimesOverlap(e.StartTime, e.EndTime, startMax, slotEnd)) ||
+                                        bookedSlots.Any(b => b.TrainerId == trainerId && b.Day == day && TimesOverlap(b.Start, b.End, startMax, slotEnd));
 
                                     var buildingConflict =
-                                        existingEntries.Any(e => e.BuildingId == buildingId && EntryCoversDay(e, day) && TimesOverlap(e.StartTime, e.EndTime, startMax, endMin)) ||
-                                        bookedSlots.Any(b => b.BuildingId == buildingId && b.Day == day && TimesOverlap(b.Start, b.End, startMax, endMin));
+                                        existingEntries.Any(e => e.BuildingId == buildingId && EntryCoversDay(e, day) && TimesOverlap(e.StartTime, e.EndTime, startMax, slotEnd)) ||
+                                        bookedSlots.Any(b => b.BuildingId == buildingId && b.Day == day && TimesOverlap(b.Start, b.End, startMax, slotEnd));
 
                                     if (!trainerConflict && !buildingConflict)
                                     {
-                                        bookedSlots.Add((TrainerId: trainerId, BuildingId: buildingId, Day: day, Start: startMax, End: endMin));
+                                        bookedSlots.Add((TrainerId: trainerId, BuildingId: buildingId, Day: day, Start: startMax, End: slotEnd));
                                         var startDate = NextWeekday(day, fromMax);
                                         scheduled.Add(new ScheduleEntryOut(
                                             string.Empty, request.PlanId, trainerId, buildingId, courseId,
-                                            startDate, startMax, endMin, "weekly", null, toMin, false));
+                                            startDate, startMax, slotEnd, "weekly", null, toMin, false));
                                         found = true;
                                         break;
                                     }
@@ -146,5 +155,12 @@ public sealed record AutoScheduleCommand(string OwnerId, string PlanId, AutoSche
         private static bool TimesOverlap(string s1, string e1, string s2, string e2) =>
             string.Compare(s1, e2, StringComparison.Ordinal) < 0 &&
             string.Compare(s2, e1, StringComparison.Ordinal) < 0;
+
+        private static string AddMinutes(string hhmm, int minutes)
+        {
+            var parts = hhmm.Split(':');
+            var total = int.Parse(parts[0]) * 60 + int.Parse(parts[1]) + minutes;
+            return $"{total / 60 % 24:D2}:{total % 60:D2}";
+        }
     }
 }

@@ -30,7 +30,8 @@
       "Read(//c/Program Files \\\\\\(x86\\\\\\)/Microsoft/Edge/Application/**)",
       "Bash(dotnet ef *)",
       "Bash(Remove-Item -Recurse -Force src/EduManage.Domain/obj/Debug/net9.0/*.cache)",
-      "Bash(npx vite *)"
+      "Bash(npx vite *)",
+      "Bash(grep -E \"\\\\.cs$\")"
     ]
   }
 }

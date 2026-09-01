@@ -33,6 +33,7 @@ public class EduManageDbContext : DbContext
     public DbSet<TrainerAvailability> TrainerAvailabilities { get; set; }
     public DbSet<Building> Buildings { get; set; }
     public DbSet<BuildingAvailability> BuildingAvailabilities { get; set; }
+    public DbSet<CourseAvailability> CourseAvailabilities { get; set; }
     public DbSet<TrainerCourseAssociation> TrainerCourseAssociations { get; set; }
     public DbSet<SchedulePlan> SchedulePlans { get; set; }
     public DbSet<ScheduleEntry> ScheduleEntries { get; set; }
@@ -65,6 +66,7 @@ public class EduManageDbContext : DbContext
         modelBuilder.ApplyConfiguration(new TrainerAvailabilityConfiguration());
         modelBuilder.ApplyConfiguration(new BuildingConfiguration());
         modelBuilder.ApplyConfiguration(new BuildingAvailabilityConfiguration());
+        modelBuilder.ApplyConfiguration(new CourseAvailabilityConfiguration());
         modelBuilder.ApplyConfiguration(new TrainerCourseAssociationConfiguration());
         modelBuilder.ApplyConfiguration(new SchedulePlanConfiguration());
         modelBuilder.ApplyConfiguration(new ScheduleEntryConfiguration());

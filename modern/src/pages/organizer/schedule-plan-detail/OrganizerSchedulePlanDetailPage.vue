@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, computed } from 'vue'
+import { onMounted, ref, computed, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useSchedulePlanStore } from '../../../stores/schedulePlanStore'
 import { useOrganizerStore } from '../../../stores/organizerStore'
@@ -12,8 +12,8 @@ import ScheduleEntryCard from './components/ScheduleEntryCard.vue'
 import ScheduleEntryFormModal from './components/ScheduleEntryFormModal.vue'
 import ScheduleCalendarView from './components/ScheduleCalendarView.vue'
 import AutoSchedulePanel from './components/AutoSchedulePanel.vue'
-import { ChevronLeft, Plus, ClipboardList, Calendar, Zap } from 'lucide-vue-next'
-import type { ScheduleEntryCreate } from '../../../types'
+import { ChevronLeft, Plus, ClipboardList, Calendar, Zap, Check, X } from 'lucide-vue-next'
+import type { ScheduleEntryCreate, ScheduleEntryOut } from '../../../types'
 
 const route = useRoute()
 const router = useRouter()
@@ -25,6 +25,11 @@ const toast = useToast()
 const planId = route.params.id as string
 const activeTab = ref<'manual' | 'calendar' | 'auto'>('manual')
 const isEntryFormOpen = ref(false)
+const editEntry = ref<ScheduleEntryOut | null>(null)
+const editingName = ref(false)
+const nameInput = ref('')
+const nameSaving = ref(false)
+const nameInputEl = ref<HTMLInputElement | null>(null)
 const autoRunning = ref(false)
 const confirming = ref(false)
 
@@ -56,7 +61,11 @@ async function togglePublish() {
 }
 
 async function handleAddEntry(entry: ScheduleEntryCreate) {
-  await store.addEntry(planId, entry)
+  if (editEntry.value) {
+    await store.updateEntry(planId, editEntry.value.id, entry)
+  } else {
+    await store.addEntry(planId, entry)
+  }
 }
 
 async function handleRemoveEntry(entryId: string) {
@@ -105,6 +114,30 @@ async function handleAutoConfirm() {
   }
 }
 
+function startEditName() {
+  nameInput.value = plan.value?.name ?? ''
+  editingName.value = true
+  nextTick(() => nameInputEl.value?.focus())
+}
+
+async function saveName() {
+  const name = nameInput.value.trim()
+  if (!name || !plan.value) { editingName.value = false; return }
+  nameSaving.value = true
+  try {
+    await store.updatePlan(planId, { name })
+    editingName.value = false
+  } catch {
+    toast.error('Failed to rename plan')
+  } finally {
+    nameSaving.value = false
+  }
+}
+
+function cancelEditName() {
+  editingName.value = false
+}
+
 function trainerLabel(id: string) {
   const t = organizerStore.trainers.find(t => t.trainerUserId === id)
   if (t?.firstName || t?.lastName) return [t.firstName, t.lastName].filter(Boolean).join(' ')
@@ -129,7 +162,27 @@ function courseName(id: string) {
       <BaseButton variant="ghost" size="sm" @click="router.push('/organizer/schedule-plans')">
         <ChevronLeft class="w-5 h-5" />
       </BaseButton>
-      <h1 class="text-xl font-bold text-text-primary dark:text-white flex-1 truncate">
+      <div v-if="editingName" class="flex items-center gap-1.5 flex-1 min-w-0">
+        <input
+          ref="nameInputEl"
+          v-model="nameInput"
+          class="flex-1 min-w-0 text-xl font-bold bg-transparent border-b-2 border-primary outline-none text-text-primary dark:text-white"
+          @keydown.enter="saveName"
+          @keydown.escape="cancelEditName"
+        />
+        <BaseButton size="sm" variant="ghost" :disabled="nameSaving" @click="saveName">
+          <Check class="w-4 h-4 text-primary" />
+        </BaseButton>
+        <BaseButton size="sm" variant="ghost" @click="cancelEditName">
+          <X class="w-4 h-4 text-text-secondary" />
+        </BaseButton>
+      </div>
+      <h1
+        v-else
+        class="text-xl font-bold text-text-primary dark:text-white flex-1 truncate cursor-pointer hover:text-primary transition-colors"
+        :title="'Click to rename'"
+        @click="startEditName"
+      >
         {{ plan?.name ?? 'Schedule Plan' }}
       </h1>
       <BaseBadge
@@ -145,65 +198,68 @@ function courseName(id: string) {
       </BaseButton>
     </div>
 
-    <!-- Tabs -->
-    <div class="flex gap-1 mb-6 bg-black/5 dark:bg-white/5 rounded-xl p-1 w-fit">
-      <button
-        class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-        :class="activeTab === 'manual'
-          ? 'bg-white dark:bg-white/10 text-text-primary dark:text-white shadow-sm'
-          : 'text-text-secondary'"
-        @click="activeTab = 'manual'"
-      >
-        <ClipboardList class="w-4 h-4" /> Manual
-      </button>
-      <button
-        class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-        :class="activeTab === 'calendar'
-          ? 'bg-white dark:bg-white/10 text-text-primary dark:text-white shadow-sm'
-          : 'text-text-secondary'"
-        @click="activeTab = 'calendar'"
-      >
-        <Calendar class="w-4 h-4" /> Calendar
-      </button>
-      <button
-        class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-        :class="activeTab === 'auto'
-          ? 'bg-white dark:bg-white/10 text-text-primary dark:text-white shadow-sm'
-          : 'text-text-secondary'"
-        @click="activeTab = 'auto'"
-      >
-        <Zap class="w-4 h-4" /> Auto
-      </button>
+    <!-- Tabs + action bar -->
+    <div class="flex items-center gap-3 mb-6">
+      <div class="flex gap-1 bg-black/5 dark:bg-white/5 rounded-xl p-1">
+        <button
+          class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-150"
+          :class="activeTab === 'manual'
+            ? 'bg-white dark:bg-white/10 text-text-primary dark:text-white shadow-sm'
+            : 'text-text-secondary hover:text-text-primary dark:hover:text-white'"
+          @click="activeTab = 'manual'"
+        >
+          <ClipboardList class="w-4 h-4" /> Manual
+          <span v-if="store.entries.length" class="ml-0.5 px-1.5 py-0.5 bg-primary/15 text-primary text-[10px] font-bold rounded-md tabular-nums">
+            {{ store.entries.length }}
+          </span>
+        </button>
+        <button
+          class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-150"
+          :class="activeTab === 'calendar'
+            ? 'bg-white dark:bg-white/10 text-text-primary dark:text-white shadow-sm'
+            : 'text-text-secondary hover:text-text-primary dark:hover:text-white'"
+          @click="activeTab = 'calendar'"
+        >
+          <Calendar class="w-4 h-4" /> Calendar
+        </button>
+        <button
+          class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-150"
+          :class="activeTab === 'auto'
+            ? 'bg-white dark:bg-white/10 text-text-primary dark:text-white shadow-sm'
+            : 'text-text-secondary hover:text-text-primary dark:hover:text-white'"
+          @click="activeTab = 'auto'"
+        >
+          <Zap class="w-4 h-4" /> Auto
+        </button>
+      </div>
+      <div class="flex-1" />
+      <BaseButton v-if="activeTab === 'manual'" variant="primary" size="sm" @click="editEntry = null; isEntryFormOpen = true">
+        <Plus class="w-4 h-4" /> Add Entry
+      </BaseButton>
     </div>
 
     <!-- Manual tab -->
     <div v-if="activeTab === 'manual'">
-      <div class="flex justify-between items-center mb-4">
-        <p class="text-sm text-text-secondary">
-          {{ store.entries.length }} {{ store.entries.length === 1 ? 'entry' : 'entries' }}
-        </p>
-        <BaseButton variant="primary" size="sm" @click="isEntryFormOpen = true">
-          <Plus class="w-4 h-4" /> Add Entry
-        </BaseButton>
-      </div>
-
       <EmptyState
         v-if="store.entries.length === 0"
         :icon="ClipboardList"
         title="No entries yet"
         description="Add schedule entries manually or use Auto to generate them."
         action-label="Add Entry"
-        @action="isEntryFormOpen = true"
+        @action="editEntry = null; isEntryFormOpen = true"
       />
 
       <div class="flex flex-col gap-2">
         <ScheduleEntryCard
-          v-for="entry in store.entries"
+          v-for="(entry, idx) in store.entries"
           :key="entry.id"
           :entry="entry"
+          :color-index="idx"
           :course-name="courseName(entry.courseId)"
           :trainer-label="trainerLabel(entry.trainerUserId)"
           :building-name="buildingName(entry.buildingId)"
+          :style="{ animationDelay: idx * 40 + 'ms' }"
+          @edit="editEntry = $event; isEntryFormOpen = true"
           @delete="handleRemoveEntry"
         />
       </div>
@@ -238,7 +294,8 @@ function courseName(id: string) {
       :buildings="store.buildings"
       :courses="courseStore.courses"
       :trainer-courses="organizerStore.trainerCourses"
-      @close="isEntryFormOpen = false"
+      :entry="editEntry"
+      @close="isEntryFormOpen = false; editEntry = null"
       @saved="handleAddEntry"
     />
   </div>

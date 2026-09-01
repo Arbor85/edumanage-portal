@@ -10,6 +10,7 @@ import type {
   CourseOut,
   TrainerCourseAssociationOut,
   ScheduleEntryCreate,
+  ScheduleEntryOut,
 } from '../../../../types'
 
 const props = defineProps<{
@@ -18,6 +19,7 @@ const props = defineProps<{
   buildings: BuildingOut[]
   courses: CourseOut[]
   trainerCourses: TrainerCourseAssociationOut[]
+  entry?: ScheduleEntryOut | null
 }>()
 const emit = defineEmits<{ close: []; saved: [entry: ScheduleEntryCreate] }>()
 
@@ -55,19 +57,39 @@ const durationShortcut = ref<DurationShortcut>(60)
 
 watch(() => props.open, (val) => {
   if (val) {
-    const today = new Date().toISOString().slice(0, 10)
-    form.value = {
-      trainerUserId: '',
-      buildingId: '',
-      courseId: '',
-      startDate: today,
-      startTime: '09:00',
-      endTime: '10:00',
-      recurrenceType: 'none',
-      recurrenceInterval: 2,
-      validUntil: '',
+    if (props.entry) {
+      const e = props.entry
+      form.value = {
+        trainerUserId: e.trainerUserId,
+        buildingId: e.buildingId,
+        courseId: e.courseId,
+        startDate: e.startDate,
+        startTime: e.startTime,
+        endTime: e.endTime,
+        recurrenceType: e.recurrenceType,
+        recurrenceInterval: e.recurrenceInterval ?? 2,
+        validUntil: e.validUntil ?? '',
+      }
+      const [sh, sm] = e.startTime.split(':').map(Number)
+      const [eh, em] = e.endTime.split(':').map(Number)
+      const dur = (eh * 60 + em) - (sh * 60 + sm)
+      const exact = ([30, 60, 90, 120] as const).find(v => v === dur)
+      durationShortcut.value = exact ?? 'custom'
+    } else {
+      const today = new Date().toISOString().slice(0, 10)
+      form.value = {
+        trainerUserId: '',
+        buildingId: '',
+        courseId: '',
+        startDate: today,
+        startTime: '09:00',
+        endTime: '10:00',
+        recurrenceType: 'none',
+        recurrenceInterval: 2,
+        validUntil: '',
+      }
+      durationShortcut.value = 60
     }
-    durationShortcut.value = 60
   }
 })
 
@@ -87,6 +109,21 @@ function applyDuration(shortcut: DurationShortcut) {
 watch(() => form.value.startTime, () => {
   if (durationShortcut.value !== 'custom') {
     applyDuration(durationShortcut.value)
+  }
+})
+
+watch(() => form.value.courseId, (id) => {
+  const course = props.courses.find(c => c.id === id)
+  const mins = course?.durationMinutes
+  if (!mins) return
+  const exact = ([30, 60, 90, 120] as const).find(v => v === mins)
+  if (exact) {
+    applyDuration(exact)
+  } else {
+    durationShortcut.value = 'custom'
+    const [h, m] = form.value.startTime.split(':').map(Number)
+    const total = h * 60 + m + mins
+    form.value.endTime = `${String(Math.floor(total / 60) % 24).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`
   }
 })
 
@@ -125,7 +162,7 @@ function save() {
 </script>
 
 <template>
-  <BaseModal :open="open" title="New Schedule Entry" size="lg" @close="emit('close')">
+  <BaseModal :open="open" :title="entry ? 'Edit Schedule Entry' : 'New Schedule Entry'" size="lg" @close="emit('close')">
     <div class="space-y-5">
       <!-- Trainer / Course / Building -->
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -215,7 +252,7 @@ function save() {
           :disabled="!form.trainerUserId || !form.buildingId || !form.courseId || !form.startDate"
           @click="save"
         >
-          Add Entry
+          {{ entry ? 'Save' : 'Add Entry' }}
         </BaseButton>
       </div>
     </template>

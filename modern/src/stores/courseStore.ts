@@ -1,11 +1,12 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import type { CourseOut, CourseCreate, CourseUpdate } from '../types'
+import type { CourseOut, CourseCreate, CourseUpdate, CourseAvailabilityOut, CourseAvailabilityCreate } from '../types'
 import * as coursesApi from '../services/coursesApi'
 
 export const useCourseStore = defineStore('course', () => {
   const courses = ref<CourseOut[]>([])
   const isLoading = ref(false)
+  const courseAvailabilities = ref<Record<string, CourseAvailabilityOut[]>>({})
 
   async function fetch() {
     isLoading.value = true
@@ -32,7 +33,31 @@ export const useCourseStore = defineStore('course', () => {
   async function remove(id: string) {
     await coursesApi.deleteCourse(id)
     courses.value = courses.value.filter((c) => c.id !== id)
+    delete courseAvailabilities.value[id]
   }
 
-  return { courses, isLoading, fetch, create, update, remove }
+  // ── Availability ──────────────────────────────────────────────
+
+  async function fetchCourseAvailability(courseId: string) {
+    courseAvailabilities.value[courseId] = await coursesApi.listCourseAvailability(courseId)
+  }
+
+  async function addCourseAvailability(courseId: string, d: CourseAvailabilityCreate) {
+    const created = await coursesApi.addCourseAvailability(courseId, d)
+    if (!courseAvailabilities.value[courseId]) courseAvailabilities.value[courseId] = []
+    courseAvailabilities.value[courseId].push(created)
+  }
+
+  async function deleteCourseAvailability(courseId: string, availId: string) {
+    await coursesApi.deleteCourseAvailability(courseId, availId)
+    if (courseAvailabilities.value[courseId]) {
+      courseAvailabilities.value[courseId] = courseAvailabilities.value[courseId].filter((a) => a.id !== availId)
+    }
+  }
+
+  return {
+    courses, isLoading, courseAvailabilities,
+    fetch, create, update, remove,
+    fetchCourseAvailability, addCourseAvailability, deleteCourseAvailability,
+  }
 })

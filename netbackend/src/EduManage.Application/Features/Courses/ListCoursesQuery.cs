@@ -11,8 +11,7 @@ public sealed record ListCoursesQuery : IRequest<IReadOnlyList<CourseOut>>
         {
             var courses = await repository.ListAsync(cancellationToken);
             return courses.Select(c => new CourseOut(
-                c.Id, c.UserId, c.Name, c.Type, c.Size,
-                new CoursePrice(c.PriceValue, c.PriceCurrency), c.Description)).ToList();
+                c.Id, c.UserId, c.Name, c.Type, c.Size, c.DurationMinutes, c.Description)).ToList();
         }
     }
 }

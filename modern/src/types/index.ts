@@ -340,18 +340,13 @@ export interface MeetingUpdate {
 // ─── Courses ──────────────────────────────────────────────────
 // API path: /api/courses
 
-export interface CoursePrice {
-  value: number
-  currency: string | null
-}
-
 export interface CourseOut {
   id: string | null
   userId: string | null
   name: string | null
   type: string | null        // "online" | "in-person" | "hybrid"
   size: number | null
-  price: CoursePrice | null
+  durationMinutes: number | null
   description: string | null
   tags: string[] | null
 }
@@ -360,7 +355,7 @@ export interface CourseCreate {
   name: string | null
   type: string | null
   size: number | null
-  price: CoursePrice | null
+  durationMinutes: number
   description: string | null
   tags: string[] | null
 }
@@ -369,9 +364,35 @@ export interface CourseUpdate {
   name: string | null
   type: string | null
   size: number | null
-  price: CoursePrice | null
+  durationMinutes: number
   description: string | null
   tags: string[] | null
+}
+
+export interface CourseAvailabilityOut {
+  id: string
+  courseId: string
+  daysOfWeek: string[]
+  startTime: string
+  endTime: string
+  validFrom: string | null
+  validTo: string | null
+}
+
+export interface CourseAvailabilityCreate {
+  daysOfWeek: string[]
+  startTime: string
+  endTime: string
+  validFrom: string | null
+  validTo: string | null
+}
+
+export interface CourseAvailabilityUpdate {
+  daysOfWeek: string[]
+  startTime: string
+  endTime: string
+  validFrom: string | null
+  validTo: string | null
 }
 
 // ─── Equipment ────────────────────────────────────────────────
