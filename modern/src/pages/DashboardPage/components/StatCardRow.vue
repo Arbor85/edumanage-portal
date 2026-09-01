@@ -15,22 +15,24 @@ const routineStore = useRoutineStore()
 const now = new Date().toISOString()
 
 const stats = computed(() => [
-  { label: 'Active Clients', value: clientStore.active.length, icon: User, iconBg: 'bg-blue-50 dark:bg-blue-900/20' },
+  { label: 'Active clients', value: clientStore.active.length, icon: User, iconBg: 'bg-blue-50 dark:bg-blue-900/20' },
   { label: 'Routines', value: routineStore.routines.length, icon: ClipboardList, iconBg: 'bg-purple-50 dark:bg-purple-900/20' },
-  { label: 'Upcoming Meetings', value: meetingStore.meetings.filter((m) => (m.date ?? '') >= now).length, icon: Calendar, iconBg: 'bg-yellow-50 dark:bg-yellow-900/20' },
-  { label: 'Workouts This Month', value: workoutStore.history.filter((w) => w.completedAt?.slice(0, 7) === now.slice(0, 7)).length, icon: Dumbbell, iconBg: 'bg-green-50 dark:bg-green-900/20' },
+  { label: 'Upcoming meetings', value: meetingStore.meetings.filter((m) => (m.date ?? '') >= now).length, icon: Calendar, iconBg: 'bg-yellow-50 dark:bg-yellow-900/20' },
+  { label: 'Workouts this month', value: workoutStore.history.filter((w) => w.completedAt?.slice(0, 7) === now.slice(0, 7)).length, icon: Dumbbell, iconBg: 'bg-green-50 dark:bg-green-900/20' },
 ])
 </script>
 
 <template>
   <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
     <StatCard
-      v-for="stat in stats"
+      v-for="(stat, i) in stats"
       :key="stat.label"
       :label="stat.label"
       :value="stat.value"
       :icon="stat.icon"
       :icon-bg="stat.iconBg"
+      class="stagger-item"
+      :style="{ animationDelay: `${i * 60}ms` }"
     />
   </div>
 </template>

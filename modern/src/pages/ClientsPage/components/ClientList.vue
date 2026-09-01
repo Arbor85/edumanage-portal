@@ -66,13 +66,14 @@ async function handleDelete() {
 
     <EmptyState v-else-if="!clients.length" :icon="User" title="No clients yet" description="Invite your first client." />
 
-    <div v-else class="flex flex-col gap-3 custom-scrollbar">
+    <div v-else class="flex flex-col gap-3">
       <div
-        v-for="client in paginated"
+        v-for="(client, i) in paginated"
         :key="client.invitationCode ?? ''"
-        class="bg-surface-card border border-white/5 rounded-2xl p-4 flex items-center gap-4
-               hover:border-white/10 hover:-translate-y-0.5 hover:shadow-lg
-               cursor-pointer transition-all active:scale-[0.99]"
+        class="stagger-item bg-surface-card border border-white/5 rounded-2xl p-4 flex items-center gap-4
+               hover:border-white/10 hover:-translate-y-0.5 hover:shadow-raised
+               cursor-pointer transition-all duration-200 active:scale-[0.99]"
+        :style="{ animationDelay: `${Math.min(i * 40, 280)}ms` }"
         @click="router.push(`/coach/clients/${client.invitationCode}`)"
       >
         <!-- Avatar with engagement ring -->

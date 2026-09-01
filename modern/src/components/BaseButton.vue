@@ -14,16 +14,16 @@ defineProps<{
     :type="type ?? 'button'"
     :disabled="disabled || loading"
     :class="[
-      'inline-flex items-center justify-center gap-2 font-medium rounded-xl transition-all active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
+      'inline-flex items-center justify-center gap-2 font-semibold rounded-xl transition-all duration-150 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-transparent select-none',
       size === 'sm' ? 'px-3 py-1.5 text-sm min-h-[36px]' : size === 'lg' ? 'px-6 py-3 text-base min-h-[52px]' : 'px-4 py-2.5 text-sm min-h-[44px]',
-      variant === 'primary' ? 'bg-primary text-white hover:bg-primary-dark disabled:opacity-50' :
-      variant === 'danger'  ? 'bg-red-500 text-white hover:bg-red-600 disabled:opacity-50' :
-      variant === 'ghost'   ? 'bg-transparent text-text-secondary hover:bg-gray-100 dark:hover:bg-white/10 disabled:opacity-50' :
-                              'bg-gray-100 dark:bg-white/10 text-text-primary dark:text-white hover:bg-gray-200 dark:hover:bg-white/20 disabled:opacity-50',
+      variant === 'primary' ? 'bg-primary text-white hover:bg-primary-dark shadow-glow-sm hover:shadow-glow disabled:opacity-50 disabled:shadow-none' :
+      variant === 'danger'  ? 'bg-red-500 text-white hover:bg-red-600 shadow-sm hover:shadow-md disabled:opacity-50' :
+      variant === 'ghost'   ? 'bg-transparent text-text-secondary hover:bg-gray-100 dark:hover:bg-white/10 hover:text-text-primary dark:hover:text-white disabled:opacity-50' :
+                              'bg-gray-100 dark:bg-white/10 text-text-primary dark:text-white hover:bg-gray-200 dark:hover:bg-white/20 shadow-sm disabled:opacity-50',
       fullWidth ? 'w-full' : '',
     ]"
   >
-    <span v-if="loading" class="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+    <span v-if="loading" class="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin flex-shrink-0" />
     <slot />
   </button>
 </template>

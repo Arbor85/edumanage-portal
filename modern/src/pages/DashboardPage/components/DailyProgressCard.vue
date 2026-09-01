@@ -17,9 +17,9 @@ const percent = computed(() => Math.min(100, Math.round((thisWeek.value / GOAL) 
 </script>
 
 <template>
-  <div class="bg-white dark:bg-surface-dark rounded-2xl border border-gray-100 dark:border-white/10 p-4 flex flex-col items-center gap-3">
-    <p class="text-sm font-semibold text-text-primary dark:text-white self-start">Weekly Progress</p>
+  <div class="bg-white dark:bg-surface-card rounded-2xl border border-gray-100/80 dark:border-white/5 shadow-card p-4 flex flex-col items-center gap-3">
+    <p class="text-sm font-bold text-text-primary dark:text-white self-start tracking-tight">Weekly progress</p>
     <ProgressRing :percent="percent" :size="120" :label="`${thisWeek}/${GOAL}`" />
-    <p class="text-xs text-text-secondary">workouts this week</p>
+    <p class="text-xs font-medium text-text-secondary">workouts this week</p>
   </div>
 </template>

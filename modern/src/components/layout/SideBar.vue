@@ -116,11 +116,11 @@ const organizerActiveIdx = computed(() => organizerItems.findIndex(item => isAct
     />
 
     <!-- Logo -->
-    <div class="relative z-10 flex items-center gap-2 px-2 mb-8">
-      <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white font-bold text-sm shadow-glow">
+    <div class="relative z-10 flex items-center gap-2.5 px-2 mb-8">
+      <div class="w-8 h-8 bg-primary rounded-xl flex items-center justify-center text-white font-bold text-sm shadow-glow flex-shrink-0">
         E
       </div>
-      <span class="text-lg font-bold text-gray-900 dark:text-white">EduManage</span>
+      <span class="text-[15px] font-bold tracking-tight text-gray-900 dark:text-white">EduManage</span>
     </div>
 
     <!-- Client nav -->
@@ -155,7 +155,7 @@ const organizerActiveIdx = computed(() => organizerItems.findIndex(item => isAct
     <!-- Coach section -->
     <div v-if="authStore.isTrainer" class="relative z-10 mt-4">
       <div class="border-t border-gray-200 dark:border-white/10 pt-4">
-        <p class="px-3 mb-2 text-xs font-bold tracking-widest uppercase text-text-muted">Coach</p>
+        <p class="px-3 mb-2 text-[10px] font-bold tracking-[0.12em] uppercase text-text-muted/80">Coach</p>
         <nav ref="coachNavEl" class="relative flex flex-col gap-1">
           <!-- Sliding active pill -->
           <div
@@ -185,7 +185,7 @@ const organizerActiveIdx = computed(() => organizerItems.findIndex(item => isAct
     <!-- Organizer section -->
     <div v-if="authStore.isOrganizer" class="relative z-10 mt-4">
       <div class="border-t border-gray-200 dark:border-white/10 pt-4">
-        <p class="px-3 mb-2 text-xs font-bold tracking-widest uppercase text-text-muted">Organizer</p>
+        <p class="px-3 mb-2 text-[10px] font-bold tracking-[0.12em] uppercase text-text-muted/80">Organizer</p>
         <nav class="relative flex flex-col gap-1">
           <RouterLink
             v-for="item in organizerItems"

@@ -29,16 +29,18 @@ watch(() => props.modelValue, (val) => { if (val !== local.value) local.value = 
       <input
         v-model="local"
         :placeholder="placeholder ?? 'Search...'"
-        class="w-full pl-9 pr-4 py-2.5 min-h-[44px] rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-surface-dark text-sm text-text-primary dark:text-white placeholder:text-text-secondary outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        class="w-full pl-9 pr-4 py-2.5 min-h-[44px] rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-surface-dark text-sm text-text-primary dark:text-white placeholder:text-text-secondary outline-none
+          transition-[border-color,box-shadow] duration-150
+          hover:border-gray-300 dark:hover:border-white/20
+          focus-visible:ring-2 focus-visible:ring-primary focus-visible:border-primary"
       />
     </div>
     <button
-      class="w-11 h-11 flex items-center justify-center rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-surface-dark text-text-secondary hover:text-primary transition-colors focus-visible:ring-2 focus-visible:ring-primary"
-      :class="loading ? 'animate-spin' : ''"
+      class="w-11 h-11 flex items-center justify-center rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-surface-dark text-text-secondary hover:text-primary hover:border-primary/30 transition-all duration-150 focus-visible:ring-2 focus-visible:ring-primary"
       aria-label="Refresh"
       @click="$emit('refresh')"
     >
-      <RefreshCw class="w-4 h-4" />
+      <RefreshCw class="w-4 h-4" :class="loading ? 'animate-spin' : ''" />
     </button>
   </div>
 </template>

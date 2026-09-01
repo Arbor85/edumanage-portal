@@ -9,7 +9,7 @@ const { toasts } = useToast()
 <template>
   <Teleport to="body">
     <div
-      class="fixed bottom-4 right-4 z-[9999] flex flex-col gap-2"
+      class="fixed bottom-20 right-4 lg:bottom-4 z-[100] flex flex-col gap-2"
       aria-live="polite"
       aria-label="Notifications"
     >
@@ -17,17 +17,17 @@ const { toasts } = useToast()
         <div
           v-for="toast in toasts"
           :key="toast.id"
-          class="flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg text-sm font-medium min-w-[240px] max-w-xs"
+          class="flex items-center gap-3 px-4 py-3 rounded-2xl shadow-float text-sm font-semibold min-w-[240px] max-w-xs backdrop-blur-sm border"
           :class="{
-            'bg-primary text-white': toast.type === 'success',
-            'bg-red-500 text-white': toast.type === 'error',
-            'bg-gray-800 text-white': toast.type === 'info',
+            'bg-primary text-white border-primary-dark/30': toast.type === 'success',
+            'bg-red-500 text-white border-red-600/30': toast.type === 'error',
+            'bg-gray-900 text-white border-white/10 dark:bg-surface-elevated dark:border-white/10': toast.type === 'info',
           }"
         >
-          <CheckCircle v-if="toast.type === 'success'" class="w-4 h-4 flex-shrink-0" />
-          <XCircle v-else-if="toast.type === 'error'" class="w-4 h-4 flex-shrink-0" />
-          <Info v-else class="w-4 h-4 flex-shrink-0" />
-          {{ toast.message }}
+          <CheckCircle v-if="toast.type === 'success'" class="w-4 h-4 flex-shrink-0 opacity-90" />
+          <XCircle v-else-if="toast.type === 'error'" class="w-4 h-4 flex-shrink-0 opacity-90" />
+          <Info v-else class="w-4 h-4 flex-shrink-0 opacity-90" />
+          <span class="leading-snug">{{ toast.message }}</span>
         </div>
       </TransitionGroup>
     </div>
@@ -41,11 +41,11 @@ const { toasts } = useToast()
 }
 .toast-enter-from {
   opacity: 0;
-  transform: translateY(12px);
+  transform: translateY(12px) scale(0.96);
 }
 .toast-leave-to {
   opacity: 0;
-  transform: translateX(24px);
+  transform: translateX(24px) scale(0.96);
 }
 
 @media (prefers-reduced-motion: reduce) {

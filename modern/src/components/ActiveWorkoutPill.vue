@@ -36,23 +36,43 @@ const exerciseName = computed(() => {
     <button
       v-if="workoutStore.activeWorkout"
       class="lg:hidden fixed bottom-[72px] left-1/2 -translate-x-1/2 z-50
-             flex items-center gap-2.5 px-4 py-2.5
+             flex items-center gap-2.5 px-4 py-3
              bg-primary text-white rounded-full shadow-glow
              text-sm font-semibold whitespace-nowrap
-             active:scale-[0.97] transition-transform"
+             active:scale-[0.95] hover:bg-primary-dark hover:shadow-glow
+             transition-all duration-150"
       @click="router.push('/workout/active')"
     >
-      <span class="w-2 h-2 rounded-full bg-white animate-pulse flex-shrink-0" />
+      <span class="w-2 h-2 rounded-full bg-white/90 animate-pulse flex-shrink-0" />
       <Dumbbell class="w-4 h-4 flex-shrink-0" />
       <span class="max-w-[140px] truncate">{{ exerciseName }}</span>
-      <span class="font-mono text-white/80">{{ elapsed }}</span>
+      <span class="font-mono tabular-nums text-white/80 text-xs">{{ elapsed }}</span>
     </button>
   </Transition>
 </template>
 
 <style scoped>
-.pill-enter-active,
-.pill-leave-active { transition: opacity 0.2s ease, transform 0.2s ease; }
-.pill-enter-from,
-.pill-leave-to { opacity: 0; transform: translateX(-50%) translateY(8px); }
+.pill-enter-active {
+  transition: opacity 0.3s cubic-bezier(0.23, 1, 0.32, 1), transform 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+}
+.pill-leave-active {
+  transition: opacity 0.2s ease-in, transform 0.2s ease-in;
+}
+.pill-enter-from {
+  opacity: 0;
+  transform: translateX(-50%) translateY(16px) scale(0.9);
+}
+.pill-leave-to {
+  opacity: 0;
+  transform: translateX(-50%) translateY(8px) scale(0.95);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pill-enter-active, .pill-leave-active {
+    transition: opacity 0.15s ease !important;
+  }
+  .pill-enter-from, .pill-leave-to {
+    transform: translateX(-50%) !important;
+  }
+}
 </style>

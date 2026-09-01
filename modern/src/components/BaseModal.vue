@@ -27,13 +27,13 @@ onUnmounted(() => { document.body.style.overflow = '' })
       >
         <!-- Backdrop -->
         <div
-          class="modal-backdrop absolute inset-0 bg-black/55 backdrop-blur-sm"
+          class="modal-backdrop absolute inset-0 bg-black/60 backdrop-blur-[2px]"
           @click="emit('close')"
         />
 
         <!-- Panel -->
         <div
-          class="modal-panel relative bg-white dark:bg-surface-elevated rounded-t-3xl sm:rounded-2xl shadow-2xl flex flex-col w-full max-h-[92dvh] overflow-hidden"
+          class="modal-panel relative bg-white dark:bg-surface-elevated rounded-t-3xl sm:rounded-2xl shadow-float flex flex-col w-full max-h-[92dvh] overflow-hidden border border-gray-100/50 dark:border-white/8"
           :class="{
             'sm:max-w-sm':  size === 'sm',
             'sm:max-w-lg':  size === 'md' || !size,
@@ -43,12 +43,12 @@ onUnmounted(() => { document.body.style.overflow = '' })
         >
           <!-- Drag handle (mobile) -->
           <div class="sm:hidden flex justify-center pt-3 pb-1 flex-shrink-0">
-            <div class="w-9 h-1 rounded-full bg-gray-200 dark:bg-white/20" />
+            <div class="w-10 h-1 rounded-full bg-gray-200 dark:bg-white/20" />
           </div>
 
           <!-- Header -->
-          <div v-if="title" class="flex items-center justify-between px-5 py-3.5 border-b border-gray-100 dark:border-white/8 flex-shrink-0">
-            <h2 class="text-base font-semibold text-text-primary dark:text-white tracking-tight">{{ title }}</h2>
+          <div v-if="title" class="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-white/8 flex-shrink-0">
+            <h2 class="text-base font-bold text-text-primary dark:text-white tracking-tight">{{ title }}</h2>
             <button
               class="close-btn"
               aria-label="Close dialog"
@@ -64,7 +64,7 @@ onUnmounted(() => { document.body.style.overflow = '' })
           </div>
 
           <!-- Footer slot -->
-          <div v-if="$slots.footer" class="px-5 py-4 border-t border-gray-100 dark:border-white/8 flex-shrink-0">
+          <div v-if="$slots.footer" class="px-5 py-4 border-t border-gray-100 dark:border-white/8 flex-shrink-0 bg-gray-50/50 dark:bg-white/[0.02]">
             <slot name="footer" />
           </div>
         </div>
@@ -74,7 +74,6 @@ onUnmounted(() => { document.body.style.overflow = '' })
 </template>
 
 <style scoped>
-/* Backdrop: same timing both ways (it's just opacity) */
 .modal-backdrop {
   transition: opacity 220ms ease-out;
 }
@@ -83,11 +82,10 @@ onUnmounted(() => { document.body.style.overflow = '' })
   opacity: 0;
 }
 
-/* Panel: asymmetric — enter is slower (user is reading), exit is snappy */
 .modal-panel {
   transition:
-    transform 260ms cubic-bezier(0.23, 1, 0.32, 1),
-    opacity   260ms cubic-bezier(0.23, 1, 0.32, 1);
+    transform 280ms cubic-bezier(0.23, 1, 0.32, 1),
+    opacity   280ms cubic-bezier(0.23, 1, 0.32, 1);
 }
 .modal-leave-active .modal-panel {
   transition:
@@ -95,7 +93,6 @@ onUnmounted(() => { document.body.style.overflow = '' })
     opacity   160ms ease-in;
 }
 
-/* Mobile: sheet slides up from bottom */
 @media (max-width: 639px) {
   .modal-enter-from .modal-panel,
   .modal-leave-to   .modal-panel {
@@ -104,11 +101,10 @@ onUnmounted(() => { document.body.style.overflow = '' })
   }
 }
 
-/* Desktop: scale + fade from center */
 @media (min-width: 640px) {
   .modal-enter-from .modal-panel,
   .modal-leave-to   .modal-panel {
-    transform: scale(0.96) translateY(8px);
+    transform: scale(0.95) translateY(10px);
     opacity: 0;
   }
 }
@@ -117,26 +113,26 @@ onUnmounted(() => { document.body.style.overflow = '' })
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 40px;
-  min-height: 40px;
-  border-radius: 10px;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
   color: rgb(107 114 128);
-  transition: background 150ms ease-out, color 150ms ease-out;
+  transition: background 150ms ease-out, color 150ms ease-out, transform 100ms ease;
+  flex-shrink: 0;
 }
 .close-btn:hover {
   background: rgb(243 244 246);
   color: rgb(17 24 39);
 }
 :global(.dark) .close-btn {
-  color: rgba(255,255,255,0.5);
+  color: rgba(255,255,255,0.45);
 }
 :global(.dark) .close-btn:hover {
   background: rgba(255,255,255,0.08);
   color: white;
 }
 .close-btn:active {
-  transform: scale(0.93);
-  transition: transform 100ms cubic-bezier(0.23, 1, 0.32, 1);
+  transform: scale(0.90);
 }
 
 @media (prefers-reduced-motion: reduce) {

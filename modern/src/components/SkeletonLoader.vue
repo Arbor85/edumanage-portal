@@ -11,7 +11,7 @@ defineProps<{
   <div
     :style="{ width, height }"
     :class="[
-      'animate-pulse bg-surface-input dark:bg-surface-input',
+      'skeleton-shimmer',
       rounded ?? 'rounded-lg',
       $props.class ?? '',
     ]"
