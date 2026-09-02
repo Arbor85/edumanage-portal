@@ -33,7 +33,14 @@
       "Bash(npx vite *)",
       "Bash(grep -E \"\\\\.cs$\")",
       "Bash(npm start *)",
-      "Bash(npx expo *)"
+      "Bash(npx expo *)",
+      "Bash(dotnet add *)",
+      "Bash(dotnet sln *)",
+      "Bash(python \"C:/Users/lukasz.wojcik/source/repos/edumanage-portal/netbackend/src/EduManage.Api/query_db.py\")",
+      "Bash(python -c ' *)",
+      "Bash(python *)",
+      "Bash(taskkill /PID 25348 /F)",
+      "Bash(xargs cat *)"
     ]
   }
 }
