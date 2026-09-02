@@ -37,6 +37,7 @@ public class EduManageDbContext : DbContext
     public DbSet<TrainerCourseAssociation> TrainerCourseAssociations { get; set; }
     public DbSet<SchedulePlan> SchedulePlans { get; set; }
     public DbSet<ScheduleEntry> ScheduleEntries { get; set; }
+    public DbSet<McpApiKey> McpApiKeys { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

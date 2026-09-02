@@ -37,6 +37,7 @@ public static class DependencyInjection
         services.AddScoped<ITrainerCourseAssociationRepository, TrainerCourseAssociationRepository>();
         services.AddScoped<ISchedulePlanRepository, SchedulePlanRepository>();
         services.AddScoped<IScheduleEntryRepository, ScheduleEntryRepository>();
+        services.AddScoped<IApiKeyRepository, ApiKeyRepository>();
 
         return services;
     }

@@ -86,6 +86,10 @@ public sealed record PlanOut(
 
 public sealed record PlanStatusUpdate(string Status);
 
+public sealed record ApiKeyCreate(string Name);
+public sealed record ApiKeyOut(string Id, string Name, string CreatedAt);
+public sealed record ApiKeyCreatedOut(string Id, string Name, string Key, string CreatedAt);
+
 public sealed record MeetingCreate(string ClientId, string StartsAt, double Price);
 
 public sealed record MeetingUpdate(string ClientId, string StartsAt, double Price);

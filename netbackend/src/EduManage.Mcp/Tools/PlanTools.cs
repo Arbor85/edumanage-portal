@@ -1,7 +1,7 @@
 using EduManage.Application.Contracts;
 using EduManage.Application.Features.Plans;
+using EduManage.Mcp.Services;
 using MediatR;
-using Microsoft.Extensions.Options;
 using ModelContextProtocol.Server;
 using System.ComponentModel;
 using System.Text.Json;
@@ -9,15 +9,15 @@ using System.Text.Json;
 namespace EduManage.Mcp.Tools;
 
 [McpServerToolType]
-public sealed class PlanTools(ISender sender, IOptions<McpSettings> settings)
+public sealed class PlanTools(ISender sender, ICurrentTrainerService trainerService)
 {
     private static readonly JsonSerializerOptions JsonOpts = new(JsonSerializerDefaults.Web);
-    private string UserId => settings.Value.TrainerUserId;
+    private string UserId => trainerService.UserId;
 
     [McpServerTool, Description("List all training plans. Returns plan summaries with id, name, status, and clientId.")]
     public async Task<string> ListPlans(
-        [Description("Optional client invitation code to show plans for a specific client only")] string? clientId,
-        CancellationToken ct)
+        [Description("Optional client invitation code to show plans for a specific client only")] string? clientId = null,
+        CancellationToken ct = default)
     {
         var plans = await sender.Send(new ListPlansQuery(UserId), ct);
         if (clientId is not null)
@@ -28,7 +28,7 @@ public sealed class PlanTools(ISender sender, IOptions<McpSettings> settings)
     [McpServerTool, Description("Get a training plan by ID with full workout and exercise details.")]
     public async Task<string> GetPlan(
         [Description("The plan ID")] string planId,
-        CancellationToken ct)
+        CancellationToken ct = default)
     {
         try
         {
@@ -47,7 +47,7 @@ public sealed class PlanTools(ISender sender, IOptions<McpSettings> settings)
         [Description("Optional client invitation code to assign the plan to a client")] string? clientId,
         [Description("Optional notes about the plan")] string? note,
         [Description("JSON array of workouts")] string workoutsJson,
-        CancellationToken ct)
+        CancellationToken ct = default)
     {
         try
         {
@@ -68,7 +68,7 @@ public sealed class PlanTools(ISender sender, IOptions<McpSettings> settings)
         [Description("Optional client invitation code")] string? clientId,
         [Description("Optional notes")] string? note,
         [Description("JSON array of workouts (replaces all existing workouts)")] string workoutsJson,
-        CancellationToken ct)
+        CancellationToken ct = default)
     {
         try
         {
@@ -85,7 +85,7 @@ public sealed class PlanTools(ISender sender, IOptions<McpSettings> settings)
     [McpServerTool, Description("Delete a training plan by ID.")]
     public async Task<string> DeletePlan(
         [Description("The plan ID")] string planId,
-        CancellationToken ct)
+        CancellationToken ct = default)
     {
         try
         {
@@ -102,7 +102,7 @@ public sealed class PlanTools(ISender sender, IOptions<McpSettings> settings)
     public async Task<string> UpdatePlanStatus(
         [Description("The plan ID")] string planId,
         [Description("New status: Draft, Published, or Completed")] string status,
-        CancellationToken ct)
+        CancellationToken ct = default)
     {
         try
         {
