@@ -31,7 +31,9 @@
       "Bash(dotnet ef *)",
       "Bash(Remove-Item -Recurse -Force src/EduManage.Domain/obj/Debug/net9.0/*.cache)",
       "Bash(npx vite *)",
-      "Bash(grep -E \"\\\\.cs$\")"
+      "Bash(grep -E \"\\\\.cs$\")",
+      "Bash(npm start *)",
+      "Bash(npx expo *)"
     ]
   }
 }
