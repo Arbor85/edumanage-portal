@@ -3,7 +3,7 @@ import { useRouter } from 'vue-router'
 
 const NAV_ORDER = [
   '/',
-  '/train',
+  '/routines',
   '/progress',
   '/explore',
   '/profile',

@@ -220,6 +220,25 @@ export const useWorkoutStore = defineStore('workout', () => {
     startElapsedTimer()
   }
 
+  function startEmpty() {
+    activeWorkout.value = {
+      routineName: 'Empty Workout',
+      mode: 'free',
+      sourceWorkout: { id: null, name: 'Empty Workout', date: new Date().toISOString().split('T')[0] },
+      startedAt: new Date().toISOString(),
+      pausedAt: null,
+      totalPausedSeconds: 0,
+      elapsedSeconds: 0,
+      exercises: [],
+      steps: [],
+      currentStepIndex: 0,
+      paused: false,
+      status: 'in_progress',
+    }
+    persist()
+    startElapsedTimer()
+  }
+
   // Complete a normal-set or drop-set step, or a specific item within a superset-round step
   function completeSet(actualReps?: number | null, actualWeight?: number | null, note?: string, actualDuration?: number | null) {
     if (!activeWorkout.value) return
@@ -614,6 +633,7 @@ export const useWorkoutStore = defineStore('workout', () => {
     history,
     startFromRoutine,
     startFromPlanWorkout,
+    startEmpty,
     completeSet,
     completeSupersetItem,
     skipRest,

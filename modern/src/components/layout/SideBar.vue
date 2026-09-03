@@ -1,26 +1,24 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
-import { useWorkoutStore } from '../../stores/workoutStore'
 import { useAuthStore } from '../../stores/authStore'
 import {
-  Home, Dumbbell, TrendingUp, Compass, User,
+  Home, TrendingUp, Compass, User,
   Users, ClipboardList, Calendar, BookOpen, Package, LogOut,
-  Building2, LayoutDashboard, CalendarDays,
+  Building2, LayoutDashboard, CalendarDays, KeyRound, List,
 } from 'lucide-vue-next'
 import DarkModeToggle from '../DarkModeToggle.vue'
 import type { Component } from 'vue'
 
 const route = useRoute()
-const workoutStore = useWorkoutStore()
 const authStore = useAuthStore()
 
 const clientItems: { to: string; icon: Component; label: string }[] = [
-  { to: '/',         icon: Home,         label: 'Today' },
-  { to: '/train',    icon: Dumbbell,     label: 'Train' },
-  { to: '/progress', icon: TrendingUp,   label: 'Progress' },
-  { to: '/explore',  icon: Compass,      label: 'Explore' },
-  { to: '/profile',  icon: User,         label: 'Profile' },
+  { to: '/',          icon: Home,       label: 'Today' },
+  { to: '/routines',  icon: List,       label: 'Routines' },
+  { to: '/progress',  icon: TrendingUp, label: 'Progress' },
+  { to: '/explore',   icon: Compass,    label: 'Explore' },
+  { to: '/profile',   icon: User,       label: 'Profile' },
 ]
 
 const coachItems: { to: string; icon: Component; label: string }[] = [
@@ -30,6 +28,7 @@ const coachItems: { to: string; icon: Component; label: string }[] = [
   { to: '/coach/courses',   icon: BookOpen,      label: 'Courses' },
   { to: '/coach/equipment', icon: Package,       label: 'Equipment' },
   { to: '/my-schedule',     icon: CalendarDays,  label: 'My Schedule' },
+  { to: '/coach/mcp-keys',  icon: KeyRound,      label: 'MCP Keys' },
 ]
 
 const organizerItems: { to: string; icon: Component; label: string }[] = [
@@ -145,10 +144,6 @@ const organizerActiveIdx = computed(() => organizerItems.findIndex(item => isAct
       >
         <component :is="item.icon" class="w-5 h-5 flex-shrink-0" />
         <span>{{ item.label }}</span>
-        <span
-          v-if="item.to === '/train' && workoutStore.activeWorkout"
-          class="ml-auto w-2 h-2 rounded-full bg-primary animate-pulse"
-        />
       </RouterLink>
     </nav>
 

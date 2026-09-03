@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { Dumbbell, ChevronRight, Flame } from 'lucide-vue-next'
+import { Dumbbell, Play } from 'lucide-vue-next'
 import AppLayout from '../components/layout/AppLayout.vue'
 import DailyChallengeCard from '../components/DailyChallengeCard.vue'
 import EffortSnapshotCard from '../components/EffortSnapshotCard.vue'
 import SkeletonLoader from '../components/SkeletonLoader.vue'
+import StartWorkoutDialog from '../components/StartWorkoutDialog.vue'
 import { useRoutineStore } from '../stores/routineStore'
 import { useWorkoutStore } from '../stores/workoutStore'
 import { usePlanStore } from '../stores/planStore'
@@ -19,6 +20,8 @@ const planStore = usePlanStore()
 const challengeStore = useChallengeStore()
 const { suggestedRoutine } = useWorkoutSuggestion()
 
+const isStartDialogOpen = ref(false)
+
 onMounted(async () => {
   await Promise.all([
     routineStore.routines.length === 0 ? routineStore.fetch() : Promise.resolve(),
@@ -27,12 +30,15 @@ onMounted(async () => {
   ])
 })
 
-// Find today's workout from an active plan
 const todayISO = new Date().toISOString().split('T')[0]
+
+const activePlan = computed(() =>
+  planStore.plans.find((p) => p.status === 'active' || p.status === 'draft') ?? null
+)
+
 const todayPlanWorkout = computed(() => {
-  const activePlan = planStore.plans.find((p) => p.status === 'active' || p.status === 'draft')
-  if (!activePlan?.workouts) return null
-  return activePlan.workouts.find((w) => w.date === todayISO) ?? null
+  if (!activePlan.value?.workouts) return null
+  return activePlan.value.workouts.find((w) => w.date === todayISO) ?? null
 })
 
 const heroWorkout = computed(() => {
@@ -42,7 +48,6 @@ const heroWorkout = computed(() => {
       note: todayPlanWorkout.value.note,
       exerciseCount: todayPlanWorkout.value.excercises?.length ?? 0,
       source: 'plan' as const,
-      planWorkout: todayPlanWorkout.value,
     }
   }
   if (suggestedRoutine.value) {
@@ -51,23 +56,12 @@ const heroWorkout = computed(() => {
       note: suggestedRoutine.value.note,
       exerciseCount: suggestedRoutine.value.excercises?.length ?? 0,
       source: 'routine' as const,
-      routine: suggestedRoutine.value,
     }
   }
   return null
 })
 
 const isLoading = computed(() => routineStore.isLoading || planStore.isLoading)
-
-function startHeroWorkout() {
-  if (!heroWorkout.value) return
-  if (heroWorkout.value.source === 'plan' && heroWorkout.value.planWorkout) {
-    workoutStore.startFromPlanWorkout(heroWorkout.value.planWorkout, '')
-  } else if (heroWorkout.value.source === 'routine' && heroWorkout.value.routine) {
-    workoutStore.startFromRoutine(heroWorkout.value.routine)
-  }
-  router.push('/workout/active')
-}
 
 // Effort snapshot stats — derived from local history
 const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000
@@ -98,84 +92,53 @@ const minutesThisWeek = computed(() =>
   <AppLayout>
     <div class="max-w-2xl mx-auto space-y-6">
       <!-- Page header -->
-      <div class="pt-2">
-        <p class="text-xs font-bold tracking-widest uppercase text-text-muted mb-1">
-          {{ new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }) }}
-        </p>
-        <h1 class="text-3xl font-black text-white">Today</h1>
+      <div class="pt-2 flex items-end justify-between">
+        <div>
+          <p class="text-xs font-bold tracking-widest uppercase text-text-muted mb-1">
+            {{ new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }) }}
+          </p>
+          <h1 class="text-3xl font-black text-white">Today</h1>
+        </div>
+        <button
+          class="flex items-center gap-1.5 px-4 h-10 bg-primary text-white font-bold text-sm rounded-xl
+                 shadow-glow hover:bg-primary-dark active:scale-[0.97] transition-all"
+          @click="isStartDialogOpen = true"
+        >
+          <Play class="w-4 h-4" />
+          Start Workout
+        </button>
       </div>
 
-      <!-- Hero: Today's workout -->
+      <!-- Hero: Today's workout (informational) -->
       <section>
-        <!-- Loading skeleton -->
         <template v-if="isLoading">
-          <SkeletonLoader height="220px" rounded="rounded-2xl" />
+          <SkeletonLoader height="110px" rounded="rounded-2xl" />
         </template>
 
-        <!-- Workout card -->
         <div
           v-else-if="heroWorkout"
-          class="rounded-2xl bg-gradient-to-br from-surface-card to-surface-elevated border border-white/5 p-6 relative overflow-hidden"
+          class="rounded-2xl bg-gradient-to-br from-surface-card to-surface-elevated border border-white/5 p-5 relative overflow-hidden"
         >
-          <!-- Decorative glow -->
-          <div class="absolute -top-10 -right-10 w-40 h-40 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
+          <div class="absolute -top-8 -right-8 w-32 h-32 bg-primary/8 rounded-full blur-2xl pointer-events-none" />
 
-          <!-- Source badge -->
-          <div class="flex items-center gap-2 mb-4">
-            <span
-              class="text-xs font-bold tracking-widest uppercase px-2.5 py-1 rounded-full"
-              :class="heroWorkout.source === 'plan'
-                ? 'bg-primary/20 text-primary'
-                : 'bg-white/10 text-text-secondary'"
-            >
-              {{ heroWorkout.source === 'plan' ? 'From your plan' : 'Suggested for you' }}
-            </span>
+          <div class="relative flex items-center gap-4">
+            <div class="w-11 h-11 rounded-xl bg-primary/15 border border-primary/20 flex items-center justify-center flex-shrink-0">
+              <Dumbbell class="w-5 h-5 text-primary" />
+            </div>
+            <div class="flex-1 min-w-0">
+              <p
+                class="text-[10px] font-bold tracking-[0.12em] uppercase mb-1"
+                :class="heroWorkout.source === 'plan' ? 'text-primary' : 'text-text-muted'"
+              >
+                {{ heroWorkout.source === 'plan' ? "Today's plan" : 'Suggested for you' }}
+              </p>
+              <h2 class="text-lg font-black text-white leading-tight truncate">{{ heroWorkout.name }}</h2>
+              <p class="text-xs text-text-muted mt-0.5">
+                {{ heroWorkout.exerciseCount }} exercise{{ heroWorkout.exerciseCount !== 1 ? 's' : '' }}
+                <span v-if="heroWorkout.note"> · {{ heroWorkout.note }}</span>
+              </p>
+            </div>
           </div>
-
-          <!-- Workout name -->
-          <h2 class="text-4xl font-black text-white mb-2 leading-tight">
-            {{ heroWorkout.name }}
-          </h2>
-          <p v-if="heroWorkout.note" class="text-text-secondary text-sm mb-4">{{ heroWorkout.note }}</p>
-
-          <!-- Meta -->
-          <div class="flex items-center gap-4 mb-6 text-sm text-text-secondary">
-            <span class="flex items-center gap-1.5">
-              <Dumbbell class="w-4 h-4" />
-              {{ heroWorkout.exerciseCount }} exercise{{ heroWorkout.exerciseCount !== 1 ? 's' : '' }}
-            </span>
-          </div>
-
-          <!-- CTA -->
-          <button
-            class="w-full h-14 bg-primary text-white font-bold text-base rounded-xl
-                   flex items-center justify-center gap-2 shadow-glow
-                   hover:bg-primary-dark active:scale-[0.97] transition-all"
-            @click="startHeroWorkout"
-          >
-            <Flame class="w-5 h-5" />
-            Start Workout
-            <ChevronRight class="w-4 h-4 ml-auto" />
-          </button>
-        </div>
-
-        <!-- Empty state: no routines yet -->
-        <div
-          v-else
-          class="rounded-2xl bg-surface-card border border-white/5 border-dashed p-8 text-center"
-        >
-          <Dumbbell class="w-10 h-10 text-text-muted mx-auto mb-3" />
-          <h3 class="text-lg font-bold text-white mb-1">No workout yet</h3>
-          <p class="text-sm text-text-secondary mb-5">
-            Create your first routine or wait for your trainer to assign a plan.
-          </p>
-          <button
-            class="px-5 py-2.5 bg-primary/10 border border-primary/30 text-primary font-semibold rounded-xl
-                   hover:bg-primary/20 active:scale-[0.97] transition-all text-sm"
-            @click="router.push('/explore')"
-          >
-            Explore exercises
-          </button>
         </div>
       </section>
 
@@ -209,5 +172,12 @@ const minutesThisWeek = computed(() =>
         </div>
       </section>
     </div>
+    <StartWorkoutDialog
+      :open="isStartDialogOpen"
+      :today-plan-workout="todayPlanWorkout"
+      :suggested-routine="suggestedRoutine"
+      :plan-id="activePlan?.id ?? ''"
+      @close="isStartDialogOpen = false"
+    />
   </AppLayout>
 </template>

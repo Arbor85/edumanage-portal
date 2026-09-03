@@ -438,6 +438,26 @@ export interface UserEquipmentBatchUpdate {
   equipment: UserEquipmentSave[]
 }
 
+// ─── MCP API Keys ─────────────────────────────────────────────
+// API path: /api/mcp-keys
+
+export interface ApiKeyCreate {
+  name: string
+}
+
+export interface ApiKeyOut {
+  id: string
+  name: string
+  createdAt: string
+}
+
+export interface ApiKeyCreatedOut {
+  id: string
+  name: string
+  key: string
+  createdAt: string
+}
+
 // ─── Frontend-only ────────────────────────────────────────────
 
 export interface ActiveSet {

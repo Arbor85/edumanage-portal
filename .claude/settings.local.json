@@ -40,7 +40,13 @@
       "Bash(python -c ' *)",
       "Bash(python *)",
       "Bash(taskkill /PID 25348 /F)",
-      "Bash(xargs cat *)"
+      "Bash(xargs cat *)",
+      "Bash(claude mcp *)",
+      "mcp__local-mcp__list_exercises",
+      "mcp__local-mcp__create_routine",
+      "mcp__local-mcp__list_routines",
+      "mcp__local-mcp__list_plans",
+      "mcp__local-mcp__create_plan"
     ]
   }
 }

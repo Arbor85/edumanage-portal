@@ -1,16 +1,16 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
-import { Home, Dumbbell, TrendingUp, Compass, User } from 'lucide-vue-next'
+import { Home, List, TrendingUp, Compass, User } from 'lucide-vue-next'
 import type { Component } from 'vue'
 
 const route = useRoute()
 
 const items: { to: string; icon: Component; label: string }[] = [
-  { to: '/',         icon: Home,       label: 'Today' },
-  { to: '/train',    icon: Dumbbell,   label: 'Train' },
-  { to: '/progress', icon: TrendingUp, label: 'Progress' },
-  { to: '/explore',  icon: Compass,    label: 'Explore' },
-  { to: '/profile',  icon: User,       label: 'Profile' },
+  { to: '/',          icon: Home,       label: 'Today' },
+  { to: '/routines',  icon: List,       label: 'Routines' },
+  { to: '/progress',  icon: TrendingUp, label: 'Progress' },
+  { to: '/explore',   icon: Compass,    label: 'Explore' },
+  { to: '/profile',   icon: User,       label: 'Profile' },
 ]
 
 function isActive(to: string) {

@@ -48,9 +48,9 @@ const router = createRouter({
       meta: { requiresAuth: true },
     },
     {
-      path: '/train',
-      name: 'Train',
-      component: () => import('../pages/TrainPage.vue'),
+      path: '/routines',
+      name: 'Routines',
+      component: () => import('../pages/RoutinesPage.vue'),
       meta: { requiresAuth: true },
     },
     {
@@ -116,6 +116,13 @@ const router = createRouter({
       meta: { requiresAuth: true, requiresTrainer: true },
     },
 
+    {
+      path: '/coach/mcp-keys',
+      name: 'CoachMcpKeys',
+      component: () => import('../pages/McpApiKeysPage.vue'),
+      meta: { requiresAuth: true, requiresTrainer: true },
+    },
+
     // ── Trainer schedule (read-only) ─────────────────────────────────────
     {
       path: '/my-schedule',
@@ -159,7 +166,6 @@ const router = createRouter({
     // ── Legacy redirects (old routes → new routes) ───────────────────────
     { path: '/dashboard', redirect: '/' },
     { path: '/exercises', redirect: '/explore' },
-    { path: '/routines', redirect: '/train' },
     { path: '/history', redirect: '/progress' },
     { path: '/clients', redirect: '/coach/clients' },
     { path: '/plans', redirect: '/coach/plans' },
