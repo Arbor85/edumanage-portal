@@ -3,11 +3,13 @@
     "name": "EduManage",
     "slug": "edumanage-mobile",
     "version": "1.0.0",
+    "scheme": "com.edumanage.mobile",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.edumanage.mobile"
     },
     "android": {
       "package": "com.edumanage.mobile"
