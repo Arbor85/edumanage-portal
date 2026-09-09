@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import type { PlanOut, PlanCreate, PlanUpdate } from '../types'
 import * as plansApi from '../services/plansApi'
+import { db } from '../db/offlineDb'
 
 export const usePlanStore = defineStore('plan', () => {
   const plans = ref<PlanOut[]>([])
@@ -10,13 +11,24 @@ export const usePlanStore = defineStore('plan', () => {
   async function fetch() {
     isLoading.value = true
     try {
-      plans.value = await plansApi.listPlans()
+      if (!navigator.onLine) {
+        plans.value = await db.plans.toArray()
+        return
+      }
+      const data = await plansApi.listPlans()
+      plans.value = data
+      await db.plans.bulkPut(data)
+      await db.syncMeta.put({ entity: 'plans', lastSyncedAt: new Date().toISOString() })
     } finally {
       isLoading.value = false
     }
   }
 
   async function get(id: string) {
+    if (!navigator.onLine) {
+      const cached = await db.plans.get(id)
+      if (cached) return cached
+    }
     return plansApi.getPlan(id)
   }
 

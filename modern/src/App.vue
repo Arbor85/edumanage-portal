@@ -1,11 +1,17 @@
 <script setup lang="ts">
+import { onMounted } from 'vue'
 import SideBar from './components/layout/SideBar.vue'
 import BottomNav from './components/layout/BottomNav.vue'
 import NotificationToast from './components/NotificationToast.vue'
 import ActiveWorkoutPill from './components/ActiveWorkoutPill.vue'
+import OfflineBanner from './components/OfflineBanner.vue'
 import { useRouteTransition } from './composables/useRouteTransition'
+import { useOfflineSync } from './composables/useOfflineSync'
 
 const { transitionName } = useRouteTransition()
+const { start } = useOfflineSync()
+
+onMounted(() => { start() })
 </script>
 
 <template>
@@ -14,6 +20,7 @@ const { transitionName } = useRouteTransition()
       <div class="flex min-h-screen bg-surface-muted dark:bg-surface-page">
         <SideBar />
         <div class="flex-1 flex flex-col min-w-0">
+          <OfflineBanner />
           <main class="flex-1 overflow-y-auto">
             <div class="grid overflow-x-hidden p-4 sm:p-6 pb-20 lg:pb-6 min-h-full">
               <Transition :name="transitionName">

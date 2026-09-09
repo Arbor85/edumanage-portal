@@ -15,6 +15,8 @@ import type {
   ActivityTrackType,
 } from '../types'
 import * as routinesApi from '../services/routinesApi'
+import { db } from '../db/offlineDb'
+import { useOfflineSync } from '../composables/useOfflineSync'
 
 const LS_ACTIVE = 'activeWorkout'
 const LS_HISTORY = 'workoutHistory'
@@ -577,10 +579,16 @@ export const useWorkoutStore = defineStore('workout', () => {
     }
 
     let result = localResult
-    try {
-      result = await routinesApi.completeRoutine(payload)
-    } catch {
-      // API unavailable — use local result
+    if (!navigator.onLine) {
+      await db.workoutQueue.add({ payload, queuedAt: new Date().toISOString(), attempts: 0 })
+      useOfflineSync().notifyQueued()
+    } else {
+      try {
+        result = await routinesApi.completeRoutine(payload)
+      } catch {
+        await db.workoutQueue.add({ payload, queuedAt: new Date().toISOString(), attempts: 0 })
+        useOfflineSync().notifyQueued()
+      }
     }
 
     history.value.unshift(result)
