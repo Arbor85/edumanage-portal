@@ -74,7 +74,7 @@ async function changeStatus(plan: PlanOut, status: string) {
             <p class="font-semibold text-text-primary dark:text-white">{{ plan.name }}</p>
             <BaseBadge :label="plan.status ?? 'draft'" :variant="statusVariant(plan.status)" />
           </div>
-          <p v-if="plan.note" class="text-xs text-text-secondary mt-0.5 truncate">{{ plan.note }}</p>
+          <p v-if="plan.note" class="text-xs text-text-secondary mt-0.5 truncate max-w-screen-sm">{{ plan.note }}</p>
           <p class="text-xs text-text-secondary mt-0.5">Client: {{ clientName(plan.clientId) }} · {{ plan.workouts?.length ?? 0 }} workouts</p>
         </div>
         <div class="flex gap-1.5 flex-wrap">

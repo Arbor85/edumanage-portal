@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { usePageTitle } from '../../../composables/usePageTitle'
-import type { PlanOut, PlanCreate, PlanUpdate, PlanWorkoutInput, RoutineOut, ClientOut, RoutineExcercise } from '../../../types'
+import type { PlanOut, PlanCreate, PlanUpdate, PlanWorkoutInput, RoutineOut, ClientOut, RoutineExcercise, SupersetColor } from '../../../types'
 import { usePlanStore } from '../../../stores/planStore'
 import { useClientStore } from '../../../stores/clientStore'
 import { useToast } from '../../../composables/useToast'
@@ -52,6 +52,35 @@ const isScheduleCopyOpen = ref(false)
 const scheduleCopySourceIndex = ref<number | null>(null)
 const scheduleCopyFrequency = ref<string>('weekly')
 const scheduleCopyCount = ref(4)
+
+const SUPERSET_COLORS: Record<SupersetColor, { border: string; bg: string }> = {
+  violet: { border: 'border-violet-400 dark:border-violet-500', bg: 'bg-violet-50 dark:bg-violet-900/10' },
+  orange: { border: 'border-orange-400 dark:border-orange-500', bg: 'bg-orange-50 dark:bg-orange-900/10' },
+  sky:    { border: 'border-sky-400 dark:border-sky-500',       bg: 'bg-sky-50 dark:bg-sky-900/10' },
+  rose:   { border: 'border-rose-400 dark:border-rose-500',     bg: 'bg-rose-50 dark:bg-rose-900/10' },
+  amber:  { border: 'border-amber-400 dark:border-amber-500',   bg: 'bg-amber-50 dark:bg-amber-900/10' },
+}
+
+type ExerciseBlock =
+  | { type: 'exercise'; exercise: RoutineExcercise }
+  | { type: 'superset'; groupId: string; color: SupersetColor; exercises: RoutineExcercise[] }
+
+function getExerciseBlocks(workout: PlanWorkoutInput): ExerciseBlock[] {
+  const exercises = workout.excercises ?? []
+  const blocks: ExerciseBlock[] = []
+  const seen = new Set<string>()
+  for (const ex of exercises) {
+    const gid = ex.supersetGroupId
+    if (gid && !seen.has(gid)) {
+      seen.add(gid)
+      const color: SupersetColor = (workout.supersetGroups ?? []).find(g => g.id === gid)?.color ?? 'violet'
+      blocks.push({ type: 'superset', groupId: gid, color, exercises: exercises.filter(e => e.supersetGroupId === gid) })
+    } else if (!gid) {
+      blocks.push({ type: 'exercise', exercise: ex })
+    }
+  }
+  return blocks
+}
 
 const FREQUENCIES = [
   { key: 'every-1', label: 'Every day', days: 1 },
@@ -497,16 +526,34 @@ async function doDelete() {
                 <p class="text-xs font-semibold uppercase tracking-wide text-text-secondary">Exercises</p>
 
                 <div v-if="(form.workouts[index].excercises ?? []).length" class="flex flex-col gap-1.5">
-                  <div
-                    v-for="(ex, ei) in form.workouts[index].excercises"
-                    :key="ei"
-                    class="flex items-center justify-between gap-2 px-3 py-2 rounded-xl bg-gray-50 dark:bg-white/5"
-                  >
-                    <span class="text-sm text-text-primary dark:text-white font-medium truncate">{{ ex.name }}</span>
-                    <span class="text-xs text-text-secondary flex-shrink-0">
-                      {{ (ex.sets ?? []).length }} set{{ (ex.sets ?? []).length !== 1 ? 's' : '' }}
-                    </span>
-                  </div>
+                  <template v-for="block in getExerciseBlocks(form.workouts[index])" :key="block.type === 'superset' ? block.groupId : block.exercise.name">
+                    <!-- Superset group -->
+                    <div
+                      v-if="block.type === 'superset'"
+                      :class="['flex flex-col gap-1 rounded-xl border-l-2 pl-2 pr-1 py-1', SUPERSET_COLORS[block.color].border, SUPERSET_COLORS[block.color].bg]"
+                    >
+                      <div
+                        v-for="(ex, ei) in block.exercises"
+                        :key="ei"
+                        class="flex items-center justify-between gap-2 px-2 py-1.5 rounded-lg bg-white/60 dark:bg-white/5"
+                      >
+                        <span class="text-sm text-text-primary dark:text-white font-medium truncate">{{ ex.name }}</span>
+                        <span class="text-xs text-text-secondary flex-shrink-0">
+                          {{ (ex.sets ?? []).length }} set{{ (ex.sets ?? []).length !== 1 ? 's' : '' }}
+                        </span>
+                      </div>
+                    </div>
+                    <!-- Standalone exercise -->
+                    <div
+                      v-else
+                      class="flex items-center justify-between gap-2 px-3 py-2 rounded-xl bg-gray-50 dark:bg-white/5"
+                    >
+                      <span class="text-sm text-text-primary dark:text-white font-medium truncate">{{ block.exercise.name }}</span>
+                      <span class="text-xs text-text-secondary flex-shrink-0">
+                        {{ (block.exercise.sets ?? []).length }} set{{ (block.exercise.sets ?? []).length !== 1 ? 's' : '' }}
+                      </span>
+                    </div>
+                  </template>
                 </div>
 
                 <p v-else class="text-sm text-text-secondary italic px-1">No exercises yet</p>

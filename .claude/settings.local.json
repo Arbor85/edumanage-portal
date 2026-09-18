@@ -46,7 +46,8 @@
       "mcp__local-mcp__create_routine",
       "mcp__local-mcp__list_routines",
       "mcp__local-mcp__list_plans",
-      "mcp__local-mcp__create_plan"
+      "mcp__local-mcp__create_plan",
+      "Bash(npm install *)"
     ]
   }
 }

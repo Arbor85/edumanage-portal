@@ -214,6 +214,7 @@ export interface PlanWorkoutInput {
   note: string | null
   user_id: string | null
   excercises: RoutineExcercise[] | null
+  supersetGroups?: SupersetGroup[] | null
   date: string | null
   isMeeting?: boolean
   meetingId?: string | null
@@ -227,6 +228,7 @@ export interface PlanWorkoutOutput {
   name: string | null
   note: string | null
   excercises: RoutineExcercise[] | null
+  supersetGroups?: SupersetGroup[] | null
   date: string | null
   isMeeting?: boolean
   meetingId?: string | null

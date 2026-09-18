@@ -541,6 +541,7 @@ async function save() {
       name: form.value.name,
       note: form.value.note,
       excercises: form.value.excercises,
+      supersetGroups: form.value.supersetGroups,
     })
     emit('close')
     return
