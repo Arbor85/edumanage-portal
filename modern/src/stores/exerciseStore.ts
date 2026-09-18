@@ -49,6 +49,12 @@ export const useExerciseStore = defineStore('exercise', () => {
     return updated
   }
 
+  async function get(id: number) {
+    const cached = exercises.value.find((e) => e.id === id)
+    if (cached) return cached
+    return exercisesApi.getExercise(id)
+  }
+
   async function remove(id: number) {
     await exercisesApi.deleteExercise(id)
     exercises.value = exercises.value.filter((e) => e.id !== id)
@@ -69,5 +75,5 @@ export const useExerciseStore = defineStore('exercise', () => {
     })
   })
 
-  return { exercises, isLoading, fetch, create, update, remove, filtered }
+  return { exercises, isLoading, fetch, get, create, update, remove, filtered }
 })

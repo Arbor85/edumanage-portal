@@ -34,6 +34,12 @@ export const useEquipmentStore = defineStore('equipment', () => {
     return updated
   }
 
+  async function get(id: string) {
+    const cached = equipment.value.find((e) => e.id === id)
+    if (cached) return cached
+    return equipmentApi.getEquipment(id)
+  }
+
   async function remove(id: string) {
     await equipmentApi.deleteEquipment(id)
     equipment.value = equipment.value.filter((e) => e.id !== id)
@@ -56,6 +62,6 @@ export const useEquipmentStore = defineStore('equipment', () => {
   return {
     equipment, userEquipment, userEquipmentMap,
     isLoading, isSaving,
-    fetch, create, update, remove, saveUserEquipment,
+    fetch, get, create, update, remove, saveUserEquipment,
   }
 })

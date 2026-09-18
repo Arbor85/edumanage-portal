@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { usePageTitle } from '../composables/usePageTitle'
 usePageTitle('Plans')
 import type { PlanOut } from '../types'
@@ -17,6 +18,8 @@ import PlanFormModal from './PlansPage/components/PlanFormModal.vue'
 import ConfirmDialog from '../components/ConfirmDialog.vue'
 import { useToast } from '../composables/useToast'
 
+const route = useRoute()
+const router = useRouter()
 const planStore = usePlanStore()
 const clientStore = useClientStore()
 const routineStore = useRoutineStore()
@@ -33,6 +36,36 @@ onMounted(() => {
   clientStore.fetch()
   routineStore.fetch()
 })
+
+function openEdit(plan: PlanOut) {
+  editTarget.value = plan
+  router.push({ query: { edit: plan.id! } })
+}
+
+function openCreate() {
+  isCreateOpen.value = true
+  router.push({ query: { new: '1' } })
+}
+
+watch(() => route.query, async (query) => {
+  if (query.edit) {
+    if (editTarget.value?.id === query.edit) return
+    try {
+      editTarget.value = await planStore.get(query.edit as string)
+      isCreateOpen.value = false
+    } catch {
+      toast.error('Plan not found')
+      router.replace({ query: {} })
+    }
+  } else if (query.new) {
+    if (isCreateOpen.value) return
+    isCreateOpen.value = true
+    editTarget.value = null
+  } else {
+    isCreateOpen.value = false
+    editTarget.value = null
+  }
+}, { immediate: true })
 
 const filtered = computed(() =>
   planStore.plans.filter((p) =>
@@ -55,7 +88,7 @@ async function handleDelete() {
 <template>
   <AppLayout>
     <PageHeader title="Training Plans" subtitle="Design and manage client training plans.">
-      <BaseButton variant="primary" @click="isCreateOpen = true">+ New Plan</BaseButton>
+      <BaseButton variant="primary" @click="openCreate">+ New Plan</BaseButton>
     </PageHeader>
 
     <div class="mb-4 flex items-center gap-3">
@@ -80,14 +113,14 @@ async function handleDelete() {
         key="list"
         :plans="filtered"
         :loading="planStore.isLoading"
-        @edit="editTarget = $event"
+        @edit="openEdit"
       />
       <PlanKanban
         v-else
         key="kanban"
         :plans="filtered"
         :loading="planStore.isLoading"
-        @edit="editTarget = $event"
+        @edit="openEdit"
         @delete="deleteTarget = $event"
       />
     </Transition>
@@ -95,7 +128,7 @@ async function handleDelete() {
     <PlanFormModal
       :open="isCreateOpen || editTarget !== null"
       :plan="editTarget"
-      @close="isCreateOpen = false; editTarget = null"
+      @close="router.replace({ query: {} })"
     />
 
     <ConfirmDialog

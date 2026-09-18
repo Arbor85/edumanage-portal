@@ -1,15 +1,20 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { Plus, Pencil, Dumbbell } from 'lucide-vue-next'
 import AppLayout from '../components/layout/AppLayout.vue'
 import SkeletonLoader from '../components/SkeletonLoader.vue'
 import RoutineFormModal from './RoutinesPage/components/RoutineFormModal.vue'
 import { useRoutineStore } from '../stores/routineStore'
 import { useExerciseStore } from '../stores/exerciseStore'
+import { useToast } from '../composables/useToast'
 import type { RoutineOut } from '../types'
 
+const route = useRoute()
+const router = useRouter()
 const routineStore = useRoutineStore()
 const exerciseStore = useExerciseStore()
+const toast = useToast()
 
 const search = ref('')
 const isCreateOpen = ref(false)
@@ -19,6 +24,36 @@ onMounted(() => {
   routineStore.fetch()
   exerciseStore.fetch()
 })
+
+function openEdit(routine: RoutineOut) {
+  editTarget.value = routine
+  router.push({ query: { edit: routine.id! } })
+}
+
+function openCreate() {
+  isCreateOpen.value = true
+  router.push({ query: { new: '1' } })
+}
+
+watch(() => route.query, async (query) => {
+  if (query.edit) {
+    if (editTarget.value?.id === query.edit) return
+    try {
+      editTarget.value = await routineStore.get(query.edit as string)
+      isCreateOpen.value = false
+    } catch {
+      toast.error('Routine not found')
+      router.replace({ query: {} })
+    }
+  } else if (query.new) {
+    if (isCreateOpen.value) return
+    isCreateOpen.value = true
+    editTarget.value = null
+  } else {
+    isCreateOpen.value = false
+    editTarget.value = null
+  }
+}, { immediate: true })
 
 const filtered = computed(() =>
   routineStore.routines.filter((r) =>
@@ -39,7 +74,7 @@ const filtered = computed(() =>
         <button
           class="flex items-center gap-1.5 px-4 h-10 bg-primary text-white font-bold text-sm rounded-xl
                  shadow-glow hover:bg-primary-dark active:scale-[0.97] transition-all"
-          @click="isCreateOpen = true"
+          @click="openCreate"
         >
           <Plus class="w-4 h-4" />
           New Routine
@@ -83,7 +118,7 @@ const filtered = computed(() =>
           v-if="routineStore.routines.length === 0"
           class="px-5 py-2.5 bg-primary/10 border border-primary/30 text-primary font-semibold rounded-xl
                  hover:bg-primary/20 active:scale-[0.97] transition-all text-sm"
-          @click="isCreateOpen = true"
+          @click="openCreate"
         >
           Create Routine
         </button>
@@ -112,7 +147,7 @@ const filtered = computed(() =>
           <button
             class="w-8 h-8 rounded-lg text-text-muted hover:text-white hover:bg-white/10
                    flex items-center justify-center transition-all flex-shrink-0"
-            @click="editTarget = routine"
+            @click="openEdit(routine)"
           >
             <Pencil class="w-3.5 h-3.5" />
           </button>
@@ -123,7 +158,7 @@ const filtered = computed(() =>
     <RoutineFormModal
       :open="isCreateOpen || editTarget !== null"
       :routine="editTarget"
-      @close="isCreateOpen = false; editTarget = null"
+      @close="router.replace({ query: {} })"
     />
   </AppLayout>
 </template>

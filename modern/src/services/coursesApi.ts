@@ -4,6 +4,9 @@ import type { CourseOut, CourseCreate, CourseUpdate, CourseAvailabilityOut, Cour
 export const listCourses = (): Promise<CourseOut[]> =>
   apiClient.get<CourseOut[]>('/api/courses').then((r) => r.data)
 
+export const getCourse = (id: string): Promise<CourseOut> =>
+  apiClient.get<CourseOut>(`/api/courses/${id}`).then((r) => r.data)
+
 export const createCourse = (d: CourseCreate): Promise<CourseOut> =>
   apiClient.post<CourseOut>('/api/courses', d).then((r) => r.data)
 

@@ -28,6 +28,12 @@ export const useSchedulePlanStore = defineStore('schedulePlan', () => {
     buildings.value = await api.listBuildings()
   }
 
+  async function getBuilding(id: string) {
+    const cached = buildings.value.find((b) => b.id === id)
+    if (cached) return cached
+    return api.getBuilding(id)
+  }
+
   async function addBuilding(d: BuildingCreate) {
     const created = await api.addBuilding(d)
     buildings.value.push(created)
@@ -157,7 +163,7 @@ export const useSchedulePlanStore = defineStore('schedulePlan', () => {
 
   return {
     buildings, buildingAvailabilities, plans, entries, autoScheduleProposal, isLoading,
-    fetchBuildings, addBuilding, updateBuilding, removeBuilding,
+    fetchBuildings, getBuilding, addBuilding, updateBuilding, removeBuilding,
     fetchBuildingAvailability, addBuildingAvailability, updateBuildingAvailability, deleteBuildingAvailability,
     fetchPlans, createPlan, updatePlan, removePlan, publishPlan, unpublishPlan,
     fetchEntries, addEntry, updateEntry, removeEntry,

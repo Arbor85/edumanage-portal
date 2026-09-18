@@ -29,6 +29,12 @@ export const useMeetingStore = defineStore('meeting', () => {
     return updated
   }
 
+  async function get(id: string) {
+    const cached = meetings.value.find((m) => m.id === id)
+    if (cached) return cached
+    return meetingsApi.getMeeting(id)
+  }
+
   async function remove(id: string) {
     await meetingsApi.deleteMeeting(id)
     meetings.value = meetings.value.filter((m) => m.id !== id)
@@ -38,5 +44,5 @@ export const useMeetingStore = defineStore('meeting', () => {
   const upcoming = computed(() => meetings.value.filter((m) => (m.startsAt ?? '') >= now))
   const past = computed(() => meetings.value.filter((m) => (m.startsAt ?? '') < now))
 
-  return { meetings, isLoading, fetch, create, update, remove, upcoming, past }
+  return { meetings, isLoading, fetch, get, create, update, remove, upcoming, past }
 })

@@ -18,6 +18,9 @@ import type {
 export const listBuildings = (): Promise<BuildingOut[]> =>
   apiClient.get<BuildingOut[]>('/api/buildings').then((r) => r.data)
 
+export const getBuilding = (id: string): Promise<BuildingOut> =>
+  apiClient.get<BuildingOut>(`/api/buildings/${id}`).then((r) => r.data)
+
 export const addBuilding = (d: BuildingCreate): Promise<BuildingOut> =>
   apiClient.post<BuildingOut>('/api/buildings', d).then((r) => r.data)
 

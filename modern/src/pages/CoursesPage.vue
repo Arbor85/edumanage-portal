@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { usePageTitle } from '../composables/usePageTitle'
 usePageTitle('Courses')
 import type { CourseOut, CourseAvailabilityCreate } from '../types'
@@ -14,6 +15,8 @@ import ConfirmDialog from '../components/ConfirmDialog.vue'
 import { useToast } from '../composables/useToast'
 import { Plus } from 'lucide-vue-next'
 
+const route = useRoute()
+const router = useRouter()
 const courseStore = useCourseStore()
 const toast = useToast()
 
@@ -23,6 +26,36 @@ const editTarget = ref<CourseOut | null>(null)
 const deleteTarget = ref<CourseOut | null>(null)
 
 onMounted(() => courseStore.fetch())
+
+function openEdit(course: CourseOut) {
+  editTarget.value = course
+  router.push({ query: { edit: course.id! } })
+}
+
+function openCreate() {
+  isCreateOpen.value = true
+  router.push({ query: { new: '1' } })
+}
+
+watch(() => route.query, async (query) => {
+  if (query.edit) {
+    if (editTarget.value?.id === query.edit) return
+    try {
+      editTarget.value = await courseStore.get(query.edit as string)
+      isCreateOpen.value = false
+    } catch {
+      toast.error('Course not found')
+      router.replace({ query: {} })
+    }
+  } else if (query.new) {
+    if (isCreateOpen.value) return
+    isCreateOpen.value = true
+    editTarget.value = null
+  } else {
+    isCreateOpen.value = false
+    editTarget.value = null
+  }
+}, { immediate: true })
 
 const filtered = computed(() =>
   courseStore.courses.filter((c) =>
@@ -45,7 +78,7 @@ async function handleDelete() {
 <template>
   <AppLayout>
     <PageHeader title="Courses" subtitle="Manage your training programs and courses.">
-      <BaseButton variant="primary" @click="isCreateOpen = true">
+      <BaseButton variant="primary" @click="openCreate">
         <Plus class="w-4 h-4" /> New Course
       </BaseButton>
     </PageHeader>
@@ -57,13 +90,13 @@ async function handleDelete() {
     <CourseList
       :courses="filtered"
       :loading="courseStore.isLoading"
-      @edit="editTarget = $event"
+      @edit="openEdit"
     />
 
     <CourseFormModal
       :open="isCreateOpen || editTarget !== null"
       :course="editTarget"
-      @close="isCreateOpen = false; editTarget = null"
+      @close="router.replace({ query: {} })"
     />
 
     <ConfirmDialog

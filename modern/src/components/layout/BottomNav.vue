@@ -1,9 +1,15 @@
 <script setup lang="ts">
+import { onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import { useAuthStore } from '../../stores/authStore'
 import { Home, List, TrendingUp, Compass, User } from 'lucide-vue-next'
 import type { Component } from 'vue'
+import { prefetchRoutes } from '../../utils/prefetchRoutes'
 
 const route = useRoute()
+const authStore = useAuthStore()
+
+onMounted(() => prefetchRoutes(authStore.isTrainer, authStore.isOrganizer))
 
 const items: { to: string; icon: Component; label: string }[] = [
   { to: '/',          icon: Home,       label: 'Today' },

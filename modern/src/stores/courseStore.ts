@@ -30,6 +30,12 @@ export const useCourseStore = defineStore('course', () => {
     return updated
   }
 
+  async function get(id: string) {
+    const cached = courses.value.find((c) => c.id === id)
+    if (cached) return cached
+    return coursesApi.getCourse(id)
+  }
+
   async function remove(id: string) {
     await coursesApi.deleteCourse(id)
     courses.value = courses.value.filter((c) => c.id !== id)
@@ -57,7 +63,7 @@ export const useCourseStore = defineStore('course', () => {
 
   return {
     courses, isLoading, courseAvailabilities,
-    fetch, create, update, remove,
+    fetch, get, create, update, remove,
     fetchCourseAvailability, addCourseAvailability, deleteCourseAvailability,
   }
 })

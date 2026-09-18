@@ -39,11 +39,17 @@ export const useRoutineStore = defineStore('routine', () => {
     return updated
   }
 
+  async function get(id: string) {
+    const cached = routines.value.find((r) => r.id === id)
+    if (cached) return cached
+    return routinesApi.getRoutine(id)
+  }
+
   async function remove(id: string) {
     await routinesApi.deleteRoutine(id)
     routines.value = routines.value.filter((r) => r.id !== id)
     await db.routines.delete(id)
   }
 
-  return { routines, isLoading, fetch, create, update, remove }
+  return { routines, isLoading, fetch, get, create, update, remove }
 })

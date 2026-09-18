@@ -4,6 +4,9 @@ import type { RoutineOut, RoutineCreate, RoutineUpdate, CompleteRoutineCreate, W
 export const listRoutines = (): Promise<RoutineOut[]> =>
   apiClient.get<RoutineOut[]>('/api/routines').then((r) => r.data)
 
+export const getRoutine = (id: string): Promise<RoutineOut> =>
+  apiClient.get<RoutineOut>(`/api/routines/${id}`).then((r) => r.data)
+
 export const createRoutine = (d: RoutineCreate): Promise<RoutineOut> =>
   apiClient.post<RoutineOut>('/api/routines', d).then((r) => r.data)
 

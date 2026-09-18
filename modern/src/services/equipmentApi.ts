@@ -7,6 +7,9 @@ import type {
 export const listEquipment = (): Promise<EquipmentOut[]> =>
   apiClient.get<EquipmentOut[]>('/api/equipment').then((r) => r.data)
 
+export const getEquipment = (id: string): Promise<EquipmentOut> =>
+  apiClient.get<EquipmentOut>(`/api/equipment/${id}`).then((r) => r.data)
+
 export const createEquipment = (d: EquipmentCreate): Promise<EquipmentOut> =>
   apiClient.post<EquipmentOut>('/api/equipment', d).then((r) => r.data)
 

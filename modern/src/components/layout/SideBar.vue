@@ -2,6 +2,7 @@
 import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAuthStore } from '../../stores/authStore'
+import { prefetchRoutes } from '../../utils/prefetchRoutes'
 import {
   Home, TrendingUp, Compass, User,
   Users, ClipboardList, Calendar, BookOpen, Package, LogOut,
@@ -78,6 +79,7 @@ onMounted(async () => {
   // Enable transition only after first placement so pill doesn't fly in on load
   await nextTick()
   pillReady.value = true
+  prefetchRoutes(authStore.isTrainer, authStore.isOrganizer)
 })
 
 // ── Cursor glow ───────────────────────────────────────────────────────────────

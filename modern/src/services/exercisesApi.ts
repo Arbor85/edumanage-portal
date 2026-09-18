@@ -4,6 +4,9 @@ import type { ExcerciseOut, ExcerciseWriteRequest } from '../types'
 export const listExercises = (): Promise<ExcerciseOut[]> =>
   apiClient.get<ExcerciseOut[]>('/api/excercises').then((r) => r.data)
 
+export const getExercise = (id: number): Promise<ExcerciseOut> =>
+  apiClient.get<ExcerciseOut>(`/api/excercises/${id}`).then((r) => r.data)
+
 export const createExercise = (d: ExcerciseWriteRequest): Promise<ExcerciseOut> =>
   apiClient.post<ExcerciseOut>('/api/excercises', d).then((r) => r.data)
 

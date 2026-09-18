@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { onMounted, ref, computed } from 'vue'
+import { onMounted, ref, computed, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { useSchedulePlanStore } from '../../../stores/schedulePlanStore'
 import { useToast } from '../../../composables/useToast'
 import PageHeader from '../../../components/layout/PageHeader.vue'
@@ -12,6 +13,8 @@ import BuildingFormModal from './components/BuildingFormModal.vue'
 import { Building2, Plus } from 'lucide-vue-next'
 import type { BuildingOut, BuildingAvailabilityCreate } from '../../../types'
 
+const route = useRoute()
+const router = useRouter()
 const store = useSchedulePlanStore()
 const toast = useToast()
 
@@ -22,6 +25,26 @@ const deleteTarget = ref<BuildingOut | null>(null)
 
 onMounted(() => store.fetchBuildings())
 
+watch(() => route.query, async (query) => {
+  if (query.edit) {
+    if (editTarget.value?.id === query.edit && isFormOpen.value) return
+    try {
+      editTarget.value = await store.getBuilding(query.edit as string)
+      isFormOpen.value = true
+    } catch {
+      toast.error('Building not found')
+      router.replace({ query: {} })
+    }
+  } else if (query.new) {
+    if (isFormOpen.value && !editTarget.value) return
+    editTarget.value = null
+    isFormOpen.value = true
+  } else {
+    isFormOpen.value = false
+    editTarget.value = null
+  }
+}, { immediate: true })
+
 const filtered = computed(() =>
   store.buildings.filter(b =>
     !search.value || b.name.toLowerCase().includes(search.value.toLowerCase())
@@ -31,11 +54,13 @@ const filtered = computed(() =>
 function openCreate() {
   editTarget.value = null
   isFormOpen.value = true
+  router.push({ query: { new: '1' } })
 }
 
 function openEdit(building: BuildingOut) {
   editTarget.value = building
   isFormOpen.value = true
+  router.push({ query: { edit: building.id } })
 }
 
 async function handleDelete() {
@@ -102,7 +127,7 @@ async function handleDeleteAvailability(buildingId: string, slotId: string) {
     <BuildingFormModal
       :open="isFormOpen"
       :building="editTarget"
-      @close="isFormOpen = false"
+      @close="router.replace({ query: {} })"
     />
 
     <ConfirmDialog

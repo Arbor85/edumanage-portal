@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { Search, Plus } from 'lucide-vue-next'
 import AppLayout from '../components/layout/AppLayout.vue'
 import ExerciseGrid from './ExercisesPage/components/ExerciseGrid.vue'
@@ -12,6 +13,8 @@ import { useAuthStore } from '../stores/authStore'
 import { useToast } from '../composables/useToast'
 import type { ExcerciseOut, ActivityType } from '../types'
 
+const route = useRoute()
+const router = useRouter()
 const exerciseStore = useExerciseStore()
 const authStore = useAuthStore()
 const toast = useToast()
@@ -24,6 +27,39 @@ const editTarget = ref<ExcerciseOut | null>(null)
 const detailTarget = ref<ExcerciseOut | null>(null)
 const confirmDeleteTarget = ref<ExcerciseOut | null>(null)
 const muscleDialogTarget = ref<ExcerciseOut | null>(null)
+
+watch(() => route.query, async (query) => {
+  if (query.edit) {
+    if (editTarget.value?.id === Number(query.edit)) return
+    try {
+      editTarget.value = await exerciseStore.get(Number(query.edit))
+      detailTarget.value = null
+      isCreateOpen.value = false
+    } catch {
+      toast.error('Exercise not found')
+      router.replace({ query: {} })
+    }
+  } else if (query.detail) {
+    if (detailTarget.value?.id === Number(query.detail)) return
+    try {
+      detailTarget.value = await exerciseStore.get(Number(query.detail))
+      editTarget.value = null
+      isCreateOpen.value = false
+    } catch {
+      toast.error('Exercise not found')
+      router.replace({ query: {} })
+    }
+  } else if (query.new) {
+    if (isCreateOpen.value) return
+    isCreateOpen.value = true
+    editTarget.value = null
+    detailTarget.value = null
+  } else {
+    isCreateOpen.value = false
+    editTarget.value = null
+    detailTarget.value = null
+  }
+}, { immediate: true })
 
 onMounted(() => {
   exerciseStore.fetch()
@@ -58,6 +94,13 @@ watch([search, activityFilter], () => { displayCount.value = 12 })
 function openEdit(ex: ExcerciseOut) {
   editTarget.value = ex
   detailTarget.value = null
+  router.push({ query: { edit: ex.id } })
+}
+
+function openDetail(ex: ExcerciseOut) {
+  detailTarget.value = ex
+  editTarget.value = null
+  router.push({ query: { detail: ex.id } })
 }
 
 async function handleDelete(ex: ExcerciseOut) {
@@ -83,7 +126,7 @@ async function handleDelete(ex: ExcerciseOut) {
         <button
           class="flex items-center gap-1.5 px-4 h-10 bg-primary/10 border border-primary/30 text-primary
                  font-bold text-sm rounded-xl hover:bg-primary/20 active:scale-[0.97] transition-all"
-          @click="isCreateOpen = true"
+          @click="() => { isCreateOpen = true; router.push({ query: { new: '1' } }) }"
         >
           <Plus class="w-4 h-4" />
           Add Exercise
@@ -149,13 +192,13 @@ async function handleDelete(ex: ExcerciseOut) {
     <ExerciseFormModal
       :open="isCreateOpen || editTarget !== null"
       :exercise="editTarget"
-      @close="isCreateOpen = false; editTarget = null"
+      @close="router.replace({ query: {} })"
     />
 
     <ExerciseDetailModal
       :open="detailTarget !== null"
       :exercise="detailTarget"
-      @close="detailTarget = null"
+      @close="router.replace({ query: {} })"
       @edit="openEdit(detailTarget!)"
     />
 

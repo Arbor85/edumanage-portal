@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { usePageTitle } from '../composables/usePageTitle'
 usePageTitle('Equipment')
 import type { EquipmentOut, UserEquipmentSave } from '../types'
@@ -12,12 +13,44 @@ import EquipmentList from './EquipmentPage/components/EquipmentList.vue'
 import EquipmentFormModal from './EquipmentPage/components/EquipmentFormModal.vue'
 import { Search } from 'lucide-vue-next'
 
+const route = useRoute()
+const router = useRouter()
 const store = useEquipmentStore()
 const toast = useToast()
 
 const search = ref('')
 const isCreateOpen = ref(false)
 const editTarget = ref<EquipmentOut | null>(null)
+
+function openEdit(equipment: EquipmentOut) {
+  editTarget.value = equipment
+  router.push({ query: { edit: equipment.id } })
+}
+
+function openCreate() {
+  isCreateOpen.value = true
+  router.push({ query: { new: '1' } })
+}
+
+watch(() => route.query, async (query) => {
+  if (query.edit) {
+    if (editTarget.value?.id === query.edit) return
+    try {
+      editTarget.value = await store.get(query.edit as string)
+      isCreateOpen.value = false
+    } catch {
+      toast.error('Equipment not found')
+      router.replace({ query: {} })
+    }
+  } else if (query.new) {
+    if (isCreateOpen.value) return
+    isCreateOpen.value = true
+    editTarget.value = null
+  } else {
+    isCreateOpen.value = false
+    editTarget.value = null
+  }
+}, { immediate: true })
 const userSelections = ref<Map<string, UserEquipmentSave>>(new Map())
 const isDirty = ref(false)
 
@@ -56,7 +89,7 @@ async function saveSelections() {
 <template>
   <AppLayout>
     <PageHeader title="Equipment" subtitle="Manage your equipment catalog and track what you own.">
-      <BaseButton variant="secondary" @click="isCreateOpen = true">+ New Equipment</BaseButton>
+      <BaseButton variant="secondary" @click="openCreate">+ New Equipment</BaseButton>
     </PageHeader>
 
     <div class="flex items-center gap-3 mb-6">
@@ -76,7 +109,7 @@ async function saveSelections() {
       :equipment="filtered"
       :loading="store.isLoading"
       :user-selections="userSelections"
-      @edit="editTarget = $event"
+      @edit="openEdit"
       @update:user-selections="onSelectionsUpdate"
     />
 
@@ -98,7 +131,7 @@ async function saveSelections() {
     <EquipmentFormModal
       :open="isCreateOpen || editTarget !== null"
       :equipment="editTarget"
-      @close="isCreateOpen = false; editTarget = null"
+      @close="router.replace({ query: {} })"
     />
   </AppLayout>
 </template>
