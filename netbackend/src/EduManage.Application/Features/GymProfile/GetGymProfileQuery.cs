@@ -26,6 +26,7 @@ public sealed record GetGymProfileQuery(string UserId) : IRequest<IReadOnlyList<
             m.MaxDuration,
             m.MaxDistance,
             m.Note,
-            m.UpdatedAt);
+            m.UpdatedAt,
+            m.Exercise.ImagePath);
     }
 }

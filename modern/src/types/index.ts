@@ -679,6 +679,7 @@ export interface UserExerciseMax {
   maxDistance?: number
   note?: string
   updatedAt: string
+  imagePath?: string | null
 }
 
 export interface UserExerciseMaxUpsert {

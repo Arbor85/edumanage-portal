@@ -307,7 +307,8 @@ public sealed record UserExerciseMaxOut(
     float? MaxDuration,
     float? MaxDistance,
     string? Note,
-    DateTime UpdatedAt);
+    DateTime UpdatedAt,
+    string? ImagePath = null);
 
 public sealed record UserExerciseMaxUpsert(
     float? MaxWeight,

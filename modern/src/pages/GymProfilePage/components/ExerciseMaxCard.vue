@@ -2,7 +2,6 @@
 import { computed, ref } from 'vue'
 import type { UserExerciseMax } from '../../../types'
 import { Pencil, Trash2 } from 'lucide-vue-next'
-import { exerciseImageMap } from '../../../data/exerciseImageMap'
 
 const props = defineProps<{
   max: UserExerciseMax
@@ -13,8 +12,7 @@ const emit = defineEmits<{ edit: []; remove: [] }>()
 
 const FALLBACK = '/images/benchpress.png'
 const imgError = ref(false)
-const mapEntry = computed(() => exerciseImageMap[(props.max.exerciseName ?? '').toLowerCase()])
-const imgSrc = computed(() => imgError.value ? null : (mapEntry.value?.imagePath ?? FALLBACK))
+const imgSrc = computed(() => imgError.value ? null : (props.max.imagePath ?? FALLBACK))
 function onImgError() { imgError.value = true }
 
 function formatValue(m: UserExerciseMax): string {
