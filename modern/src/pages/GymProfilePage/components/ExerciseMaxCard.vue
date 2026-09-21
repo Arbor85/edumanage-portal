@@ -1,13 +1,21 @@
 <script setup lang="ts">
+import { computed, ref } from 'vue'
 import type { UserExerciseMax } from '../../../types'
 import { Pencil, Trash2 } from 'lucide-vue-next'
+import { exerciseImageMap } from '../../../data/exerciseImageMap'
 
-defineProps<{
+const props = defineProps<{
   max: UserExerciseMax
   readonly?: boolean
 }>()
 
 const emit = defineEmits<{ edit: []; remove: [] }>()
+
+const FALLBACK = '/images/benchpress.png'
+const imgError = ref(false)
+const mapEntry = computed(() => exerciseImageMap[(props.max.exerciseName ?? '').toLowerCase()])
+const imgSrc = computed(() => imgError.value ? null : (mapEntry.value?.imagePath ?? FALLBACK))
+function onImgError() { imgError.value = true }
 
 function formatValue(m: UserExerciseMax): string {
   if (m.activityTrackType === 'repetitions') {
@@ -34,6 +42,17 @@ function formatDate(iso: string) {
 
 <template>
   <div class="bg-white dark:bg-surface-dark rounded-2xl border border-gray-100 dark:border-white/10 p-4 flex items-start gap-4">
+    <!-- Thumbnail -->
+    <div class="w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 bg-surface-input">
+      <img
+        v-if="imgSrc"
+        :src="imgSrc"
+        :alt="max.exerciseName"
+        class="w-full h-full object-cover"
+        @error="onImgError"
+      />
+    </div>
+
     <div class="flex-1 min-w-0">
       <p class="font-semibold text-text-primary dark:text-white text-sm truncate">{{ max.exerciseName }}</p>
       <p v-if="max.primaryMuscle" class="text-xs text-text-secondary capitalize mt-0.5">{{ max.primaryMuscle }}</p>
