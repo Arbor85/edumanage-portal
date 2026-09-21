@@ -278,6 +278,7 @@ export interface ClientOut {
   lastName: string | null
   email: string | null
   gender: string | null
+  userId: string | null
 }
 
 export interface ClientCreate {

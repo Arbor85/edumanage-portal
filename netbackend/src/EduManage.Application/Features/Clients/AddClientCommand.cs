@@ -52,7 +52,7 @@ public sealed record AddClientCommand(ClientCreate Request, string UserId) : IRe
             var client = new Client(invitationCode, request.Request.Name, request.UserId, request.Request.Tags);
 
             await repository.AddAsync(client, cancellationToken);
-            return new ClientOut(client.Name, client.Tags, client.ImageUrl, client.Status, client.InvitationCode, client.TrainerUserId, client.FirstName, client.LastName, client.Email, client.Gender);
+            return new ClientOut(client.Name, client.Tags, client.ImageUrl, client.Status, client.InvitationCode, client.TrainerUserId, client.FirstName, client.LastName, client.Email, client.Gender, client.UserId);
         }
     }
 }

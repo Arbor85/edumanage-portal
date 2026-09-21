@@ -19,7 +19,8 @@ public sealed record ClientOut(
     string? FirstName,
     string? LastName,
     string? Email,
-    string? Gender);
+    string? Gender,
+    string? UserId = null);
 
 public sealed record InvitationOut(
     string Name,

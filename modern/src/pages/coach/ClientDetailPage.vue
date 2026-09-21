@@ -3,7 +3,7 @@ import { ref, computed, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {
   ChevronLeft, Mail, CalendarDays, ClipboardList,
-  Users, FileText, CheckCircle2,
+  Users, FileText, CheckCircle2, Dumbbell,
 } from 'lucide-vue-next'
 import AppLayout from '../../components/layout/AppLayout.vue'
 import NudgeButton from '../../components/NudgeButton.vue'
@@ -185,6 +185,18 @@ function initials(name: string | null): string {
               <FileText class="w-5 h-5 text-primary" />
             </div>
             <span class="text-xs font-bold text-text-secondary">Leave Note</span>
+          </button>
+
+          <button
+            v-if="client?.userId"
+            class="flex flex-col items-center gap-2 p-4 bg-surface-card border border-white/5 rounded-2xl
+                   hover:border-white/10 hover:-translate-y-0.5 active:scale-[0.97] transition-all"
+            @click="router.push(`/gym-profile/client/${client.userId}`)"
+          >
+            <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+              <Dumbbell class="w-5 h-5 text-primary" />
+            </div>
+            <span class="text-xs font-bold text-text-secondary">Gym Profile</span>
           </button>
         </div>
 

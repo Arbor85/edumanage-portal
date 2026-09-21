@@ -45,7 +45,7 @@ public sealed record ListPlansQuery(string CurrentUserId) : IRequest<IReadOnlyLi
             var clientOut = plan.Client is not null
                 ? new ClientOut(plan.Client.Name, plan.Client.Tags, plan.Client.ImageUrl,
                     plan.Client.Status, plan.Client.InvitationCode, plan.Client.TrainerUserId,
-                    plan.Client.FirstName, plan.Client.LastName, plan.Client.Email, plan.Client.Gender)
+                    plan.Client.FirstName, plan.Client.LastName, plan.Client.Email, plan.Client.Gender, plan.Client.UserId)
                 : null;
 
             return new PlanOut(plan.Name, plan.ClientId, plan.Notes, plan.Status, plan.Id, workoutOutputs, clientOut);
