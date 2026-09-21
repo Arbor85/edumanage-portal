@@ -1,46 +1,13 @@
 import type { ClientOut, ExcerciseOut, RoutineOut } from '../../types'
 
+const clientDefaults = { firstName: null, lastName: null, email: null, gender: null, userId: null }
+
 export const mockClients: ClientOut[] = [
-  {
-    invitationCode: 'c1',
-    name: 'Alice Johnson',
-    status: 'Active',
-    imageUrl: null,
-    trainerUserId: 'trainer1',
-    tags: ['weight-loss', 'beginner'],
-  },
-  {
-    invitationCode: 'c2',
-    name: 'Bob Smith',
-    status: 'Active',
-    imageUrl: null,
-    trainerUserId: 'trainer1',
-    tags: ['muscle-gain'],
-  },
-  {
-    invitationCode: 'c3',
-    name: 'Carol White',
-    status: 'Invited',
-    imageUrl: null,
-    trainerUserId: 'trainer1',
-    tags: ['flexibility'],
-  },
-  {
-    invitationCode: 'c4',
-    name: 'David Lee',
-    status: 'Active',
-    imageUrl: null,
-    trainerUserId: 'trainer1',
-    tags: ['advanced', 'powerlifting'],
-  },
-  {
-    invitationCode: 'c5',
-    name: 'Eva Martinez',
-    status: 'Invited',
-    imageUrl: null,
-    trainerUserId: 'trainer1',
-    tags: [],
-  },
+  { ...clientDefaults, invitationCode: 'c1', name: 'Alice Johnson', status: 'Active', imageUrl: null, trainerUserId: 'trainer1', tags: ['weight-loss', 'beginner'] },
+  { ...clientDefaults, invitationCode: 'c2', name: 'Bob Smith', status: 'Active', imageUrl: null, trainerUserId: 'trainer1', tags: ['muscle-gain'] },
+  { ...clientDefaults, invitationCode: 'c3', name: 'Carol White', status: 'Invited', imageUrl: null, trainerUserId: 'trainer1', tags: ['flexibility'] },
+  { ...clientDefaults, invitationCode: 'c4', name: 'David Lee', status: 'Active', imageUrl: null, trainerUserId: 'trainer1', tags: ['advanced', 'powerlifting'] },
+  { ...clientDefaults, invitationCode: 'c5', name: 'Eva Martinez', status: 'Invited', imageUrl: null, trainerUserId: 'trainer1', tags: [] },
 ]
 
 const EXERCISE_DEFAULTS = {

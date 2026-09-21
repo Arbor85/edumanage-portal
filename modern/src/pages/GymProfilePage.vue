@@ -11,6 +11,7 @@ import EmptyState from '../components/EmptyState.vue'
 import BaseSpinner from '../components/BaseSpinner.vue'
 import BaseButton from '../components/BaseButton.vue'
 import ConfirmDialog from '../components/ConfirmDialog.vue'
+import ListSearchBar from '../components/ListSearchBar.vue'
 import ExerciseMaxCard from './GymProfilePage/components/ExerciseMaxCard.vue'
 import ExerciseMaxFormModal from './GymProfilePage/components/ExerciseMaxFormModal.vue'
 import { Dumbbell, Plus } from 'lucide-vue-next'
@@ -46,16 +47,21 @@ const filtered = computed(() => {
   )
 })
 
-onMounted(async () => {
-  if (readonly.value && clientUserId.value) {
-    isLoadingClient.value = true
-    try {
-      clientMaxes.value = await store.fetchForClient(clientUserId.value)
-    } finally {
-      isLoadingClient.value = false
-    }
+async function refreshClient() {
+  if (!clientUserId.value) return
+  isLoadingClient.value = true
+  try {
+    clientMaxes.value = await store.fetchForClient(clientUserId.value)
+  } finally {
+    isLoadingClient.value = false
+  }
+}
+
+onMounted(() => {
+  if (readonly.value) {
+    refreshClient()
   } else {
-    await store.fetch()
+    store.fetch()
   }
 })
 
@@ -106,14 +112,15 @@ async function confirmRemove() {
       :subtitle="readonly ? 'Personal records for this client.' : 'Your personal records per exercise.'"
     />
 
-    <div class="max-w-2xl flex flex-col gap-4">
+    <div class="max-w-2xl mx-auto w-full flex flex-col gap-4">
       <!-- Toolbar -->
       <div class="flex items-center gap-3">
-        <input
+        <ListSearchBar
           v-model="search"
-          type="search"
           placeholder="Search exercises…"
-          class="flex-1 px-3 py-2.5 rounded-xl border border-gray-200 dark:border-white/10 text-sm bg-white dark:bg-surface-dark text-text-primary dark:text-white focus:outline-none focus:ring-2 focus:ring-primary"
+          :loading="isLoading"
+          class="flex-1"
+          @refresh="readonly ? refreshClient() : store.refresh()"
         />
         <BaseButton v-if="!readonly" variant="primary" @click="openAdd">
           <Plus class="w-4 h-4 mr-1" />

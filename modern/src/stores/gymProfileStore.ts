@@ -10,6 +10,10 @@ export const useGymProfileStore = defineStore('gymProfile', () => {
 
   async function fetch() {
     if (fetched) return
+    await refresh()
+  }
+
+  async function refresh() {
     isLoading.value = true
     try {
       maxes.value = await gymProfileApi.listGymProfile()
@@ -42,5 +46,5 @@ export const useGymProfileStore = defineStore('gymProfile', () => {
     return maxes.value.find((m) => m.exerciseId === id)
   }
 
-  return { maxes, isLoading, fetch, fetchForClient, upsert, remove, getByExerciseId }
+  return { maxes, isLoading, fetch, refresh, fetchForClient, upsert, remove, getByExerciseId }
 })
