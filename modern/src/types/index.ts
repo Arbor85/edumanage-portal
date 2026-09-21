@@ -488,6 +488,7 @@ export interface ActiveExercise {
   skipped: boolean
   supersetGroupId: string | null
   isDropSet: boolean
+  exerciseId?: number | null
 }
 
 export interface ActiveWorkoutState {
@@ -663,5 +664,27 @@ export interface UnscheduledCourse {
 
 export interface ConfirmAutoScheduleRequest {
   entries: ScheduleEntryCreate[]
+}
+
+export interface UserExerciseMax {
+  userId: string
+  exerciseId: number
+  exerciseName: string
+  activityTrackType: ActivityTrackType
+  primaryMuscle?: string
+  maxWeight?: number
+  maxReps?: number
+  maxDuration?: number
+  maxDistance?: number
+  note?: string
+  updatedAt: string
+}
+
+export interface UserExerciseMaxUpsert {
+  maxWeight?: number
+  maxReps?: number
+  maxDuration?: number
+  maxDistance?: number
+  note?: string
 }
 

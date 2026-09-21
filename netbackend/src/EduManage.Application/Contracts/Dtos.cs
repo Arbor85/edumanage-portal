@@ -294,3 +294,23 @@ public sealed record AutoScheduleResult(
     IReadOnlyList<UnscheduledCourse> Unscheduled);
 public sealed record UnscheduledCourse(string CourseId, string CourseName, string Reason);
 public sealed record ConfirmAutoScheduleRequest(IReadOnlyList<ScheduleEntryCreate> Entries);
+
+public sealed record UserExerciseMaxOut(
+    string UserId,
+    int ExerciseId,
+    string ExerciseName,
+    string ActivityTrackType,
+    string? PrimaryMuscle,
+    float? MaxWeight,
+    int? MaxReps,
+    float? MaxDuration,
+    float? MaxDistance,
+    string? Note,
+    DateTime UpdatedAt);
+
+public sealed record UserExerciseMaxUpsert(
+    float? MaxWeight,
+    int? MaxReps,
+    float? MaxDuration,
+    float? MaxDistance,
+    string? Note);

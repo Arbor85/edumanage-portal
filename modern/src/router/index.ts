@@ -77,6 +77,18 @@ const router = createRouter({
       component: () => import('../pages/ProfilePage.vue'),
       meta: { requiresAuth: true },
     },
+    {
+      path: '/gym-profile',
+      name: 'GymProfile',
+      component: () => import('../pages/GymProfilePage.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/gym-profile/client/:userId',
+      name: 'ClientGymProfile',
+      component: () => import('../pages/GymProfilePage.vue'),
+      meta: { requiresAuth: true, requiresTrainer: true },
+    },
 
     // ── Coach routes (trainers only) ──────────────────────────────────────
     {

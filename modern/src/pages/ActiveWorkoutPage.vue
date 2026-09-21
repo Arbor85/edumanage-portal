@@ -16,15 +16,19 @@ import WeightPickerDialog from '../components/WeightPickerDialog/index.vue'
 import RestTimerOverlay from '../components/RestTimerOverlay.vue'
 import MuscleDiagram from '../components/MuscleDiagram.vue'
 import ConfirmDialog from '../components/ConfirmDialog.vue'
+import PrUpdateDialog from '../components/PrUpdateDialog.vue'
+import type { PrCandidate } from '../components/PrUpdateDialog.vue'
 import WorkoutStartPanel from './ActiveWorkoutPage/components/WorkoutStartPanel.vue'
 import SetTimerRow from './ActiveWorkoutPage/components/SetTimerRow.vue'
 import { useWorkoutStore } from '../stores/workoutStore'
 import { useExerciseStore } from '../stores/exerciseStore'
+import { useGymProfileStore } from '../stores/gymProfileStore'
 import { useWeightUnit } from '../composables/useWeightUnit'
-import type { WorkoutHistoryOut } from '../types'
+import type { WorkoutHistoryOut, ActiveExercise } from '../types'
 
 const store = useWorkoutStore()
 const exerciseStore = useExerciseStore()
+const gymProfileStore = useGymProfileStore()
 const router = useRouter()
 const { unit, toggle, toDisplay } = useWeightUnit()
 
@@ -36,6 +40,109 @@ const supersetDialogForExIdx = ref<number | null>(null)
 const supersetCreateStep = ref(false)
 const confirmFinish = ref(false)
 const isFinishing = ref(false)
+
+const prQueue = ref<PrCandidate[]>([])
+const prDialogOpen = ref(false)
+
+function epley1rm(weight: number, reps: number): number {
+  return weight * (1 + reps / 30)
+}
+
+function formatMaxLabel(weight: number | null | undefined, reps: number | null | undefined, duration: number | null | undefined, distance: number | null | undefined, trackType: string): string {
+  if (trackType === 'repetitions') {
+    if (weight != null && reps != null) return `${weight} kg × ${reps}`
+    if (reps != null) return `${reps} reps`
+  }
+  if (trackType === 'time' && duration != null) {
+    const m = Math.floor(duration / 60)
+    const s = Math.floor(duration % 60)
+    return `${m}:${String(s).padStart(2, '0')}`
+  }
+  if (trackType === 'distance' && distance != null) {
+    return distance >= 1000 ? `${(distance / 1000).toFixed(1)} km` : `${distance} m`
+  }
+  return ''
+}
+
+function detectPrCandidates(exercises: ActiveExercise[]): PrCandidate[] {
+  const candidates: PrCandidate[] = []
+
+  for (const ex of exercises) {
+    if (!ex.exerciseId || ex.skipped) continue
+
+    const completedSets = ex.sets.filter((s) => s.completed)
+    if (completedSets.length === 0) continue
+
+    const stored = gymProfileStore.getByExerciseId(ex.exerciseId)
+    const trackType = ex.activityTrackType
+
+    if (trackType === 'repetitions') {
+      const actType = ex.activityType
+      const hasWeight = actType === 'weighted' || actType === 'machine'
+
+      let bestSet: (typeof completedSets)[0] | null = null
+      let bestScore = 0
+
+      for (const s of completedSets) {
+        const w = s.actualWeight ?? 0
+        const r = s.actualReps ?? 0
+        const score = hasWeight ? epley1rm(w, r) : r
+        if (score > bestScore) { bestScore = score; bestSet = s }
+      }
+
+      if (!bestSet) continue
+
+      const storedScore = stored
+        ? (hasWeight && stored.maxWeight != null && stored.maxReps != null
+            ? epley1rm(stored.maxWeight, stored.maxReps)
+            : (stored.maxReps ?? 0))
+        : 0
+
+      if (bestScore > storedScore) {
+        const newWeight = hasWeight ? (bestSet.actualWeight ?? undefined) : undefined
+        const newReps = bestSet.actualReps ?? undefined
+        candidates.push({
+          exerciseId: ex.exerciseId,
+          exerciseName: ex.name,
+          activityTrackType: 'repetitions',
+          newWeight,
+          newReps,
+          oldLabel: stored ? formatMaxLabel(stored.maxWeight, stored.maxReps, null, null, 'repetitions') : undefined,
+          newLabel: formatMaxLabel(newWeight ?? null, newReps ?? null, null, null, 'repetitions'),
+          newOneRm: hasWeight && newWeight != null && newReps != null ? epley1rm(newWeight, newReps) : null,
+        })
+      }
+    } else if (trackType === 'time') {
+      const bestDuration = Math.max(...completedSets.map((s) => s.actualDuration ?? 0))
+      const storedDuration = stored?.maxDuration ?? 0
+      if (bestDuration > storedDuration) {
+        candidates.push({
+          exerciseId: ex.exerciseId,
+          exerciseName: ex.name,
+          activityTrackType: 'time',
+          newDuration: bestDuration,
+          oldLabel: stored?.maxDuration != null ? formatMaxLabel(null, null, stored.maxDuration, null, 'time') : undefined,
+          newLabel: formatMaxLabel(null, null, bestDuration, null, 'time'),
+        })
+      }
+    } else if (trackType === 'distance') {
+      const bestDistance = Math.max(...completedSets.map((s) => s.actualDistance ?? 0))
+      const storedDistance = stored?.maxDistance ?? 0
+      if (bestDistance > storedDistance) {
+        candidates.push({
+          exerciseId: ex.exerciseId,
+          exerciseName: ex.name,
+          activityTrackType: 'distance',
+          newDistance: bestDistance,
+          oldLabel: stored?.maxDistance != null ? formatMaxLabel(null, null, null, stored.maxDistance, 'distance') : undefined,
+          newLabel: formatMaxLabel(null, null, null, bestDistance, 'distance'),
+        })
+      }
+    }
+  }
+
+  return candidates
+}
 const unitSwitchConfirmOpen = ref(false)
 const pendingUnit = ref<'kg' | 'lbs'>('lbs')
 
@@ -252,9 +359,50 @@ function completeCurrentSet(actualDuration?: number | null) {
 }
 
 async function finish() {
-  isFinishing.value = true
   confirmFinish.value = false
 
+  const aw = store.activeWorkout!
+
+  await gymProfileStore.fetch()
+  const candidates = detectPrCandidates(aw.exercises)
+  if (candidates.length > 0) {
+    prQueue.value = candidates
+    prDialogOpen.value = true
+    return
+  }
+
+  await doFinishWorkout()
+}
+
+async function onPrConfirm() {
+  const candidate = prQueue.value[0]
+  if (!candidate) return
+  const today = new Date()
+  const noteLabel = today.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+  await gymProfileStore.upsert(candidate.exerciseId, {
+    maxWeight: candidate.newWeight ?? undefined,
+    maxReps: candidate.newReps ?? undefined,
+    maxDuration: candidate.newDuration ?? undefined,
+    maxDistance: candidate.newDistance ?? undefined,
+    note: `Updated based on ${noteLabel} workout`,
+  })
+  advancePrQueue()
+}
+
+function onPrSkip() {
+  advancePrQueue()
+}
+
+function advancePrQueue() {
+  prQueue.value.shift()
+  if (prQueue.value.length === 0) {
+    prDialogOpen.value = false
+    doFinishWorkout()
+  }
+}
+
+async function doFinishWorkout() {
+  isFinishing.value = true
   const aw = store.activeWorkout!
 
   try {
@@ -796,6 +944,13 @@ function onWorkoutDone() {
       confirm-label="Finish"
       @confirm="finish"
       @cancel="confirmFinish = false"
+    />
+
+    <PrUpdateDialog
+      :open="prDialogOpen"
+      :candidate="prQueue[0] ?? null"
+      @confirm="onPrConfirm"
+      @skip="onPrSkip"
     />
 
     <!-- Superset picker: choose an existing superset or create a new one -->

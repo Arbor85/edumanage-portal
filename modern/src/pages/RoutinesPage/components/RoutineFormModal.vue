@@ -18,6 +18,8 @@ import EditSet from '../../../components/EditSet/index.vue'
 import AddSetsDialog from '../../../components/AddSetsDialog/index.vue'
 import DefaultWorkoutPickerDialog from '../../../components/DefaultWorkoutPickerDialog/index.vue'
 import ExerciseMuscleView from '../../../components/ExerciseMuscleView.vue'
+import ExerciseMaxBadge from '../../../components/ExerciseMaxBadge.vue'
+import { useGymProfileStore } from '../../../stores/gymProfileStore'
 import { X, Plus, Dumbbell, MoreVertical, ChevronUp, ChevronDown, Activity } from 'lucide-vue-next'
 import { exerciseImageMap } from '../../../data/exerciseImageMap'
 
@@ -37,6 +39,7 @@ usePageTitle(() => props.routine ? 'Edit Routine' : 'New Routine', () => props.o
 
 const routineStore = useRoutineStore()
 const exerciseStore = useExerciseStore()
+const gymProfileStore = useGymProfileStore()
 const toast = useToast()
 
 // ── Color config ──────────────────────────────────────────────
@@ -152,6 +155,7 @@ function onNameInput(e: Event) {
 
 watch(() => props.open, (val) => {
   if (val) {
+    gymProfileStore.fetch()
     if (props.routine) {
       form.value = {
         name: props.routine.name,
@@ -682,6 +686,7 @@ async function doDelete() {
                     <span class="text-sm font-semibold text-text-primary dark:text-white truncate">
                       {{ form.excercises[exIdx].name }}
                     </span>
+                    <ExerciseMaxBadge :exercise-id="form.excercises[exIdx].exerciseId" class="flex-shrink-0" />
                   </div>
                   <!-- ⋮ menu -->
                   <div class="relative flex-shrink-0">
@@ -785,6 +790,7 @@ async function doDelete() {
                 <span class="text-sm font-semibold text-text-primary dark:text-white truncate">
                   {{ form.excercises[block.exerciseIndex].name }}
                 </span>
+                <ExerciseMaxBadge :exercise-id="form.excercises[block.exerciseIndex].exerciseId" class="flex-shrink-0" />
                 <span
                   v-if="form.excercises[block.exerciseIndex].dropConfig"
                   class="text-xs px-1.5 py-0.5 rounded-full bg-accent/10 text-accent font-semibold flex-shrink-0"

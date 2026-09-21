@@ -28,6 +28,7 @@ public class EduManageDbContext : DbContext
     public DbSet<Equipment> Equipment { get; set; }
     public DbSet<UserEquipment> UserEquipment { get; set; }
     public DbSet<UserExercisePreference> UserExercisePreferences { get; set; }
+    public DbSet<UserExerciseMax> UserExerciseMaxes { get; set; }
     public DbSet<Organization> Organizations { get; set; }
     public DbSet<OrganizationMembership> OrganizationMemberships { get; set; }
     public DbSet<TrainerAvailability> TrainerAvailabilities { get; set; }
@@ -62,6 +63,7 @@ public class EduManageDbContext : DbContext
         modelBuilder.ApplyConfiguration(new EquipmentConfiguration());
         modelBuilder.ApplyConfiguration(new UserEquipmentConfiguration());
         modelBuilder.ApplyConfiguration(new UserExercisePreferenceConfiguration());
+        modelBuilder.ApplyConfiguration(new UserExerciseMaxConfiguration());
         modelBuilder.ApplyConfiguration(new OrganizationConfiguration());
         modelBuilder.ApplyConfiguration(new OrganizationMembershipConfiguration());
         modelBuilder.ApplyConfiguration(new TrainerAvailabilityConfiguration());

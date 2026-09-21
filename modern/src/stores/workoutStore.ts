@@ -90,6 +90,7 @@ function buildActiveExercises(routine: RoutineOut): ActiveExercise[] {
       sets,
       supersetGroupId,
       isDropSet,
+      exerciseId: ex.exerciseId ?? null,
     }
   })
 }
