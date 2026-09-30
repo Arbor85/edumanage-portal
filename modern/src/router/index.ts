@@ -32,14 +32,6 @@ const router = createRouter({
       component: () => import('../pages/TrainerJoinPage.vue'),
     },
 
-    // ── Onboarding ───────────────────────────────────────────────────────
-    {
-      path: '/onboarding',
-      name: 'Onboarding',
-      component: () => import('../pages/OnboardingPage.vue'),
-      meta: { requiresAuth: true },
-    },
-
     // ── Client routes (all authenticated users) ──────────────────────────
     {
       path: '/',
@@ -209,26 +201,6 @@ router.beforeEach(async (to) => {
 
   if (to.meta.requiresOrganizer && !authStore.isOrganizer) {
     return { path: '/' }
-  }
-
-  // Onboarding gate — skip for the onboarding route itself
-  if (to.name !== 'Onboarding' && !authStore.onboardingComplete) {
-    // Wait briefly for profile to load (it fetches async on auth)
-    if (authStore.userProfile === null) {
-      await new Promise<void>((resolve) => {
-        const stop = setInterval(() => {
-          if (authStore.userProfile !== null || !authStore.isAuthenticated) {
-            clearInterval(stop)
-            resolve()
-          }
-        }, 50)
-        // Timeout after 2s — if profile still null, assume new user → onboarding
-        setTimeout(() => { clearInterval(stop); resolve() }, 2000)
-      })
-    }
-    if (!authStore.onboardingComplete) {
-      return { name: 'Onboarding' }
-    }
   }
 
   return true

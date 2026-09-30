@@ -32,11 +32,7 @@ export async function updateProfile(data: UserProfileUpdate): Promise<UserProfil
   const existing = fromStorage()
   const merged: UserProfile = {
     userId: existing?.userId ?? '',
-    goal: existing?.goal ?? null,
-    experience: existing?.experience ?? null,
     equipment: existing?.equipment ?? [],
-    reminderTime: existing?.reminderTime ?? null,
-    onboardingComplete: existing?.onboardingComplete ?? false,
     ...data,
   }
   toStorage(merged)

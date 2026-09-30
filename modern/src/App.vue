@@ -16,7 +16,7 @@ onMounted(() => { start() })
 
 <template>
   <RouterView v-slot="{ Component, route: r }">
-    <template v-if="r.meta.requiresAuth && r.name !== 'Onboarding'">
+    <template v-if="r.meta.requiresAuth">
       <div class="flex min-h-screen bg-surface-muted dark:bg-surface-page">
         <SideBar />
         <div class="flex-1 flex flex-col min-w-0">

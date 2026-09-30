@@ -1,16 +1,10 @@
 // ─── User Profile ─────────────────────────────────────────────
 
-export type OnboardingGoal = 'muscle' | 'weight_loss' | 'active' | 'follow_trainer'
-export type OnboardingExperience = 'beginner' | 'intermediate' | 'advanced'
-export type OnboardingEquipment = 'none' | 'dumbbells' | 'barbell' | 'full_gym'
+export type UserEquipment = 'none' | 'dumbbells' | 'barbell' | 'full_gym'
 
 export interface UserProfile {
   userId: string
-  goal: OnboardingGoal | null
-  experience: OnboardingExperience | null
-  equipment: OnboardingEquipment[]
-  reminderTime: string | null
-  onboardingComplete: boolean
+  equipment: UserEquipment[]
 }
 
 export type UserProfileUpdate = Partial<Omit<UserProfile, 'userId'>>

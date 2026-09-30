@@ -23,7 +23,6 @@ export const useAuthStore = defineStore('auth', () => {
   })
 
   const userProfile = ref<UserProfile | null>(null)
-  const onboardingComplete = computed(() => userProfile.value?.onboardingComplete ?? false)
 
   // Fetch profile once Auth0 finishes loading and user is authenticated
   watch(
@@ -36,10 +35,6 @@ export const useAuthStore = defineStore('auth', () => {
     { immediate: true }
   )
 
-  function setProfile(profile: UserProfile) {
-    userProfile.value = profile
-  }
-
   async function bootstrap() {
     // Auth0 handles token refresh internally; this is a hook for future setup
   }
@@ -49,5 +44,5 @@ export const useAuthStore = defineStore('auth', () => {
     auth0Logout({ logoutParams: { returnTo: window.location.origin + '/login' } })
   }
 
-  return { user, isLoading, isAuthenticated, isTrainer, isOrganizer, userProfile, onboardingComplete, setProfile, bootstrap, logout }
+  return { user, isLoading, isAuthenticated, isTrainer, isOrganizer, userProfile, bootstrap, logout }
 })
