@@ -121,6 +121,8 @@ app.MapScalarApiReference(options =>
 
 app.UseHttpsRedirection();
 
+app.UseRouting();
+
 app.UseCors(frontendCorsPolicy);
 
 app.UseAuthentication();

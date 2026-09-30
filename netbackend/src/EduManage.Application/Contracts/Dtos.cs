@@ -259,6 +259,13 @@ public sealed record UserEquipmentSave(
     string EquipmentId,
     List<decimal>? AvailableWeights);
 
+public sealed record UserProfileOut(
+    string UserId,
+    List<string> Equipment);
+
+public sealed record UserProfileUpdate(
+    List<string>? Equipment);
+
 // Organization
 public sealed record OrganizationCreate(string Name);
 public sealed record OrganizationOut(string Id, string Name, string OwnerId, string InviteCode, int TrainerCount);
