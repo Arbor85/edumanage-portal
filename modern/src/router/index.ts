@@ -115,6 +115,12 @@ const router = createRouter({
       component: () => import('../pages/EquipmentPage.vue'),
       meta: { requiresAuth: true, requiresTrainer: true },
     },
+    {
+      path: '/coach/form-templates',
+      name: 'CoachFormTemplates',
+      component: () => import('../pages/FormTemplatesPage.vue'),
+      meta: { requiresAuth: true, requiresTrainer: true },
+    },
 
     {
       path: '/coach/mcp-keys',

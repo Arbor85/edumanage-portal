@@ -96,6 +96,46 @@ public sealed record MeetingUpdate(string ClientId, string StartsAt, double Pric
 
 public sealed record MeetingOut(string ClientId, string StartsAt, double Price, string Id, string? UserId);
 
+public sealed record FormFieldDefinitionDto(
+    string Id,
+    string Label,
+    string Type,
+    bool Required,
+    int Order,
+    IReadOnlyList<string>? Options,
+    double? Min,
+    double? Max,
+    string? HelpText);
+
+public sealed record FormTemplateCreate(string Name, string? Description, IReadOnlyList<FormFieldDefinitionDto> Fields);
+
+public sealed record FormTemplateUpdate(string Name, string? Description, bool IsActive, IReadOnlyList<FormFieldDefinitionDto> Fields);
+
+public sealed record FormTemplateOut(
+    string Id,
+    string Name,
+    string? Description,
+    bool IsActive,
+    int CurrentVersion,
+    string TrainerUserId,
+    string CreatedAt,
+    IReadOnlyList<FormFieldDefinitionDto> Fields);
+
+public sealed record FormAnswerDto(string FieldId, string? Value, IReadOnlyList<string>? Values);
+
+public sealed record FormResponseCreate(string FormTemplateId, string ClientId, string? MeetingId, IReadOnlyList<FormAnswerDto> Answers);
+
+public sealed record FormResponseOut(
+    string Id,
+    string FormTemplateId,
+    string FormTemplateVersionId,
+    int TemplateVersionNumber,
+    string ClientId,
+    string? MeetingId,
+    string FilledByUserId,
+    string CreatedAt,
+    IReadOnlyList<FormAnswerDto> Answers);
+
 public sealed record CourseCreate(string Name, string Type, int? Size, int DurationMinutes, string? Description);
 
 public sealed record CourseUpdate(string Name, string Type, int? Size, int DurationMinutes, string? Description);

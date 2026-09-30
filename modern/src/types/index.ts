@@ -339,6 +339,74 @@ export interface MeetingUpdate {
   price: number
 }
 
+// ─── Form Templates & Responses ───────────────────────────────
+// API path: /api/form-templates, /api/form-responses
+
+export type FormFieldType =
+  | 'Text' | 'TextArea' | 'Number' | 'SingleChoice'
+  | 'MultiChoice' | 'Boolean' | 'Scale' | 'Date'
+
+export interface FormFieldDefinition {
+  id: string
+  label: string
+  type: FormFieldType
+  required: boolean
+  order: number
+  options: string[] | null
+  min: number | null
+  max: number | null
+  helpText: string | null
+}
+
+export interface FormTemplateOut {
+  id: string
+  name: string
+  description: string | null
+  isActive: boolean
+  currentVersion: number
+  trainerUserId: string
+  createdAt: string
+  fields: FormFieldDefinition[]
+}
+
+export interface FormTemplateCreate {
+  name: string
+  description: string | null
+  fields: FormFieldDefinition[]
+}
+
+export interface FormTemplateUpdate {
+  name: string
+  description: string | null
+  isActive: boolean
+  fields: FormFieldDefinition[]
+}
+
+export interface FormAnswer {
+  fieldId: string
+  value: string | null
+  values: string[] | null
+}
+
+export interface FormResponseCreate {
+  formTemplateId: string
+  clientId: string
+  meetingId: string | null
+  answers: FormAnswer[]
+}
+
+export interface FormResponseOut {
+  id: string
+  formTemplateId: string
+  formTemplateVersionId: string
+  templateVersionNumber: number
+  clientId: string
+  meetingId: string | null
+  filledByUserId: string
+  createdAt: string
+  answers: FormAnswer[]
+}
+
 // ─── Courses ──────────────────────────────────────────────────
 // API path: /api/courses
 
