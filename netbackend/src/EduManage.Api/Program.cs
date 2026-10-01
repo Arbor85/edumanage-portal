@@ -92,7 +92,9 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=edumanage.db");
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
-string[] allowedOrigins = ["http://localhost:5173", "http://localhost:5091"];
+var allowedOriginsRaw = builder.Configuration["Cors:AllowedOrigins"] ?? "http://localhost:5173";
+string[] allowedOrigins = allowedOriginsRaw.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
 builder.Services.AddCors(options =>
 {
 	options.AddPolicy(frontendCorsPolicy, policy =>
