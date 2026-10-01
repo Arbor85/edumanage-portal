@@ -12,7 +12,7 @@ builder.Configuration
 
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(
-    builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=edumanage.db");
+    builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new ArgumentException("DefaultConnection is not configured"));
 builder.Services.AddScoped<ICurrentTrainerService, CurrentTrainerService>();
 
 builder.Services
