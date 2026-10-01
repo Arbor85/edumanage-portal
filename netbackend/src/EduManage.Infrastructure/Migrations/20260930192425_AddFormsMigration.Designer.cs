@@ -3,6 +3,7 @@ using System;
 using EduManage.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EduManage.Infrastructure.Migrations
 {
     [DbContext(typeof(EduManageDbContext))]
-    partial class EduManageDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260930192425_AddFormsMigration")]
+    partial class AddFormsMigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.0");
@@ -967,39 +970,6 @@ namespace EduManage.Infrastructure.Migrations
                     b.ToTable("UserEquipment");
                 });
 
-            modelBuilder.Entity("EduManage.Domain.Entities.UserExerciseMax", b =>
-                {
-                    b.Property<string>("UserId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("ExerciseId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<float?>("MaxDistance")
-                        .HasColumnType("REAL");
-
-                    b.Property<float?>("MaxDuration")
-                        .HasColumnType("REAL");
-
-                    b.Property<int?>("MaxReps")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<float?>("MaxWeight")
-                        .HasColumnType("REAL");
-
-                    b.Property<string>("Note")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("UserId", "ExerciseId");
-
-                    b.HasIndex("ExerciseId");
-
-                    b.ToTable("UserExerciseMaxes");
-                });
-
             modelBuilder.Entity("EduManage.Domain.Entities.UserExercisePreference", b =>
                 {
                     b.Property<string>("UserId")
@@ -1017,21 +987,6 @@ namespace EduManage.Infrastructure.Migrations
                     b.HasKey("UserId", "ExerciseId");
 
                     b.ToTable("UserExercisePreferences");
-                });
-
-            modelBuilder.Entity("EduManage.Domain.Entities.UserProfile", b =>
-                {
-                    b.Property<string>("UserId")
-                        .HasMaxLength(200)
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Equipment")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("UserId");
-
-                    b.ToTable("UserProfiles");
                 });
 
             modelBuilder.Entity("EduManage.Domain.Entities.WorkoutHistory", b =>
@@ -1265,17 +1220,6 @@ namespace EduManage.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Equipment");
-                });
-
-            modelBuilder.Entity("EduManage.Domain.Entities.UserExerciseMax", b =>
-                {
-                    b.HasOne("EduManage.Domain.Entities.Exercise", "Exercise")
-                        .WithMany()
-                        .HasForeignKey("ExerciseId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Exercise");
                 });
 
             modelBuilder.Entity("EduManage.Domain.Entities.Building", b =>

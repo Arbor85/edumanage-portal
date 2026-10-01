@@ -2,21 +2,26 @@
 import { ref, computed, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {
-  ChevronLeft, Mail, CalendarDays, ClipboardList,
-  Users, FileText, CheckCircle2, Dumbbell,
+  ChevronLeft, Mail, CalendarDays, ClipboardList, Dumbbell,
+  Users, FileText, CheckCircle2, FilePlus2, ChevronDown,
 } from 'lucide-vue-next'
 import AppLayout from '../../components/layout/AppLayout.vue'
 import NudgeButton from '../../components/NudgeButton.vue'
 import TrainingHeatmap from '../../components/TrainingHeatmap.vue'
 import SkeletonLoader from '../../components/SkeletonLoader.vue'
+import FillFormModal from './components/FillFormModal.vue'
 import { useClientStore } from '../../stores/clientStore'
 import { usePlanStore } from '../../stores/planStore'
+import { useToast } from '../../composables/useToast'
+import * as formsApi from '../../services/formsApi'
 import type { HeatmapDay } from '../../stores/progressStore'
+import type { FormResponseOut } from '../../types'
 
 const route = useRoute()
 const router = useRouter()
 const clientStore = useClientStore()
 const planStore = usePlanStore()
+const toast = useToast()
 
 const id = computed(() => route.params.id as string)
 
@@ -61,10 +66,32 @@ const emptyHeatmap = computed<HeatmapDay[]>(() => {
 const noteKey = computed(() => `client_note_${id.value}`)
 const note = ref('')
 
+// Session forms
+const formResponses = ref<FormResponseOut[]>([])
+const formResponsesLoading = ref(false)
+const isFillFormOpen = ref(false)
+const expandedResponseId = ref<string | null>(null)
+
+async function loadFormResponses() {
+  formResponsesLoading.value = true
+  try {
+    formResponses.value = await formsApi.listFormResponsesForClient(id.value)
+  } catch {
+    toast.error('Failed to load session forms')
+  } finally {
+    formResponsesLoading.value = false
+  }
+}
+
+function toggleResponse(responseId: string) {
+  expandedResponseId.value = expandedResponseId.value === responseId ? null : responseId
+}
+
 onMounted(async () => {
   if (!clientStore.clients.length) await clientStore.fetch()
   if (!planStore.plans.length) planStore.fetch()
   note.value = localStorage.getItem(noteKey.value) ?? ''
+  loadFormResponses()
 })
 
 watch(note, (v) => localStorage.setItem(noteKey.value, v))
@@ -153,7 +180,7 @@ function initials(name: string | null): string {
         </div>
 
         <!-- ── Quick actions ──────────────────────────────── -->
-        <div class="grid grid-cols-3 gap-3 mb-4">
+        <div class="grid grid-cols-4 gap-3 mb-4">
           <button
             class="flex flex-col items-center gap-2 p-4 bg-surface-card border border-white/5 rounded-2xl
                    hover:border-white/10 hover:-translate-y-0.5 active:scale-[0.97] transition-all"
@@ -197,6 +224,14 @@ function initials(name: string | null): string {
               <Dumbbell class="w-5 h-5 text-primary" />
             </div>
             <span class="text-xs font-bold text-text-secondary">Gym Profile</span>
+            class="flex flex-col items-center gap-2 p-4 bg-surface-card border border-white/5 rounded-2xl
+                   hover:border-white/10 hover:-translate-y-0.5 active:scale-[0.97] transition-all"
+            @click="isFillFormOpen = true"
+          >
+            <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+              <FilePlus2 class="w-5 h-5 text-primary" />
+            </div>
+            <span class="text-xs font-bold text-text-secondary">Fill Form</span>
           </button>
         </div>
 
@@ -275,6 +310,52 @@ function initials(name: string | null): string {
           </p>
         </section>
 
+        <!-- ── Session forms ──────────────────────────────── -->
+        <section class="bg-surface-card border border-white/5 rounded-2xl p-5 mb-4">
+          <div class="flex items-center justify-between mb-3">
+            <p class="text-xs font-bold tracking-widest uppercase text-text-muted">Session forms</p>
+            <button
+              class="text-xs font-bold text-primary hover:text-primary-dark transition-colors"
+              @click="isFillFormOpen = true"
+            >+ Fill form</button>
+          </div>
+
+          <div v-if="formResponsesLoading" class="flex flex-col gap-2">
+            <SkeletonLoader height="48px" rounded="rounded-xl" />
+          </div>
+
+          <div v-else-if="!formResponses.length" class="text-center py-6">
+            <p class="text-sm text-text-secondary">No session forms submitted yet.</p>
+          </div>
+
+          <div v-else class="flex flex-col gap-2">
+            <div
+              v-for="response in formResponses"
+              :key="response.id"
+              class="border border-white/5 rounded-xl overflow-hidden"
+            >
+              <button
+                class="w-full flex items-center justify-between gap-3 px-4 py-3 hover:bg-white/[0.02] transition-colors"
+                @click="toggleResponse(response.id)"
+              >
+                <span class="text-sm text-white font-semibold">
+                  {{ new Date(response.createdAt).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' }) }}
+                </span>
+                <ChevronDown
+                  class="w-4 h-4 text-text-muted flex-shrink-0 transition-transform"
+                  :class="expandedResponseId === response.id ? 'rotate-180' : ''"
+                />
+              </button>
+              <div v-if="expandedResponseId === response.id" class="px-4 pb-3 flex flex-col gap-2">
+                <div v-for="answer in response.answers" :key="answer.fieldId" class="text-sm">
+                  <span class="text-text-muted">{{ answer.fieldId }}:</span>
+                  <span class="text-text-secondary ml-1">{{ answer.values?.length ? answer.values.join(', ') : (answer.value ?? '—') }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <!-- ── Notes ─────────────────────────────────────── -->
         <section data-notes class="bg-surface-card border border-white/5 rounded-2xl p-5 mb-8">
           <p class="text-xs font-bold tracking-widest uppercase text-text-muted mb-3">Your notes</p>
@@ -290,5 +371,13 @@ function initials(name: string | null): string {
         </section>
       </template>
     </div>
+
+    <FillFormModal
+      v-if="client"
+      :open="isFillFormOpen"
+      :client-id="id"
+      @close="isFillFormOpen = false"
+      @submitted="loadFormResponses"
+    />
   </AppLayout>
 </template>

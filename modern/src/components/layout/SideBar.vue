@@ -6,7 +6,7 @@ import { prefetchRoutes } from '../../utils/prefetchRoutes'
 import {
   Home, TrendingUp, Compass, User,
   Users, ClipboardList, Calendar, BookOpen, Package, LogOut,
-  Building2, LayoutDashboard, CalendarDays, KeyRound, List, Dumbbell,
+  Building2, LayoutDashboard, CalendarDays, KeyRound, List, Dumbbell,FileText,
 } from 'lucide-vue-next'
 import DarkModeToggle from '../DarkModeToggle.vue'
 import type { Component } from 'vue'
@@ -24,13 +24,14 @@ const clientItems: { to: string; icon: Component; label: string }[] = [
 ]
 
 const coachItems: { to: string; icon: Component; label: string }[] = [
-  { to: '/coach/clients',   icon: Users,         label: 'Clients' },
-  { to: '/coach/plans',     icon: ClipboardList, label: 'Plans' },
-  { to: '/coach/meetings',  icon: Calendar,      label: 'Meetings' },
-  { to: '/coach/courses',   icon: BookOpen,      label: 'Courses' },
-  { to: '/coach/equipment', icon: Package,       label: 'Equipment' },
-  { to: '/my-schedule',     icon: CalendarDays,  label: 'My Schedule' },
-  { to: '/coach/mcp-keys',  icon: KeyRound,      label: 'MCP Keys' },
+  { to: '/coach/clients',        icon: Users,         label: 'Clients' },
+  { to: '/coach/plans',          icon: ClipboardList, label: 'Plans' },
+  { to: '/coach/meetings',       icon: Calendar,      label: 'Meetings' },
+  { to: '/coach/courses',        icon: BookOpen,      label: 'Courses' },
+  { to: '/coach/equipment',      icon: Package,       label: 'Equipment' },
+  { to: '/coach/form-templates', icon: FileText,      label: 'Form Templates' },
+  { to: '/my-schedule',          icon: CalendarDays,  label: 'My Schedule' },
+  { to: '/coach/mcp-keys',       icon: KeyRound,      label: 'MCP Keys' },
 ]
 
 const organizerItems: { to: string; icon: Component; label: string }[] = [

@@ -39,6 +39,10 @@ public class EduManageDbContext : DbContext
     public DbSet<SchedulePlan> SchedulePlans { get; set; }
     public DbSet<ScheduleEntry> ScheduleEntries { get; set; }
     public DbSet<McpApiKey> McpApiKeys { get; set; }
+    public DbSet<FormTemplate> FormTemplates { get; set; }
+    public DbSet<FormTemplateVersion> FormTemplateVersions { get; set; }
+    public DbSet<FormResponse> FormResponses { get; set; }
+    public DbSet<UserProfile> UserProfiles { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -73,5 +77,9 @@ public class EduManageDbContext : DbContext
         modelBuilder.ApplyConfiguration(new TrainerCourseAssociationConfiguration());
         modelBuilder.ApplyConfiguration(new SchedulePlanConfiguration());
         modelBuilder.ApplyConfiguration(new ScheduleEntryConfiguration());
+        modelBuilder.ApplyConfiguration(new FormTemplateConfiguration());
+        modelBuilder.ApplyConfiguration(new FormTemplateVersionConfiguration());
+        modelBuilder.ApplyConfiguration(new FormResponseConfiguration());
+        modelBuilder.ApplyConfiguration(new UserProfileConfiguration());
     }
 }

@@ -92,8 +92,7 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=edumanage.db");
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
-var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>()
-	?? ["http://localhost:5173"];
+string[] allowedOrigins = ["http://localhost:5173", "http://localhost:5091"];
 builder.Services.AddCors(options =>
 {
 	options.AddPolicy(frontendCorsPolicy, policy =>
@@ -121,6 +120,8 @@ app.MapScalarApiReference(options =>
 });
 
 app.UseHttpsRedirection();
+
+app.UseRouting();
 
 app.UseCors(frontendCorsPolicy);
 

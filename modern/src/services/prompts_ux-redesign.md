@@ -9,7 +9,7 @@ Follow existing Clean Architecture patterns: Controller → MediatR Command/Quer
 ## 1. User Profile
 
 ### GET /api/users/profile
-Returns the current authenticated user's profile and onboarding state.
+Returns the current authenticated user's profile.
 
 **Auth:** Required (Bearer token — user reads their own profile)
 
@@ -17,22 +17,14 @@ Returns the current authenticated user's profile and onboarding state.
 ```json
 {
   "userId": "auth0|abc123",
-  "goal": "muscle",
-  "experience": "intermediate",
-  "equipment": ["dumbbells", "barbell"],
-  "reminderTime": "08:00",
-  "onboardingComplete": true
+  "equipment": ["dumbbells", "barbell"]
 }
 ```
 
 **Fields:**
-- `goal`: `"muscle" | "weight_loss" | "active" | "follow_trainer" | null`
-- `experience`: `"beginner" | "intermediate" | "advanced" | null`
 - `equipment`: array of `"none" | "dumbbells" | "barbell" | "full_gym"`
-- `reminderTime`: `"HH:mm"` string or `null`
-- `onboardingComplete`: `boolean`
 
-**Response 404:** Profile not yet created → frontend treats as onboarding not complete.
+**Response 404:** Profile not yet created → frontend treats equipment as empty.
 
 ---
 
@@ -44,11 +36,7 @@ Creates or updates the current user's profile. Upsert semantics.
 **Request body (all fields optional — partial update):**
 ```json
 {
-  "goal": "muscle",
-  "experience": "intermediate",
-  "equipment": ["dumbbells", "barbell"],
-  "reminderTime": "08:00",
-  "onboardingComplete": true
+  "equipment": ["dumbbells", "barbell"]
 }
 ```
 
