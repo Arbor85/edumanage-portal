@@ -44,7 +44,7 @@ public sealed record GetStandaloneFormResponsesSummaryQuery(string FormTemplateI
 
             return field.Type switch
             {
-                FormFieldType.Number or FormFieldType.Scale => BuildNumericSummary(field, allAnswers, responseCount),
+                FormFieldType.Number or FormFieldType.Scale or FormFieldType.Range => BuildNumericSummary(field, allAnswers, responseCount),
                 FormFieldType.SingleChoice => BuildOptionSummary(field, allAnswers.Select(a => a.Value).OfType<string>().ToList(), responseCount),
                 FormFieldType.MultiChoice => BuildMultiChoiceSummary(field, allAnswers, responseCount),
                 FormFieldType.Boolean => BuildBooleanSummary(field, allAnswers, responseCount),

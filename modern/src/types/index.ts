@@ -339,7 +339,7 @@ export interface MeetingUpdate {
 
 export type FormFieldType =
   | 'Text' | 'TextArea' | 'Number' | 'SingleChoice'
-  | 'MultiChoice' | 'Boolean' | 'Scale' | 'Date'
+  | 'MultiChoice' | 'Boolean' | 'Scale' | 'Date' | 'Range'
 
 export interface FormFieldDefinition {
   id: string

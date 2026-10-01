@@ -22,6 +22,7 @@ const FIELD_TYPE_OPTIONS: { value: FormFieldType; label: string }[] = [
   { value: 'MultiChoice', label: 'Multi choice (checkboxes)' },
   { value: 'Boolean', label: 'Yes / No' },
   { value: 'Scale', label: 'Scale / rating' },
+  { value: 'Range', label: 'Range slider' },
   { value: 'Date', label: 'Date' },
 ]
 
@@ -79,7 +80,7 @@ function needsOptions(type: FormFieldType) {
 }
 
 function needsRange(type: FormFieldType) {
-  return type === 'Number' || type === 'Scale'
+  return type === 'Number' || type === 'Scale' || type === 'Range'
 }
 
 async function save() {

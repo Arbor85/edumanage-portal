@@ -41,7 +41,10 @@ watch(selectedTemplate, (template) => {
   answers.value = {}
   if (!template) return
   for (const field of template.fields) {
-    answers.value[field.id] = { value: '', values: [] }
+    const defaultVal = field.type === 'Range'
+      ? String(Math.round(((field.min ?? 0) + (field.max ?? 100)) / 2))
+      : ''
+    answers.value[field.id] = { value: defaultVal, values: [] }
   }
 })
 
@@ -67,6 +70,7 @@ async function submit() {
     if (!f.required) return false
     const a = answers.value[f.id]
     if (f.type === 'MultiChoice') return !(a?.values?.length)
+    if (f.type === 'Range') return false
     return !a?.value
   })
   if (missing.length) {
@@ -131,6 +135,29 @@ async function submit() {
               :label="field.label + (field.required ? ' *' : '')"
               :hint="field.helpText ?? (field.min != null || field.max != null ? `Range: ${field.min ?? '–'} to ${field.max ?? '–'}` : undefined)"
             />
+          </template>
+
+          <template v-else-if="field.type === 'Range'">
+            <div class="flex flex-col gap-2">
+              <div class="flex items-center justify-between">
+                <span class="text-sm font-semibold text-text-primary">{{ field.label }}{{ field.required ? ' *' : '' }}</span>
+                <span class="text-sm font-bold text-primary tabular-nums">{{ answers[field.id]?.value ?? (field.min ?? 0) }}</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-xs text-text-muted tabular-nums">{{ field.min ?? 0 }}</span>
+                <input
+                  type="range"
+                  class="flex-1 h-2 rounded-full appearance-none cursor-pointer"
+                  style="accent-color: var(--color-primary, #7c3aed);"
+                  :min="field.min ?? 0"
+                  :max="field.max ?? 100"
+                  :value="answers[field.id]?.value ?? (field.min ?? 0)"
+                  @input="(e) => answers[field.id].value = (e.target as HTMLInputElement).value"
+                />
+                <span class="text-xs text-text-muted tabular-nums">{{ field.max ?? 100 }}</span>
+              </div>
+              <p v-if="field.helpText" class="text-xs text-text-muted">{{ field.helpText }}</p>
+            </div>
           </template>
 
           <template v-else-if="field.type === 'Date'">

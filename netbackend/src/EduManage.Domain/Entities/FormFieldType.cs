@@ -9,5 +9,6 @@ public enum FormFieldType
     MultiChoice,
     Boolean,
     Scale,
-    Date
+    Date,
+    Range
 }

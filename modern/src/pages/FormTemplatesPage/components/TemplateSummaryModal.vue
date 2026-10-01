@@ -22,7 +22,7 @@ watch(() => props.open, async (val) => {
 })
 
 function isNumeric(field: FieldSummaryOut) {
-  return field.type === 'Number' || field.type === 'Scale'
+  return field.type === 'Number' || field.type === 'Scale' || field.type === 'Range'
 }
 
 function isOption(field: FieldSummaryOut) {

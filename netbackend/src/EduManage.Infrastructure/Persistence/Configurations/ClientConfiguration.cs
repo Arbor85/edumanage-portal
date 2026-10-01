@@ -1,5 +1,6 @@
 using EduManage.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace EduManage.Infrastructure.Persistence.Configurations;
@@ -15,7 +16,11 @@ public class ClientConfiguration : IEntityTypeConfiguration<Client>
         builder.Property(c => c.Tags)
             .HasConversion(
                 v => string.Join(",", v),
-                v => v.Split(",", StringSplitOptions.None).ToList());
+                v => v.Split(",", StringSplitOptions.None).ToList())
+            .Metadata.SetValueComparer(new ValueComparer<List<string>>(
+                (l, r) => l != null && r != null && l.SequenceEqual(r),
+                v => v.Aggregate(0, (h, s) => HashCode.Combine(h, s.GetHashCode(StringComparison.Ordinal))),
+                v => v.ToList()));
 
         builder.Property(c => c.ImageUrl)
             .HasDefaultValue(string.Empty);
