@@ -23,6 +23,9 @@ jobs:
         with:
           dotnet-version: '10.x'
 
+      - name: Restore NuGet packages
+        run: dotnet restore netbackend/src/EduManage.Api/EduManage.Api.csproj
+
       - name: Build with dotnet
         run: dotnet build netbackend/src/EduManage.Api/EduManage.Api.csproj --configuration Release --no-restore
 
