@@ -2,7 +2,7 @@
 import { useWorkoutStore } from '../../../stores/workoutStore'
 import { useRouter } from 'vue-router'
 import BaseButton from '../../../components/BaseButton.vue'
-import { Dumbbell, ArrowRight } from 'lucide-vue-next'
+import { Dumbbell, ArrowRight } from '@lucide/vue'
 
 const store = useWorkoutStore()
 const router = useRouter()

@@ -2,7 +2,7 @@
 import { onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAuthStore } from '../../stores/authStore'
-import { Home, List, TrendingUp, Compass, User } from 'lucide-vue-next'
+import { Home, List, TrendingUp, Compass, User } from '@lucide/vue'
 import type { Component } from 'vue'
 import { prefetchRoutes } from '../../utils/prefetchRoutes'
 

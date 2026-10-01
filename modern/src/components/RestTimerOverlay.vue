@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { SkipForward } from 'lucide-vue-next'
+import { SkipForward } from '@lucide/vue'
 import { useWorkoutStore } from '../stores/workoutStore'
 
 const store = useWorkoutStore()

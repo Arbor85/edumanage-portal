@@ -9,7 +9,7 @@ import BaseTextarea from '../../../components/BaseTextarea.vue'
 import BaseSelect from '../../../components/BaseSelect.vue'
 import BaseCheckbox from '../../../components/BaseCheckbox.vue'
 import BaseButton from '../../../components/BaseButton.vue'
-import { Check } from 'lucide-vue-next'
+import { Check } from '@lucide/vue'
 
 const props = defineProps<{ open: boolean; template: FormTemplateOut | null; existingResponse?: StandaloneFormResponseOut | null }>()
 const emit = defineEmits<{ close: []; submitted: [] }>()

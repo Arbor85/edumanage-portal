@@ -6,7 +6,7 @@ import BaseButton from '../../../components/BaseButton.vue'
 import SelectRoutine from '../../../components/SelectRoutine/index.vue'
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { Dumbbell } from 'lucide-vue-next'
+import { Dumbbell } from '@lucide/vue'
 
 const workoutStore = useWorkoutStore()
 const routineStore = useRoutineStore()

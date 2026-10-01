@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { ChevronDown, ChevronUp, Plus, Trash2, Pencil, GraduationCap, Clock } from 'lucide-vue-next'
+import { ChevronDown, ChevronUp, Plus, Trash2, Pencil, GraduationCap, Clock } from '@lucide/vue'
 import BaseButton from '../../../components/BaseButton.vue'
 import BaseInput from '../../../components/BaseInput.vue'
 import BaseBadge from '../../../components/BaseBadge.vue'

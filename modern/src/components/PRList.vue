@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Zap } from 'lucide-vue-next'
+import { Zap } from '@lucide/vue'
 import type { PR } from '../stores/progressStore'
 
 defineProps<{

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { ChevronLeft, ChevronRight, Calendar } from 'lucide-vue-next'
+import { ChevronLeft, ChevronRight, Calendar } from '@lucide/vue'
 import type { ScheduleEntryOut } from '../../../../types'
 
 const props = defineProps<{

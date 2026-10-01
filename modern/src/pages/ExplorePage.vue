@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { Search, Plus } from 'lucide-vue-next'
+import { Search, Plus } from '@lucide/vue'
 import AppLayout from '../components/layout/AppLayout.vue'
 import ExerciseGrid from './ExercisesPage/components/ExerciseGrid.vue'
 import ExerciseFormModal from './ExercisesPage/components/ExerciseFormModal.vue'

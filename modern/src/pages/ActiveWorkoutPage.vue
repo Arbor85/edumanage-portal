@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { Pause, Play, Check, ChevronLeft, SkipForward, Link2, X, Plus } from 'lucide-vue-next'
+import { Pause, Play, Check, ChevronLeft, SkipForward, Link2, X, Plus } from '@lucide/vue'
 import { exerciseImageMap } from '../data/exerciseImageMap'
 
 const EXERCISE_FALLBACK = '/images/benchpress.png'

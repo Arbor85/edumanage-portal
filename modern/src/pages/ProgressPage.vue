@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { Dumbbell, Clock, Layers, ChevronRight } from 'lucide-vue-next'
+import { Dumbbell, Clock, Layers, ChevronRight } from '@lucide/vue'
 import AppLayout from '../components/layout/AppLayout.vue'
 import SkeletonLoader from '../components/SkeletonLoader.vue'
 import VolumeChart from '../components/VolumeChart.vue'

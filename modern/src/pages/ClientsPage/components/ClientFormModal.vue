@@ -8,7 +8,7 @@ import BaseModal from '../../../components/BaseModal.vue'
 import BaseInput from '../../../components/BaseInput.vue'
 import BaseButton from '../../../components/BaseButton.vue'
 import ConfirmDialog from '../../../components/ConfirmDialog.vue'
-import { X } from 'lucide-vue-next'
+import { X } from '@lucide/vue'
 import QRCode from 'qrcode'
 
 const props = defineProps<{ open: boolean; client: ClientOut | null }>()

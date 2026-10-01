@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { Dumbbell, Play, Zap } from 'lucide-vue-next'
+import { Dumbbell, Play, Zap } from '@lucide/vue'
 import BaseModal from './BaseModal.vue'
 import { useRoutineStore } from '../stores/routineStore'
 import { useWorkoutStore } from '../stores/workoutStore'

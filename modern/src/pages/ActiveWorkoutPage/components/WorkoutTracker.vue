@@ -7,7 +7,7 @@ import WorkoutExerciseQueue from './WorkoutExerciseQueue.vue'
 import BaseButton from '../../../components/BaseButton.vue'
 import ConfirmDialog from '../../../components/ConfirmDialog.vue'
 import ExerciseSetupDialog from '../../../components/ExerciseSetupDialog.vue'
-import { Timer, Play, Pause, Pencil } from 'lucide-vue-next'
+import { Timer, Play, Pause, Pencil } from '@lucide/vue'
 
 const store = useWorkoutStore()
 const router = useRouter()

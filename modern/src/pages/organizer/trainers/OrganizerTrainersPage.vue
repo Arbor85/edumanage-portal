@@ -8,7 +8,7 @@ import EmptyState from '../../../components/EmptyState.vue'
 import ConfirmDialog from '../../../components/ConfirmDialog.vue'
 import BaseButton from '../../../components/BaseButton.vue'
 import TrainerCard from './components/TrainerCard.vue'
-import { Users, Copy, Check } from 'lucide-vue-next'
+import { Users, Copy, Check } from '@lucide/vue'
 import type { AvailabilityCreate } from '../../../types'
 
 const organizerStore = useOrganizerStore()

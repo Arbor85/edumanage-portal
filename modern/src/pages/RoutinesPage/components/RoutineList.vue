@@ -11,7 +11,7 @@ import { useWorkoutStore } from '../../../stores/workoutStore'
 import { useRouter } from 'vue-router'
 import { useToast } from '../../../composables/useToast'
 import { useRoutineStore } from '../../../stores/routineStore'
-import { Play, ClipboardList } from 'lucide-vue-next'
+import { Play, ClipboardList } from '@lucide/vue'
 
 const props = defineProps<{
   routines: RoutineOut[]

@@ -3,7 +3,7 @@ import { ref, computed, watch } from 'vue'
 import type { ActivityType, ActivityTrackType } from '../types'
 import BaseModal from './BaseModal.vue'
 import BaseButton from './BaseButton.vue'
-import { Plus, Trash2 } from 'lucide-vue-next'
+import { Plus, Trash2 } from '@lucide/vue'
 
 interface SetDraft {
   reps: number | null

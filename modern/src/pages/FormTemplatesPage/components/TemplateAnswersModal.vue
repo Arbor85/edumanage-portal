@@ -5,7 +5,7 @@ import * as formsApi from '../../../services/formsApi'
 import { useToast } from '../../../composables/useToast'
 import BaseModal from '../../../components/BaseModal.vue'
 import SkeletonLoader from '../../../components/SkeletonLoader.vue'
-import { ChevronDown, ChevronRight, Pencil, Trash2 } from 'lucide-vue-next'
+import { ChevronDown, ChevronRight, Pencil, Trash2 } from '@lucide/vue'
 
 const props = defineProps<{ open: boolean; template: FormTemplateOut | null }>()
 const emit = defineEmits<{ close: []; edit: [response: StandaloneFormResponseOut] }>()

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Teleport } from 'vue'
-import { CheckCircle, XCircle, Info } from 'lucide-vue-next'
+import { CheckCircle, XCircle, Info } from '@lucide/vue'
 import { useToast } from '../composables/useToast'
 
 const { toasts } = useToast()

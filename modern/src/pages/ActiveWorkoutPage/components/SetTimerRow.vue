@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch, onUnmounted } from 'vue'
-import { Check, Play, Square } from 'lucide-vue-next'
+import { Check, Play, Square } from '@lucide/vue'
 import BaseButton from '../../../components/BaseButton.vue'
 
 const props = defineProps<{

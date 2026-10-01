@@ -16,7 +16,7 @@ import EmptyState from '../EmptyState.vue'
 import EditSet from '../EditSet/index.vue'
 import AddSetsDialog from '../AddSetsDialog/index.vue'
 import DefaultWorkoutPickerDialog from '../DefaultWorkoutPickerDialog/index.vue'
-import { X, Plus, Dumbbell, MoreVertical, ChevronUp, ChevronDown } from 'lucide-vue-next'
+import { X, Plus, Dumbbell, MoreVertical, ChevronUp, ChevronDown } from '@lucide/vue'
 import { exerciseImageMap } from '../../data/exerciseImageMap'
 
 const EXERCISE_FALLBACK = '/images/benchpress.png'

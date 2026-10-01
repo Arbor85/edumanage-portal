@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { X, Pencil, Dumbbell } from 'lucide-vue-next'
+import { X, Pencil, Dumbbell } from '@lucide/vue'
 import type { ExcerciseOut, ActivityType } from '../../../types'
 import DifficultyBadge from '../../../components/DifficultyBadge.vue'
 import ExerciseMuscleView from '../../../components/ExerciseMuscleView.vue'

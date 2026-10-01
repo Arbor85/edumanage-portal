@@ -72,7 +72,7 @@ dotnet test   # unit tests
 **Patterns:**
 - Always use Composition API with `<script setup>`.
 - Reuse existing services/composables before creating new ones. Follow naming conventions (`clientsApi`, `routinesApi`, etc.).
-- Icons: **`lucide-vue-next` only** — no heroicons, phosphor, font-awesome, mdi, tabler, feather, etc.
+- Icons: **`@lucide/vue` only** — no heroicons, phosphor, font-awesome, mdi, tabler, feather, etc.
 - Success/error feedback → `src/components/NotificationToast.vue`.
 - Custom scrollbar styles on all scrollable `div`s for cross-browser consistency.
 - All API endpoints/secrets in `.env` or `.env.*`. Never hardcode URLs.
