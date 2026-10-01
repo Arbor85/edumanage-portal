@@ -8,6 +8,13 @@ import router from './router'
 import { useWorkoutStore } from './stores/workoutStore'
 import { initApiAuth } from './services/apiClient'
 
+console.log('[env]', {
+  VITE_AUTH0_DOMAIN: import.meta.env.VITE_AUTH0_DOMAIN,
+  VITE_AUTH0_CLIENT_ID: import.meta.env.VITE_AUTH0_CLIENT_ID,
+  VITE_AUTH0_AUDIENCE: import.meta.env.VITE_AUTH0_AUDIENCE,
+  VITE_API_BASE_URL: import.meta.env.VITE_API_BASE_URL,
+})
+
 const app = createApp(App)
 
 app.use(createPinia())
