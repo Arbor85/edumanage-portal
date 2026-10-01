@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import type { Component } from 'vue'
-import { List, LayoutGrid, Calendar } from 'lucide-vue-next'
+import { List, LayoutGrid, Calendar } from '@lucide/vue'
 
 const props = defineProps<{
   modelValue: string

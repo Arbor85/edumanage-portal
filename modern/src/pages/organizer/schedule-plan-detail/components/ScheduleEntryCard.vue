@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { Trash2, AlertTriangle, Pencil, Clock, MapPin, User } from 'lucide-vue-next'
+import { Trash2, AlertTriangle, Pencil, Clock, MapPin, User } from '@lucide/vue'
 import BaseButton from '../../../../components/BaseButton.vue'
 import type { ScheduleEntryOut } from '../../../../types'
 

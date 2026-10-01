@@ -14,7 +14,7 @@ import ConfirmDialog from '../components/ConfirmDialog.vue'
 import ListSearchBar from '../components/ListSearchBar.vue'
 import ExerciseMaxCard from './GymProfilePage/components/ExerciseMaxCard.vue'
 import ExerciseMaxFormModal from './GymProfilePage/components/ExerciseMaxFormModal.vue'
-import { Dumbbell, Plus } from 'lucide-vue-next'
+import { Dumbbell, Plus } from '@lucide/vue'
 
 usePageTitle('Gym Profile')
 

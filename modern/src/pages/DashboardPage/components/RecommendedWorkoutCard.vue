@@ -4,7 +4,7 @@ import { useRoutineStore } from '../../../stores/routineStore'
 import { useWorkoutStore } from '../../../stores/workoutStore'
 import { useRouter } from 'vue-router'
 import BaseButton from '../../../components/BaseButton.vue'
-import { Play } from 'lucide-vue-next'
+import { Play } from '@lucide/vue'
 
 const routineStore = useRoutineStore()
 const workoutStore = useWorkoutStore()

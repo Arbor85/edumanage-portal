@@ -2,7 +2,7 @@
 import { useRouter } from 'vue-router'
 import type { ClientOut } from '../../../types'
 import NudgeButton from '../../../components/NudgeButton.vue'
-import { Pencil, Trash2 } from 'lucide-vue-next'
+import { Pencil, Trash2 } from '@lucide/vue'
 
 const props = defineProps<{ client: ClientOut }>()
 const emit = defineEmits<{ edit: []; delete: [] }>()

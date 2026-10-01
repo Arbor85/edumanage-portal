@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Utensils } from 'lucide-vue-next'
+import { Utensils } from '@lucide/vue'
 </script>
 
 <template>

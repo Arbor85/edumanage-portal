@@ -10,7 +10,7 @@ import ConfirmDialog from '../../../components/ConfirmDialog.vue'
 import BaseButton from '../../../components/BaseButton.vue'
 import BuildingCard from './components/BuildingCard.vue'
 import BuildingFormModal from './components/BuildingFormModal.vue'
-import { Building2, Plus } from 'lucide-vue-next'
+import { Building2, Plus } from '@lucide/vue'
 import type { BuildingOut, BuildingAvailabilityCreate } from '../../../types'
 
 const route = useRoute()

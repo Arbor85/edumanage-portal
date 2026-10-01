@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import { useWorkoutStore } from '../../../stores/workoutStore'
 import { useRouter } from 'vue-router'
-import { Dumbbell, ChevronRight } from 'lucide-vue-next'
+import { Dumbbell, ChevronRight } from '@lucide/vue'
 
 const store = useWorkoutStore()
 const router = useRouter()

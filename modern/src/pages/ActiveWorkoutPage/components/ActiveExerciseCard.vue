@@ -3,7 +3,7 @@ import type { ActiveExercise } from '../../../types'
 import BaseButton from '../../../components/BaseButton.vue'
 import SetTimerRow from './SetTimerRow.vue'
 import { useWorkoutStore } from '../../../stores/workoutStore'
-import { Check } from 'lucide-vue-next'
+import { Check } from '@lucide/vue'
 
 const props = defineProps<{ exercise: ActiveExercise; isCurrent: boolean; currentSetIndex?: number }>()
 const store = useWorkoutStore()

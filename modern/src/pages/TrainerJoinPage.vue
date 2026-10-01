@@ -9,7 +9,7 @@ import BaseButton from '../components/BaseButton.vue'
 import BaseInput from '../components/BaseInput.vue'
 import BaseSpinner from '../components/BaseSpinner.vue'
 import { useToast } from '../composables/useToast'
-import { Users, Plus, Trash2 } from 'lucide-vue-next'
+import { Users, Plus, Trash2 } from '@lucide/vue'
 import type { AvailabilityCreate } from '../types'
 
 usePageTitle('Join as Trainer')

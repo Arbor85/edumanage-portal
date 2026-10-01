@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ChevronRight, Trash2 } from 'lucide-vue-next'
+import { ChevronRight, Trash2 } from '@lucide/vue'
 import BaseBadge from '../../../../components/BaseBadge.vue'
 import BaseButton from '../../../../components/BaseButton.vue'
 import type { SchedulePlanOut } from '../../../../types'

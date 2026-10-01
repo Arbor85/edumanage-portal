@@ -12,7 +12,7 @@ import BaseCheckbox from '../../../components/BaseCheckbox.vue'
 import BaseButton from '../../../components/BaseButton.vue'
 import TagInput from '../../../components/TagInput.vue'
 import ConfirmDialog from '../../../components/ConfirmDialog.vue'
-import { Plus, Trash2, GripVertical } from 'lucide-vue-next'
+import { Plus, Trash2, GripVertical } from '@lucide/vue'
 
 const FIELD_TYPE_OPTIONS: { value: FormFieldType; label: string }[] = [
   { value: 'Text', label: 'Short text' },

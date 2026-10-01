@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { CheckCircle, Zap, Timer, MoveRight, Flower } from 'lucide-vue-next'
+import { CheckCircle, Zap, Timer, MoveRight, Flower } from '@lucide/vue'
 import { useChallengeStore } from '../stores/challengeStore'
 import type { Component } from 'vue'
 import confetti from 'canvas-confetti'

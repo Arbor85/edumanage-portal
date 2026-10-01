@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { EquipmentOut, UserEquipmentSave } from '../../../types'
-import { Pencil, Dumbbell, User, ShieldCheck } from 'lucide-vue-next'
+import { Pencil, Dumbbell, User, ShieldCheck } from '@lucide/vue'
 
 const props = defineProps<{
   equipment: EquipmentOut[]

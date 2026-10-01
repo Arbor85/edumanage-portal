@@ -12,7 +12,7 @@ import ScheduleEntryCard from './components/ScheduleEntryCard.vue'
 import ScheduleEntryFormModal from './components/ScheduleEntryFormModal.vue'
 import ScheduleCalendarView from './components/ScheduleCalendarView.vue'
 import AutoSchedulePanel from './components/AutoSchedulePanel.vue'
-import { ChevronLeft, Plus, ClipboardList, Calendar, Zap, Check, X } from 'lucide-vue-next'
+import { ChevronLeft, Plus, ClipboardList, Calendar, Zap, Check, X } from '@lucide/vue'
 import type { ScheduleEntryCreate, ScheduleEntryOut } from '../../../types'
 
 const route = useRoute()

@@ -11,7 +11,7 @@ import BaseButton from '../../../components/BaseButton.vue'
 import PaginationBar from '../../../components/PaginationBar.vue'
 import ConfirmDialog from '../../../components/ConfirmDialog.vue'
 import NudgeButton from '../../../components/NudgeButton.vue'
-import { Pencil, Trash2, User } from 'lucide-vue-next'
+import { Pencil, Trash2, User } from '@lucide/vue'
 
 const props = defineProps<{ clients: ClientOut[]; loading: boolean }>()
 const emit = defineEmits<{ edit: [c: ClientOut] }>()

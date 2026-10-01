@@ -6,7 +6,7 @@ import EmptyState from '../../../components/EmptyState.vue'
 import BaseButton from '../../../components/BaseButton.vue'
 import BaseAvatar from '../../../components/BaseAvatar.vue'
 import { useClientStore } from '../../../stores/clientStore'
-import { Pencil, CalendarDays } from 'lucide-vue-next'
+import { Pencil, CalendarDays } from '@lucide/vue'
 
 const props = defineProps<{ meetings: MeetingOut[]; loading: boolean }>()
 const emit = defineEmits<{ edit: [m: MeetingOut] }>()

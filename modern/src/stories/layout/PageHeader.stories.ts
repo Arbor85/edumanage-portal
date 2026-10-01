@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/vue3'
 import PageHeader from '../../components/layout/PageHeader.vue'
 import BaseButton from '../../components/BaseButton.vue'
-import { Plus } from 'lucide-vue-next'
+import { Plus } from '@lucide/vue'
 
 const meta = {
   title: 'Layout / PageHeader',

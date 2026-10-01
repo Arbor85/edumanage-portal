@@ -5,7 +5,7 @@ import { useMeetingStore } from '../../../stores/meetingStore'
 import { useWorkoutStore } from '../../../stores/workoutStore'
 import { useRoutineStore } from '../../../stores/routineStore'
 import StatCard from '../../../components/StatCard.vue'
-import { User, ClipboardList, Calendar, Dumbbell } from 'lucide-vue-next'
+import { User, ClipboardList, Calendar, Dumbbell } from '@lucide/vue'
 
 const clientStore = useClientStore()
 const meetingStore = useMeetingStore()

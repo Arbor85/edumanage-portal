@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { CourseOut } from '../../../types'
 import BaseBadge from '../../../components/BaseBadge.vue'
-import { Pencil, Trash2, Clock } from 'lucide-vue-next'
+import { Pencil, Trash2, Clock } from '@lucide/vue'
 
 defineProps<{ course: CourseOut }>()
 defineEmits<{ edit: []; delete: [] }>()

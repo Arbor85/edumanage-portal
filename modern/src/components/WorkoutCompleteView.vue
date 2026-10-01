@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { Trophy, Share2, ArrowRight } from 'lucide-vue-next'
+import { Trophy, Share2, ArrowRight } from '@lucide/vue'
 import WorkoutShareCard from './WorkoutShareCard.vue'
 import type { WorkoutHistoryOut } from '../types'
 import confetti from 'canvas-confetti'

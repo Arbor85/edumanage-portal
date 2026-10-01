@@ -10,7 +10,7 @@ import BaseBadge from '../../../components/BaseBadge.vue'
 import BaseButton from '../../../components/BaseButton.vue'
 import PaginationBar from '../../../components/PaginationBar.vue'
 import ConfirmDialog from '../../../components/ConfirmDialog.vue'
-import { Pencil, Trash2, Calendar } from 'lucide-vue-next'
+import { Pencil, Trash2, Calendar } from '@lucide/vue'
 
 const props = defineProps<{ plans: PlanOut[]; loading: boolean }>()
 const emit = defineEmits<{ edit: [p: PlanOut] }>()

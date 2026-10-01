@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, watch, onUnmounted } from 'vue'
-import { X, Loader2 } from 'lucide-vue-next'
+import { X, Loader2 } from '@lucide/vue'
 import ExerciseMuscleView from './ExerciseMuscleView.vue'
 import type { ExcerciseOut } from '../types'
 import { fetchMuscleVisualization, isApiConfigured } from '../services/muscleVisualizerApi'

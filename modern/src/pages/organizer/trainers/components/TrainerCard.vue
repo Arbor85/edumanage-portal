@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { ChevronDown, ChevronUp, Plus, Trash2 } from 'lucide-vue-next'
+import { ChevronDown, ChevronUp, Plus, Trash2 } from '@lucide/vue'
 import BaseButton from '../../../../components/BaseButton.vue'
 import BaseInput from '../../../../components/BaseInput.vue'
 import BaseSelect from '../../../../components/BaseSelect.vue'

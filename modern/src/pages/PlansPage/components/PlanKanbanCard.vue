@@ -2,7 +2,7 @@
 import type { PlanOut } from '../../../types'
 import BaseBadge from '../../../components/BaseBadge.vue'
 import { useClientStore } from '../../../stores/clientStore'
-import { Pencil, Trash2 } from 'lucide-vue-next'
+import { Pencil, Trash2 } from '@lucide/vue'
 
 defineProps<{ plan: PlanOut }>()
 defineEmits<{ edit: []; delete: [] }>()

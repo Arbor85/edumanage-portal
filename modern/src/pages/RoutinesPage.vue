@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { Plus, Pencil, Dumbbell } from 'lucide-vue-next'
+import { Plus, Pencil, Dumbbell } from '@lucide/vue'
 import AppLayout from '../components/layout/AppLayout.vue'
 import SkeletonLoader from '../components/SkeletonLoader.vue'
 import RoutineFormModal from './RoutinesPage/components/RoutineFormModal.vue'

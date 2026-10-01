@@ -2,7 +2,7 @@
 import { onMounted, computed, ref } from 'vue'
 import { useOrganizerStore } from '../../stores/organizerStore'
 import { useSchedulePlanStore } from '../../stores/schedulePlanStore'
-import { Users, Building2, CalendarDays, AlertCircle, Plus } from 'lucide-vue-next'
+import { Users, Building2, CalendarDays, AlertCircle, Plus } from '@lucide/vue'
 import { useRouter } from 'vue-router'
 
 const organizerStore = useOrganizerStore()

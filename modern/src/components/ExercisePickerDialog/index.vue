@@ -8,7 +8,7 @@ import BaseModal from '../BaseModal.vue'
 import BaseInput from '../BaseInput.vue'
 import BaseBadge from '../BaseBadge.vue'
 import EmptyState from '../EmptyState.vue'
-import { Dumbbell, SlidersHorizontal, X, Star, Check } from 'lucide-vue-next'
+import { Dumbbell, SlidersHorizontal, X, Star, Check } from '@lucide/vue'
 
 const props = defineProps<{ open: boolean }>()
 const emit = defineEmits<{

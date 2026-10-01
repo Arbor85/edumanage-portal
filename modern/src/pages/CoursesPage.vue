@@ -13,7 +13,7 @@ import CourseList from './CoursesPage/components/CourseList.vue'
 import CourseFormModal from './CoursesPage/components/CourseFormModal.vue'
 import ConfirmDialog from '../components/ConfirmDialog.vue'
 import { useToast } from '../composables/useToast'
-import { Plus } from 'lucide-vue-next'
+import { Plus } from '@lucide/vue'
 
 const route = useRoute()
 const router = useRouter()

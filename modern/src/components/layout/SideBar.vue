@@ -7,7 +7,7 @@ import {
   Home, TrendingUp, Compass, User,
   Users, ClipboardList, Calendar, BookOpen, Package, LogOut,
   Building2, LayoutDashboard, CalendarDays, KeyRound, List, Dumbbell,FileText,
-} from 'lucide-vue-next'
+} from '@lucide/vue'
 import DarkModeToggle from '../DarkModeToggle.vue'
 import type { Component } from 'vue'
 

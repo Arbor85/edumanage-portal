@@ -7,7 +7,7 @@ import BaseInput from '../BaseInput.vue'
 import BaseAvatar from '../BaseAvatar.vue'
 import BaseBadge from '../BaseBadge.vue'
 import EmptyState from '../EmptyState.vue'
-import { Users } from 'lucide-vue-next'
+import { Users } from '@lucide/vue'
 
 const props = defineProps<{ open: boolean }>()
 const emit = defineEmits<{ close: []; select: [client: ClientOut] }>()

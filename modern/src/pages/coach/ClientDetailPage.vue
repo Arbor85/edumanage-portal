@@ -4,7 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import {
   ChevronLeft, Mail, CalendarDays, ClipboardList, Dumbbell,
   Users, FileText, CheckCircle2, FilePlus2, ChevronDown,
-} from 'lucide-vue-next'
+} from '@lucide/vue'
 import AppLayout from '../../components/layout/AppLayout.vue'
 import NudgeButton from '../../components/NudgeButton.vue'
 import TrainingHeatmap from '../../components/TrainingHeatmap.vue'

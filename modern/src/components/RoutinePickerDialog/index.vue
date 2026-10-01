@@ -6,7 +6,7 @@ import BaseModal from '../BaseModal.vue'
 import BaseInput from '../BaseInput.vue'
 import BaseBadge from '../BaseBadge.vue'
 import EmptyState from '../EmptyState.vue'
-import { ClipboardList } from 'lucide-vue-next'
+import { ClipboardList } from '@lucide/vue'
 
 const props = defineProps<{ open: boolean }>()
 const emit = defineEmits<{ close: []; select: [routine: RoutineOut] }>()
