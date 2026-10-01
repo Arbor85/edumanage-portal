@@ -1,3 +1,6 @@
+# Claude Code worktrees (must not be tracked by git)
+.claude/worktrees/
+
 # ================================
 # Node.js & JavaScript/TypeScript
 # ================================
