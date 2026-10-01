@@ -95,6 +95,8 @@ builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 var allowedOriginsRaw = builder.Configuration["Cors:AllowedOrigins"] ?? "http://localhost:5173";
 string[] allowedOrigins = allowedOriginsRaw.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
+builder.Services.AddHealthChecks();
+
 builder.Services.AddCors(options =>
 {
 	options.AddPolicy(frontendCorsPolicy, policy =>
@@ -131,5 +133,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHealthChecks("/health");
 
 app.Run();
