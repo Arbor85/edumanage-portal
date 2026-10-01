@@ -50,6 +50,46 @@ public sealed class StandaloneFormResponsesController(ISender mediator, ICurrent
         }
     }
 
+    [HttpDelete("{id}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public async Task<IActionResult> Delete(string id, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await mediator.Send(new DeleteStandaloneFormResponseCommand(id, currentUserService.GetCurrentUserId()!), cancellationToken);
+            return NoContent();
+        }
+        catch (NotFoundException ex)
+        {
+            return NotFound(new { detail = ex.Message });
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, new { detail = ex.Message });
+        }
+    }
+
+    [HttpPut("{id}")]
+    public async Task<ActionResult<StandaloneFormResponseOut>> Update(string id, [FromBody] StandaloneFormResponseCreate request, CancellationToken cancellationToken)
+    {
+        try
+        {
+            return Ok(await mediator.Send(new UpdateStandaloneFormResponseCommand(id, request, currentUserService.GetCurrentUserId()!), cancellationToken));
+        }
+        catch (NotFoundException ex)
+        {
+            return NotFound(new { detail = ex.Message });
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, new { detail = ex.Message });
+        }
+        catch (ValidationException ex)
+        {
+            return BadRequest(new { detail = ex.Message });
+        }
+    }
+
     [HttpGet("summary")]
     public async Task<ActionResult<StandaloneFormResponsesSummaryOut>> Summary([FromQuery(Name = "template_id")] string templateId, CancellationToken cancellationToken)
     {

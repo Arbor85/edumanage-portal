@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
-import type { FormTemplateOut, FormAnswer, FormFieldDefinition } from '../../../types'
+import type { FormTemplateOut, FormAnswer, FormFieldDefinition, StandaloneFormResponseOut } from '../../../types'
 import { useToast } from '../../../composables/useToast'
 import * as formsApi from '../../../services/formsApi'
 import BaseModal from '../../../components/BaseModal.vue'
@@ -11,7 +11,7 @@ import BaseCheckbox from '../../../components/BaseCheckbox.vue'
 import BaseButton from '../../../components/BaseButton.vue'
 import { Check } from 'lucide-vue-next'
 
-const props = defineProps<{ open: boolean; template: FormTemplateOut | null }>()
+const props = defineProps<{ open: boolean; template: FormTemplateOut | null; existingResponse?: StandaloneFormResponseOut | null }>()
 const emit = defineEmits<{ close: []; submitted: [] }>()
 
 const toast = useToast()
@@ -33,29 +33,38 @@ const GENDER_OPTIONS = [
 function rangeMin(field: FormFieldDefinition) { return field.min ?? 0 }
 function rangeMax(field: FormFieldDefinition) { return field.max ?? 100 }
 
-function initAnswers(template: FormTemplateOut | null) {
+function initAnswers(template: FormTemplateOut | null, existing?: StandaloneFormResponseOut | null) {
   answers.value = {}
   if (!template) return
   for (const field of template.fields) {
-    const defaultVal = field.type === 'Range'
-      ? String(Math.round((rangeMin(field) + rangeMax(field)) / 2))
-      : ''
-    answers.value[field.id] = { value: defaultVal, values: [] }
+    const existingAnswer = existing?.answers.find((a) => a.fieldId === field.id)
+    if (existingAnswer) {
+      answers.value[field.id] = {
+        value: existingAnswer.value ?? '',
+        values: existingAnswer.values ?? [],
+      }
+    } else {
+      const defaultVal = field.type === 'Range'
+        ? String(Math.round((rangeMin(field) + rangeMax(field)) / 2))
+        : ''
+      answers.value[field.id] = { value: defaultVal, values: [] }
+    }
   }
 }
 
 watch(() => props.open, (val) => {
   if (!val) return
-  firstName.value = ''
-  lastName.value = ''
-  gender.value = null
-  age.value = ''
-  notes.value = ''
-  initAnswers(props.template)
+  const existing = props.existingResponse
+  firstName.value = existing?.firstName ?? ''
+  lastName.value = existing?.lastName ?? ''
+  gender.value = existing?.gender ?? null
+  age.value = existing?.age != null ? String(existing.age) : ''
+  notes.value = existing?.notes ?? ''
+  initAnswers(props.template, existing)
 })
 
 watch(() => props.template, (template) => {
-  initAnswers(template)
+  initAnswers(template, props.existingResponse)
 })
 
 function toggleMultiChoice(fieldId: string, option: string) {
@@ -128,22 +137,29 @@ async function submit() {
     values: f.type === 'MultiChoice' ? (answers.value[f.id]?.values ?? []) : null,
   }))
 
+  const payload = {
+    formTemplateId: props.template.id,
+    firstName: firstName.value.trim(),
+    lastName: lastName.value.trim(),
+    gender: gender.value,
+    age: age.value ? parseInt(age.value, 10) : null,
+    notes: notes.value.trim() || null,
+    answers: payloadAnswers,
+  }
+
   saving.value = true
   try {
-    await formsApi.submitStandaloneFormResponse({
-      formTemplateId: props.template.id,
-      firstName: firstName.value.trim(),
-      lastName: lastName.value.trim(),
-      gender: gender.value,
-      age: age.value ? parseInt(age.value, 10) : null,
-      notes: notes.value.trim() || null,
-      answers: payloadAnswers,
-    })
-    toast.success('Form submitted')
+    if (props.existingResponse) {
+      await formsApi.updateStandaloneFormResponse(props.existingResponse.id, payload)
+      toast.success('Response updated')
+    } else {
+      await formsApi.submitStandaloneFormResponse(payload)
+      toast.success('Form submitted')
+    }
     emit('submitted')
     emit('close')
   } catch {
-    toast.error('Failed to submit form')
+    toast.error(props.existingResponse ? 'Failed to update response' : 'Failed to submit form')
   } finally {
     saving.value = false
   }
@@ -151,7 +167,7 @@ async function submit() {
 </script>
 
 <template>
-  <BaseModal :open="open" :title="template ? `Fill: ${template.name}` : 'Fill Form'" size="fullscreen" @close="emit('close')">
+  <BaseModal :open="open" :title="template ? (existingResponse ? `Edit: ${template.name}` : `Fill: ${template.name}`) : 'Fill Form'" size="fullscreen" @close="emit('close')">
     <div class="flex gap-6 h-full min-h-0">
 
       <!-- Form content -->
@@ -320,7 +336,7 @@ async function submit() {
       <div class="flex items-center gap-2">
         <div class="flex-1" />
         <BaseButton variant="ghost" @click="emit('close')">Cancel</BaseButton>
-        <BaseButton variant="primary" :loading="saving" :disabled="!template" @click="submit">Submit</BaseButton>
+        <BaseButton variant="primary" :loading="saving" :disabled="!template" @click="submit">{{ existingResponse ? 'Save changes' : 'Submit' }}</BaseButton>
       </div>
     </template>
   </BaseModal>

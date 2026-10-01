@@ -29,6 +29,12 @@ export const submitFormResponse = (d: FormResponseCreate): Promise<FormResponseO
 export const submitStandaloneFormResponse = (d: StandaloneFormResponseCreate): Promise<StandaloneFormResponseOut> =>
   apiClient.post<StandaloneFormResponseOut>('/api/standalone-form-responses', d).then((r) => r.data)
 
+export const deleteStandaloneFormResponse = (id: string): Promise<void> =>
+  apiClient.delete(`/api/standalone-form-responses/${id}`).then(() => undefined)
+
+export const updateStandaloneFormResponse = (id: string, d: StandaloneFormResponseCreate): Promise<StandaloneFormResponseOut> =>
+  apiClient.put<StandaloneFormResponseOut>(`/api/standalone-form-responses/${id}`, d).then((r) => r.data)
+
 export const listStandaloneFormResponses = (templateId: string): Promise<StandaloneFormResponseOut[]> =>
   apiClient.get<StandaloneFormResponseOut[]>('/api/standalone-form-responses', { params: { template_id: templateId } }).then((r) => r.data)
 

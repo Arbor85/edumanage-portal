@@ -3,7 +3,7 @@ import { ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { usePageTitle } from '../composables/usePageTitle'
 usePageTitle('Form Templates')
-import type { FormTemplateOut } from '../types'
+import type { FormTemplateOut, StandaloneFormResponseOut } from '../types'
 import { useFormTemplateStore } from '../stores/formTemplateStore'
 import { useToast } from '../composables/useToast'
 import AppLayout from '../components/layout/AppLayout.vue'
@@ -26,6 +26,7 @@ const isCreateOpen = ref(false)
 const editTarget = ref<FormTemplateOut | null>(null)
 
 const fillTarget = ref<FormTemplateOut | null>(null)
+const editResponse = ref<StandaloneFormResponseOut | null>(null)
 const answersTarget = ref<FormTemplateOut | null>(null)
 const summaryTarget = ref<FormTemplateOut | null>(null)
 
@@ -41,6 +42,17 @@ function openEdit(template: FormTemplateOut) {
 function openCreate() {
   isCreateOpen.value = true
   router.push({ query: { new: '1' } })
+}
+
+function handleEditResponse(template: FormTemplateOut, response: StandaloneFormResponseOut) {
+  answersTarget.value = null
+  editResponse.value = response
+  fillTarget.value = template
+}
+
+function closeFillModal() {
+  fillTarget.value = null
+  editResponse.value = null
 }
 
 watch(() => route.query, async (query) => {
@@ -83,7 +95,7 @@ const filtered = () =>
       :templates="filtered()"
       :loading="store.isLoading"
       @edit="openEdit"
-      @fill="(t) => fillTarget = t"
+      @fill="(t) => { fillTarget = t; editResponse = null }"
       @answers="(t) => answersTarget = t"
       @summary="(t) => summaryTarget = t"
     />
@@ -97,14 +109,16 @@ const filtered = () =>
     <FillTemplateModal
       :open="fillTarget !== null"
       :template="fillTarget"
-      @close="fillTarget = null"
-      @submitted="fillTarget = null"
+      :existing-response="editResponse"
+      @close="closeFillModal"
+      @submitted="closeFillModal"
     />
 
     <TemplateAnswersModal
       :open="answersTarget !== null"
       :template="answersTarget"
       @close="answersTarget = null"
+      @edit="(response) => handleEditResponse(answersTarget!, response)"
     />
 
     <TemplateSummaryModal
