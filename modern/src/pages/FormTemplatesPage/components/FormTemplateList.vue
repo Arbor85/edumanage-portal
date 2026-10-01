@@ -2,7 +2,7 @@
 import type { FormTemplateOut } from '../../../types'
 import SkeletonLoader from '../../../components/SkeletonLoader.vue'
 import EmptyState from '../../../components/EmptyState.vue'
-import { ClipboardList, PencilLine, List, BarChart2 } from 'lucide-vue-next'
+import { ClipboardList, PencilLine, List, BarChart2 } from '@lucide/vue'
 
 defineProps<{ templates: FormTemplateOut[]; loading: boolean }>()
 const emit = defineEmits<{

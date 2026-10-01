@@ -20,7 +20,7 @@ import DefaultWorkoutPickerDialog from '../../../components/DefaultWorkoutPicker
 import ExerciseMuscleView from '../../../components/ExerciseMuscleView.vue'
 import ExerciseMaxBadge from '../../../components/ExerciseMaxBadge.vue'
 import { useGymProfileStore } from '../../../stores/gymProfileStore'
-import { X, Plus, Dumbbell, MoreVertical, ChevronUp, ChevronDown, Activity } from 'lucide-vue-next'
+import { X, Plus, Dumbbell, MoreVertical, ChevronUp, ChevronDown, Activity } from '@lucide/vue'
 import { exerciseImageMap } from '../../../data/exerciseImageMap'
 
 const EXERCISE_FALLBACK = '/images/benchpress.png'

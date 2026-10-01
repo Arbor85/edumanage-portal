@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { Zap, AlertTriangle } from 'lucide-vue-next'
+import { Zap, AlertTriangle } from '@lucide/vue'
 import BaseButton from '../../../../components/BaseButton.vue'
 import type { OrganizationMemberOut, BuildingOut, CourseOut, AutoScheduleResult } from '../../../../types'
 

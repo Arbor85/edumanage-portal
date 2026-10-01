@@ -9,7 +9,7 @@ import BaseInput from '../../../components/BaseInput.vue'
 import BaseSelect from '../../../components/BaseSelect.vue'
 import BaseButton from '../../../components/BaseButton.vue'
 import ConfirmDialog from '../../../components/ConfirmDialog.vue'
-import { X, Plus, ShieldCheck } from 'lucide-vue-next'
+import { X, Plus, ShieldCheck } from '@lucide/vue'
 
 const EQUIPMENT_TYPE_OPTIONS = [
   { value: 'bodyweight', label: 'Bodyweight – no added load' },

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { Search, RefreshCw } from 'lucide-vue-next'
+import { Search, RefreshCw } from '@lucide/vue'
 
 const props = defineProps<{
   modelValue: string

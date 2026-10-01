@@ -3,7 +3,7 @@ import { ref, computed, watch } from 'vue'
 import type { RoutineSet, ActivityType, ActivityTrackType } from '../../types'
 import BaseModal from '../BaseModal.vue'
 import BaseButton from '../BaseButton.vue'
-import { ArrowDown, Minus, ArrowUp } from 'lucide-vue-next'
+import { ArrowDown, Minus, ArrowUp } from '@lucide/vue'
 
 type Direction = 'decrease' | 'keep' | 'increase'
 

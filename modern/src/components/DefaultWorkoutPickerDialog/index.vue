@@ -5,7 +5,7 @@ import { listDefaultWorkouts } from '../../services/defaultWorkoutsApi'
 import BaseModal from '../BaseModal.vue'
 import BaseInput from '../BaseInput.vue'
 import EmptyState from '../EmptyState.vue'
-import { Dumbbell } from 'lucide-vue-next'
+import { Dumbbell } from '@lucide/vue'
 
 const props = defineProps<{ open: boolean }>()
 const emit = defineEmits<{ close: []; select: [workout: DefaultWorkoutOut] }>()

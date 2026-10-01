@@ -15,7 +15,7 @@ import EmptyState from '../../../components/EmptyState.vue'
 import ClientPickerDialog from '../../../components/ClientPickerDialog/index.vue'
 import RoutinePickerDialog from '../../../components/RoutinePickerDialog/index.vue'
 import RoutineFormModal from '../../../components/RoutineFormModal/index.vue'
-import { X, Plus, CalendarDays, Copy, LayoutList, ChevronLeft, ChevronRight } from 'lucide-vue-next'
+import { X, Plus, CalendarDays, Copy, LayoutList, ChevronLeft, ChevronRight } from '@lucide/vue'
 
 const props = defineProps<{ open: boolean; plan: PlanOut | null }>()
 const emit = defineEmits<{ close: [] }>()

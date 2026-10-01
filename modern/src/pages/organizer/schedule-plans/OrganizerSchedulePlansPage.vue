@@ -10,7 +10,7 @@ import ConfirmDialog from '../../../components/ConfirmDialog.vue'
 import BaseButton from '../../../components/BaseButton.vue'
 import SchedulePlanCard from './components/SchedulePlanCard.vue'
 import SchedulePlanFormModal from './components/SchedulePlanFormModal.vue'
-import { CalendarDays, Plus } from 'lucide-vue-next'
+import { CalendarDays, Plus } from '@lucide/vue'
 import type { SchedulePlanOut } from '../../../types'
 
 const store = useSchedulePlanStore()

@@ -2,7 +2,7 @@
 import { ref, computed } from 'vue'
 import { useClientStore } from '../../stores/clientStore'
 import BaseAvatar from '../BaseAvatar.vue'
-import { ChevronDown } from 'lucide-vue-next'
+import { ChevronDown } from '@lucide/vue'
 
 const props = defineProps<{
   modelValue: string | null

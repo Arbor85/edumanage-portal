@@ -14,7 +14,7 @@ import ExerciseDetailModal from './ExercisesPage/components/ExerciseDetailModal.
 import ConfirmDialog from '../components/ConfirmDialog.vue'
 import MuscleDistributionDialog from '../components/MuscleDistributionDialog.vue'
 import { useToast } from '../composables/useToast'
-import { Search } from 'lucide-vue-next'
+import { Search } from '@lucide/vue'
 
 const exerciseStore = useExerciseStore()
 const toast = useToast()

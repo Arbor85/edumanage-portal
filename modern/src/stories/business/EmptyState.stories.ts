@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/vue3'
-import { Inbox, SearchX, Users } from 'lucide-vue-next'
+import { Inbox, SearchX, Users } from '@lucide/vue'
 import EmptyState from '../../components/EmptyState.vue'
 
 const meta = {

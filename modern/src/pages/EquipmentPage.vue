@@ -11,7 +11,7 @@ import PageHeader from '../components/layout/PageHeader.vue'
 import BaseButton from '../components/BaseButton.vue'
 import EquipmentList from './EquipmentPage/components/EquipmentList.vue'
 import EquipmentFormModal from './EquipmentPage/components/EquipmentFormModal.vue'
-import { Search } from 'lucide-vue-next'
+import { Search } from '@lucide/vue'
 
 const route = useRoute()
 const router = useRouter()

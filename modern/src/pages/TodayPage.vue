@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { Dumbbell, Play } from 'lucide-vue-next'
+import { Dumbbell, Play } from '@lucide/vue'
 import AppLayout from '../components/layout/AppLayout.vue'
 import DailyChallengeCard from '../components/DailyChallengeCard.vue'
 import EffortSnapshotCard from '../components/EffortSnapshotCard.vue'

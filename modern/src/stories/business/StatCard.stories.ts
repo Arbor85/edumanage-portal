@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/vue3'
-import { Users, Dumbbell, Calendar, TrendingUp } from 'lucide-vue-next'
+import { Users, Dumbbell, Calendar, TrendingUp } from '@lucide/vue'
 import StatCard from '../../components/StatCard.vue'
 
 const meta = {

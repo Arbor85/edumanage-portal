@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { WifiOff, RefreshCw } from 'lucide-vue-next'
+import { WifiOff, RefreshCw } from '@lucide/vue'
 import { useNetworkStatus } from '../composables/useNetworkStatus'
 import { useOfflineSync } from '../composables/useOfflineSync'
 

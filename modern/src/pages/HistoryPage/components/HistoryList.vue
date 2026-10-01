@@ -3,7 +3,7 @@ import type { WorkoutHistoryOut } from '../../../types'
 import BaseButton from '../../../components/BaseButton.vue'
 import EmptyState from '../../../components/EmptyState.vue'
 import BaseBadge from '../../../components/BaseBadge.vue'
-import { ScrollText } from 'lucide-vue-next'
+import { ScrollText } from '@lucide/vue'
 
 const props = defineProps<{ history: WorkoutHistoryOut[] }>()
 const emit = defineEmits<{ view: [w: WorkoutHistoryOut] }>()

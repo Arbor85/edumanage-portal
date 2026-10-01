@@ -2,7 +2,7 @@
 import { computed, ref } from 'vue'
 import type { ExcerciseOut, ActivityType } from '../../../types'
 import DifficultyBadge from '../../../components/DifficultyBadge.vue'
-import { Trash2, Dumbbell, Activity } from 'lucide-vue-next'
+import { Trash2, Dumbbell, Activity } from '@lucide/vue'
 import { exerciseImageMap } from '../../../data/exerciseImageMap'
 
 const ACTIVITY_TYPE_BADGE: Record<ActivityType, { label: string; classes: string }> = {

@@ -6,7 +6,7 @@ import SkeletonBlock from '../../../components/SkeletonBlock.vue'
 import EmptyState from '../../../components/EmptyState.vue'
 import PaginationBar from '../../../components/PaginationBar.vue'
 import CourseCard from './CourseCard.vue'
-import { GraduationCap } from 'lucide-vue-next'
+import { GraduationCap } from '@lucide/vue'
 
 const props = defineProps<{ courses: CourseOut[]; loading: boolean }>()
 const emit = defineEmits<{ edit: [c: CourseOut] }>()

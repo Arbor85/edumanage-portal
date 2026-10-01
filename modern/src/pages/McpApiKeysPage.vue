@@ -8,7 +8,7 @@ import { useToast } from '../composables/useToast'
 import AppLayout from '../components/layout/AppLayout.vue'
 import PageHeader from '../components/layout/PageHeader.vue'
 import BaseButton from '../components/BaseButton.vue'
-import { Key, Copy, Trash2, Plus, Check } from 'lucide-vue-next'
+import { Key, Copy, Trash2, Plus, Check } from '@lucide/vue'
 
 const toast = useToast()
 

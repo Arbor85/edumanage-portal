@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { Bell } from 'lucide-vue-next'
+import { Bell } from '@lucide/vue'
 import apiClient from '../services/apiClient'
 
 const props = defineProps<{ clientId: string }>()
