@@ -42,6 +42,7 @@ public class EduManageDbContext : DbContext
     public DbSet<FormTemplate> FormTemplates { get; set; }
     public DbSet<FormTemplateVersion> FormTemplateVersions { get; set; }
     public DbSet<FormResponse> FormResponses { get; set; }
+    public DbSet<StandaloneFormResponse> StandaloneFormResponses { get; set; }
     public DbSet<UserProfile> UserProfiles { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -80,6 +81,7 @@ public class EduManageDbContext : DbContext
         modelBuilder.ApplyConfiguration(new FormTemplateConfiguration());
         modelBuilder.ApplyConfiguration(new FormTemplateVersionConfiguration());
         modelBuilder.ApplyConfiguration(new FormResponseConfiguration());
+        modelBuilder.ApplyConfiguration(new StandaloneFormResponseConfiguration());
         modelBuilder.ApplyConfiguration(new UserProfileConfiguration());
     }
 }

@@ -402,6 +402,53 @@ export interface FormResponseOut {
   answers: FormAnswer[]
 }
 
+// ─── Standalone Form Responses ────────────────────────────────
+// API path: /api/standalone-form-responses
+
+export interface StandaloneFormResponseCreate {
+  formTemplateId: string
+  firstName: string
+  lastName: string
+  gender: string | null
+  age: number | null
+  notes: string | null
+  answers: FormAnswer[]
+}
+
+export interface StandaloneFormResponseOut {
+  id: string
+  formTemplateId: string
+  formTemplateVersionId: string
+  templateVersionNumber: number
+  trainerUserId: string
+  firstName: string
+  lastName: string
+  gender: string | null
+  age: number | null
+  notes: string | null
+  createdAt: string
+  answers: FormAnswer[]
+}
+
+export interface FieldSummaryOut {
+  fieldId: string
+  label: string
+  type: FormFieldType
+  responseCount: number
+  avg: number | null
+  min: number | null
+  max: number | null
+  optionCounts: Record<string, number> | null
+  textValues: string[] | null
+}
+
+export interface StandaloneFormResponsesSummaryOut {
+  formTemplateId: string
+  formTemplateName: string
+  totalResponses: number
+  fields: FieldSummaryOut[]
+}
+
 // ─── Courses ──────────────────────────────────────────────────
 // API path: /api/courses
 

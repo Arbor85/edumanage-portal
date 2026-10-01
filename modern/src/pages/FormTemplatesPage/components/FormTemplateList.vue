@@ -2,10 +2,15 @@
 import type { FormTemplateOut } from '../../../types'
 import SkeletonLoader from '../../../components/SkeletonLoader.vue'
 import EmptyState from '../../../components/EmptyState.vue'
-import { ClipboardList } from 'lucide-vue-next'
+import { ClipboardList, PencilLine, List, BarChart2 } from 'lucide-vue-next'
 
 defineProps<{ templates: FormTemplateOut[]; loading: boolean }>()
-const emit = defineEmits<{ edit: [template: FormTemplateOut] }>()
+const emit = defineEmits<{
+  edit: [template: FormTemplateOut]
+  fill: [template: FormTemplateOut]
+  answers: [template: FormTemplateOut]
+  summary: [template: FormTemplateOut]
+}>()
 </script>
 
 <template>
@@ -21,13 +26,15 @@ const emit = defineEmits<{ edit: [template: FormTemplateOut] }>()
   />
 
   <div v-else class="flex flex-col gap-3">
-    <button
+    <div
       v-for="template in templates"
       :key="template.id"
-      class="w-full text-left flex items-center justify-between gap-3 p-4 bg-surface-card border border-white/5 rounded-2xl hover:border-white/10 hover:-translate-y-0.5 active:scale-[0.99] transition-all"
-      @click="emit('edit', template)"
+      class="flex items-center justify-between gap-3 p-4 bg-surface-card border border-white/5 rounded-2xl hover:border-white/10 transition-all"
     >
-      <div class="min-w-0">
+      <button
+        class="flex-1 min-w-0 text-left hover:-translate-y-0.5 active:scale-[0.99] transition-transform"
+        @click="emit('edit', template)"
+      >
         <div class="flex items-center gap-2">
           <p class="font-bold text-white truncate">{{ template.name }}</p>
           <span
@@ -37,7 +44,34 @@ const emit = defineEmits<{ edit: [template: FormTemplateOut] }>()
         </div>
         <p v-if="template.description" class="text-sm text-text-secondary truncate mt-0.5">{{ template.description }}</p>
         <p class="text-xs text-text-muted mt-1">{{ template.fields.length }} field(s) · v{{ template.currentVersion }}</p>
+      </button>
+
+      <div class="flex items-center gap-1 flex-shrink-0">
+        <button
+          class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-primary/15 text-primary hover:bg-primary/25 active:scale-95 transition-all"
+          title="Fill form"
+          @click="emit('fill', template)"
+        >
+          <PencilLine class="w-3.5 h-3.5" />
+          Fill
+        </button>
+        <button
+          class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-white/10 text-text-secondary hover:text-white hover:bg-white/15 active:scale-95 transition-all"
+          title="View answers"
+          @click="emit('answers', template)"
+        >
+          <List class="w-3.5 h-3.5" />
+          Answers
+        </button>
+        <button
+          class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-white/10 text-text-secondary hover:text-white hover:bg-white/15 active:scale-95 transition-all"
+          title="View summary"
+          @click="emit('summary', template)"
+        >
+          <BarChart2 class="w-3.5 h-3.5" />
+          Summary
+        </button>
       </div>
-    </button>
+    </div>
   </div>
 </template>

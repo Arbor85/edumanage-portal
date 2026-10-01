@@ -363,3 +363,44 @@ public sealed record UserExerciseMaxUpsert(
     float? MaxDuration,
     float? MaxDistance,
     string? Note);
+
+// StandaloneFormResponse
+public sealed record StandaloneFormResponseCreate(
+    string FormTemplateId,
+    string FirstName,
+    string LastName,
+    string? Gender,
+    int? Age,
+    string? Notes,
+    IReadOnlyList<FormAnswerDto> Answers);
+
+public sealed record StandaloneFormResponseOut(
+    string Id,
+    string FormTemplateId,
+    string FormTemplateVersionId,
+    int TemplateVersionNumber,
+    string TrainerUserId,
+    string FirstName,
+    string LastName,
+    string? Gender,
+    int? Age,
+    string? Notes,
+    string CreatedAt,
+    IReadOnlyList<FormAnswerDto> Answers);
+
+public sealed record FieldSummaryOut(
+    string FieldId,
+    string Label,
+    string Type,
+    int ResponseCount,
+    double? Avg,
+    double? Min,
+    double? Max,
+    IReadOnlyDictionary<string, int>? OptionCounts,
+    IReadOnlyList<string>? TextValues);
+
+public sealed record StandaloneFormResponsesSummaryOut(
+    string FormTemplateId,
+    string FormTemplateName,
+    int TotalResponses,
+    IReadOnlyList<FieldSummaryOut> Fields);

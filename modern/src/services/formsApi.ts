@@ -2,6 +2,7 @@ import apiClient from './apiClient'
 import type {
   FormTemplateOut, FormTemplateCreate, FormTemplateUpdate,
   FormResponseOut, FormResponseCreate,
+  StandaloneFormResponseCreate, StandaloneFormResponseOut, StandaloneFormResponsesSummaryOut,
 } from '../types'
 
 export const listFormTemplates = (): Promise<FormTemplateOut[]> =>
@@ -24,3 +25,12 @@ export const listFormResponsesForClient = (clientId: string): Promise<FormRespon
 
 export const submitFormResponse = (d: FormResponseCreate): Promise<FormResponseOut> =>
   apiClient.post<FormResponseOut>('/api/form-responses', d).then((r) => r.data)
+
+export const submitStandaloneFormResponse = (d: StandaloneFormResponseCreate): Promise<StandaloneFormResponseOut> =>
+  apiClient.post<StandaloneFormResponseOut>('/api/standalone-form-responses', d).then((r) => r.data)
+
+export const listStandaloneFormResponses = (templateId: string): Promise<StandaloneFormResponseOut[]> =>
+  apiClient.get<StandaloneFormResponseOut[]>('/api/standalone-form-responses', { params: { template_id: templateId } }).then((r) => r.data)
+
+export const getStandaloneFormResponsesSummary = (templateId: string): Promise<StandaloneFormResponsesSummaryOut> =>
+  apiClient.get<StandaloneFormResponsesSummaryOut>('/api/standalone-form-responses/summary', { params: { template_id: templateId } }).then((r) => r.data)

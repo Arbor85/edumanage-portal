@@ -12,6 +12,9 @@ import ListSearchBar from '../components/ListSearchBar.vue'
 import BaseButton from '../components/BaseButton.vue'
 import FormTemplateList from './FormTemplatesPage/components/FormTemplateList.vue'
 import FormTemplateFormModal from './FormTemplatesPage/components/FormTemplateFormModal.vue'
+import FillTemplateModal from './FormTemplatesPage/components/FillTemplateModal.vue'
+import TemplateAnswersModal from './FormTemplatesPage/components/TemplateAnswersModal.vue'
+import TemplateSummaryModal from './FormTemplatesPage/components/TemplateSummaryModal.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -21,6 +24,10 @@ const toast = useToast()
 const search = ref('')
 const isCreateOpen = ref(false)
 const editTarget = ref<FormTemplateOut | null>(null)
+
+const fillTarget = ref<FormTemplateOut | null>(null)
+const answersTarget = ref<FormTemplateOut | null>(null)
+const summaryTarget = ref<FormTemplateOut | null>(null)
 
 onMounted(() => {
   store.fetch()
@@ -72,12 +79,38 @@ const filtered = () =>
       <ListSearchBar v-model="search" placeholder="Search templates..." :loading="store.isLoading" @refresh="store.fetch()" />
     </div>
 
-    <FormTemplateList :templates="filtered()" :loading="store.isLoading" @edit="openEdit" />
+    <FormTemplateList
+      :templates="filtered()"
+      :loading="store.isLoading"
+      @edit="openEdit"
+      @fill="(t) => fillTarget = t"
+      @answers="(t) => answersTarget = t"
+      @summary="(t) => summaryTarget = t"
+    />
 
     <FormTemplateFormModal
       :open="isCreateOpen || editTarget !== null"
       :template="editTarget"
       @close="router.replace({ query: {} })"
+    />
+
+    <FillTemplateModal
+      :open="fillTarget !== null"
+      :template="fillTarget"
+      @close="fillTarget = null"
+      @submitted="fillTarget = null"
+    />
+
+    <TemplateAnswersModal
+      :open="answersTarget !== null"
+      :template="answersTarget"
+      @close="answersTarget = null"
+    />
+
+    <TemplateSummaryModal
+      :open="summaryTarget !== null"
+      :template="summaryTarget"
+      @close="summaryTarget = null"
     />
   </AppLayout>
 </template>

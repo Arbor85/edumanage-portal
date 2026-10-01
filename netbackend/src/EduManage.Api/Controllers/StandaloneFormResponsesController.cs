@@ -1,0 +1,69 @@
+using EduManage.Api.Services;
+using EduManage.Application.Common.Exceptions;
+using EduManage.Application.Contracts;
+using EduManage.Application.Features.Forms;
+
+namespace EduManage.Api.Controllers;
+
+[ApiController]
+[Route("api/standalone-form-responses")]
+[Authorize]
+public sealed class StandaloneFormResponsesController(ISender mediator, ICurrentUserService currentUserService) : ControllerBase
+{
+    [HttpPost]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    public async Task<ActionResult<StandaloneFormResponseOut>> Submit([FromBody] StandaloneFormResponseCreate request, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var created = await mediator.Send(new SubmitStandaloneFormResponseCommand(request, currentUserService.GetCurrentUserId()!), cancellationToken);
+            return Created($"/api/standalone-form-responses/{created.Id}", created);
+        }
+        catch (NotFoundException ex)
+        {
+            return NotFound(new { detail = ex.Message });
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, new { detail = ex.Message });
+        }
+        catch (ValidationException ex)
+        {
+            return BadRequest(new { detail = ex.Message });
+        }
+    }
+
+    [HttpGet]
+    public async Task<ActionResult<IReadOnlyList<StandaloneFormResponseOut>>> List([FromQuery(Name = "template_id")] string templateId, CancellationToken cancellationToken)
+    {
+        try
+        {
+            return Ok(await mediator.Send(new ListStandaloneFormResponsesQuery(templateId, currentUserService.GetCurrentUserId()!), cancellationToken));
+        }
+        catch (NotFoundException ex)
+        {
+            return NotFound(new { detail = ex.Message });
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, new { detail = ex.Message });
+        }
+    }
+
+    [HttpGet("summary")]
+    public async Task<ActionResult<StandaloneFormResponsesSummaryOut>> Summary([FromQuery(Name = "template_id")] string templateId, CancellationToken cancellationToken)
+    {
+        try
+        {
+            return Ok(await mediator.Send(new GetStandaloneFormResponsesSummaryQuery(templateId, currentUserService.GetCurrentUserId()!), cancellationToken));
+        }
+        catch (NotFoundException ex)
+        {
+            return NotFound(new { detail = ex.Message });
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, new { detail = ex.Message });
+        }
+    }
+}
