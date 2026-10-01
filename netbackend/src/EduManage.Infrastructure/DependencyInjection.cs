@@ -14,7 +14,7 @@ public static class DependencyInjection
         var connectionString = databaseConnectionString;
 
         services.AddDbContext<EduManageDbContext>(options =>
-            options.UseSqlite(connectionString));
+            options.UseSqlServer(connectionString));
 
         // Register individual repositories
         services.AddScoped<IClientRepository, ClientRepository>();
