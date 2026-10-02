@@ -38,12 +38,16 @@ const coachItems = computed(() =>
   allCoachItems.filter(item => authStore.hasPermission(item.permission))
 )
 
-const organizerItems: { to: string; icon: Component; label: string }[] = [
-  { to: '/organizer',                  icon: LayoutDashboard, label: 'Dashboard' },
-  { to: '/organizer/trainers',         icon: Users,           label: 'Trainers' },
-  { to: '/organizer/buildings',        icon: Building2,       label: 'Buildings' },
-  { to: '/organizer/schedule-plans',   icon: CalendarDays,    label: 'Schedules' },
+const allOrganizerItems: { to: string; icon: Component; label: string; permission: string }[] = [
+  { to: '/organizer',                icon: LayoutDashboard, label: 'Dashboard', permission: 'manage:organization' },
+  { to: '/organizer/trainers',       icon: Users,           label: 'Trainers',  permission: 'manage:organization' },
+  { to: '/organizer/buildings',      icon: Building2,       label: 'Buildings', permission: 'manage:buildings' },
+  { to: '/organizer/schedule-plans', icon: CalendarDays,    label: 'Schedules', permission: 'manage:schedule-plans' },
 ]
+
+const organizerItems = computed(() =>
+  allOrganizerItems.filter(item => authStore.hasPermission(item.permission))
+)
 
 function isActive(to: string) {
   if (to === '/') return route.path === '/'
@@ -102,7 +106,7 @@ function onMouseMove(e: MouseEvent) {
 
 // Active link index for coach section (needed for v-if on coach nav)
 const coachActiveIdx = computed(() => coachItems.value.findIndex(item => isActive(item.to)))
-const organizerActiveIdx = computed(() => organizerItems.findIndex(item => isActive(item.to)))
+const organizerActiveIdx = computed(() => organizerItems.value.findIndex(item => isActive(item.to)))
 </script>
 
 <template>
@@ -186,7 +190,7 @@ const organizerActiveIdx = computed(() => organizerItems.findIndex(item => isAct
     </div>
 
     <!-- Organizer section -->
-    <div v-if="authStore.hasPermission('manage:organization')" class="relative z-10 mt-4">
+    <div v-if="organizerItems.length > 0" class="relative z-10 mt-4">
       <div class="border-t border-gray-200 dark:border-white/10 pt-4">
         <p class="px-3 mb-2 text-[10px] font-bold tracking-[0.12em] uppercase text-text-muted/80">Organizer</p>
         <nav class="relative flex flex-col gap-1">
