@@ -42,6 +42,25 @@ builder.Services
 		options.TokenValidationParameters.NameClaimType = "sub";
 		options.TokenValidationParameters.ValidateLifetime = true;
 		options.TokenValidationParameters.ClockSkew = TimeSpan.Zero;
+		options.Events = new Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerEvents
+		{
+			OnAuthenticationFailed = ctx =>
+			{
+				var logger = ctx.HttpContext.RequestServices
+					.GetRequiredService<ILogger<Program>>();
+				logger.LogWarning("JWT auth failed: {Error}", ctx.Exception.Message);
+				ctx.Response.Headers["X-Auth-Error"] = ctx.Exception.Message;
+				return Task.CompletedTask;
+			},
+			OnChallenge = ctx =>
+			{
+				var logger = ctx.HttpContext.RequestServices
+					.GetRequiredService<ILogger<Program>>();
+				logger.LogWarning("JWT challenge: error={Error} description={Desc}",
+					ctx.Error, ctx.ErrorDescription);
+				return Task.CompletedTask;
+			}
+		};
 	});
 builder.Services
 	.AddControllers()
