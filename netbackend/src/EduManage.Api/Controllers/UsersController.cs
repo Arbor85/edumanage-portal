@@ -12,9 +12,10 @@ public sealed class UsersController(ISender mediator, ICurrentUserService curren
     [HttpGet("profile")]
     public async Task<ActionResult<UserProfileOut>> GetProfile(CancellationToken cancellationToken)
     {
-        var profile = await mediator.Send(new GetUserProfileQuery(currentUserService.GetCurrentUserId()!), cancellationToken);
+        var userId = currentUserService.GetCurrentUserId()!;
+        var profile = await mediator.Send(new GetUserProfileQuery(userId), cancellationToken);
 
-        return profile is null ? NotFound(new { detail = "Profile not yet created." }) : Ok(profile);
+        return Ok(profile ?? new UserProfileOut(userId, []));
     }
 
     [HttpPatch("profile")]

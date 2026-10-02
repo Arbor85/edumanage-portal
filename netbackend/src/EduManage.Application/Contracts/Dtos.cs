@@ -267,6 +267,17 @@ public sealed record UserProfileOut(
 public sealed record UserProfileUpdate(
     List<string>? Equipment);
 
+// Challenges
+public sealed record DailyChallengeOut(
+    string Id,
+    string Description,
+    string Type,
+    int Target,
+    string Unit,
+    bool CompletedByUser);
+
+public sealed record LogChallengeRequest(string ChallengeId);
+
 // Organization
 public sealed record OrganizationCreate(string Name);
 public sealed record OrganizationOut(string Id, string Name, string OwnerId, string InviteCode, int TrainerCount);
