@@ -67,8 +67,10 @@ jobs:
           slot-name: 'Production'
           package: ./publish
 
-      - name: Restart Azure Web App
-        run: az webapp restart --name edumanage-api --resource-group edumanage-rg
+      - name: Start and restart Azure Web App
+        run: |
+          az webapp start --name edumanage-api --resource-group edumanage-rg
+          az webapp restart --name edumanage-api --resource-group edumanage-rg
 
   healthcheck:
     runs-on: ubuntu-latest
