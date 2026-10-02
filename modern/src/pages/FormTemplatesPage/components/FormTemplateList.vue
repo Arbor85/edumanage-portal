@@ -2,7 +2,7 @@
 import type { FormTemplateOut } from '../../../types'
 import SkeletonLoader from '../../../components/SkeletonLoader.vue'
 import EmptyState from '../../../components/EmptyState.vue'
-import { ClipboardList, PencilLine, List, BarChart2 } from '@lucide/vue'
+import { ClipboardList, Pencil, List, BarChart2 } from '@lucide/vue'
 
 defineProps<{ templates: FormTemplateOut[]; loading: boolean }>()
 const emit = defineEmits<{
@@ -33,7 +33,7 @@ const emit = defineEmits<{
     >
       <button
         class="flex-1 min-w-0 text-left hover:-translate-y-0.5 active:scale-[0.99] transition-transform"
-        @click="emit('edit', template)"
+        @click="emit('fill', template)"
       >
         <div class="flex items-center gap-2">
           <p class="font-bold text-text-primary dark:text-white truncate">{{ template.name }}</p>
@@ -48,15 +48,15 @@ const emit = defineEmits<{
 
       <div class="flex items-center gap-1 flex-shrink-0">
         <button
-          class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-primary/15 text-primary hover:bg-primary/25 active:scale-95 transition-all"
-          title="Fill form"
-          @click="emit('fill', template)"
+          class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-white/10 text-text-secondary hover:text-text-primary dark:hover:text-white hover:bg-white/15 active:scale-95 transition-all"
+          title="Edit template"
+          @click.stop="emit('edit', template)"
         >
-          <PencilLine class="w-3.5 h-3.5" />
-          Fill
+          <Pencil class="w-3.5 h-3.5" />
+          Edit
         </button>
         <button
-          class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-white/10 text-text-secondary hover:text-white hover:bg-white/15 active:scale-95 transition-all"
+          class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-white/10 text-text-secondary hover:text-text-primary dark:hover:text-white hover:bg-white/15 active:scale-95 transition-all"
           title="View answers"
           @click="emit('answers', template)"
         >
@@ -64,7 +64,7 @@ const emit = defineEmits<{
           Answers
         </button>
         <button
-          class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-white/10 text-text-secondary hover:text-white hover:bg-white/15 active:scale-95 transition-all"
+          class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-white/10 text-text-secondary hover:text-text-primary dark:hover:text-white hover:bg-white/15 active:scale-95 transition-all"
           title="View summary"
           @click="emit('summary', template)"
         >

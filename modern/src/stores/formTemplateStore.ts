@@ -35,11 +35,10 @@ export const useFormTemplateStore = defineStore('formTemplate', () => {
     return updated
   }
 
-  async function deactivate(id: string) {
+  async function deleteTemplate(id: string) {
     await formsApi.deactivateFormTemplate(id)
-    const idx = templates.value.findIndex((t) => t.id === id)
-    if (idx !== -1) templates.value[idx] = { ...templates.value[idx], isActive: false }
+    templates.value = templates.value.filter((t) => t.id !== id)
   }
 
-  return { templates, isLoading, fetch, get, create, update, deactivate }
+  return { templates, isLoading, fetch, get, create, update, deleteTemplate }
 })

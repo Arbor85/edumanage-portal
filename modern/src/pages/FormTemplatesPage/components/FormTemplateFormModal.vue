@@ -123,15 +123,15 @@ async function save() {
   }
 }
 
-async function doDeactivate() {
+async function doDelete() {
   if (!props.template) return
   try {
-    await store.deactivate(props.template.id)
-    toast.success('Form template deactivated')
+    await store.deleteTemplate(props.template.id)
+    toast.success('Form template deleted')
     confirmDeactivate.value = false
     emit('close')
   } catch {
-    toast.error('Failed to deactivate form template')
+    toast.error('Failed to delete form template')
   }
 }
 </script>
@@ -141,7 +141,6 @@ async function doDeactivate() {
     <form class="flex flex-col gap-4" @submit.prevent="save">
       <BaseInput v-model="form.name" label="Name" placeholder="e.g. Post-Physiotherapy Session Form" />
       <BaseTextarea v-model="form.description" label="Description" :rows="2" placeholder="Optional context for trainers filling this in" />
-      <BaseCheckbox v-if="template" v-model="form.isActive" label="Active (selectable when submitting session forms)" />
 
       <div class="flex items-center justify-between mt-2">
         <p class="text-xs font-bold tracking-widest uppercase text-text-muted">Fields</p>
@@ -192,7 +191,7 @@ async function doDeactivate() {
 
     <template #footer>
       <div class="flex items-center gap-2">
-        <BaseButton v-if="template" variant="danger" @click="confirmDeactivate = true">Deactivate</BaseButton>
+        <BaseButton v-if="template" variant="danger" @click="confirmDeactivate = true">Delete</BaseButton>
         <div class="flex-1" />
         <BaseButton variant="ghost" @click="emit('close')">Cancel</BaseButton>
         <BaseButton variant="primary" :loading="saving" @click="save">{{ template ? 'Save' : 'Create' }}</BaseButton>
@@ -202,11 +201,11 @@ async function doDeactivate() {
 
   <ConfirmDialog
     :open="confirmDeactivate"
-    title="Deactivate Form Template"
-    message="This template will no longer be selectable for new session forms. Existing responses are kept."
-    confirm-label="Deactivate"
+    title="Delete Form Template"
+    message="This will permanently delete this template and all its responses. This action cannot be undone."
+    confirm-label="Delete"
     variant="danger"
-    @confirm="doDeactivate"
+    @confirm="doDelete"
     @cancel="confirmDeactivate = false"
   />
 </template>
