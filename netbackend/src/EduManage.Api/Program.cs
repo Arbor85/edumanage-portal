@@ -15,7 +15,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Configuration
 	.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-	.AddJsonFile("appsettings.local.json", optional: true, reloadOnChange: true);
+	.AddJsonFile("appsettings.local.json", optional: true, reloadOnChange: true)
+	.AddEnvironmentVariables();
 
 const string frontendCorsPolicy = "FrontendCors";
 const string auth0DomainConfigKey = "Authentication:Auth0:Domain";
