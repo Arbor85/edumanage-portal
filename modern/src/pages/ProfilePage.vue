@@ -50,7 +50,6 @@ async function logout() {
         <p class="text-xs font-semibold uppercase tracking-wide text-text-secondary">Permissions</p>
         <p v-if="authStore.permissions.length === 0" class="text-xs text-text-secondary">No special permissions</p>
         <p v-for="p in authStore.permissions" :key="p" class="text-xs text-green-500 font-bold">{{ p }}</p>
-        </p>
       </div>
 
       <BaseButton variant="danger" @click="logout">Log Out</BaseButton>
