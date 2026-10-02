@@ -2,7 +2,6 @@ using EduManage.Application.Contracts;
 using EduManage.Infrastructure.Persistence;
 using EduManage.Infrastructure.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace EduManage.Infrastructure;
@@ -16,7 +15,6 @@ public static class DependencyInjection
         services.AddDbContext<EduManageDbContext>(options =>
         {
             options.UseSqlServer(connectionString);
-            options.ConfigureWarnings(warnings => warnings.Ignore(CoreEventId.ManyServiceProvidersCreatedWarning));
         });
 
         // Register individual repositories
