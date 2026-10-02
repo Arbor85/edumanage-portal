@@ -1,0 +1,1 @@
+gh workflow run main_edumanage-api.yml --repo Arbor85/edumanage-portal
