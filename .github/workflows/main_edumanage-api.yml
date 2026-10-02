@@ -26,7 +26,10 @@ jobs:
           dotnet-version: '10.x'
 
       - name: Restore dependencies
-        run: dotnet restore netbackend/src/EduManage.Api/EduManage.Api.csproj
+        run: dotnet restore netbackend/EduManage.NetBackend.sln
+
+      - name: Run tests
+        run: dotnet test netbackend/EduManage.NetBackend.sln --no-restore --verbosity normal
 
       - name: Build with dotnet
         run: dotnet build netbackend/src/EduManage.Api/EduManage.Api.csproj --configuration Release --no-restore
