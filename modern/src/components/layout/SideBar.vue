@@ -23,16 +23,20 @@ const clientItems: { to: string; icon: Component; label: string }[] = [
   { to: '/profile',      icon: User,       label: 'Profile' },
 ]
 
-const coachItems: { to: string; icon: Component; label: string }[] = [
-  { to: '/coach/clients',        icon: Users,         label: 'Clients' },
-  { to: '/coach/plans',          icon: ClipboardList, label: 'Plans' },
-  { to: '/coach/meetings',       icon: Calendar,      label: 'Meetings' },
-  { to: '/coach/courses',        icon: BookOpen,      label: 'Courses' },
-  { to: '/coach/equipment',      icon: Package,       label: 'Equipment' },
-  { to: '/coach/form-templates', icon: FileText,      label: 'Form Templates' },
-  { to: '/my-schedule',          icon: CalendarDays,  label: 'My Schedule' },
-  { to: '/coach/mcp-keys',       icon: KeyRound,      label: 'MCP Keys' },
+const allCoachItems: { to: string; icon: Component; label: string; permission: string }[] = [
+  { to: '/coach/clients',        icon: Users,         label: 'Clients',        permission: 'manage:clients' },
+  { to: '/coach/plans',          icon: ClipboardList, label: 'Plans',          permission: 'manage:clients' },
+  { to: '/coach/meetings',       icon: Calendar,      label: 'Meetings',       permission: 'manage:clients' },
+  { to: '/coach/courses',        icon: BookOpen,      label: 'Courses',        permission: 'manage:clients' },
+  { to: '/coach/equipment',      icon: Package,       label: 'Equipment',      permission: 'manage:equipment' },
+  { to: '/coach/form-templates', icon: FileText,      label: 'Form Templates', permission: 'manage:forms' },
+  { to: '/my-schedule',          icon: CalendarDays,  label: 'My Schedule',    permission: 'view:schedule' },
+  { to: '/coach/mcp-keys',       icon: KeyRound,      label: 'MCP Keys',       permission: 'manage:clients' },
 ]
+
+const coachItems = computed(() =>
+  allCoachItems.filter(item => authStore.hasPermission(item.permission))
+)
 
 const organizerItems: { to: string; icon: Component; label: string }[] = [
   { to: '/organizer',                  icon: LayoutDashboard, label: 'Dashboard' },
@@ -69,7 +73,7 @@ function readPillPos(navEl: HTMLElement | null, items: typeof clientItems): Pill
 
 function updatePills() {
   clientPos.value = readPillPos(clientNavEl.value, clientItems)
-  coachPos.value  = readPillPos(coachNavEl.value,  coachItems)
+  coachPos.value  = readPillPos(coachNavEl.value,  coachItems.value)
 }
 
 // Update after every route change once DOM has settled
@@ -97,7 +101,7 @@ function onMouseMove(e: MouseEvent) {
 }
 
 // Active link index for coach section (needed for v-if on coach nav)
-const coachActiveIdx = computed(() => coachItems.findIndex(item => isActive(item.to)))
+const coachActiveIdx = computed(() => coachItems.value.findIndex(item => isActive(item.to)))
 const organizerActiveIdx = computed(() => organizerItems.findIndex(item => isActive(item.to)))
 </script>
 
@@ -152,7 +156,7 @@ const organizerActiveIdx = computed(() => organizerItems.findIndex(item => isAct
     </nav>
 
     <!-- Coach section -->
-    <div v-if="authStore.hasPermission('manage:clients')" class="relative z-10 mt-4">
+    <div v-if="coachItems.length > 0" class="relative z-10 mt-4">
       <div class="border-t border-gray-200 dark:border-white/10 pt-4">
         <p class="px-3 mb-2 text-[10px] font-bold tracking-[0.12em] uppercase text-text-muted/80">Coach</p>
         <nav ref="coachNavEl" class="relative flex flex-col gap-1">

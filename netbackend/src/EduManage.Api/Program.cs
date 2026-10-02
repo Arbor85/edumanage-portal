@@ -3,6 +3,7 @@ using EduManage.Api.Services;
 using EduManage.Api.Validators;
 using EduManage.Infrastructure.Persistence;
 using FluentValidation;
+using Microsoft.EntityFrameworkCore;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -135,6 +136,20 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<EduManageDbContext>();
+    await db.Database.EnsureCreatedAsync();
+    await db.Database.ExecuteSqlRawAsync("""
+        IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'UserChallengeLogs')
+        CREATE TABLE UserChallengeLogs (
+            UserId NVARCHAR(200) NOT NULL,
+            ChallengeDate DATE NOT NULL,
+            CONSTRAINT PK_UserChallengeLogs PRIMARY KEY (UserId, ChallengeDate)
+        )
+        """);
+}
 
 // await app.Services.SeedExercisesFromJsonAsync();
 

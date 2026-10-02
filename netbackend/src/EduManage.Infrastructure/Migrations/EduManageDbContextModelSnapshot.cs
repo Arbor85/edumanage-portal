@@ -1017,6 +1017,20 @@ namespace EduManage.Infrastructure.Migrations
                     b.ToTable("TrainerCourseAssociations");
                 });
 
+            modelBuilder.Entity("EduManage.Domain.Entities.UserChallengeLog", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateOnly>("ChallengeDate")
+                        .HasColumnType("date");
+
+                    b.HasKey("UserId", "ChallengeDate");
+
+                    b.ToTable("UserChallengeLogs");
+                });
+
             modelBuilder.Entity("EduManage.Domain.Entities.UserEquipment", b =>
                 {
                     b.Property<Guid>("Id")
