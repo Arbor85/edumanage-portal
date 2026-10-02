@@ -2,6 +2,8 @@
 import { ref, computed, watch, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { Pause, Play, Check, ChevronLeft, SkipForward, Link2, X, Plus } from '@lucide/vue'
+import ExercisePickerDialog from '../components/ExercisePickerDialog/index.vue'
+import type { ExcerciseOut } from '../types'
 import { exerciseImageMap } from '../data/exerciseImageMap'
 
 const EXERCISE_FALLBACK = '/images/benchpress.png'
@@ -40,6 +42,16 @@ const supersetDialogForExIdx = ref<number | null>(null)
 const supersetCreateStep = ref(false)
 const confirmFinish = ref(false)
 const isFinishing = ref(false)
+const exercisePickerOpen = ref(false)
+
+function onAddExercises(exercises: ExcerciseOut[]) {
+  for (const ex of exercises) {
+    store.addAdHocExercise(
+      { name: ex.name, activityType: ex.activityType, activityTrackType: ex.activityTrackType },
+      [{ reps: null, weight: null, duration: null, distance: null }],
+    )
+  }
+}
 
 const prQueue = ref<PrCandidate[]>([])
 const prDialogOpen = ref(false)
@@ -499,6 +511,15 @@ function onWorkoutDone() {
         >
           {{ ex.name }}
         </button>
+        <button
+          class="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold
+                 bg-white/5 border border-dashed border-white/20 text-text-muted
+                 hover:bg-white/10 hover:text-white active:scale-95 transition-all"
+          @click="exercisePickerOpen = true"
+        >
+          <Plus class="w-3.5 h-3.5" />
+          Add
+        </button>
       </div>
 
       <!-- Main content -->
@@ -865,6 +886,17 @@ function onWorkoutDone() {
             </template>
           </div>
 
+          <!-- Add set -->
+          <button
+            class="mt-3 w-full flex items-center justify-center gap-2 py-2.5 rounded-xl
+                   border border-dashed border-white/15 text-xs font-bold text-text-muted
+                   hover:bg-white/5 hover:text-white active:scale-[0.98] transition-all"
+            @click="store.addSetToExercise((currentStep as any).exerciseIndex)"
+          >
+            <Plus class="w-3.5 h-3.5" />
+            Add Set
+          </button>
+
           <!-- Up next hint -->
           <div
             v-if="workout.currentStepIndex < workout.steps.length - 1"
@@ -951,6 +983,12 @@ function onWorkoutDone() {
       :candidate="prQueue[0] ?? null"
       @confirm="onPrConfirm"
       @skip="onPrSkip"
+    />
+
+    <ExercisePickerDialog
+      :open="exercisePickerOpen"
+      @add="onAddExercises"
+      @close="exercisePickerOpen = false"
     />
 
     <!-- Superset picker: choose an existing superset or create a new one -->

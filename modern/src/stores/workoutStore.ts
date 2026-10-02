@@ -482,6 +482,44 @@ export const useWorkoutStore = defineStore('workout', () => {
     persist()
   }
 
+  function addSetToExercise(exerciseIndex: number) {
+    if (!activeWorkout.value) return
+    const ex = activeWorkout.value.exercises[exerciseIndex]
+    if (!ex) return
+
+    const lastSet = ex.sets[ex.sets.length - 1]
+    const newSet: ActiveSet = {
+      setNumber: ex.sets.length + 1,
+      reps: lastSet?.reps ?? null,
+      weight: lastSet?.weight ?? null,
+      duration: lastSet?.duration ?? null,
+      distance: lastSet?.distance ?? null,
+      targetReps: lastSet?.targetReps ?? null,
+      targetWeight: lastSet?.targetWeight ?? null,
+      targetDuration: lastSet?.targetDuration ?? null,
+      targetDistance: lastSet?.targetDistance ?? null,
+      actualReps: null,
+      actualWeight: null,
+      actualDuration: null,
+      actualDistance: null,
+      completed: false,
+      note: null,
+    }
+    const newSetIndex = ex.sets.length
+    ex.sets.push(newSet)
+
+    // Insert a new step after the last step that belongs to this exercise
+    const lastStepIdx = activeWorkout.value.steps.reduce((best, step, i) => {
+      if (step.type === 'normal-set' && step.exerciseIndex === exerciseIndex) return i
+      return best
+    }, -1)
+    const insertAt = lastStepIdx === -1
+      ? activeWorkout.value.currentStepIndex + 1
+      : lastStepIdx + 1
+    activeWorkout.value.steps.splice(insertAt, 0, { type: 'normal-set', exerciseIndex, setIndex: newSetIndex })
+    persist()
+  }
+
   function updateExerciseSets(
     exerciseIndex: number,
     sets: { reps: number | null; weight: number | null; duration: number | null; distance: number | null }[]
@@ -651,6 +689,7 @@ export const useWorkoutStore = defineStore('workout', () => {
     addToSuperset,
     joinSuperset,
     addAdHocExercise,
+    addSetToExercise,
     updateExerciseSets,
     pauseWorkout,
     resumeWorkout,
