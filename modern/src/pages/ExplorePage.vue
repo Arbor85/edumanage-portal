@@ -121,7 +121,7 @@ async function handleDelete(ex: ExcerciseOut) {
       <div class="pt-2 pb-4 flex items-end justify-between">
         <div>
           <p class="text-xs font-bold tracking-widest uppercase text-text-muted mb-1">Exercise library</p>
-          <h1 class="text-3xl font-black text-white">Explore</h1>
+          <h1 class="text-3xl font-black text-text-primary dark:text-white">Explore</h1>
         </div>
         <button
           class="flex items-center gap-1.5 px-4 h-10 bg-primary/10 border border-primary/30 text-primary

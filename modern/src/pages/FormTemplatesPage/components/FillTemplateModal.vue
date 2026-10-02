@@ -284,7 +284,7 @@ async function submit() {
       >
         <!-- Big percentage + bar -->
         <div class="flex flex-col items-center gap-2">
-          <span class="text-3xl font-bold text-white tabular-nums">{{ progressPercent }}<span class="text-lg text-text-muted">%</span></span>
+          <span class="text-3xl font-bold text-text-primary dark:text-white tabular-nums">{{ progressPercent }}<span class="text-lg text-text-muted">%</span></span>
           <div class="w-full h-2 bg-white/10 rounded-full overflow-hidden">
             <div
               class="h-full bg-primary rounded-full transition-all duration-300"
@@ -308,7 +308,7 @@ async function submit() {
             >
               <Check v-if="item.filled" class="w-2.5 h-2.5 text-white" />
             </div>
-            <span :class="item.filled ? 'text-white' : 'text-text-muted'">{{ item.label }}</span>
+            <span :class="item.filled ? 'text-text-primary dark:text-white' : 'text-text-muted'">{{ item.label }}</span>
           </div>
         </div>
 
@@ -326,7 +326,7 @@ async function submit() {
             >
               <Check v-if="item.filled" class="w-2.5 h-2.5 text-white" />
             </div>
-            <span class="truncate" :class="item.filled ? 'text-white' : 'text-text-muted'">{{ item.label }}</span>
+            <span class="truncate" :class="item.filled ? 'text-text-primary dark:text-white' : 'text-text-muted'">{{ item.label }}</span>
           </div>
         </div>
       </div>

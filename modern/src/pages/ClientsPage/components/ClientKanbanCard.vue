@@ -38,7 +38,7 @@ function ringClass(): string {
 
     <!-- Name -->
     <div class="flex-1 min-w-0">
-      <p class="text-sm font-semibold text-white truncate">{{ client.name }}</p>
+      <p class="text-sm font-semibold text-text-primary dark:text-white truncate">{{ client.name }}</p>
     </div>
 
     <!-- Actions (visible on hover) -->

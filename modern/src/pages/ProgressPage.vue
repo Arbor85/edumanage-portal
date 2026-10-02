@@ -79,7 +79,7 @@ const TABS: { id: Tab; label: string }[] = [
       <!-- Page header -->
       <div class="pt-2 pb-4">
         <p class="text-xs font-bold tracking-widest uppercase text-text-muted mb-1">Your journey</p>
-        <h1 class="text-3xl font-black text-white">Progress</h1>
+        <h1 class="text-3xl font-black text-text-primary dark:text-white">Progress</h1>
       </div>
 
       <!-- Quick stat cards (animated count-up) -->

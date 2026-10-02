@@ -69,7 +69,7 @@ const filtered = computed(() =>
       <div class="pt-2 pb-4 flex items-end justify-between">
         <div>
           <p class="text-xs font-bold tracking-widest uppercase text-text-muted mb-1">Your workouts</p>
-          <h1 class="text-3xl font-black text-white">Routines</h1>
+          <h1 class="text-3xl font-black text-text-primary dark:text-white">Routines</h1>
         </div>
         <button
           class="flex items-center gap-1.5 px-4 h-10 bg-primary text-white font-bold text-sm rounded-xl

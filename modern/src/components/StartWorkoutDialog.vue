@@ -107,7 +107,7 @@ function startEmpty() {
 
               <!-- Info -->
               <div class="flex-1 min-w-0">
-                <p class="font-black text-white text-base leading-tight truncate">{{ todayWorkout.name }}</p>
+                <p class="font-black text-text-primary dark:text-white text-base leading-tight truncate">{{ todayWorkout.name }}</p>
                 <p class="text-xs text-primary/80 mt-0.5 font-medium">
                   {{ todayWorkout.exerciseCount }} exercise{{ todayWorkout.exerciseCount !== 1 ? 's' : '' }}
                   <span v-if="todayWorkout.note" class="text-text-muted font-normal"> · {{ todayWorkout.note }}</span>
@@ -195,7 +195,7 @@ function startEmpty() {
                 <Dumbbell class="w-3.5 h-3.5 text-primary" />
               </div>
               <div class="flex-1 min-w-0">
-                <p class="font-semibold text-white text-sm truncate">{{ routine.name }}</p>
+                <p class="font-semibold text-text-primary dark:text-white text-sm truncate">{{ routine.name }}</p>
                 <p class="text-xs text-text-muted mt-0.5">
                   {{ routine.excercises?.length ?? 0 }} exercise{{ (routine.excercises?.length ?? 0) !== 1 ? 's' : '' }}
                   <span v-if="routine.note"> · {{ routine.note }}</span>

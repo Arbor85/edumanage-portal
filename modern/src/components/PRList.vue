@@ -35,7 +35,7 @@ function fmtDate(iso: string): string {
     <!-- Empty state -->
     <div v-if="records.length === 0" class="text-center py-16">
       <Zap class="w-10 h-10 text-text-muted mx-auto mb-3" />
-      <p class="text-lg font-bold text-white mb-1">No records yet</p>
+      <p class="text-lg font-bold text-text-primary dark:text-white mb-1">No records yet</p>
       <p class="text-sm text-text-secondary">Complete workouts to set your first PRs.</p>
     </div>
 
@@ -57,7 +57,7 @@ function fmtDate(iso: string): string {
 
         <!-- Name + value -->
         <div class="flex-1 min-w-0">
-          <p class="font-bold text-white truncate">{{ pr.exerciseName }}</p>
+          <p class="font-bold text-text-primary dark:text-white truncate">{{ pr.exerciseName }}</p>
           <p class="text-sm text-text-secondary mt-0.5">{{ fmtValue(pr) }}</p>
         </div>
 

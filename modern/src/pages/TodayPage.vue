@@ -97,7 +97,7 @@ const minutesThisWeek = computed(() =>
           <p class="text-xs font-bold tracking-widest uppercase text-text-muted mb-1">
             {{ new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }) }}
           </p>
-          <h1 class="text-3xl font-black text-white">Today</h1>
+          <h1 class="text-3xl font-black text-text-primary dark:text-white">Today</h1>
         </div>
         <button
           class="flex items-center gap-1.5 px-4 h-10 bg-primary text-white font-bold text-sm rounded-xl

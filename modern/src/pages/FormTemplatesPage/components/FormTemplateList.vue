@@ -36,7 +36,7 @@ const emit = defineEmits<{
         @click="emit('edit', template)"
       >
         <div class="flex items-center gap-2">
-          <p class="font-bold text-white truncate">{{ template.name }}</p>
+          <p class="font-bold text-text-primary dark:text-white truncate">{{ template.name }}</p>
           <span
             class="px-2 py-0.5 rounded-full text-[10px] font-bold flex-shrink-0"
             :class="template.isActive ? 'bg-primary/15 text-primary' : 'bg-white/10 text-text-secondary'"

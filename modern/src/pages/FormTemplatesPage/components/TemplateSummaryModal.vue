@@ -52,7 +52,7 @@ function barWidth(count: number, total: number): string {
       <template v-else-if="summary">
         <div class="flex items-center gap-3 pb-3 border-b border-white/10">
           <div class="text-center">
-            <p class="text-2xl font-bold text-white">{{ summary.totalResponses }}</p>
+            <p class="text-2xl font-bold text-text-primary dark:text-white">{{ summary.totalResponses }}</p>
             <p class="text-xs text-text-muted">Total responses</p>
           </div>
         </div>
@@ -67,7 +67,7 @@ function barWidth(count: number, total: number): string {
           class="bg-white/5 rounded-xl p-4 flex flex-col gap-3"
         >
           <div class="flex items-center justify-between gap-2">
-            <p class="font-semibold text-white text-sm">{{ field.label }}</p>
+            <p class="font-semibold text-text-primary dark:text-white text-sm">{{ field.label }}</p>
             <span class="text-xs text-text-muted bg-white/10 rounded-full px-2 py-0.5">
               {{ field.type }} · {{ field.responseCount }} response{{ field.responseCount !== 1 ? 's' : '' }}
             </span>
@@ -81,11 +81,11 @@ function barWidth(count: number, total: number): string {
                 <p class="text-xs text-text-muted">Average</p>
               </div>
               <div class="text-center bg-white/5 rounded-lg py-2">
-                <p class="text-lg font-bold text-white">{{ field.min }}</p>
+                <p class="text-lg font-bold text-text-primary dark:text-white">{{ field.min }}</p>
                 <p class="text-xs text-text-muted">Min</p>
               </div>
               <div class="text-center bg-white/5 rounded-lg py-2">
-                <p class="text-lg font-bold text-white">{{ field.max }}</p>
+                <p class="text-lg font-bold text-text-primary dark:text-white">{{ field.max }}</p>
                 <p class="text-xs text-text-muted">Max</p>
               </div>
             </div>

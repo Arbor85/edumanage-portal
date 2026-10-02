@@ -97,7 +97,7 @@ async function confirmDelete(id: string) {
             >
               <component :is="expandedId === response.id ? ChevronDown : ChevronRight" class="w-4 h-4 text-text-muted flex-shrink-0" />
               <div class="min-w-0">
-                <p class="font-semibold text-white text-sm">{{ response.firstName }} {{ response.lastName }}</p>
+                <p class="font-semibold text-text-primary dark:text-white text-sm">{{ response.firstName }} {{ response.lastName }}</p>
                 <p class="text-xs text-text-muted">
                   {{ [response.gender, response.age != null ? `Age ${response.age}` : null].filter(Boolean).join(' · ') }}
                   <span v-if="response.gender || response.age != null"> · </span>{{ formatDate(response.createdAt) }}
@@ -155,7 +155,7 @@ async function confirmDelete(id: string) {
                 class="flex items-start justify-between gap-2 text-sm"
               >
                 <span class="text-text-secondary shrink-0 max-w-[55%]">{{ getFieldLabel(answer.fieldId) }}</span>
-                <span class="text-white text-right">{{ formatAnswer(answer.fieldId, answer.value, answer.values) }}</span>
+                <span class="text-text-primary dark:text-white text-right">{{ formatAnswer(answer.fieldId, answer.value, answer.values) }}</span>
               </div>
             </div>
           </div>

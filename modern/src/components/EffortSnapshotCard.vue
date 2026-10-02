@@ -28,7 +28,7 @@ watch(isVisible, (visible) => { if (visible) trigger() })
     @click="router.push(linkTo)"
   >
     <p class="text-xs font-bold tracking-widest uppercase text-text-muted mb-2">{{ label }}</p>
-    <p class="text-3xl font-bold tabular-nums text-white leading-none mb-1">
+    <p class="text-3xl font-bold tabular-nums text-text-primary dark:text-white leading-none mb-1">
       {{ displayValue.toLocaleString() }}
     </p>
     <p class="text-xs text-text-secondary">{{ unit }}</p>

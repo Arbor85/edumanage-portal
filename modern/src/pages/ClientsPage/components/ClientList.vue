@@ -87,7 +87,7 @@ async function handleDelete() {
 
         <div class="flex-1 min-w-0">
           <div class="flex items-center gap-2 flex-wrap">
-            <p class="font-bold text-white">{{ client.name }}</p>
+            <p class="font-bold text-text-primary dark:text-white">{{ client.name }}</p>
             <BaseBadge :label="client.status ?? 'Invited'" :variant="client.status === 'Active' ? 'success' : 'warning'" />
           </div>
           <p v-if="client.firstName || client.lastName || client.email" class="text-xs text-text-secondary mt-0.5">

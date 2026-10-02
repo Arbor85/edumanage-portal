@@ -128,7 +128,7 @@ function initials(name: string | null): string {
 
       <div v-else-if="!client" class="text-center py-16">
         <Users class="w-10 h-10 text-text-muted mx-auto mb-3" />
-        <p class="text-lg font-bold text-white mb-1">Client not found</p>
+        <p class="text-lg font-bold text-text-primary dark:text-white mb-1">Client not found</p>
         <p class="text-sm text-text-secondary">This client may have been removed.</p>
       </div>
 
@@ -148,7 +148,7 @@ function initials(name: string | null): string {
             <!-- Info -->
             <div class="flex-1 min-w-0">
               <div class="flex items-center gap-2 flex-wrap">
-                <h1 class="text-xl font-black text-white">{{ client.name }}</h1>
+                <h1 class="text-xl font-black text-text-primary dark:text-white">{{ client.name }}</h1>
                 <span
                   class="px-2.5 py-0.5 rounded-full text-xs font-bold"
                   :class="client.status === 'Active'
@@ -253,7 +253,7 @@ function initials(name: string | null): string {
           <template v-else>
             <div class="flex items-start justify-between mb-3">
               <div>
-                <p class="font-bold text-white">{{ clientPlan.name }}</p>
+                <p class="font-bold text-text-primary dark:text-white">{{ clientPlan.name }}</p>
                 <p class="text-xs text-text-muted mt-0.5">{{ planWorkouts.length }} workouts scheduled</p>
               </div>
               <span
@@ -268,7 +268,7 @@ function initials(name: string | null): string {
             <div class="mb-2">
               <div class="flex justify-between mb-1.5">
                 <span class="text-xs text-text-muted">Timeline progress</span>
-                <span class="text-xs font-bold text-white">{{ planProgress }}%</span>
+                <span class="text-xs font-bold text-text-primary dark:text-white">{{ planProgress }}%</span>
               </div>
               <div class="h-2 bg-white/5 rounded-full overflow-hidden">
                 <div
@@ -338,7 +338,7 @@ function initials(name: string | null): string {
                 class="w-full flex items-center justify-between gap-3 px-4 py-3 hover:bg-white/[0.02] transition-colors"
                 @click="toggleResponse(response.id)"
               >
-                <span class="text-sm text-white font-semibold">
+                <span class="text-sm text-text-primary dark:text-white font-semibold">
                   {{ new Date(response.createdAt).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' }) }}
                 </span>
                 <ChevronDown

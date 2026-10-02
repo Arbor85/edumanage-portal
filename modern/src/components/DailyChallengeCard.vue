@@ -52,7 +52,7 @@ async function markDone() {
     </div>
 
     <!-- Content -->
-    <p class="text-lg font-bold text-white mb-4 leading-snug">
+    <p class="text-lg font-bold text-text-primary dark:text-white mb-4 leading-snug">
       {{ store.todayChallenge.description }}
     </p>
 
