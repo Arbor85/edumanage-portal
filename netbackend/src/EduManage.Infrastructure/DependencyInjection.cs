@@ -14,7 +14,10 @@ public static class DependencyInjection
         var connectionString = databaseConnectionString;
 
         services.AddDbContext<EduManageDbContext>(options =>
-            options.UseSqlServer(connectionString));
+        {
+            options.UseSqlServer(connectionString);
+            options.ConfigureWarnings(warnings => warnings.Ignore(CoreEventId.ManyServiceProvidersCreatedWarning));
+        });
 
         // Register individual repositories
         services.AddScoped<IClientRepository, ClientRepository>();
