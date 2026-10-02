@@ -17,7 +17,10 @@ public static class ExerciseSeedExtensions
         using var scope = serviceProvider.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<EduManageDbContext>();
 
-        await dbContext.Database.MigrateAsync(cancellationToken);
+        if (dbContext.Database.IsRelational())
+            await dbContext.Database.MigrateAsync(cancellationToken);
+        else
+            await dbContext.Database.EnsureCreatedAsync(cancellationToken);
 
         var assembly = typeof(DependencyInjection).Assembly;
 
