@@ -7,7 +7,7 @@ namespace EduManage.Api.Controllers;
 
 [ApiController]
 [Route("api/standalone-form-responses")]
-[Authorize]
+[Authorize(Policy = "manage:forms")]
 public sealed class StandaloneFormResponsesController(ISender mediator, ICurrentUserService currentUserService) : ControllerBase
 {
     [HttpPost]

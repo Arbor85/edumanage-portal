@@ -47,16 +47,9 @@ async function logout() {
 
       <div
         class="bg-white dark:bg-surface-dark rounded-2xl border border-gray-100 dark:border-white/10 p-4 flex flex-col gap-2">
-        <p class="text-xs font-semibold uppercase tracking-wide text-text-secondary">Roles</p>
-        <p class="text-xs">
-          <span class="text-text-secondary">Trainer: </span>
-          <span :class="authStore.isTrainer ? 'text-green-500 font-bold' : 'text-red-500 font-bold'">{{
-            authStore.isTrainer }}</span>
-        </p>
-        <p class="text-xs">
-          <span class="text-text-secondary">Organizer: </span>
-          <span :class="authStore.isOrganizer ? 'text-green-500 font-bold' : 'text-red-500 font-bold'">{{
-            authStore.isOrganizer }}</span>
+        <p class="text-xs font-semibold uppercase tracking-wide text-text-secondary">Permissions</p>
+        <p v-if="authStore.permissions.length === 0" class="text-xs text-text-secondary">No special permissions</p>
+        <p v-for="p in authStore.permissions" :key="p" class="text-xs text-green-500 font-bold">{{ p }}</p>
         </p>
       </div>
 

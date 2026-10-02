@@ -79,7 +79,7 @@ const router = createRouter({
       path: '/gym-profile/client/:userId',
       name: 'ClientGymProfile',
       component: () => import('../pages/GymProfilePage.vue'),
-      meta: { requiresAuth: true, requiresTrainer: true },
+      meta: { requiresAuth: true, requiresPermission: 'manage:clients' },
     },
 
     // ── Coach routes (trainers only) ──────────────────────────────────────
@@ -87,50 +87,49 @@ const router = createRouter({
       path: '/coach/clients',
       name: 'CoachClients',
       component: () => import('../pages/ClientsPage.vue'),
-      meta: { requiresAuth: true, requiresTrainer: true },
+      meta: { requiresAuth: true, requiresPermission: 'manage:clients' },
     },
     {
       path: '/coach/clients/:id',
       name: 'CoachClientDetail',
       component: () => import('../pages/coach/ClientDetailPage.vue'),
-      meta: { requiresAuth: true, requiresTrainer: true },
+      meta: { requiresAuth: true, requiresPermission: 'manage:clients' },
     },
     {
       path: '/coach/plans',
       name: 'CoachPlans',
       component: () => import('../pages/PlansPage.vue'),
-      meta: { requiresAuth: true, requiresTrainer: true },
+      meta: { requiresAuth: true, requiresPermission: 'manage:clients' },
     },
     {
       path: '/coach/meetings',
       name: 'CoachMeetings',
       component: () => import('../pages/MeetingsPage.vue'),
-      meta: { requiresAuth: true, requiresTrainer: true },
+      meta: { requiresAuth: true, requiresPermission: 'manage:clients' },
     },
     {
       path: '/coach/courses',
       name: 'CoachCourses',
       component: () => import('../pages/CoursesPage.vue'),
-      meta: { requiresAuth: true, requiresTrainer: true },
+      meta: { requiresAuth: true, requiresPermission: 'manage:clients' },
     },
     {
       path: '/coach/equipment',
       name: 'CoachEquipment',
       component: () => import('../pages/EquipmentPage.vue'),
-      meta: { requiresAuth: true, requiresTrainer: true },
+      meta: { requiresAuth: true, requiresPermission: 'manage:equipment' },
     },
     {
       path: '/coach/form-templates',
       name: 'CoachFormTemplates',
       component: () => import('../pages/FormTemplatesPage.vue'),
-      meta: { requiresAuth: true, requiresTrainer: true },
+      meta: { requiresAuth: true, requiresPermission: 'manage:forms' },
     },
-
     {
       path: '/coach/mcp-keys',
       name: 'CoachMcpKeys',
       component: () => import('../pages/McpApiKeysPage.vue'),
-      meta: { requiresAuth: true, requiresTrainer: true },
+      meta: { requiresAuth: true, requiresPermission: 'manage:clients' },
     },
 
     // ── Trainer schedule (read-only) ─────────────────────────────────────
@@ -138,7 +137,7 @@ const router = createRouter({
       path: '/my-schedule',
       name: 'MySchedule',
       component: () => import('../pages/MySchedulePage.vue'),
-      meta: { requiresAuth: true, requiresTrainer: true },
+      meta: { requiresAuth: true, requiresPermission: 'view:schedule' },
     },
 
     // ── Organizer routes ──────────────────────────────────────────────────
@@ -146,31 +145,31 @@ const router = createRouter({
       path: '/organizer',
       name: 'OrganizerDashboard',
       component: () => import('../pages/organizer/OrganizerDashboardPage.vue'),
-      meta: { requiresAuth: true, requiresOrganizer: true },
+      meta: { requiresAuth: true, requiresPermission: 'manage:organization' },
     },
     {
       path: '/organizer/trainers',
       name: 'OrganizerTrainers',
       component: () => import('../pages/organizer/trainers/OrganizerTrainersPage.vue'),
-      meta: { requiresAuth: true, requiresOrganizer: true },
+      meta: { requiresAuth: true, requiresPermission: 'manage:organization' },
     },
     {
       path: '/organizer/buildings',
       name: 'OrganizerBuildings',
       component: () => import('../pages/organizer/buildings/OrganizerBuildingsPage.vue'),
-      meta: { requiresAuth: true, requiresOrganizer: true },
+      meta: { requiresAuth: true, requiresPermission: 'manage:buildings' },
     },
     {
       path: '/organizer/schedule-plans',
       name: 'OrganizerSchedulePlans',
       component: () => import('../pages/organizer/schedule-plans/OrganizerSchedulePlansPage.vue'),
-      meta: { requiresAuth: true, requiresOrganizer: true },
+      meta: { requiresAuth: true, requiresPermission: 'manage:schedule-plans' },
     },
     {
       path: '/organizer/schedule-plans/:id',
       name: 'OrganizerSchedulePlanDetail',
       component: () => import('../pages/organizer/schedule-plan-detail/OrganizerSchedulePlanDetailPage.vue'),
-      meta: { requiresAuth: true, requiresOrganizer: true },
+      meta: { requiresAuth: true, requiresPermission: 'manage:schedule-plans' },
     },
 
     // ── Legacy redirects (old routes → new routes) ───────────────────────
@@ -207,11 +206,7 @@ router.beforeEach(async (to) => {
 
   const authStore = useAuthStore()
 
-  if (to.meta.requiresTrainer && !authStore.isTrainer) {
-    return { path: '/' }
-  }
-
-  if (to.meta.requiresOrganizer && !authStore.isOrganizer) {
+  if (to.meta.requiresPermission && !authStore.hasPermission(to.meta.requiresPermission as string)) {
     return { path: '/' }
   }
 

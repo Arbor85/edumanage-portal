@@ -7,7 +7,7 @@ namespace EduManage.Api.Controllers;
 
 [ApiController]
 [Route("api/form-templates")]
-[Authorize]
+[Authorize(Policy = "manage:forms")]
 public sealed class FormTemplatesController(ISender mediator, ICurrentUserService currentUserService) : ControllerBase
 {
     [HttpGet]

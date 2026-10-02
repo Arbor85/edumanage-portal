@@ -9,7 +9,7 @@ import { prefetchRoutes } from '../../utils/prefetchRoutes'
 const route = useRoute()
 const authStore = useAuthStore()
 
-onMounted(() => prefetchRoutes(authStore.isTrainer, authStore.isOrganizer))
+onMounted(() => prefetchRoutes(authStore.hasPermission('manage:clients'), authStore.hasPermission('manage:organization')))
 
 const items: { to: string; icon: Component; label: string }[] = [
   { to: '/',          icon: Home,       label: 'Today' },

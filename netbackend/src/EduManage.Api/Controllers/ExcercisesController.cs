@@ -10,10 +10,12 @@ namespace EduManage.Api.Controllers;
 public sealed class ExcercisesController(ISender mediator, ICurrentUserService currentUserService) : ControllerBase
 {
     [HttpGet]
+    [Authorize]
     public Task<IReadOnlyList<ExcerciseOut>> ListExcercises(CancellationToken cancellationToken) =>
         mediator.Send(new ListExcercisesQuery(currentUserService.GetCurrentUserId()), cancellationToken);
 
     [HttpGet("{id:int}")]
+    [Authorize]
     public async Task<ActionResult<ExcerciseOut>> GetExcercise([FromRoute] int id, CancellationToken cancellationToken)
     {
         try
@@ -27,6 +29,7 @@ public sealed class ExcercisesController(ISender mediator, ICurrentUserService c
     }
 
     [HttpPost]
+    [Authorize(Policy = "manage:clients")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     public async Task<ActionResult<ExcerciseOut>> AddExcercise([FromBody] ExcerciseWriteRequest request, CancellationToken cancellationToken)
     {
@@ -35,6 +38,7 @@ public sealed class ExcercisesController(ISender mediator, ICurrentUserService c
     }
 
     [HttpPut("{id:int}")]
+    [Authorize(Policy = "manage:clients")]
     public async Task<ActionResult<ExcerciseOut>> UpdateExcercise([FromRoute] int id, [FromBody] ExcerciseWriteRequest request, CancellationToken cancellationToken)
     {
         try
@@ -48,6 +52,7 @@ public sealed class ExcercisesController(ISender mediator, ICurrentUserService c
     }
 
     [HttpDelete("{id:int}")]
+    [Authorize(Policy = "manage:clients")]
     public async Task<IActionResult> DeleteExcercise([FromRoute] int id, CancellationToken cancellationToken)
     {
         try

@@ -75,8 +75,14 @@ builder.Services.AddAuthorization(options =>
 		policy.Requirements.Add(new HasPermissionRequirement("manage:clients")));
 	options.AddPolicy("manage:equipment", policy =>
 		policy.Requirements.Add(new HasPermissionRequirement("manage:equipment")));
+	options.AddPolicy("manage:forms", policy =>
+		policy.Requirements.Add(new HasPermissionRequirement("manage:forms")));
 	options.AddPolicy("manage:organization", policy =>
 		policy.Requirements.Add(new HasPermissionRequirement("manage:organization")));
+	options.AddPolicy("manage:buildings", policy =>
+		policy.Requirements.Add(new HasPermissionRequirement("manage:buildings")));
+	options.AddPolicy("manage:schedule-plans", policy =>
+		policy.Requirements.Add(new HasPermissionRequirement("manage:schedule-plans")));
 	options.AddPolicy("view:schedule", policy =>
 		policy.Requirements.Add(new HasPermissionRequirement("view:schedule")));
 });

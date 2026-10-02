@@ -9,6 +9,7 @@ namespace EduManage.Api.Controllers;
 
 [ApiController]
 [Route("api/organizations")]
+[Authorize(Policy = "manage:organization")]
 public sealed class OrganizationsController(ISender mediator, ICurrentUserService currentUserService) : ControllerBase
 {
     [HttpPost]

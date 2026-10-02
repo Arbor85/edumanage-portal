@@ -10,7 +10,7 @@ namespace EduManage.Api.Controllers;
 
 [ApiController]
 [Route("api/mcp-keys")]
-[Authorize]
+[Authorize(Policy = "manage:clients")]
 public sealed class ApiKeysController(ISender mediator, ICurrentUserService currentUserService) : ControllerBase
 {
     [HttpGet]

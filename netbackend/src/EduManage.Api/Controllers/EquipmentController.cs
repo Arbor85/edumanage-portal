@@ -6,6 +6,7 @@ namespace EduManage.Api.Controllers;
 
 [ApiController]
 [Route("api/equipment")]
+[Authorize(Policy = "manage:equipment")]
 public sealed class EquipmentController(ISender mediator) : ControllerBase
 {
     [HttpGet]

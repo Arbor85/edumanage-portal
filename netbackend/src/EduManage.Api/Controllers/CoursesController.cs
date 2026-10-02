@@ -9,6 +9,7 @@ namespace EduManage.Api.Controllers;
 
 [ApiController]
 [Route("api/courses")]
+[Authorize(Policy = "manage:clients")]
 public sealed class CoursesController(ISender mediator) : ControllerBase
 {
     [HttpGet]

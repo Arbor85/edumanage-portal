@@ -7,6 +7,7 @@ namespace EduManage.Api.Controllers;
 
 [ApiController]
 [Route("api/clients")]
+[Authorize(Policy = "manage:clients")]
 public sealed class ClientsController(ISender mediator, ICurrentUserService currentUserService) : ControllerBase
 {
     [HttpGet]

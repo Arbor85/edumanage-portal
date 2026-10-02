@@ -8,6 +8,7 @@ namespace EduManage.Api.Controllers;
 
 [ApiController]
 [Route("api/buildings")]
+[Authorize(Policy = "manage:buildings")]
 public sealed class BuildingsController(ISender mediator, ICurrentUserService currentUserService) : ControllerBase
 {
     [HttpGet]

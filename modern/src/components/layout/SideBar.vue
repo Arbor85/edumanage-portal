@@ -81,7 +81,7 @@ onMounted(async () => {
   // Enable transition only after first placement so pill doesn't fly in on load
   await nextTick()
   pillReady.value = true
-  prefetchRoutes(authStore.isTrainer, authStore.isOrganizer)
+  prefetchRoutes(authStore.hasPermission('manage:clients'), authStore.hasPermission('manage:organization'))
 })
 
 // ── Cursor glow ───────────────────────────────────────────────────────────────
@@ -152,7 +152,7 @@ const organizerActiveIdx = computed(() => organizerItems.findIndex(item => isAct
     </nav>
 
     <!-- Coach section -->
-    <div v-if="authStore.isTrainer" class="relative z-10 mt-4">
+    <div v-if="authStore.hasPermission('manage:clients')" class="relative z-10 mt-4">
       <div class="border-t border-gray-200 dark:border-white/10 pt-4">
         <p class="px-3 mb-2 text-[10px] font-bold tracking-[0.12em] uppercase text-text-muted/80">Coach</p>
         <nav ref="coachNavEl" class="relative flex flex-col gap-1">
@@ -182,7 +182,7 @@ const organizerActiveIdx = computed(() => organizerItems.findIndex(item => isAct
     </div>
 
     <!-- Organizer section -->
-    <div v-if="authStore.isOrganizer" class="relative z-10 mt-4">
+    <div v-if="authStore.hasPermission('manage:organization')" class="relative z-10 mt-4">
       <div class="border-t border-gray-200 dark:border-white/10 pt-4">
         <p class="px-3 mb-2 text-[10px] font-bold tracking-[0.12em] uppercase text-text-muted/80">Organizer</p>
         <nav class="relative flex flex-col gap-1">

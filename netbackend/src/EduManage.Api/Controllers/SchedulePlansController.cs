@@ -9,6 +9,7 @@ namespace EduManage.Api.Controllers;
 
 [ApiController]
 [Route("api/schedule-plans")]
+[Authorize(Policy = "manage:schedule-plans")]
 public sealed class SchedulePlansController(ISender mediator, ICurrentUserService currentUserService) : ControllerBase
 {
     [HttpGet]

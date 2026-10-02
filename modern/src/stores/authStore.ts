@@ -5,31 +5,35 @@ import { getProfile } from '../services/userProfileService'
 import type { UserProfile } from '../types'
 
 export const useAuthStore = defineStore('auth', () => {
-  const { user: auth0User, isAuthenticated: auth0IsAuthenticated, isLoading: auth0IsLoading, logout: auth0Logout } = useAuth0()
+  const { user: auth0User, isAuthenticated: auth0IsAuthenticated, isLoading: auth0IsLoading, logout: auth0Logout, getAccessTokenSilently } = useAuth0()
 
   const isLoading = computed(() => auth0IsLoading.value)
   const isAuthenticated = computed(() => auth0IsAuthenticated.value)
   const user = computed(() => auth0User.value ?? null)
 
-  // Auth0 custom Action must add https://edumanage.app/roles claim to the token
-  const isTrainer = computed(() => {
-    const roles: string[] = user.value?.['https://edumanage.app/roles'] ?? []
-    return roles.includes('gym-trainer')
-  })
-
-  const isOrganizer = computed(() => {
-    const roles: string[] = user.value?.['https://edumanage.app/roles'] ?? []
-    return roles.includes('gym-organizer')
-  })
-
+  const permissions = ref<string[]>([])
   const userProfile = ref<UserProfile | null>(null)
 
-  // Fetch profile once Auth0 finishes loading and user is authenticated
+  function hasPermission(permission: string): boolean {
+    return permissions.value.includes(permission)
+  }
+
+  async function loadPermissions() {
+    try {
+      const token = await getAccessTokenSilently()
+      const payload = JSON.parse(atob(token.split('.')[1]))
+      permissions.value = payload.permissions ?? []
+    } catch {
+      permissions.value = []
+    }
+  }
+
   watch(
     () => isAuthenticated.value && !isLoading.value,
     async (ready) => {
-      if (ready && !userProfile.value) {
-        userProfile.value = await getProfile()
+      if (ready) {
+        if (!userProfile.value) userProfile.value = await getProfile()
+        await loadPermissions()
       }
     },
     { immediate: true }
@@ -41,8 +45,9 @@ export const useAuthStore = defineStore('auth', () => {
 
   function logout() {
     userProfile.value = null
+    permissions.value = []
     auth0Logout({ logoutParams: { returnTo: window.location.origin + '/login' } })
   }
 
-  return { user, isLoading, isAuthenticated, isTrainer, isOrganizer, userProfile, bootstrap, logout }
+  return { user, isLoading, isAuthenticated, permissions, hasPermission, userProfile, bootstrap, logout }
 })

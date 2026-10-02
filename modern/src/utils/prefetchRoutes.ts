@@ -1,6 +1,6 @@
 let done = false
 
-export function prefetchRoutes(isTrainer: boolean, isOrganizer: boolean) {
+export function prefetchRoutes(hasTrainerAccess: boolean, hasOrganizerAccess: boolean) {
   if (done) return
   done = true
 
@@ -12,7 +12,7 @@ export function prefetchRoutes(isTrainer: boolean, isOrganizer: boolean) {
     () => import('../pages/ProfilePage.vue'),
   ]
 
-  if (isTrainer) {
+  if (hasTrainerAccess) {
     chunks.push(
       () => import('../pages/ClientsPage.vue'),
       () => import('../pages/PlansPage.vue'),
@@ -23,7 +23,7 @@ export function prefetchRoutes(isTrainer: boolean, isOrganizer: boolean) {
     )
   }
 
-  if (isOrganizer) {
+  if (hasOrganizerAccess) {
     chunks.push(
       () => import('../pages/organizer/OrganizerDashboardPage.vue'),
       () => import('../pages/organizer/trainers/OrganizerTrainersPage.vue'),

@@ -29,6 +29,7 @@ public sealed class GymProfileController(ISender mediator, ICurrentUserService c
     }
 
     [HttpGet("client/{userId}")]
+    [Authorize(Policy = "manage:clients")]
     public Task<IReadOnlyList<UserExerciseMaxOut>> GetClientGymProfile(
         [FromRoute] string userId,
         CancellationToken cancellationToken) =>
