@@ -69,3 +69,21 @@ jobs:
 
       - name: Restart Azure Web App
         run: az webapp restart --name edumanage-api --resource-group edumanage-rg
+
+      - name: Wait for health check
+        run: |
+          echo "Waiting for app to start..."
+          for i in $(seq 1 20); do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://edumanage-api.azurewebsites.net/health)
+            echo "Attempt $i: HTTP $STATUS"
+            if [ "$STATUS" = "200" ]; then
+              echo "App is healthy!"
+              exit 0
+            fi
+            sleep 15
+          done
+          echo "Health check failed after 5 minutes"
+          exit 1
+
+      - name: Restart Azure Web App
+        run: az webapp restart --name edumanage-api --resource-group edumanage-rg
