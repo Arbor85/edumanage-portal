@@ -66,3 +66,6 @@ jobs:
           app-name: 'edumanage-api'
           slot-name: 'Production'
           package: ./publish
+
+      - name: Restart Azure Web App
+        run: az webapp restart --name edumanage-api --resource-group edumanage-rg
