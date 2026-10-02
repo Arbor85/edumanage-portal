@@ -110,7 +110,7 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-await app.Services.SeedExercisesFromJsonAsync();
+// await app.Services.SeedExercisesFromJsonAsync();
 
 app.UseSwagger(options =>
 {
