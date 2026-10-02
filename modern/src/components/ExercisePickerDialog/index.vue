@@ -162,15 +162,16 @@ function exerciseImageSrc(ex: ExcerciseOut): string {
                 : 'hover:bg-gray-50 dark:hover:bg-white/5'"
               @click="toggleSelection(ex.id)"
             >
-              <!-- Star button -->
-              <button
-                type="button"
+              <!-- Star toggle -->
+              <span
+                role="button"
+                tabindex="-1"
                 class="flex-shrink-0 p-0.5 rounded transition-colors hover:text-amber-500"
                 :class="ex.isDirectFavourite ? 'text-amber-400' : 'text-gray-300 dark:text-white/20'"
                 @click.stop="toggleDirectFavourite(ex.id)"
               >
                 <Star class="w-3.5 h-3.5" :fill="ex.isDirectFavourite ? 'currentColor' : 'none'" />
-              </button>
+              </span>
               <img
                 :src="exerciseImageSrc(ex)"
                 :alt="ex.name ?? ''"
@@ -198,15 +199,16 @@ function exerciseImageSrc(ex: ExcerciseOut): string {
                 : 'hover:bg-gray-50 dark:hover:bg-white/5'"
               @click="toggleSelection(ex.id)"
             >
-              <!-- Star button -->
-              <button
-                type="button"
+              <!-- Star toggle -->
+              <span
+                role="button"
+                tabindex="-1"
                 class="flex-shrink-0 p-0.5 rounded transition-colors hover:text-amber-500"
                 :class="ex.isDirectFavourite ? 'text-amber-400' : 'text-gray-300 dark:text-white/20'"
                 @click.stop="toggleDirectFavourite(ex.id)"
               >
                 <Star class="w-3.5 h-3.5" :fill="ex.isDirectFavourite ? 'currentColor' : 'none'" />
-              </button>
+              </span>
               <img
                 :src="exerciseImageSrc(ex)"
                 :alt="ex.name ?? ''"
