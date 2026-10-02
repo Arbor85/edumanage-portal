@@ -38,7 +38,7 @@ builder.Services
 		options.Authority = auth0Authority;
 		options.Audience = auth0Audience;
 		options.MapInboundClaims = false;
-		options.TokenValidationParameters.ValidTypes = ["JWT", "at+jwt"];
+		options.TokenValidationParameters.ValidTypes = ["JWT", "at+JWT", "at+jwt"];
 		options.TokenValidationParameters.NameClaimType = "sub";
 		options.TokenValidationParameters.ValidateLifetime = true;
 		options.TokenValidationParameters.ClockSkew = TimeSpan.Zero;
