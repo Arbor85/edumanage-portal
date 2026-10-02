@@ -89,6 +89,3 @@ jobs:
           done
           echo "Health check failed after 3 minutes"
           exit 1
-
-      - name: Restart Azure Web App
-        run: az webapp restart --name edumanage-api --resource-group edumanage-rg
