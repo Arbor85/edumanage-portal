@@ -10,6 +10,7 @@ const router = createRouter({
       path: '/login',
       name: 'Login',
       component: () => import('../pages/LoginPage.vue'),
+      meta: { redirectIfAuthenticated: true },
     },
     {
       path: '/auth/callback',
@@ -185,8 +186,6 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to) => {
-  if (!to.meta.requiresAuth) return true
-
   const { isAuthenticated, isLoading } = useAuth0()
 
   if (isLoading.value) {
@@ -199,6 +198,12 @@ router.beforeEach(async (to) => {
       }, 50)
     })
   }
+
+  if (to.meta.redirectIfAuthenticated && isAuthenticated.value) {
+    return { name: 'Profile' }
+  }
+
+  if (!to.meta.requiresAuth) return true
 
   if (!isAuthenticated.value) {
     return { name: 'Login', query: { redirect: to.fullPath } }
