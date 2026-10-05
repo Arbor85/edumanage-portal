@@ -23,12 +23,13 @@ function isActive(to: string) {
 }
 
 const clientItems: { to: string; icon: Component; label: string }[] = [
-  { to: '/',            icon: Home,       label: 'Today' },
-  { to: '/routines',    icon: List,       label: 'Routines' },
-  { to: '/gym-profile', icon: Dumbbell,   label: 'Gym Profile' },
-  { to: '/progress',    icon: TrendingUp, label: 'Progress' },
-  { to: '/explore',     icon: Compass,    label: 'Explore' },
-  { to: '/profile',     icon: User,       label: 'Profile' },
+  { to: '/',            icon: Home,          label: 'Today' },
+  { to: '/routines',    icon: List,          label: 'Routines' },
+  { to: '/plans',       icon: ClipboardList, label: 'Plans' },
+  { to: '/gym-profile', icon: Dumbbell,      label: 'Gym Profile' },
+  { to: '/progress',    icon: TrendingUp,    label: 'Progress' },
+  { to: '/explore',     icon: Compass,       label: 'Explore' },
+  { to: '/profile',     icon: User,          label: 'Profile' },
 ]
 
 const allCoachItems: { to: string; icon: Component; label: string; permission: string }[] = [
