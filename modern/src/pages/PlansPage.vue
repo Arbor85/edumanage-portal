@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+
+const props = defineProps<{ readonly?: boolean }>()
 import { usePageTitle } from '../composables/usePageTitle'
 usePageTitle('Plans')
 import type { PlanOut } from '../types'
@@ -87,8 +89,11 @@ async function handleDelete() {
 
 <template>
   <AppLayout>
-    <PageHeader title="Training Plans" subtitle="Design and manage client training plans.">
-      <BaseButton variant="primary" @click="openCreate">+ New Plan</BaseButton>
+    <PageHeader
+      title="Training Plans"
+      :subtitle="props.readonly ? 'Your training plans from your coach.' : 'Design and manage client training plans.'"
+    >
+      <BaseButton v-if="!props.readonly" variant="primary" @click="openCreate">+ New Plan</BaseButton>
     </PageHeader>
 
     <div class="mb-4 flex items-center gap-3">
@@ -113,6 +118,7 @@ async function handleDelete() {
         key="list"
         :plans="filtered"
         :loading="planStore.isLoading"
+        :readonly="props.readonly"
         @edit="openEdit"
       />
       <PlanKanban
@@ -120,12 +126,14 @@ async function handleDelete() {
         key="kanban"
         :plans="filtered"
         :loading="planStore.isLoading"
+        :readonly="props.readonly"
         @edit="openEdit"
         @delete="deleteTarget = $event"
       />
     </Transition>
 
     <PlanFormModal
+      v-if="!props.readonly"
       :open="isCreateOpen || editTarget !== null"
       :plan="editTarget"
       @close="router.replace({ query: {} })"

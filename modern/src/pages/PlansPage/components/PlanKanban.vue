@@ -5,7 +5,7 @@ import { useToast } from '../../../composables/useToast'
 import SkeletonBlock from '../../../components/SkeletonBlock.vue'
 import PlanKanbanCard from './PlanKanbanCard.vue'
 
-const props = defineProps<{ plans: PlanOut[]; loading: boolean }>()
+const props = defineProps<{ plans: PlanOut[]; loading: boolean; readonly?: boolean }>()
 const emit = defineEmits<{ edit: [p: PlanOut]; delete: [p: PlanOut] }>()
 
 const planStore = usePlanStore()
@@ -52,10 +52,10 @@ async function onDrop(e: DragEvent, targetStatus: string) {
         <div
           v-for="plan in byStatus(col.key)"
           :key="plan.id ?? ''"
-          draggable="true"
-          @dragstart="$event.dataTransfer?.setData('planId', plan.id ?? '')"
+          :draggable="!props.readonly"
+          @dragstart="!props.readonly && $event.dataTransfer?.setData('planId', plan.id ?? '')"
         >
-          <PlanKanbanCard :plan="plan" @edit="emit('edit', plan)" @delete="emit('delete', plan)" />
+          <PlanKanbanCard :plan="plan" :readonly="props.readonly" @edit="emit('edit', plan)" @delete="emit('delete', plan)" />
         </div>
       </div>
     </div>

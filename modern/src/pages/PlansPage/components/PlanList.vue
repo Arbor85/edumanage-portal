@@ -12,7 +12,7 @@ import PaginationBar from '../../../components/PaginationBar.vue'
 import ConfirmDialog from '../../../components/ConfirmDialog.vue'
 import { Pencil, Trash2, Calendar } from '@lucide/vue'
 
-const props = defineProps<{ plans: PlanOut[]; loading: boolean }>()
+const props = defineProps<{ plans: PlanOut[]; loading: boolean; readonly?: boolean }>()
 const emit = defineEmits<{ edit: [p: PlanOut] }>()
 
 const planStore = usePlanStore()
@@ -77,7 +77,7 @@ async function changeStatus(plan: PlanOut, status: string) {
           <p v-if="plan.note" class="text-xs text-text-secondary mt-0.5 truncate max-w-screen-sm">{{ plan.note }}</p>
           <p class="text-xs text-text-secondary mt-0.5">Client: {{ clientName(plan.clientId) }} · {{ plan.workouts?.length ?? 0 }} workouts</p>
         </div>
-        <div class="flex gap-1.5 flex-wrap">
+        <div v-if="!props.readonly" class="flex gap-1.5 flex-wrap">
           <BaseButton size="sm" variant="ghost" @click="changeStatus(plan, plan.status === 'active' ? 'inactive' : 'active')">
             {{ plan.status === 'active' ? 'Deactivate' : 'Activate' }}
           </BaseButton>

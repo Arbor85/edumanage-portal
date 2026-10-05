@@ -7,7 +7,7 @@ namespace EduManage.Api.Controllers;
 
 [ApiController]
 [Route("api/plans")]
-[Authorize(Policy = "manage:clients")]
+[Authorize]
 public sealed class PlansController(ISender mediator, ICurrentUserService currentUserService) : ControllerBase
 {
     [HttpGet]
@@ -15,6 +15,7 @@ public sealed class PlansController(ISender mediator, ICurrentUserService curren
         mediator.Send(new ListPlansQuery(currentUserService.GetCurrentUserId()!), cancellationToken);
 
     [HttpPost]
+    [Authorize(Policy = "manage:clients")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     public async Task<ActionResult<PlanOut>> AddPlan([FromBody] PlanCreate request, CancellationToken cancellationToken)
     {
@@ -51,6 +52,7 @@ public sealed class PlansController(ISender mediator, ICurrentUserService curren
     }
 
     [HttpPut("{plan_id}")]
+    [Authorize(Policy = "manage:clients")]
     public async Task<ActionResult<PlanOut>> UpdatePlan([FromRoute(Name = "plan_id")] string planId, [FromBody] PlanUpdate request, CancellationToken cancellationToken)
     {
         try
@@ -68,6 +70,7 @@ public sealed class PlansController(ISender mediator, ICurrentUserService curren
     }
 
     [HttpDelete("{plan_id}")]
+    [Authorize(Policy = "manage:clients")]
     public async Task<ActionResult<Dictionary<string, string>>> DeletePlan([FromRoute(Name = "plan_id")] string planId, CancellationToken cancellationToken)
     {
         try
@@ -85,6 +88,7 @@ public sealed class PlansController(ISender mediator, ICurrentUserService curren
     }
 
     [HttpPatch("{plan_id}/status")]
+    [Authorize(Policy = "manage:clients")]
     public async Task<ActionResult<PlanOut>> UpdatePlanStatus([FromRoute(Name = "plan_id")] string planId, [FromBody] PlanStatusUpdate request, CancellationToken cancellationToken)
     {
         try

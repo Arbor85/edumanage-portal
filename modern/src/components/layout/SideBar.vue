@@ -6,7 +6,7 @@ import { prefetchRoutes } from '../../utils/prefetchRoutes'
 import {
   Home, TrendingUp, Compass, User,
   Users, ClipboardList, Calendar, BookOpen, Package, LogOut,
-  Building2, LayoutDashboard, CalendarDays, KeyRound, List, Dumbbell,FileText,
+  Building2, LayoutDashboard, CalendarDays, KeyRound, List, Dumbbell, FileText,
 } from '@lucide/vue'
 import DarkModeToggle from '../DarkModeToggle.vue'
 import type { Component } from 'vue'
@@ -15,12 +15,13 @@ const route = useRoute()
 const authStore = useAuthStore()
 
 const clientItems: { to: string; icon: Component; label: string }[] = [
-  { to: '/',             icon: Home,       label: 'Today' },
-  { to: '/routines',     icon: List,       label: 'Routines' },
-  { to: '/gym-profile',  icon: Dumbbell,   label: 'Gym Profile' },
-  { to: '/progress',     icon: TrendingUp, label: 'Progress' },
-  { to: '/explore',      icon: Compass,    label: 'Explore' },
-  { to: '/profile',      icon: User,       label: 'Profile' },
+  { to: '/',             icon: Home,          label: 'Today' },
+  { to: '/routines',     icon: List,          label: 'Routines' },
+  { to: '/plans',        icon: ClipboardList, label: 'Plans' },
+  { to: '/gym-profile',  icon: Dumbbell,      label: 'Gym Profile' },
+  { to: '/progress',     icon: TrendingUp,    label: 'Progress' },
+  { to: '/explore',      icon: Compass,       label: 'Explore' },
+  { to: '/profile',      icon: User,          label: 'Profile' },
 ]
 
 const allCoachItems: { to: string; icon: Component; label: string; permission: string }[] = [

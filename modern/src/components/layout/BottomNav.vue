@@ -2,7 +2,7 @@
 import { onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAuthStore } from '../../stores/authStore'
-import { Home, List, TrendingUp, Compass, User } from '@lucide/vue'
+import { Home, List, ClipboardList, TrendingUp, Compass, User } from '@lucide/vue'
 import type { Component } from 'vue'
 import { prefetchRoutes } from '../../utils/prefetchRoutes'
 
@@ -12,11 +12,12 @@ const authStore = useAuthStore()
 onMounted(() => prefetchRoutes(authStore.hasPermission('manage:clients'), authStore.hasPermission('manage:organization')))
 
 const items: { to: string; icon: Component; label: string }[] = [
-  { to: '/',          icon: Home,       label: 'Today' },
-  { to: '/routines',  icon: List,       label: 'Routines' },
-  { to: '/progress',  icon: TrendingUp, label: 'Progress' },
-  { to: '/explore',   icon: Compass,    label: 'Explore' },
-  { to: '/profile',   icon: User,       label: 'Profile' },
+  { to: '/',          icon: Home,          label: 'Today' },
+  { to: '/routines',  icon: List,          label: 'Routines' },
+  { to: '/plans',     icon: ClipboardList, label: 'Plans' },
+  { to: '/progress',  icon: TrendingUp,    label: 'Progress' },
+  { to: '/explore',   icon: Compass,       label: 'Explore' },
+  { to: '/profile',   icon: User,          label: 'Profile' },
 ]
 
 function isActive(to: string) {
