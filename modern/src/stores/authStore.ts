@@ -13,6 +13,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   const permissions = ref<string[]>([])
   const userProfile = ref<UserProfile | null>(null)
+  const appReady = ref(false)
 
   function hasPermission(permission: string): boolean {
     return permissions.value.includes(permission)
@@ -29,12 +30,14 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   watch(
-    () => isAuthenticated.value && !isLoading.value,
-    async (ready) => {
-      if (ready) {
+    [isAuthenticated, isLoading],
+    async ([authenticated, loading]) => {
+      if (loading) return
+      if (authenticated) {
         if (!userProfile.value) userProfile.value = await getProfile()
         await loadPermissions()
       }
+      appReady.value = true
     },
     { immediate: true }
   )
@@ -49,5 +52,5 @@ export const useAuthStore = defineStore('auth', () => {
     auth0Logout({ logoutParams: { returnTo: window.location.origin + '/login' } })
   }
 
-  return { user, isLoading, isAuthenticated, permissions, hasPermission, userProfile, bootstrap, logout }
+  return { user, isLoading, isAuthenticated, permissions, hasPermission, userProfile, appReady, bootstrap, logout }
 })

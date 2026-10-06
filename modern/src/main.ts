@@ -26,7 +26,10 @@ app.use(
 )
 app.use(router)
 
-initApiAuth(() => (app.config.globalProperties.$auth0 as ReturnType<typeof createAuth0>).getAccessTokenSilently())
+initApiAuth(
+  () => (app.config.globalProperties.$auth0 as ReturnType<typeof createAuth0>).getAccessTokenSilently(),
+  () => (app.config.globalProperties.$auth0 as ReturnType<typeof createAuth0>).logout({ logoutParams: { returnTo: window.location.origin + '/login' } }),
+)
 
 const workoutStore = useWorkoutStore()
 workoutStore.restoreFromLocalStorage()

@@ -1,9 +1,11 @@
 import axios from 'axios'
 
 let _getToken: (() => Promise<string>) | null = null
+let _onUnauthorized: (() => void) | null = null
 
-export function initApiAuth(getToken: () => Promise<string>) {
+export function initApiAuth(getToken: () => Promise<string>, onUnauthorized?: () => void) {
   _getToken = getToken
+  if (onUnauthorized) _onUnauthorized = onUnauthorized
 }
 
 const apiClient = axios.create({
@@ -26,7 +28,8 @@ apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      window.location.href = '/login'
+      if (_onUnauthorized) _onUnauthorized()
+      else window.location.href = '/login'
     }
     return Promise.reject(error.response?.data ?? error)
   }

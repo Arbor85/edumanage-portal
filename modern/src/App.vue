@@ -6,20 +6,26 @@ import MobileDrawer from './components/layout/MobileDrawer.vue'
 import NotificationToast from './components/NotificationToast.vue'
 import ActiveWorkoutPill from './components/ActiveWorkoutPill.vue'
 import OfflineBanner from './components/OfflineBanner.vue'
+import BaseSpinner from './components/BaseSpinner.vue'
 import { Menu } from '@lucide/vue'
 import { useRouteTransition } from './composables/useRouteTransition'
 import { useOfflineSync } from './composables/useOfflineSync'
 import { useNavDrawer } from './composables/useNavDrawer'
+import { useAuthStore } from './stores/authStore'
 
 const { transitionName } = useRouteTransition()
 const { start } = useOfflineSync()
 const { toggle } = useNavDrawer()
+const authStore = useAuthStore()
 
 onMounted(() => { start() })
 </script>
 
 <template>
-  <RouterView v-slot="{ Component, route: r }">
+  <div v-if="!authStore.appReady" class="fixed inset-0 flex items-center justify-center bg-surface-muted dark:bg-surface-page">
+    <BaseSpinner size="lg" />
+  </div>
+  <RouterView v-else v-slot="{ Component, route: r }">
     <template v-if="r.meta.requiresAuth">
       <div class="flex min-h-screen bg-surface-muted dark:bg-surface-page">
         <SideBar />

@@ -192,12 +192,13 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to) => {
-  const { isAuthenticated, isLoading } = useAuth0()
+  const { isAuthenticated } = useAuth0()
+  const authStore = useAuthStore()
 
-  if (isLoading.value) {
+  if (!authStore.appReady) {
     await new Promise<void>((resolve) => {
       const stop = setInterval(() => {
-        if (!isLoading.value) {
+        if (authStore.appReady) {
           clearInterval(stop)
           resolve()
         }
@@ -214,8 +215,6 @@ router.beforeEach(async (to) => {
   if (!isAuthenticated.value) {
     return { name: 'Login', query: { redirect: to.fullPath } }
   }
-
-  const authStore = useAuthStore()
 
   if (to.meta.requiresPermission && !authStore.hasPermission(to.meta.requiresPermission as string)) {
     return { path: '/' }
