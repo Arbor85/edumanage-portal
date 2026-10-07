@@ -10,10 +10,14 @@ import PageHeader from '../components/layout/PageHeader.vue'
 import ListSearchBar from '../components/ListSearchBar.vue'
 import BaseButton from '../components/BaseButton.vue'
 import CourseList from './CoursesPage/components/CourseList.vue'
+import CourseCalendarView from './CoursesPage/components/CourseCalendarView.vue'
 import CourseFormModal from './CoursesPage/components/CourseFormModal.vue'
 import ConfirmDialog from '../components/ConfirmDialog.vue'
 import { useToast } from '../composables/useToast'
-import { Plus } from '@lucide/vue'
+import { Plus, List, CalendarDays } from '@lucide/vue'
+
+type ViewMode = 'list' | 'calendar'
+const viewMode = ref<ViewMode>('list')
 
 const route = useRoute()
 const router = useRouter()
@@ -83,15 +87,33 @@ async function handleDelete() {
       </BaseButton>
     </PageHeader>
 
-    <div class="mb-5">
-      <ListSearchBar v-model="search" placeholder="Search courses..." :loading="courseStore.isLoading" @refresh="courseStore.fetch()" />
+    <div class="mb-5 flex items-center gap-3">
+      <ListSearchBar v-model="search" placeholder="Search courses..." :loading="courseStore.isLoading" @refresh="courseStore.fetch()" class="flex-1" />
+      <div class="flex bg-gray-100 dark:bg-white/5 rounded-xl p-1 gap-1 flex-shrink-0">
+        <button
+          class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
+          :class="viewMode === 'list'
+            ? 'bg-white dark:bg-white/15 text-text-primary dark:text-white shadow-sm'
+            : 'text-text-secondary hover:text-text-primary dark:hover:text-white'"
+          @click="viewMode = 'list'"
+        ><List class="w-3.5 h-3.5" /> List</button>
+        <button
+          class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
+          :class="viewMode === 'calendar'
+            ? 'bg-white dark:bg-white/15 text-text-primary dark:text-white shadow-sm'
+            : 'text-text-secondary hover:text-text-primary dark:hover:text-white'"
+          @click="viewMode = 'calendar'"
+        ><CalendarDays class="w-3.5 h-3.5" /> Calendar</button>
+      </div>
     </div>
 
     <CourseList
+      v-if="viewMode === 'list'"
       :courses="filtered"
       :loading="courseStore.isLoading"
       @edit="openEdit"
     />
+    <CourseCalendarView v-else />
 
     <CourseFormModal
       :open="isCreateOpen || editTarget !== null"

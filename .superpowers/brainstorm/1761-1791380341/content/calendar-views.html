@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Course Calendar Mockup</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, -apple-system, sans-serif; background: #0f0f17; color: #e0e0f0; padding: 24px; }
+
+  h2 { font-size: 18px; font-weight: 600; margin-bottom: 4px; color: #f0f0ff; }
+  .subtitle { font-size: 13px; color: #888; margin-bottom: 24px; }
+
+  /* Page chrome */
+  .page { background: #16161f; border-radius: 16px; overflow: hidden; border: 1px solid #2a2a3a; margin-bottom: 40px; }
+  .page-header { padding: 16px 20px; border-bottom: 1px solid #2a2a3a; display: flex; align-items: center; justify-content: space-between; }
+  .page-title { font-size: 20px; font-weight: 700; color: #f0f0ff; }
+  .toggle-group { display: flex; background: #0f0f17; border-radius: 8px; padding: 3px; gap: 2px; }
+  .toggle-btn { padding: 6px 14px; border-radius: 6px; font-size: 13px; font-weight: 500; color: #888; cursor: pointer; border: none; background: transparent; }
+  .toggle-btn.active { background: #6c63ff; color: white; }
+
+  /* Calendar header */
+  .cal-header { padding: 12px 20px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #1e1e2e; }
+  .nav-btn { width: 28px; height: 28px; border-radius: 6px; background: #1e1e2e; border: none; color: #ccc; font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .cal-month-label { font-size: 15px; font-weight: 600; color: #e0e0f0; }
+  .today-btn { margin-left: auto; padding: 5px 12px; border-radius: 6px; background: #1e1e2e; border: none; color: #ccc; font-size: 12px; cursor: pointer; }
+  .view-toggle { display: flex; background: #1e1e2e; border-radius: 6px; padding: 2px; gap: 2px; margin-left: 8px; }
+  .view-btn { padding: 4px 10px; border-radius: 5px; font-size: 12px; font-weight: 500; color: #888; border: none; background: transparent; cursor: pointer; }
+  .view-btn.active { background: #2a2a3f; color: #c0c0ff; }
+
+  /* ── MONTH VIEW ── */
+  .month-grid { display: grid; grid-template-columns: repeat(7, 1fr); }
+  .day-header { padding: 8px 0; text-align: center; font-size: 11px; font-weight: 600; color: #666; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #1e1e2e; }
+  .day-cell { min-height: 90px; padding: 6px; border-right: 1px solid #1e1e2e; border-bottom: 1px solid #1e1e2e; position: relative; }
+  .day-cell:nth-child(7n) { border-right: none; }
+  .day-num { font-size: 12px; font-weight: 500; color: #666; margin-bottom: 4px; }
+  .day-num.today { background: #6c63ff; color: white; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; }
+  .day-num.other-month { color: #333; }
+  .chip { font-size: 10px; font-weight: 500; padding: 2px 6px; border-radius: 4px; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
+  .chip:hover { opacity: 0.85; filter: brightness(1.1); }
+  .more { font-size: 10px; color: #666; padding: 1px 4px; cursor: pointer; }
+  .more:hover { color: #aaa; }
+
+  /* Course colors */
+  .c1 { background: #7c3aed22; color: #a78bfa; border-left: 2px solid #7c3aed; }
+  .c2 { background: #0891b222; color: #67e8f9; border-left: 2px solid #0891b2; }
+  .c3 { background: #16a34a22; color: #86efac; border-left: 2px solid #16a34a; }
+  .c4 { background: #dc262622; color: #fca5a5; border-left: 2px solid #dc2626; }
+  .c5 { background: #d9770622; color: #fdba74; border-left: 2px solid #d97706; }
+
+  /* ── WEEK VIEW ── */
+  .week-grid-wrap { overflow-x: auto; }
+  .week-grid { display: grid; grid-template-columns: 48px repeat(7, 1fr); min-width: 600px; }
+  .wg-corner { border-right: 1px solid #1e1e2e; border-bottom: 1px solid #1e1e2e; }
+  .wg-day-head { padding: 10px 4px; text-align: center; border-right: 1px solid #1e1e2e; border-bottom: 1px solid #1e1e2e; }
+  .wg-day-name { font-size: 11px; color: #666; text-transform: uppercase; font-weight: 600; letter-spacing: 0.05em; }
+  .wg-day-num { font-size: 18px; font-weight: 700; color: #e0e0f0; margin-top: 2px; }
+  .wg-day-num.today { color: #6c63ff; }
+  .wg-time { font-size: 10px; color: #444; text-align: right; padding-right: 6px; padding-top: 2px; border-right: 1px solid #1e1e2e; height: 40px; }
+  .wg-cell { border-right: 1px solid #1e1e2e; border-bottom: 1px solid #12121a; height: 40px; position: relative; }
+  .wg-cell:nth-child(7n+1) { border-right: none; }
+  .wg-block { position: absolute; left: 2px; right: 2px; border-radius: 5px; padding: 3px 5px; font-size: 10px; font-weight: 600; overflow: hidden; cursor: pointer; z-index: 1; }
+  .wg-block:hover { filter: brightness(1.15); }
+  .wg-block .bname { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .wg-block .btime { opacity: 0.75; font-weight: 400; font-size: 9px; }
+
+  /* Legend */
+  .legend { display: flex; gap: 16px; padding: 12px 20px; border-top: 1px solid #1e1e2e; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #888; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 3px; }
+
+  .section-label { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #555; margin-bottom: 10px; }
+</style>
+</head>
+<body>
+
+<h2>Course Calendar — Layout Mockup</h2>
+<p class="subtitle">Two views to validate. The toggle switches between them; month/week sub-toggle appears inside the calendar header.</p>
+
+<!-- ═══════════════ MONTH VIEW ═══════════════ -->
+<p class="section-label" style="margin-top:8px;">Month View</p>
+<div class="page">
+  <div class="page-header">
+    <span class="page-title">Courses</span>
+    <div class="toggle-group">
+      <button class="toggle-btn">List</button>
+      <button class="toggle-btn">Kanban</button>
+      <button class="toggle-btn active">Calendar</button>
+    </div>
+  </div>
+
+  <div class="cal-header">
+    <button class="nav-btn">‹</button>
+    <button class="nav-btn">›</button>
+    <span class="cal-month-label">October 2026</span>
+    <button class="today-btn">Today</button>
+    <div class="view-toggle">
+      <button class="view-btn active">Month</button>
+      <button class="view-btn">Week</button>
+    </div>
+  </div>
+
+  <div class="month-grid">
+    <div class="day-header">Mon</div><div class="day-header">Tue</div><div class="day-header">Wed</div>
+    <div class="day-header">Thu</div><div class="day-header">Fri</div><div class="day-header">Sat</div><div class="day-header">Sun</div>
+
+    <!-- Row 1: Sep 28 – Oct 4 -->
+    <div class="day-cell"><div class="day-num other-month">28</div></div>
+    <div class="day-cell"><div class="day-num other-month">29</div></div>
+    <div class="day-cell"><div class="day-num other-month">30</div></div>
+    <div class="day-cell"><div class="day-num">1</div><div class="chip c1">Photography · 09:00</div><div class="chip c3">Yoga · 18:00</div></div>
+    <div class="day-cell"><div class="day-num">2</div><div class="chip c2">Cooking · 10:00</div></div>
+    <div class="day-cell"><div class="day-num">3</div></div>
+    <div class="day-cell"><div class="day-num">4</div></div>
+
+    <!-- Row 2 -->
+    <div class="day-cell"><div class="day-num">5</div><div class="chip c4">Drawing · 14:00</div></div>
+    <div class="day-cell"><div class="day-num">6</div><div class="chip c1">Photography · 09:00</div></div>
+    <div class="day-cell"><div class="day-num">7</div><div class="chip c3">Yoga · 18:00</div><div class="chip c5">Piano · 11:00</div></div>
+    <div class="day-cell"><div class="day-num today"><span>8</span></div><div class="chip c1">Photography · 09:00</div><div class="chip c3">Yoga · 18:00</div></div>
+    <div class="day-cell"><div class="day-num">9</div><div class="chip c2">Cooking · 10:00</div></div>
+    <div class="day-cell"><div class="day-num">10</div></div>
+    <div class="day-cell"><div class="day-num">11</div></div>
+
+    <!-- Row 3 -->
+    <div class="day-cell"><div class="day-num">12</div><div class="chip c4">Drawing · 14:00</div></div>
+    <div class="day-cell"><div class="day-num">13</div><div class="chip c1">Photography · 09:00</div></div>
+    <div class="day-cell"><div class="day-num">14</div><div class="chip c3">Yoga · 18:00</div><div class="chip c5">Piano · 11:00</div></div>
+    <div class="day-cell"><div class="day-num">15</div><div class="chip c1">Photography · 09:00</div><div class="chip c3">Yoga · 18:00</div><div class="more">+1 more</div></div>
+    <div class="day-cell"><div class="day-num">16</div><div class="chip c2">Cooking · 10:00</div></div>
+    <div class="day-cell"><div class="day-num">17</div></div>
+    <div class="day-cell"><div class="day-num">18</div></div>
+
+    <!-- Row 4 -->
+    <div class="day-cell"><div class="day-num">19</div><div class="chip c4">Drawing · 14:00</div></div>
+    <div class="day-cell"><div class="day-num">20</div><div class="chip c1">Photography · 09:00</div></div>
+    <div class="day-cell"><div class="day-num">21</div><div class="chip c3">Yoga · 18:00</div></div>
+    <div class="day-cell"><div class="day-num">22</div><div class="chip c1">Photography · 09:00</div></div>
+    <div class="day-cell"><div class="day-num">23</div><div class="chip c2">Cooking · 10:00</div></div>
+    <div class="day-cell"><div class="day-num">24</div></div>
+    <div class="day-cell"><div class="day-num">25</div></div>
+
+    <!-- Row 5 -->
+    <div class="day-cell"><div class="day-num">26</div></div>
+    <div class="day-cell"><div class="day-num">27</div><div class="chip c1">Photography · 09:00</div></div>
+    <div class="day-cell"><div class="day-num">28</div><div class="chip c3">Yoga · 18:00</div></div>
+    <div class="day-cell"><div class="day-num">29</div><div class="chip c1">Photography · 09:00</div></div>
+    <div class="day-cell"><div class="day-num">30</div><div class="chip c2">Cooking · 10:00</div></div>
+    <div class="day-cell"><div class="day-num">31</div></div>
+    <div class="day-cell"><div class="day-num other-month">1</div></div>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#7c3aed"></div>Photography</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#0891b2"></div>Cooking</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#16a34a"></div>Yoga</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#dc2626"></div>Drawing</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#d97706"></div>Piano</div>
+  </div>
+</div>
+
+<!-- ═══════════════ WEEK VIEW ═══════════════ -->
+<p class="section-label">Week View</p>
+<div class="page">
+  <div class="page-header">
+    <span class="page-title">Courses</span>
+    <div class="toggle-group">
+      <button class="toggle-btn">List</button>
+      <button class="toggle-btn">Kanban</button>
+      <button class="toggle-btn active">Calendar</button>
+    </div>
+  </div>
+
+  <div class="cal-header">
+    <button class="nav-btn">‹</button>
+    <button class="nav-btn">›</button>
+    <span class="cal-month-label">6 – 12 Oct 2026</span>
+    <button class="today-btn">Today</button>
+    <div class="view-toggle">
+      <button class="view-btn">Month</button>
+      <button class="view-btn active">Week</button>
+    </div>
+  </div>
+
+  <div class="week-grid-wrap">
+    <div class="week-grid">
+      <!-- Header row -->
+      <div class="wg-corner" style="border-bottom:1px solid #1e1e2e;height:56px"></div>
+      <div class="wg-day-head"><div class="wg-day-name">Mon</div><div class="wg-day-num">6</div></div>
+      <div class="wg-day-head"><div class="wg-day-name">Tue</div><div class="wg-day-num">7</div></div>
+      <div class="wg-day-head"><div class="wg-day-name">Wed</div><div class="wg-day-num today">8</div></div>
+      <div class="wg-day-head"><div class="wg-day-name">Thu</div><div class="wg-day-num">9</div></div>
+      <div class="wg-day-head"><div class="wg-day-name">Fri</div><div class="wg-day-num">10</div></div>
+      <div class="wg-day-head"><div class="wg-day-name">Sat</div><div class="wg-day-num">11</div></div>
+      <div class="wg-day-head"><div class="wg-day-name">Sun</div><div class="wg-day-num">12</div></div>
+
+      <!-- 08:00 -->
+      <div class="wg-time">08:00</div>
+      <div class="wg-cell"></div><div class="wg-cell"></div><div class="wg-cell"></div><div class="wg-cell"></div><div class="wg-cell"></div><div class="wg-cell"></div><div class="wg-cell"></div>
+
+      <!-- 09:00 — Photography Mon/Tue/Thu (2h = 80px tall) -->
+      <div class="wg-time">09:00</div>
+      <div class="wg-cell" style="position:relative">
+        <div class="wg-block c1" style="top:0;height:80px;background:#7c3aed33;color:#a78bfa;border-left:3px solid #7c3aed">
+          <div class="bname">Photography</div><div class="btime">09:00 – 11:00</div>
+        </div>
+      </div>
+      <div class="wg-cell" style="position:relative">
+        <div class="wg-block c1" style="top:0;height:80px;background:#7c3aed33;color:#a78bfa;border-left:3px solid #7c3aed">
+          <div class="bname">Photography</div><div class="btime">09:00 – 11:00</div>
+        </div>
+      </div>
+      <div class="wg-cell"></div>
+      <div class="wg-cell" style="position:relative">
+        <div class="wg-block c1" style="top:0;height:80px;background:#7c3aed33;color:#a78bfa;border-left:3px solid #7c3aed">
+          <div class="bname">Photography</div><div class="btime">09:00 – 11:00</div>
+        </div>
+      </div>
+      <div class="wg-cell"></div><div class="wg-cell"></div><div class="wg-cell"></div>
+
+      <!-- 10:00 — Cooking Fri (1h = 40px) -->
+      <div class="wg-time">10:00</div>
+      <div class="wg-cell"></div><div class="wg-cell"></div><div class="wg-cell"></div><div class="wg-cell"></div>
+      <div class="wg-cell" style="position:relative">
+        <div class="wg-block c2" style="top:0;height:40px;background:#0891b233;color:#67e8f9;border-left:3px solid #0891b2">
+          <div class="bname">Cooking</div><div class="btime">10:00 – 11:00</div>
+        </div>
+      </div>
+      <div class="wg-cell"></div><div class="wg-cell"></div>
+
+      <!-- 11:00 — Piano Wed -->
+      <div class="wg-time">11:00</div>
+      <div class="wg-cell"></div><div class="wg-cell"></div>
+      <div class="wg-cell" style="position:relative">
+        <div class="wg-block c5" style="top:0;height:40px;background:#d9770633;color:#fdba74;border-left:3px solid #d97706">
+          <div class="bname">Piano</div><div class="btime">11:00 – 12:00</div>
+        </div>
+      </div>
+      <div class="wg-cell"></div><div class="wg-cell"></div><div class="wg-cell"></div><div class="wg-cell"></div>
+
+      <!-- 12:00 -->
+      <div class="wg-time">12:00</div>
+      <div class="wg-cell"></div><div class="wg-cell"></div><div class="wg-cell"></div><div class="wg-cell"></div><div class="wg-cell"></div><div class="wg-cell"></div><div class="wg-cell"></div>
+
+      <!-- 13:00 -->
+      <div class="wg-time">13:00</div>
+      <div class="wg-cell"></div><div class="wg-cell"></div><div class="wg-cell"></div><div class="wg-cell"></div><div class="wg-cell"></div><div class="wg-cell"></div><div class="wg-cell"></div>
+
+      <!-- 14:00 — Drawing Mon (90 min = 60px) -->
+      <div class="wg-time">14:00</div>
+      <div class="wg-cell" style="position:relative">
+        <div class="wg-block c4" style="top:0;height:60px;background:#dc262633;color:#fca5a5;border-left:3px solid #dc2626">
+          <div class="bname">Drawing</div><div class="btime">14:00 – 15:30</div>
+        </div>
+      </div>
+      <div class="wg-cell"></div><div class="wg-cell"></div><div class="wg-cell"></div><div class="wg-cell"></div><div class="wg-cell"></div><div class="wg-cell"></div>
+
+      <!-- 15:00 -->
+      <div class="wg-time">15:00</div>
+      <div class="wg-cell"></div><div class="wg-cell"></div><div class="wg-cell"></div><div class="wg-cell"></div><div class="wg-cell"></div><div class="wg-cell"></div><div class="wg-cell"></div>
+
+      <!-- 18:00 — Yoga Tue/Thu -->
+      <div class="wg-time">18:00</div>
+      <div class="wg-cell"></div>
+      <div class="wg-cell" style="position:relative">
+        <div class="wg-block c3" style="top:0;height:60px;background:#16a34a33;color:#86efac;border-left:3px solid #16a34a">
+          <div class="bname">Yoga</div><div class="btime">18:00 – 19:30</div>
+        </div>
+      </div>
+      <div class="wg-cell"></div>
+      <div class="wg-cell" style="position:relative">
+        <div class="wg-block c3" style="top:0;height:60px;background:#16a34a33;color:#86efac;border-left:3px solid #16a34a">
+          <div class="bname">Yoga</div><div class="btime">18:00 – 19:30</div>
+        </div>
+      </div>
+      <div class="wg-cell"></div><div class="wg-cell"></div><div class="wg-cell"></div>
+    </div>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#7c3aed"></div>Photography</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#0891b2"></div>Cooking</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#16a34a"></div>Yoga</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#dc2626"></div>Drawing</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#d97706"></div>Piano</div>
+  </div>
+</div>
+
+</body>
+</html>
