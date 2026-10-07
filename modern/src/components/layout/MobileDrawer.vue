@@ -9,6 +9,7 @@ import {
   Building2, LayoutDashboard, CalendarDays, KeyRound, List, Dumbbell, FileText, X,
 } from '@lucide/vue'
 import DarkModeToggle from '../DarkModeToggle.vue'
+import AppLogo from '../AppLogo.vue'
 import type { Component } from 'vue'
 
 const route = useRoute()
@@ -73,11 +74,8 @@ const organizerItems = computed(() => allOrganizerItems.filter(i => authStore.ha
       >
         <!-- Header -->
         <div class="flex items-center justify-between mb-8">
-          <div class="flex items-center gap-2.5 px-2">
-            <div class="w-8 h-8 bg-primary rounded-xl flex items-center justify-center text-white font-bold text-sm shadow-glow flex-shrink-0">
-              E
-            </div>
-            <span class="text-[15px] font-bold tracking-tight text-gray-900 dark:text-white">EduManage</span>
+          <div class="px-2">
+            <AppLogo />
           </div>
           <button
             class="w-8 h-8 flex items-center justify-center rounded-lg text-text-secondary hover:text-gray-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5 transition-colors"

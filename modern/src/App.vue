@@ -12,6 +12,7 @@ import { useRouteTransition } from './composables/useRouteTransition'
 import { useOfflineSync } from './composables/useOfflineSync'
 import { useNavDrawer } from './composables/useNavDrawer'
 import { useAuthStore } from './stores/authStore'
+import AppLogo from './components/AppLogo.vue'
 
 const { transitionName } = useRouteTransition()
 const { start } = useOfflineSync()
@@ -33,10 +34,7 @@ onMounted(() => { start() })
           <OfflineBanner />
           <!-- Mobile top bar -->
           <header class="lg:hidden flex items-center justify-between px-4 pt-4 pb-2 flex-shrink-0">
-            <div class="flex items-center gap-2">
-              <div class="w-7 h-7 bg-primary rounded-lg flex items-center justify-center text-white font-bold text-xs shadow-glow">E</div>
-              <span class="text-[14px] font-bold tracking-tight text-gray-900 dark:text-white">EduManage</span>
-            </div>
+            <AppLogo size="sm" />
             <button
               class="w-10 h-10 flex items-center justify-center rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-surface-card text-text-secondary hover:text-primary hover:border-primary/30 transition-all duration-150"
               aria-label="Open menu"

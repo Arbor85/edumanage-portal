@@ -25,6 +25,13 @@ jobs:
         with:
           dotnet-version: '10.x'
 
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/packages.lock.json', '**/*.csproj') }}
+          restore-keys: nuget-${{ runner.os }}-
+
       - name: Restore dependencies
         run: dotnet restore netbackend/EduManage.NetBackend.sln
 
@@ -72,10 +79,8 @@ jobs:
           slot-name: 'Production'
           package: ./publish
 
-      - name: Start and restart Azure Web App
-        run: |
-          az webapp start --name edumanage-api --resource-group edumanage-rg
-          az webapp restart --name edumanage-api --resource-group edumanage-rg
+      - name: Restart Azure Web App
+        run: az webapp restart --name edumanage-api --resource-group edumanage-rg
 
   healthcheck:
     runs-on: ubuntu-latest
