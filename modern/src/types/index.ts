@@ -799,3 +799,30 @@ export interface UserExerciseMaxUpsert {
   note?: string
 }
 
+// ─── Body Measurements ─────────────────────────────────────────
+
+export interface BodyMeasurementOut {
+  id: string
+  date: string
+  weightKg: number | null
+  waistCm: number | null
+  thighCm: number | null
+  bicepCm: number | null
+  chestCm: number | null
+  buttCm: number | null
+  systolicMmHg: number | null
+  diastolicMmHg: number | null
+}
+
+export interface BodyMeasurementCreate {
+  date: string
+  weightKg: number | null
+  waistCm: number | null
+  thighCm: number | null
+  bicepCm: number | null
+  chestCm: number | null
+  buttCm: number | null
+  systolicMmHg: number | null
+  diastolicMmHg: number | null
+}
+

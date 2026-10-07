@@ -13,12 +13,13 @@ import { useWorkoutStore } from '../stores/workoutStore'
 import { useCountUp } from '../composables/useCountUp'
 import { useIntersectionReveal } from '../composables/useIntersectionReveal'
 import type { WorkoutHistoryOut } from '../types'
+import MeasurementsTab from './ProgressPage/components/MeasurementsTab.vue'
 
 const router = useRouter()
 const progressStore = useProgressStore()
 const workoutStore = useWorkoutStore()
 
-type Tab = 'overview' | 'records' | 'history'
+type Tab = 'overview' | 'records' | 'history' | 'measurements'
 const activeTab = ref<Tab>('overview')
 
 // Workout detail modal
@@ -70,6 +71,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id: 'overview', label: 'Overview' },
   { id: 'records', label: 'Records' },
   { id: 'history', label: 'History' },
+  { id: 'measurements', label: 'Measurements' },
 ]
 </script>
 
@@ -156,6 +158,11 @@ const TABS: { id: Tab; label: string }[] = [
       <!-- ── Records tab ──────────────────────────────────── -->
       <div v-else-if="activeTab === 'records'" :key="'records'">
         <PRList :records="progressStore.personalRecords" />
+      </div>
+
+      <!-- ── Measurements tab ────────────────────────────────── -->
+      <div v-else-if="activeTab === 'measurements'" :key="'measurements'">
+        <MeasurementsTab />
       </div>
 
       <!-- ── History tab ──────────────────────────────────── -->

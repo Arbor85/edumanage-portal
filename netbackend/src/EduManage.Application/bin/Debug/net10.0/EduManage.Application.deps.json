@@ -10,7 +10,8 @@
         "dependencies": {
           "EduManage.Domain": "1.0.0",
           "MediatR": "13.0.0",
-          "Microsoft.Extensions.DependencyInjection.Abstractions": "10.0.0"
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "10.0.0",
+          "System.Linq.Async": "7.0.0"
         },
         "runtime": {
           "EduManage.Application.dll": {}
@@ -142,6 +143,25 @@
           }
         }
       },
+      "System.Interactive.Async/7.0.0": {
+        "runtime": {
+          "lib/net10.0/System.Interactive.Async.dll": {
+            "assemblyVersion": "7.0.0.0",
+            "fileVersion": "7.0.0.45496"
+          }
+        }
+      },
+      "System.Linq.Async/7.0.0": {
+        "dependencies": {
+          "System.Interactive.Async": "7.0.0"
+        },
+        "runtime": {
+          "lib/net10.0/System.Linq.Async.dll": {
+            "assemblyVersion": "7.0.0.0",
+            "fileVersion": "7.0.0.45496"
+          }
+        }
+      },
       "EduManage.Domain/1.0.0": {
         "runtime": {
           "EduManage.Domain.dll": {
@@ -241,6 +261,20 @@
       "sha512": "sha512-kDimB6Dkd3nkW2oZPDkMkVHfQt3IDqO5gL0oa8WVy3OP4uE8Ij+8TXnqg9TOd9ufjsY3IDiGz7pCUbnfL18tjg==",
       "path": "microsoft.identitymodel.tokens/8.0.1",
       "hashPath": "microsoft.identitymodel.tokens.8.0.1.nupkg.sha512"
+    },
+    "System.Interactive.Async/7.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-Ckj+tg2BVOZ0oLp7FAbjfvRyA/BMkUhVxROLd+x22zncRR6KD7CdFzAYp+9Mo2cedxAMo2X9ZNyhZu68jdDITw==",
+      "path": "system.interactive.async/7.0.0",
+      "hashPath": "system.interactive.async.7.0.0.nupkg.sha512"
+    },
+    "System.Linq.Async/7.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-A2Wci92Oyuodi8YLMQCJJ0vHqzgRFgEUG1K6tQNcoxHd3w05B1LvGzXvxQnGYPIL4Cr4hicHytpk2F2Jx8TZHg==",
+      "path": "system.linq.async/7.0.0",
+      "hashPath": "system.linq.async.7.0.0.nupkg.sha512"
     },
     "EduManage.Domain/1.0.0": {
       "type": "project",

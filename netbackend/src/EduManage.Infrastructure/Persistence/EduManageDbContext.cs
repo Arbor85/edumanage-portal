@@ -45,6 +45,7 @@ public class EduManageDbContext : DbContext
     public DbSet<StandaloneFormResponse> StandaloneFormResponses { get; set; }
     public DbSet<UserProfile> UserProfiles { get; set; }
     public DbSet<UserChallengeLog> UserChallengeLogs { get; set; }
+    public DbSet<BodyMeasurement> BodyMeasurements { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -85,5 +86,6 @@ public class EduManageDbContext : DbContext
         modelBuilder.ApplyConfiguration(new StandaloneFormResponseConfiguration());
         modelBuilder.ApplyConfiguration(new UserProfileConfiguration());
         modelBuilder.ApplyConfiguration(new UserChallengeLogConfiguration());
+        modelBuilder.ApplyConfiguration(new BodyMeasurementConfiguration());
     }
 }

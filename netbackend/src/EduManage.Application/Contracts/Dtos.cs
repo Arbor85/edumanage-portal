@@ -415,3 +415,26 @@ public sealed record StandaloneFormResponsesSummaryOut(
     string FormTemplateName,
     int TotalResponses,
     IReadOnlyList<FieldSummaryOut> Fields);
+
+public sealed record BodyMeasurementOut(
+    string Id,
+    string Date,
+    float? WeightKg,
+    float? WaistCm,
+    float? ThighCm,
+    float? BicepCm,
+    float? ChestCm,
+    float? ButtCm,
+    int? SystolicMmHg,
+    int? DiastolicMmHg);
+
+public sealed record BodyMeasurementCreate(
+    string Date,
+    float? WeightKg,
+    float? WaistCm,
+    float? ThighCm,
+    float? BicepCm,
+    float? ChestCm,
+    float? ButtCm,
+    int? SystolicMmHg,
+    int? DiastolicMmHg);
