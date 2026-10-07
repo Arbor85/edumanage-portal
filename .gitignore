@@ -230,3 +230,7 @@ netbackend/src/EduManage.Api/appsettings.local.json
 backend/.env
 *.dll
 *.pdb
+*.dll
+*.dll
+.mcp.json
+.claude/settings.local.json

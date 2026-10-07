@@ -6,7 +6,7 @@ defineProps<{
 </script>
 
 <template>
-  <div class="flex items-center gap-2.5 select-none">
+  <div class="flex items-center gap-2.5 select-none group cursor-pointer">
     <!-- Logomark: ascending bars (gym progress, planning, education levels) -->
     <svg
       :class="{
@@ -14,6 +14,7 @@ defineProps<{
         'w-8 h-8': !size || size === 'md',
         'w-12 h-12': size === 'lg',
       }"
+      class="transition-all duration-200 group-hover:scale-[0.72] group-hover:opacity-70"
       viewBox="0 0 40 40"
       xmlns="http://www.w3.org/2000/svg"
       aria-hidden="true"
@@ -31,7 +32,7 @@ defineProps<{
       'text-[15px]': !size || size === 'md',
       'text-[22px]': size === 'lg',
     }" class="tracking-tight leading-none">
-      <span class="font-bold text-gray-900 dark:text-white">Arbor</span><span class="font-medium text-text-secondary dark:text-white/60">Coach</span>
+      <span class="font-bold text-gray-900 dark:text-white transition-all duration-200 group-hover:text-[1.2em]">Arbor</span><span class="font-medium text-text-secondary dark:text-white/60 transition-all duration-200 group-hover:text-emerald-400 dark:group-hover:text-emerald-400 group-hover:text-[0.8em]">Coach</span>
     </span>
   </div>
 </template>

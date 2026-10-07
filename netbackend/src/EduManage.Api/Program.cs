@@ -1,4 +1,5 @@
 using EduManage.Api.Authorization;
+using EduManage.Api.Mcp;
 using EduManage.Api.Services;
 using EduManage.Api.Validators;
 using EduManage.Infrastructure.Persistence;
@@ -51,7 +52,7 @@ builder.Services
 				var logger = ctx.HttpContext.RequestServices
 					.GetRequiredService<ILogger<Program>>();
 				logger.LogWarning("JWT auth failed: {Error}", ctx.Exception.Message);
-				ctx.Response.Headers["X-Auth-Error"] = ctx.Exception.Message;
+				ctx.Response.Headers["X-Auth-Error"] = ctx.Exception.Message.ReplaceLineEndings(" ");
 				return Task.CompletedTask;
 			},
 			OnChallenge = ctx =>
@@ -124,6 +125,10 @@ string[] allowedOrigins = allowedOriginsRaw.Split(',', StringSplitOptions.Remove
 
 builder.Services.AddHealthChecks();
 
+builder.Services.AddMcpServer()
+    .WithHttpTransport()
+    .WithTools<ExerciseTools>();
+
 builder.Services.AddCors(options =>
 {
 	options.AddPolicy(frontendCorsPolicy, policy =>
@@ -175,5 +180,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 app.MapHealthChecks("/health");
+app.MapMcp("/mcp").AllowAnonymous();
 
 app.Run();
