@@ -13,17 +13,26 @@ import { useOfflineSync } from './composables/useOfflineSync'
 import { useNavDrawer } from './composables/useNavDrawer'
 import { useAuthStore } from './stores/authStore'
 import AppLogo from './components/AppLogo.vue'
+import { useBackendHealth } from './composables/useBackendHealth'
 
 const { transitionName } = useRouteTransition()
 const { start } = useOfflineSync()
 const { toggle } = useNavDrawer()
 const authStore = useAuthStore()
+const { isReady: backendReady, waitUntilHealthy } = useBackendHealth()
 
-onMounted(() => { start() })
+onMounted(async () => {
+  await waitUntilHealthy()
+  start()
+})
 </script>
 
 <template>
-  <div v-if="!authStore.appReady" class="fixed inset-0 flex items-center justify-center bg-surface-muted dark:bg-surface-page">
+  <div v-if="!backendReady" class="fixed inset-0 flex flex-col items-center justify-center gap-3 bg-surface-muted dark:bg-surface-page">
+    <BaseSpinner size="lg" />
+    <p class="text-sm font-medium text-text-secondary">Initializing app...</p>
+  </div>
+  <div v-else-if="!authStore.appReady" class="fixed inset-0 flex items-center justify-center bg-surface-muted dark:bg-surface-page">
     <BaseSpinner size="lg" />
   </div>
   <RouterView v-else v-slot="{ Component, route: r }">
