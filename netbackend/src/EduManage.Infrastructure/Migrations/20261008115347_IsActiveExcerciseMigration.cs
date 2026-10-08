@@ -5,24 +5,25 @@
 namespace EduManage.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class AddExerciseIdToRoutineExercise : Migration
+    public partial class IsActiveExcerciseMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<int>(
-                name: "ExerciseId",
-                table: "RoutineExercises",
-                type: "INTEGER",
-                nullable: true);
+            migrationBuilder.AddColumn<bool>(
+                name: "IsActive",
+                table: "Exercises",
+                type: "bit",
+                nullable: false,
+                defaultValue: true);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "ExerciseId",
-                table: "RoutineExercises");
+                name: "IsActive",
+                table: "Exercises");
         }
     }
 }

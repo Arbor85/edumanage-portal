@@ -17,6 +17,7 @@ const ACTIVITY_TYPE_BADGE: Record<ActivityType, { label: string; color: string }
 const props = defineProps<{
   open: boolean
   exercise: ExcerciseOut | null
+  canEdit?: boolean
 }>()
 const emit = defineEmits<{ close: []; edit: [] }>()
 
@@ -211,7 +212,7 @@ const metaChips = computed(() => {
           </div>
 
           <!-- Footer -->
-          <div class="flex-shrink-0 px-5 py-4 border-t border-white/8">
+          <div v-if="canEdit" class="flex-shrink-0 px-5 py-4 border-t border-white/8">
             <button
               class="edit-btn w-full"
               @click="emit('edit')"

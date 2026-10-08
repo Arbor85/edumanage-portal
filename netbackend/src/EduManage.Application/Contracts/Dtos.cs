@@ -169,7 +169,10 @@ public sealed record ExcerciseOut(
     string? GifPath = null,
     string? DatasetId = null,
     bool IsDirectFavourite = false,
-    int UsageCount = 0);
+    int UsageCount = 0,
+    bool IsActive = true);
+
+public sealed record SetActiveRequest(bool IsActive);
 
 public sealed record ExcerciseWriteRequest(
     string Name,
@@ -187,7 +190,8 @@ public sealed record ExcerciseWriteRequest(
     string? Category = null,
     string? ImagePath = null,
     string? GifPath = null,
-    string? DatasetId = null);
+    string? DatasetId = null,
+    bool IsActive = true);
 
 public sealed record CompletedRoutineSet(
     string Type,

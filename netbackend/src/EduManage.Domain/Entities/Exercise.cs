@@ -23,4 +23,5 @@ public class Exercise
     public string? ImagePath { get; set; }
     public string? GifPath { get; set; }
     public string? DatasetId { get; set; }
+    public bool IsActive { get; set; } = true;
 }

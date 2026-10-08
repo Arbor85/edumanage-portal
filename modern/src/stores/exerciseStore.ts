@@ -55,6 +55,14 @@ export const useExerciseStore = defineStore('exercise', () => {
     return exercisesApi.getExercise(id)
   }
 
+  async function setActive(id: number, isActive: boolean) {
+    const updated = await exercisesApi.setExerciseActive(id, isActive)
+    const idx = exercises.value.findIndex((e) => e.id === id)
+    if (idx !== -1) exercises.value.splice(idx, 1, updated)
+    await db.exercises.put(updated)
+    return updated
+  }
+
   async function remove(id: number) {
     await exercisesApi.deleteExercise(id)
     exercises.value = exercises.value.filter((e) => e.id !== id)
@@ -75,5 +83,5 @@ export const useExerciseStore = defineStore('exercise', () => {
     })
   })
 
-  return { exercises, isLoading, fetch, get, create, update, remove, filtered }
+  return { exercises, isLoading, fetch, get, create, update, remove, setActive, filtered }
 })

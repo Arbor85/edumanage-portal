@@ -30,6 +30,7 @@ public sealed record UpdateExcerciseCommand(int Id, ExcerciseWriteRequest Reques
             exercise.ImagePath = request.Request.ImagePath;
             exercise.GifPath = request.Request.GifPath;
             exercise.DatasetId = request.Request.DatasetId;
+            exercise.IsActive = request.Request.IsActive;
 
             await repository.UpdateAsync(exercise, cancellationToken);
             return ListExcercisesQuery.Handler.ToOut(exercise, null);

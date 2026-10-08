@@ -18,3 +18,6 @@ export const deleteExercise = (id: number): Promise<void> =>
 
 export const toggleFavourite = (id: number): Promise<void> =>
   apiClient.post(`/api/excercises/${id}/favourite`).then(() => undefined)
+
+export const setExerciseActive = (id: number, isActive: boolean): Promise<ExcerciseOut> =>
+  apiClient.patch<ExcerciseOut>(`/api/excercises/${id}/active`, { isActive }).then((r) => r.data)

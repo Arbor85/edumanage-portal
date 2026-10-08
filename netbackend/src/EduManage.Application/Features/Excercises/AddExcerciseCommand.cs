@@ -28,7 +28,8 @@ public sealed record AddExcerciseCommand(ExcerciseWriteRequest Request) : IReque
                 Category = request.Request.Category,
                 ImagePath = request.Request.ImagePath,
                 GifPath = request.Request.GifPath,
-                DatasetId = request.Request.DatasetId
+                DatasetId = request.Request.DatasetId,
+                IsActive = request.Request.IsActive
             };
 
             await repository.AddAsync(exercise, cancellationToken);

@@ -87,6 +87,8 @@ builder.Services.AddAuthorization(options =>
 		policy.Requirements.Add(new HasPermissionRequirement("manage:schedule-plans")));
 	options.AddPolicy("view:schedule", policy =>
 		policy.Requirements.Add(new HasPermissionRequirement("view:schedule")));
+	options.AddPolicy("manage:exercise", policy =>
+		policy.Requirements.Add(new HasPermissionRequirement("manage:exercise")));
 });
 builder.Services.AddSingleton<IAuthorizationHandler, HasPermissionHandler>();
 builder.Services.AddEndpointsApiExplorer();

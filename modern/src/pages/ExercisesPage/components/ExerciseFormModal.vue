@@ -40,6 +40,7 @@ const form = ref<ExcerciseWriteRequest>({
   name: null, shortDescription: null, primaryMuscle: null,
   secondaryMuscles: [], tags: [],
   activityType: 'weighted', activityTrackType: 'repetitions',
+  isActive: true,
 })
 const saving = ref(false)
 const confirmDelete = ref(false)
@@ -55,6 +56,7 @@ watch(() => props.open, (val) => {
           tags: [...(props.exercise.tags ?? [])],
           activityType: props.exercise.activityType ?? 'weighted',
           activityTrackType: props.exercise.activityTrackType ?? 'repetitions',
+          isActive: props.exercise.isActive ?? true,
         }
       : {
           name: null, shortDescription: null, primaryMuscle: null,
@@ -124,6 +126,26 @@ async function doDelete() {
         :options="ACTIVITY_TRACK_OPTIONS"
         @update:model-value="form.activityTrackType = $event as typeof form.activityTrackType"
       />
+
+      <div class="flex items-center justify-between rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-surface-dark px-4 py-3">
+        <div>
+          <p class="text-sm font-medium text-text-primary dark:text-white">Active</p>
+          <p class="text-xs text-text-secondary dark:text-white/50 mt-0.5">Inactive exercises are hidden from regular users</p>
+        </div>
+        <button
+          type="button"
+          role="switch"
+          :aria-checked="form.isActive"
+          class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          :class="form.isActive ? 'bg-primary' : 'bg-gray-300 dark:bg-white/20'"
+          @click="form.isActive = !form.isActive"
+        >
+          <span
+            class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+            :class="form.isActive ? 'translate-x-5' : 'translate-x-0'"
+          />
+        </button>
+      </div>
     </form>
 
     <template #footer>

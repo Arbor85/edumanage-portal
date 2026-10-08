@@ -7,8 +7,9 @@ import ExerciseCard from './ExerciseCard.vue'
 defineProps<{
   exercises: ExcerciseOut[]
   loading: boolean
+  canManage?: boolean
 }>()
-defineEmits<{ edit: [ex: ExcerciseOut]; delete: [ex: ExcerciseOut]; 'open-muscle-dialog': [ex: ExcerciseOut] }>()
+defineEmits<{ edit: [ex: ExcerciseOut]; delete: [ex: ExcerciseOut]; 'open-muscle-dialog': [ex: ExcerciseOut]; 'toggle-active': [ex: ExcerciseOut] }>()
 </script>
 
 <template>
@@ -35,9 +36,11 @@ defineEmits<{ edit: [ex: ExcerciseOut]; delete: [ex: ExcerciseOut]; 'open-muscle
         :key="ex.id"
         :exercise="ex"
         :index="i"
+        :can-manage="canManage"
         @edit="$emit('edit', ex)"
         @delete="$emit('delete', ex)"
         @open-muscle-dialog="$emit('open-muscle-dialog', ex)"
+        @toggle-active="$emit('toggle-active', ex)"
       />
     </div>
   </div>

@@ -37,6 +37,7 @@ export interface ExcerciseOut {
   datasetId: string | null
   isDirectFavourite: boolean
   usageCount: number
+  isActive: boolean
 }
 
 export interface ExcerciseWriteRequest {
@@ -56,6 +57,7 @@ export interface ExcerciseWriteRequest {
   imagePath?: string | null
   gifPath?: string | null
   datasetId?: string | null
+  isActive?: boolean
 }
 
 // ─── Activity enums ───────────────────────────────────────────

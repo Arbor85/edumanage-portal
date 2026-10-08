@@ -50,5 +50,8 @@ public class ExerciseConfiguration : IEntityTypeConfiguration<Exercise>
                 (l, r) => l == null && r == null || (l != null && r != null && l.SequenceEqual(r)),
                 v => v == null ? 0 : v.Aggregate(0, (h, s) => HashCode.Combine(h, s.GetHashCode(StringComparison.Ordinal))),
                 v => v == null ? null : (IReadOnlyList<string>?)v.ToList()));
+
+        builder.Property(e => e.IsActive)
+            .HasDefaultValue(true);
     }
 }

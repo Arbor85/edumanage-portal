@@ -4,7 +4,7 @@ using MediatR;
 
 namespace EduManage.Application.Features.Excercises;
 
-public sealed record ListExcercisesQuery(string? CurrentUserId = null) : IRequest<IReadOnlyList<ExcerciseOut>>
+public sealed record ListExcercisesQuery(string? CurrentUserId = null, bool IncludeInactive = false) : IRequest<IReadOnlyList<ExcerciseOut>>
 {
     internal sealed class Handler(
         IExerciseRepository repository,
@@ -14,6 +14,9 @@ public sealed record ListExcercisesQuery(string? CurrentUserId = null) : IReques
         public async Task<IReadOnlyList<ExcerciseOut>> Handle(ListExcercisesQuery request, CancellationToken cancellationToken)
         {
             var exercises = await repository.ListAsync(cancellationToken);
+
+            if (!request.IncludeInactive)
+                exercises = exercises.Where(e => e.IsActive).ToList();
 
             Dictionary<int, UserExercisePreference> prefLookup = [];
             if (request.CurrentUserId is not null)
@@ -46,6 +49,7 @@ public sealed record ListExcercisesQuery(string? CurrentUserId = null) : IReques
                 e.GifPath,
                 e.DatasetId,
                 pref?.IsDirectFavourite ?? false,
-                pref?.UsageCount ?? 0);
+                pref?.UsageCount ?? 0,
+                e.IsActive);
     }
 }

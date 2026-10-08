@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EduManage.Infrastructure.Migrations
 {
     [DbContext(typeof(EduManageDbContext))]
-    [Migration("20261002083702_UpdateSchema")]
-    partial class UpdateSchema
+    [Migration("20261008115347_IsActiveExcerciseMigration")]
+    partial class IsActiveExcerciseMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,51 @@ namespace EduManage.Infrastructure.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("EduManage.Domain.Entities.BodyMeasurement", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<float?>("BicepCm")
+                        .HasColumnType("real");
+
+                    b.Property<float?>("ButtCm")
+                        .HasColumnType("real");
+
+                    b.Property<float?>("ChestCm")
+                        .HasColumnType("real");
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
+
+                    b.Property<int?>("DiastolicMmHg")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("SystolicMmHg")
+                        .HasColumnType("int");
+
+                    b.Property<float?>("ThighCm")
+                        .HasColumnType("real");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<float?>("WaistCm")
+                        .HasColumnType("real");
+
+                    b.Property<float?>("WeightKg")
+                        .HasColumnType("real");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId", "Date");
+
+                    b.ToTable("BodyMeasurements");
+                });
 
             modelBuilder.Entity("EduManage.Domain.Entities.Building", b =>
                 {
@@ -411,6 +456,11 @@ namespace EduManage.Infrastructure.Migrations
 
                     b.Property<string>("Instructions")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
 
                     b.Property<string>("Level")
                         .HasColumnType("nvarchar(max)");
@@ -1018,6 +1068,20 @@ namespace EduManage.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("TrainerCourseAssociations");
+                });
+
+            modelBuilder.Entity("EduManage.Domain.Entities.UserChallengeLog", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateOnly>("ChallengeDate")
+                        .HasColumnType("date");
+
+                    b.HasKey("UserId", "ChallengeDate");
+
+                    b.ToTable("UserChallengeLogs");
                 });
 
             modelBuilder.Entity("EduManage.Domain.Entities.UserEquipment", b =>

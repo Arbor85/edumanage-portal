@@ -2,7 +2,7 @@
 import { computed, ref } from 'vue'
 import type { ExcerciseOut, ActivityType } from '../../../types'
 import DifficultyBadge from '../../../components/DifficultyBadge.vue'
-import { Trash2, Dumbbell, Activity } from '@lucide/vue'
+import { Trash2, Dumbbell, Activity, Eye, EyeOff } from '@lucide/vue'
 import { exerciseImageMap } from '../../../data/exerciseImageMap'
 
 const ACTIVITY_TYPE_BADGE: Record<ActivityType, { label: string; classes: string }> = {
@@ -12,8 +12,8 @@ const ACTIVITY_TYPE_BADGE: Record<ActivityType, { label: string; classes: string
   cardio:     { label: 'Cardio',     classes: 'bg-orange-500/80 text-white' },
 }
 
-const props = defineProps<{ exercise: ExcerciseOut; index?: number }>()
-defineEmits<{ edit: []; delete: []; 'open-muscle-dialog': [] }>()
+const props = defineProps<{ exercise: ExcerciseOut; index?: number; canManage?: boolean }>()
+defineEmits<{ edit: []; delete: []; 'open-muscle-dialog': []; 'toggle-active': [] }>()
 
 const difficultyLevel = computed(() => {
   const level = props.exercise.level?.toLowerCase()
@@ -49,6 +49,7 @@ const staggerDelay = computed(() => `${(props.index ?? 0) * 40}ms`)
 <template>
   <div
     class="exercise-card relative rounded-2xl overflow-hidden cursor-pointer group bg-gray-900 shadow-md"
+    :class="{ 'opacity-50 grayscale': exercise.isActive === false }"
     :style="{ '--stagger-delay': staggerDelay }"
     @click="$emit('edit')"
   >
@@ -80,7 +81,13 @@ const staggerDelay = computed(() => `${(props.index ?? 0) * 40}ms`)
 
       <!-- Top row: difficulty badge + action buttons -->
       <div class="absolute top-3 left-3 right-3 flex items-start justify-between">
-        <DifficultyBadge :level="difficultyLevel" />
+        <div class="flex flex-col gap-1">
+          <DifficultyBadge :level="difficultyLevel" />
+          <span
+            v-if="exercise.isActive === false"
+            class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide bg-red-500/80 text-white"
+          >Inactive</span>
+        </div>
 
         <!-- Action buttons: fade in on hover, not teleport -->
         <div class="flex gap-1.5 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-150 ease-out">
@@ -92,6 +99,17 @@ const staggerDelay = computed(() => `${(props.index ?? 0) * 40}ms`)
             <Activity class="w-3.5 h-3.5 text-primary" />
           </button>
           <button
+            v-if="canManage"
+            class="action-btn"
+            :class="exercise.isActive === false ? 'text-emerald-500 hover:bg-emerald-500/90 hover:text-white' : 'hover:bg-amber-500/90 hover:text-white'"
+            :aria-label="exercise.isActive === false ? 'Activate exercise' : 'Deactivate exercise'"
+            @click.stop="$emit('toggle-active')"
+          >
+            <Eye v-if="exercise.isActive === false" class="w-3.5 h-3.5" />
+            <EyeOff v-else class="w-3.5 h-3.5" />
+          </button>
+          <button
+            v-if="canManage"
             class="action-btn hover:bg-red-500/90 hover:text-white"
             aria-label="Delete exercise"
             @click.stop="$emit('delete')"

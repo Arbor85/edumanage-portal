@@ -3,6 +3,7 @@ import { ref, computed, watch, onMounted } from 'vue'
 import { usePageTitle } from '../composables/usePageTitle'
 usePageTitle('Exercises')
 import { useExerciseStore } from '../stores/exerciseStore'
+import { useAuthStore } from '../stores/authStore'
 import type { ExcerciseOut } from '../types'
 import BaseSelect from '../components/BaseSelect.vue'
 import PageHeader from '../components/layout/PageHeader.vue'
@@ -17,7 +18,10 @@ import { useToast } from '../composables/useToast'
 import { Search } from '@lucide/vue'
 
 const exerciseStore = useExerciseStore()
+const authStore = useAuthStore()
 const toast = useToast()
+
+const canManage = computed(() => authStore.hasPermission('manage:exercise'))
 
 const search = ref('')
 const muscleFilter = ref('')
@@ -59,6 +63,24 @@ async function handleDelete(ex: ExcerciseOut) {
   }
 }
 
+async function handleToggleActive(ex: ExcerciseOut) {
+  try {
+    await exerciseStore.setActive(ex.id, !ex.isActive)
+    toast.success(ex.isActive ? 'Exercise deactivated' : 'Exercise activated')
+  } catch {
+    toast.error('Failed to update exercise')
+  }
+}
+
+function handleCardClick(ex: ExcerciseOut) {
+  if (canManage.value) {
+    editTarget.value = ex
+    detailTarget.value = null
+  } else {
+    detailTarget.value = ex
+  }
+}
+
 function openEdit(ex: ExcerciseOut) {
   editTarget.value = ex
   detailTarget.value = null
@@ -68,7 +90,7 @@ function openEdit(ex: ExcerciseOut) {
 <template>
   <AppLayout>
     <PageHeader title="Exercise Library" subtitle="Discover and manage exercises.">
-      <BaseButton variant="primary" @click="isCreateOpen = true">+ New Exercise</BaseButton>
+      <BaseButton v-if="canManage" variant="primary" @click="isCreateOpen = true">+ New Exercise</BaseButton>
     </PageHeader>
 
     <!-- Filters -->
@@ -90,8 +112,10 @@ function openEdit(ex: ExcerciseOut) {
     <ExerciseGrid
       :exercises="visibleExercises"
       :loading="exerciseStore.isLoading"
-      @edit="openEdit"
+      :can-manage="canManage"
+      @edit="handleCardClick"
       @delete="(ex) => (confirmDeleteTarget = ex)"
+      @toggle-active="handleToggleActive"
       @open-muscle-dialog="(ex) => (muscleDialogTarget = ex)"
     />
 
@@ -110,6 +134,7 @@ function openEdit(ex: ExcerciseOut) {
     <ExerciseDetailModal
       :open="detailTarget !== null"
       :exercise="detailTarget"
+      :can-edit="canManage"
       @close="detailTarget = null"
       @edit="openEdit(detailTarget!)"
     />

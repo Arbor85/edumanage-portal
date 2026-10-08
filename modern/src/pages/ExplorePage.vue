@@ -19,6 +19,8 @@ const exerciseStore = useExerciseStore()
 const authStore = useAuthStore()
 const toast = useToast()
 
+const canManage = computed(() => authStore.hasPermission('manage:exercise'))
+
 const search = ref('')
 const activityFilter = ref<ActivityType | ''>('')
 const displayCount = ref(12)
@@ -30,6 +32,7 @@ const muscleDialogTarget = ref<ExcerciseOut | null>(null)
 
 watch(() => route.query, async (query) => {
   if (query.edit) {
+    if (!canManage.value) { router.replace({ query: { detail: query.edit } }); return }
     if (editTarget.value?.id === Number(query.edit)) return
     try {
       editTarget.value = await exerciseStore.get(Number(query.edit))
@@ -50,6 +53,7 @@ watch(() => route.query, async (query) => {
       router.replace({ query: {} })
     }
   } else if (query.new) {
+    if (!canManage.value) { router.replace({ query: {} }); return }
     if (isCreateOpen.value) return
     isCreateOpen.value = true
     editTarget.value = null
@@ -112,6 +116,15 @@ async function handleDelete(ex: ExcerciseOut) {
     toast.error('Failed to delete exercise')
   }
 }
+
+async function handleToggleActive(ex: ExcerciseOut) {
+  try {
+    await exerciseStore.setActive(ex.id, !ex.isActive)
+    toast.success(ex.isActive ? 'Exercise deactivated' : 'Exercise activated')
+  } catch {
+    toast.error('Failed to update exercise')
+  }
+}
 </script>
 
 <template>
@@ -124,6 +137,7 @@ async function handleDelete(ex: ExcerciseOut) {
           <h1 class="text-3xl font-black text-text-primary dark:text-white">Explore</h1>
         </div>
         <button
+          v-if="canManage"
           class="flex items-center gap-1.5 px-4 h-10 bg-primary/10 border border-primary/30 text-primary
                  font-bold text-sm rounded-xl hover:bg-primary/20 active:scale-[0.97] transition-all"
           @click="() => { isCreateOpen = true; router.push({ query: { new: '1' } }) }"
@@ -171,8 +185,10 @@ async function handleDelete(ex: ExcerciseOut) {
       <ExerciseGrid
         :exercises="visibleExercises"
         :loading="exerciseStore.isLoading"
-        @edit="openEdit"
+        :can-manage="canManage"
+        @edit="(ex) => canManage ? openEdit(ex) : openDetail(ex)"
         @delete="(ex) => (confirmDeleteTarget = ex)"
+        @toggle-active="handleToggleActive"
         @open-muscle-dialog="(ex) => (muscleDialogTarget = ex)"
       />
 
@@ -198,6 +214,7 @@ async function handleDelete(ex: ExcerciseOut) {
     <ExerciseDetailModal
       :open="detailTarget !== null"
       :exercise="detailTarget"
+      :can-edit="canManage"
       @close="router.replace({ query: {} })"
       @edit="openEdit(detailTarget!)"
     />

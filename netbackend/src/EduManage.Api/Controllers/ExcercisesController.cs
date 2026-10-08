@@ -11,8 +11,11 @@ public sealed class ExcercisesController(ISender mediator, ICurrentUserService c
 {
     [HttpGet]
     [Authorize]
-    public Task<IReadOnlyList<ExcerciseOut>> ListExcercises(CancellationToken cancellationToken) =>
-        mediator.Send(new ListExcercisesQuery(currentUserService.GetCurrentUserId()), cancellationToken);
+    public Task<IReadOnlyList<ExcerciseOut>> ListExcercises(CancellationToken cancellationToken)
+    {
+        var canManage = User.FindAll("permissions").Any(c => c.Value == "manage:exercise");
+        return mediator.Send(new ListExcercisesQuery(currentUserService.GetCurrentUserId(), IncludeInactive: canManage), cancellationToken);
+    }
 
     [HttpGet("{id:int}")]
     [Authorize]
@@ -20,7 +23,8 @@ public sealed class ExcercisesController(ISender mediator, ICurrentUserService c
     {
         try
         {
-            return Ok(await mediator.Send(new GetExcerciseQuery(id), cancellationToken));
+            var canManage = User.FindAll("permissions").Any(c => c.Value == "manage:exercise");
+            return Ok(await mediator.Send(new GetExcerciseQuery(id, IncludeInactive: canManage), cancellationToken));
         }
         catch (NotFoundException ex)
         {
@@ -29,7 +33,7 @@ public sealed class ExcercisesController(ISender mediator, ICurrentUserService c
     }
 
     [HttpPost]
-    [Authorize(Policy = "manage:clients")]
+    [Authorize(Policy = "manage:exercise")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     public async Task<ActionResult<ExcerciseOut>> AddExcercise([FromBody] ExcerciseWriteRequest request, CancellationToken cancellationToken)
     {
@@ -38,7 +42,7 @@ public sealed class ExcercisesController(ISender mediator, ICurrentUserService c
     }
 
     [HttpPut("{id:int}")]
-    [Authorize(Policy = "manage:clients")]
+    [Authorize(Policy = "manage:exercise")]
     public async Task<ActionResult<ExcerciseOut>> UpdateExcercise([FromRoute] int id, [FromBody] ExcerciseWriteRequest request, CancellationToken cancellationToken)
     {
         try
@@ -52,13 +56,27 @@ public sealed class ExcercisesController(ISender mediator, ICurrentUserService c
     }
 
     [HttpDelete("{id:int}")]
-    [Authorize(Policy = "manage:clients")]
+    [Authorize(Policy = "manage:exercise")]
     public async Task<IActionResult> DeleteExcercise([FromRoute] int id, CancellationToken cancellationToken)
     {
         try
         {
             await mediator.Send(new DeleteExcerciseCommand(id), cancellationToken);
             return NoContent();
+        }
+        catch (NotFoundException ex)
+        {
+            return NotFound(new { detail = ex.Message });
+        }
+    }
+
+    [HttpPatch("{id:int}/active")]
+    [Authorize(Policy = "manage:exercise")]
+    public async Task<ActionResult<ExcerciseOut>> SetActive([FromRoute] int id, [FromBody] SetActiveRequest request, CancellationToken cancellationToken)
+    {
+        try
+        {
+            return Ok(await mediator.Send(new SetExcerciseActiveCommand(id, request.IsActive), cancellationToken));
         }
         catch (NotFoundException ex)
         {

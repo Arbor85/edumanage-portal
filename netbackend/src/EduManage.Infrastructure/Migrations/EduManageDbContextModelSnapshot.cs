@@ -22,6 +22,51 @@ namespace EduManage.Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("EduManage.Domain.Entities.BodyMeasurement", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<float?>("BicepCm")
+                        .HasColumnType("real");
+
+                    b.Property<float?>("ButtCm")
+                        .HasColumnType("real");
+
+                    b.Property<float?>("ChestCm")
+                        .HasColumnType("real");
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
+
+                    b.Property<int?>("DiastolicMmHg")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("SystolicMmHg")
+                        .HasColumnType("int");
+
+                    b.Property<float?>("ThighCm")
+                        .HasColumnType("real");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<float?>("WaistCm")
+                        .HasColumnType("real");
+
+                    b.Property<float?>("WeightKg")
+                        .HasColumnType("real");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId", "Date");
+
+                    b.ToTable("BodyMeasurements");
+                });
+
             modelBuilder.Entity("EduManage.Domain.Entities.Building", b =>
                 {
                     b.Property<string>("Id")
@@ -79,51 +124,6 @@ namespace EduManage.Infrastructure.Migrations
                     b.HasIndex("BuildingId");
 
                     b.ToTable("BuildingAvailabilities");
-                });
-
-            modelBuilder.Entity("EduManage.Domain.Entities.BodyMeasurement", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasMaxLength(32)
-                        .HasColumnType("nvarchar(32)");
-
-                    b.Property<float?>("BicepCm")
-                        .HasColumnType("real");
-
-                    b.Property<float?>("ButtCm")
-                        .HasColumnType("real");
-
-                    b.Property<float?>("ChestCm")
-                        .HasColumnType("real");
-
-                    b.Property<DateOnly>("Date")
-                        .HasColumnType("date");
-
-                    b.Property<int?>("DiastolicMmHg")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("SystolicMmHg")
-                        .HasColumnType("int");
-
-                    b.Property<float?>("ThighCm")
-                        .HasColumnType("real");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<float?>("WaistCm")
-                        .HasColumnType("real");
-
-                    b.Property<float?>("WeightKg")
-                        .HasColumnType("real");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId", "Date");
-
-                    b.ToTable("BodyMeasurements");
                 });
 
             modelBuilder.Entity("EduManage.Domain.Entities.Client", b =>
@@ -453,6 +453,11 @@ namespace EduManage.Infrastructure.Migrations
 
                     b.Property<string>("Instructions")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
 
                     b.Property<string>("Level")
                         .HasColumnType("nvarchar(max)");
