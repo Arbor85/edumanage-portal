@@ -1,4 +1,5 @@
 using EduManage.Api.Services;
+using EduManage.Application.Common;
 using EduManage.Application.Common.Exceptions;
 using EduManage.Application.Contracts;
 using EduManage.Application.Features.Forms;
@@ -87,6 +88,26 @@ public sealed class StandaloneFormResponsesController(ISender mediator, ICurrent
         catch (ValidationException ex)
         {
             return BadRequest(new { detail = ex.Message });
+        }
+    }
+
+    [HttpGet("toon")]
+    [Produces("text/plain")]
+    public async Task<IActionResult> Toon([FromQuery(Name = "template_id")] string templateId, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var template = await mediator.Send(new GetFormTemplateQuery(templateId, currentUserService.GetCurrentUserId()!), cancellationToken);
+            var responses = await mediator.Send(new ListStandaloneFormResponsesQuery(templateId, currentUserService.GetCurrentUserId()!), cancellationToken);
+            return Content(FormToonSerializer.Serialize(template, responses), "text/plain", System.Text.Encoding.UTF8);
+        }
+        catch (NotFoundException ex)
+        {
+            return NotFound(new { detail = ex.Message });
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, new { detail = ex.Message });
         }
     }
 

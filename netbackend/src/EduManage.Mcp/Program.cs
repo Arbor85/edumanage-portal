@@ -21,7 +21,8 @@ builder.Services
     .WithTools<PlanTools>()
     .WithTools<WorkoutHistoryTools>()
     .WithTools<ClientTools>()
-    .WithTools<RoutineTools>();
+    .WithTools<RoutineTools>()
+    .WithTools<FormTools>();
 
 var app = builder.Build();
 

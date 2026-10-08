@@ -5,10 +5,13 @@ This guide walks you through deploying the EduManage monorepo to Azure:
 | App | Tech | Azure service |
 |-----|------|---------------|
 | `modern/` (frontend) | Vue 3 + Vite SPA | Azure Static Web Apps |
-| `netbackend/` (backend) | ASP.NET Core .NET 10 | Azure App Service (Linux) |
+| `netbackend/EduManage.Api` | ASP.NET Core .NET 10 | Azure App Service (Linux) — `edumanage-api` |
+| `netbackend/EduManage.Mcp` | ASP.NET Core .NET 10 MCP server | Azure App Service (Linux) — `edumanage-mcp` |
 | Database | EF Core + SQL Server | Azure SQL Database (Serverless) |
 
-Estimated cost for sporadic/demo use: **~$15–20 / month** (App Service Basic B1 + Static Web Apps Free + Azure SQL Serverless minimum).
+Estimated cost for sporadic/demo use: **~$28–35 / month** (two App Service Basic B1 + Static Web Apps Free + Azure SQL Serverless minimum).
+
+> **MCP architecture:** The main API (`EduManage.Api`) exposes a limited MCP endpoint at `/mcp` (exercise tools, anonymous). The standalone `EduManage.Mcp` project is a separate app with more tools (plans, workouts, clients, routines) protected by API key auth (`X-Api-Key` header).
 
 ---
 
@@ -32,6 +35,7 @@ RESOURCE_GROUP="edumanage-rg"
 LOCATION="westeurope"
 APP_SERVICE_PLAN="edumanage-plan"
 BACKEND_APP_NAME="edumanage-api"       # becomes edumanage-api.azurewebsites.net
+MCP_APP_NAME="edumanage-mcp"           # becomes edumanage-mcp.azurewebsites.net
 SQL_SERVER_NAME="edumanage-db"        # becomes edumanage-sql.database.windows.net
 SQL_DB_NAME="edumanage"
 SQL_ADMIN_USER="sqladmin"
@@ -53,6 +57,9 @@ az webapp create \
   --resource-group $RESOURCE_GROUP \
   --plan $APP_SERVICE_PLAN \
   --runtime "DOTNETCORE:10.0"
+
+# 3b. Web App for the MCP server (.NET 10)
+az webapp create --name edumanage-mcp --resource-group edumanage-rg --plan edumanage-plan --runtime "DOTNETCORE:10.0"
 
 # 4. Azure SQL logical server
 az sql server create \
@@ -115,6 +122,18 @@ Replace:
 
 > You can also set these in **Portal → App Service → Configuration → Application settings**.
 
+### MCP server environment variables
+
+The `EduManage.Mcp` app only needs the database connection string (it has no CORS or Auth0 config):
+
+```bash
+az webapp config appsettings set \
+  --name $MCP_APP_NAME \
+  --resource-group $RESOURCE_GROUP \
+  --settings \
+    "ConnectionStrings__DefaultConnection=<your-ado-net-connection-string>"
+```
+
 ---
 
 ## Step 3 — Set up GitHub secrets
@@ -130,6 +149,9 @@ Go to **GitHub repo → Settings → Secrets and variables → Actions** and add
 | `VITE_AUTH0_AUDIENCE` | `edu-manage` |
 | `VITE_API_BASE_URL` | `https://edumanage-api.azurewebsites.net` |
 | `VITE_RAPIDAPI_KEY` | Your RapidAPI key (optional) |
+| `AZURE_CLIENT_ID` | Client ID from the service principal JSON |
+| `AZURE_TENANT_ID` | Tenant ID from the service principal JSON |
+| `AZURE_SUBSCRIPTION_ID` | Your Azure subscription ID |
 
 **Create the service principal** (for backend deployment — basic auth is disabled):
 
@@ -156,7 +178,128 @@ The connection string is injected at runtime via the App Service setting set in 
 
 ---
 
-## Step 5 — Deploy the frontend via Azure Static Web Apps
+## Step 5 — Deploy the MCP server
+
+The `EduManage.Mcp` project is a separate ASP.NET Core app. Create `.github/workflows/deploy-mcp.yml` in the repo:
+
+```yaml
+name: Build and deploy MCP server to Azure Web App - edumanage-mcp
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'netbackend/**'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.x'
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/packages.lock.json', '**/*.csproj') }}
+          restore-keys: nuget-${{ runner.os }}-
+
+      - name: Restore dependencies
+        run: dotnet restore netbackend/EduManage.NetBackend.sln
+
+      - name: Build with dotnet
+        run: dotnet build netbackend/src/EduManage.Mcp/EduManage.Mcp.csproj --configuration Release --no-restore
+
+      - name: dotnet publish
+        run: dotnet publish netbackend/src/EduManage.Mcp/EduManage.Mcp.csproj --configuration Release --output ./publish-mcp --no-build
+
+      - name: Upload artifact for deployment job
+        uses: actions/upload-artifact@v4
+        with:
+          name: .net-mcp
+          path: ./publish-mcp
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v4
+        with:
+          name: .net-mcp
+          path: ./publish-mcp
+
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: 'edumanage-mcp'
+          slot-name: 'Production'
+          package: ./publish-mcp
+
+      - name: Restart Azure Web App
+        run: az webapp restart --name edumanage-mcp --resource-group edumanage-rg
+```
+
+> The `EduManage.Mcp` app targets `net10.0`. Ensure App Service is set to the same runtime (`DOTNETCORE:10.0`) as created in Step 1.
+
+---
+
+## Step 6 — Update .mcp.json for production
+
+After both apps are deployed, update `.mcp.json` (the Claude Code MCP config at the repo root) to point to production:
+
+```json
+{
+  "mcpServers": {
+    "edumanage-api": {
+      "type": "http",
+      "url": "https://edumanage-api.azurewebsites.net/mcp",
+      "headers": {
+        "Authorization": "Bearer <your-jwt-token>"
+      }
+    },
+    "edumanage-mcp": {
+      "type": "http",
+      "url": "https://edumanage-mcp.azurewebsites.net/mcp",
+      "headers": {
+        "X-Api-Key": "<your-mcp-api-key>"
+      }
+    }
+  }
+}
+```
+
+**Getting an MCP API key:**
+1. Log in to the frontend (`edumanage-api.azurewebsites.net`)
+2. Navigate to **Settings → API Keys** (calls `POST /api/mcp-keys`)
+3. Copy the key returned and paste it as the `X-Api-Key` value above
+
+> Keep `.mcp.json` out of version control if it contains personal API keys — add it to `.gitignore`. The file in the repo uses `localhost` URLs suitable for local dev.
+
+---
+
+## Step 7 — Deploy the frontend via Azure Static Web Apps
 
 1. Open [portal.azure.com](https://portal.azure.com) → **Static Web Apps** → **Create**
 2. Fill in:
@@ -174,7 +317,7 @@ After creation, copy the URL (e.g. `https://nice-ground-040b55303.azurestaticapp
 
 ---
 
-## Step 6 — Frontend environment variables
+## Step 8 — Frontend environment variables
 
 Vite bakes `VITE_*` values into the bundle **at build time**. Set them as GitHub Actions secrets (Step 3) — the workflow injects them during `npm run build:ci`.
 
@@ -182,7 +325,7 @@ Vite bakes `VITE_*` values into the bundle **at build time**. Set them as GitHub
 
 ---
 
-## Step 7 — Update Auth0 settings
+## Step 9 — Update Auth0 settings
 
 1. Open [manage.auth0.com](https://manage.auth0.com) → your application
 2. Add your Static Web App URL to:
@@ -193,15 +336,20 @@ Vite bakes `VITE_*` values into the bundle **at build time**. Set them as GitHub
 
 ---
 
-## Step 8 — Verify
+## Step 10 — Verify
 
 1. Visit your Static Web App URL — the Vue app should load.
 2. Log in with Auth0.
 3. Open browser DevTools → Network and confirm API calls go to `azurewebsites.net` and return 200s.
 4. Check the backend health probe: `https://edumanage-api.azurewebsites.net/health`
-5. Check backend logs if anything fails:
+5. Test the MCP endpoint (returns SSE stream on a valid request):
+   ```bash
+   curl -H "X-Api-Key: <your-key>" https://edumanage-mcp.azurewebsites.net/mcp
+   ```
+6. Check backend or MCP logs if anything fails:
    ```bash
    az webapp log tail --name $BACKEND_APP_NAME --resource-group $RESOURCE_GROUP
+   az webapp log tail --name $MCP_APP_NAME --resource-group $RESOURCE_GROUP
    ```
 
 ---
@@ -210,10 +358,10 @@ Vite bakes `VITE_*` values into the bundle **at build time**. Set them as GitHub
 
 | What changed | How it deploys |
 |---|---|
-| `netbackend/**` pushed to `main` | `deploy-backend.yml` builds and deploys to App Service |
+| `netbackend/**` pushed to `main` | `main_edumanage-api.yml` deploys API; `deploy-mcp.yml` deploys MCP server |
 | `modern/**` pushed to `main` | Azure Static Web Apps workflow pre-builds and deploys the SPA |
-| Any other path | Neither workflow triggers |
-| Manual trigger | Both workflows support **Run workflow** in GitHub Actions |
+| Any other path | No workflow triggers |
+| Manual trigger | All workflows support **Run workflow** in GitHub Actions |
 
 ---
 
@@ -251,6 +399,10 @@ az sql server firewall-rule create \
 | Resource | Tier | Approx monthly cost |
 |---|---|---|
 | App Service Plan (B1) | Basic | ~$13 |
+| `edumanage-api` Web App | (on shared plan above) | $0 extra |
+| `edumanage-mcp` Web App | (on shared plan above) | $0 extra |
 | Azure Static Web Apps | Free | $0 |
 | Azure SQL Database | Serverless 1 vCore (auto-pause 60 min) | ~$5 min (near $0 when idle) |
-| **Total** | | **~$18 / month** (less with idle time) |
+| **Total** | | **~$18 / month** (both apps share the same B1 plan) |
+
+> Both `edumanage-api` and `edumanage-mcp` can run on the same B1 App Service Plan at no extra cost — each is a separate Web App but shares the plan's compute.

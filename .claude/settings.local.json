@@ -49,5 +49,9 @@
       "mcp__local-mcp__create_plan",
       "Bash(npm install *)"
     ]
-  }
+  },
+  "enabledMcpjsonServers": [
+    "edumanage-api"
+  ],
+  "enableAllProjectMcpServers": true
 }
