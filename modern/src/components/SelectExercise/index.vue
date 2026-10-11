@@ -1,48 +1,50 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useExerciseStore } from '../../stores/exerciseStore'
-import { exerciseImageMap } from '../../data/exerciseImageMap'
-import type { ExcerciseOut } from '../../types'
 import BaseBadge from '../BaseBadge.vue'
 import BaseModal from '../BaseModal.vue'
+import ExerciseBrowser from '../ExerciseBrowser/index.vue'
 
-const props = defineProps<{
-  modelValue: number | null
+const props = withDefaults(defineProps<{
+  modelValue: number | number[] | null
+  multiple?: boolean
   label?: string
   error?: string
-}>()
-const emit = defineEmits<{ 'update:modelValue': [val: number | null] }>()
+}>(), { multiple: false })
+const emit = defineEmits<{ 'update:modelValue': [val: any] }>()
 
 const exerciseStore = useExerciseStore()
-const search = ref('')
 const open = ref(false)
+const draft = ref<number[]>([])
 
-const filtered = computed(() =>
-  exerciseStore.exercises.filter((e) =>
-    !search.value || e.name?.toLowerCase().includes(search.value.toLowerCase())
-  )
+const currentIds = computed<number[]>(() =>
+  Array.isArray(props.modelValue) ? props.modelValue : props.modelValue === null ? [] : [props.modelValue],
 )
 
-const selected = computed(() =>
-  exerciseStore.exercises.find((e) => e.id === props.modelValue) ?? null
-)
+const selected = computed(() => exerciseStore.exercises.filter((e) => currentIds.value.includes(e.id)))
 
-function pick(id: number | null) {
-  emit('update:modelValue', id)
-  open.value = false
-  search.value = ''
+const triggerText = computed(() => {
+  if (!selected.value.length) return props.multiple ? 'Select exercises...' : 'Select exercise...'
+  return selected.value.length === 1 ? (selected.value[0]!.name ?? '') : `${selected.value.length} exercises selected`
+})
+
+function openDialog() {
+  draft.value = [...currentIds.value]
+  open.value = true
 }
 
-function close() {
-  open.value = false
-  search.value = ''
+function onSelect(id: number) {
+  if (!props.multiple) {
+    emit('update:modelValue', id)
+    open.value = false
+    return
+  }
+  draft.value = draft.value.includes(id) ? draft.value.filter((i) => i !== id) : [...draft.value, id]
 }
 
-const FALLBACK = '/images/benchpress.png'
-
-function exerciseImageSrc(ex: ExcerciseOut): string {
-  const mapEntry = exerciseImageMap[(ex.name ?? '').toLowerCase()]
-  return ex.imagePath ?? mapEntry?.imagePath ?? FALLBACK
+function confirm() {
+  emit('update:modelValue', draft.value)
+  open.value = false
 }
 </script>
 
@@ -54,42 +56,34 @@ function exerciseImageSrc(ex: ExcerciseOut): string {
       type="button"
       class="flex items-center gap-2 px-3 py-2.5 min-h-[44px] rounded-xl border text-sm text-left bg-white dark:bg-surface-dark text-text-primary dark:text-white outline-none transition-colors focus-visible:ring-2 focus-visible:ring-primary"
       :class="error ? 'border-red-400' : 'border-gray-200 dark:border-white/10'"
-      @click="open = true"
+      @click="openDialog"
     >
-      <span class="flex-1 truncate">{{ selected?.name ?? 'Select exercise...' }}</span>
-      <BaseBadge v-if="selected?.primaryMuscle" :label="selected.primaryMuscle" />
+      <span class="flex-1 truncate">{{ triggerText }}</span>
+      <BaseBadge v-if="selected.length === 1 && selected[0]!.primaryMuscle" :label="selected[0]!.primaryMuscle!" />
     </button>
 
     <p v-if="error" class="text-xs text-red-500">{{ error }}</p>
 
-    <BaseModal :open="open" title="Select Exercise" size="sm" @close="close">
-      <div class="flex flex-col gap-3">
-        <input
-          v-model="search"
-          placeholder="Search exercises..."
-          class="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-white/5 rounded-lg border border-gray-200 dark:border-white/10 outline-none text-text-primary dark:text-white placeholder:text-text-secondary focus-visible:ring-2 focus-visible:ring-primary"
-        />
-        <ul class="flex flex-col gap-0.5 max-h-72 overflow-y-auto custom-scrollbar">
-          <li v-for="ex in filtered" :key="ex.id">
-            <button
-              type="button"
-              class="w-full flex items-center gap-2 px-2 py-1.5 text-sm text-text-primary dark:text-white rounded-lg hover:bg-gray-50 dark:hover:bg-white/5 min-h-[44px]"
-              :class="modelValue === ex.id ? 'bg-primary/10' : ''"
-              @click="pick(ex.id)"
-            >
-              <img
-                :src="exerciseImageSrc(ex)"
-                :alt="ex.name ?? ''"
-                class="w-9 h-9 rounded-md object-cover flex-shrink-0 bg-gray-100 dark:bg-white/10"
-                @error="($event.target as HTMLImageElement).src = FALLBACK"
-              />
-              <span class="flex-1 text-left truncate">{{ ex.name }}</span>
-              <BaseBadge v-if="ex.primaryMuscle" :label="ex.primaryMuscle" />
-            </button>
-          </li>
-          <li v-if="!filtered.length" class="px-3 py-4 text-sm text-center text-text-secondary">No exercises found</li>
-        </ul>
-      </div>
+    <BaseModal
+      :open="open"
+      :title="multiple ? 'Select Exercises' : 'Select Exercise'"
+      size="xl"
+      mobile-fullscreen
+      @close="open = false"
+    >
+      <ExerciseBrowser :selected-ids="multiple ? draft : currentIds" :multiple="multiple" @select="onSelect" />
+      <template v-if="multiple" #footer>
+        <div class="flex items-center gap-3">
+          <span class="flex-1 text-sm text-text-secondary">{{ draft.length }} selected</span>
+          <button
+            type="button"
+            class="px-5 h-10 rounded-xl text-sm font-bold bg-primary text-white hover:bg-primary-dark transition-colors"
+            @click="confirm"
+          >
+            Confirm
+          </button>
+        </div>
+      </template>
     </BaseModal>
   </div>
 </template>

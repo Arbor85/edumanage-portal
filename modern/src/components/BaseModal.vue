@@ -5,7 +5,8 @@ import { X } from '@lucide/vue'
 const props = defineProps<{
   open: boolean
   title?: string
-  size?: 'sm' | 'md' | 'lg' | 'fullscreen'
+  size?: 'sm' | 'md' | 'lg' | 'xl' | 'fullscreen'
+  mobileFullscreen?: boolean
 }>()
 const emit = defineEmits<{ close: [] }>()
 
@@ -38,11 +39,13 @@ onUnmounted(() => { document.body.style.overflow = '' })
             'sm:max-w-sm':  size === 'sm',
             'sm:max-w-lg':  size === 'md' || !size,
             'sm:max-w-2xl': size === 'lg',
+            'sm:max-w-6xl sm:h-[86dvh]': size === 'xl',
             'sm:max-w-full sm:h-full sm:rounded-none': size === 'fullscreen',
+            'max-sm:h-[100dvh] max-sm:max-h-[100dvh] max-sm:rounded-none': mobileFullscreen,
           }"
         >
           <!-- Drag handle (mobile) -->
-          <div class="sm:hidden flex justify-center pt-3 pb-1 flex-shrink-0">
+          <div v-if="!mobileFullscreen" class="sm:hidden flex justify-center pt-3 pb-1 flex-shrink-0">
             <div class="w-10 h-1 rounded-full bg-gray-200 dark:bg-white/20" />
           </div>
 

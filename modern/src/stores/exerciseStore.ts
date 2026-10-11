@@ -69,6 +69,19 @@ export const useExerciseStore = defineStore('exercise', () => {
     await db.exercises.delete(id)
   }
 
+  async function toggleFavourite(id: number) {
+    const exercise = exercises.value.find((e) => e.id === id)
+    if (!exercise) return
+    exercise.isDirectFavourite = !exercise.isDirectFavourite
+    try {
+      await exercisesApi.toggleFavourite(id)
+      await db.exercises.put({ ...exercise })
+    } catch {
+      exercise.isDirectFavourite = !exercise.isDirectFavourite
+      throw new Error('Could not update favourite')
+    }
+  }
+
   const filtered = computed(() => (search: string, muscle: string, tag: string) => {
     const s = search.toLowerCase()
     return exercises.value.filter((e) => {
@@ -83,5 +96,5 @@ export const useExerciseStore = defineStore('exercise', () => {
     })
   })
 
-  return { exercises, isLoading, fetch, get, create, update, remove, setActive, filtered }
+  return { exercises, isLoading, fetch, get, create, update, remove, toggleFavourite, filtered }
 })

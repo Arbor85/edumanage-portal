@@ -6,65 +6,7 @@ const props = defineProps<{
   secondaryMuscles?: string[]
 }>()
 
-// Normalize dataset muscle names → SVG group keys
-const MUSCLE_MAP: Record<string, string> = {
-  // chest
-  'pectoralis major': 'chest',
-  'chest': 'chest',
-  // shoulders
-  'delts': 'shoulders',
-  'deltoids': 'shoulders',
-  'shoulders': 'shoulders',
-  'rear deltoids': 'shoulders',
-  'front deltoids': 'shoulders',
-  // biceps
-  'biceps': 'biceps',
-  'upper arms': 'biceps',
-  // triceps
-  'triceps': 'triceps',
-  // back / lats
-  'lats': 'lats',
-  'latissimus dorsi': 'lats',
-  'back': 'lats',
-  'upper back': 'lats',
-  // traps
-  'traps': 'traps',
-  'trapezius': 'traps',
-  // lower back
-  'lower back': 'lower_back',
-  'spine': 'lower_back',
-  'erector spinae': 'lower_back',
-  // core
-  'abs': 'core',
-  'abdominals': 'core',
-  'waist': 'core',
-  'core': 'core',
-  'hip flexors': 'core',
-  'obliques': 'core',
-  // glutes
-  'glutes': 'glutes',
-  'glute': 'glutes',
-  // quads
-  'quadriceps': 'quads',
-  'quads': 'quads',
-  'upper legs': 'quads',
-  // hamstrings
-  'hamstrings': 'hamstrings',
-  // calves
-  'calves': 'calves',
-  'calf': 'calves',
-  'lower legs': 'calves',
-  // forearms
-  'forearms': 'forearms',
-  'lower arms': 'forearms',
-  // neck
-  'neck': 'neck',
-  'levator scapulae': 'neck',
-}
-
-function normalize(muscle: string): string {
-  return MUSCLE_MAP[muscle.toLowerCase()] ?? muscle.toLowerCase()
-}
+import { normalizeMuscle as normalize } from '../utils/muscleGroups'
 
 const primary = computed(() => normalize(props.primaryMuscle))
 const secondaries = computed(() => (props.secondaryMuscles ?? []).map(normalize))

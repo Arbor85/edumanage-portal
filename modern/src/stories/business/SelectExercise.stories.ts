@@ -49,7 +49,20 @@ export const PreSelected: Story = {
     components: { SelectExercise },
     setup() {
       seedExerciseStore()
-      const val = ref<number | null>(args.modelValue ?? null)
+      const val = ref<number | null>((args.modelValue as number | null) ?? null)
+      return { args, val }
+    },
+    template: '<div class="w-72"><SelectExercise v-bind="args" v-model="val" /></div>',
+  }),
+}
+
+export const Multiple: Story = {
+  args: { multiple: true },
+  render: (args) => ({
+    components: { SelectExercise },
+    setup() {
+      seedExerciseStore()
+      const val = ref<number[]>([])
       return { args, val }
     },
     template: '<div class="w-72"><SelectExercise v-bind="args" v-model="val" /></div>',
