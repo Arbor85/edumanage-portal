@@ -114,11 +114,17 @@ const organizerActiveIdx = computed(() => organizerItems.value.findIndex(item =>
 <template>
   <aside
     ref="asideEl"
-    class="hidden lg:flex flex-col w-56 bg-surface-card min-h-screen flex-shrink-0 px-4 py-6 border-r border-gray-200 dark:border-white/5 relative"
+    class="group hidden lg:flex flex-col w-56 bg-surface-card min-h-screen flex-shrink-0 px-4 py-6 border-r border-gray-200 dark:border-white/5 relative z-10 shadow-[6px_0_24px_-10px_rgba(0,0,0,0.2)] dark:shadow-[6px_0_30px_-8px_rgba(0,0,0,0.6)]"
     @mousemove="onMouseMove"
     @mouseenter="glowVisible = true"
     @mouseleave="glowVisible = false"
   >
+    <!-- Grain texture -->
+    <div
+      class="pointer-events-none absolute inset-0 z-0 opacity-[0.05] dark:opacity-[0.09] mix-blend-overlay"
+      style="background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E&quot;)"
+    />
+
     <!-- Cursor-following glow -->
     <div
       class="pointer-events-none absolute inset-0 z-0 transition-opacity duration-[400ms]"
@@ -126,6 +132,12 @@ const organizerActiveIdx = computed(() => organizerItems.value.findIndex(item =>
         opacity: glowVisible ? 1 : 0,
         background: `radial-gradient(180px circle at 50% ${glowY}px, rgba(0,200,150,0.12) 0%, transparent 100%)`,
       }"
+    />
+
+    <!-- Hover glow bleeding onto content, right edge -->
+    <div
+      aria-hidden="true"
+      class="pointer-events-none absolute top-0 right-0 bottom-0 w-6 translate-x-1/2 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-md bg-gradient-to-r from-primary/40 via-primary/10 to-transparent"
     />
 
     <!-- Logo -->
