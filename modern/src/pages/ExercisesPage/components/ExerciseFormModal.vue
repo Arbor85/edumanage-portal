@@ -14,7 +14,6 @@ import ConfirmDialog from '../../../components/ConfirmDialog.vue'
 import ExerciseMuscleView from '../../../components/ExerciseMuscleView.vue'
 import ExerciseImagePickerModal from './ExerciseImagePickerModal.vue'
 import { MUSCLE_GROUPS, normalizeMuscle } from '../../../utils/muscleGroups'
-import { exerciseImageMap } from '../../../data/exerciseImageMap'
 import { EXERCISE_IMAGE_FALLBACK } from '../../../utils/exerciseImage'
 
 const ACTIVITY_TYPE_OPTIONS = [
@@ -78,11 +77,7 @@ const saving = ref(false)
 const confirmDelete = ref(false)
 const imagePicker = ref(false)
 
-const previewImage = computed(() => {
-  if (form.value.imagePath) return form.value.imagePath
-  const mapEntry = exerciseImageMap[(form.value.name ?? '').toLowerCase()]
-  return mapEntry?.imagePath ?? null
-})
+const previewImage = computed(() => form.value.imagePath ?? null)
 
 function onImageSelected(paths: { imagePath: string; gifPath: string }) {
   form.value.imagePath = paths.imagePath
@@ -174,7 +169,6 @@ async function doDelete() {
             </div>
             <div class="flex flex-col gap-1.5 min-w-0">
               <p v-if="form.imagePath" class="text-xs text-text-secondary truncate">{{ form.imagePath.split('/').pop() }}</p>
-              <p v-else-if="previewImage" class="text-xs text-text-secondary italic">Auto-matched from name</p>
               <p v-else class="text-xs text-text-secondary italic">No image selected</p>
               <div class="flex gap-1.5">
                 <button
