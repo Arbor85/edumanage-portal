@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 import { usePageTitle } from '../../../composables/usePageTitle'
 import type { ExcerciseOut, ExcerciseWriteRequest } from '../../../types'
 import { useExerciseStore } from '../../../stores/exerciseStore'
@@ -11,6 +11,8 @@ import BaseSelect from '../../../components/BaseSelect.vue'
 import TagInput from '../../../components/TagInput.vue'
 import BaseButton from '../../../components/BaseButton.vue'
 import ConfirmDialog from '../../../components/ConfirmDialog.vue'
+import ExerciseMuscleView from '../../../components/ExerciseMuscleView.vue'
+import { MUSCLE_GROUPS, normalizeMuscle } from '../../../utils/muscleGroups'
 
 const ACTIVITY_TYPE_OPTIONS = [
   { value: 'weighted',   label: 'Weighted – free weights, barbells, dumbbells' },
@@ -25,6 +27,13 @@ const ACTIVITY_TRACK_OPTIONS = [
   { value: 'distance',    label: 'Distance – track distance in meters' },
 ]
 
+const EQUIPMENT_BY_TYPE: Record<string, string[]> = {
+  weighted:   ['Barbell', 'Dumbbell', 'Kettlebell', 'EZ Bar', 'Bench', 'Weight Plate', 'Pull-up Bar', 'Dip Bar'],
+  machine:    ['Cable Machine', 'Smith Machine', 'Leg Press Machine', 'Lat Pulldown Machine', 'Row Machine', 'Chest Press Machine', 'Hack Squat Machine'],
+  bodyweight: ['Pull-up Bar', 'Parallel Bars', 'Resistance Band', 'Gymnastic Rings', 'Bench'],
+  cardio:     ['Treadmill', 'Stationary Bike', 'Rowing Machine', 'Elliptical', 'Jump Rope', 'Battle Ropes'],
+}
+
 const props = defineProps<{
   open: boolean
   exercise: ExcerciseOut | null
@@ -36,35 +45,59 @@ usePageTitle(() => props.exercise ? 'Edit Exercise' : 'New Exercise', () => prop
 const exerciseStore = useExerciseStore()
 const toast = useToast()
 
-const form = ref<ExcerciseWriteRequest>({
-  name: null, shortDescription: null, primaryMuscle: null,
-  secondaryMuscles: [], tags: [],
-  activityType: 'weighted', activityTrackType: 'repetitions',
-  isActive: true,
-})
+function blankForm(): ExcerciseWriteRequest {
+  return {
+    name: null, shortDescription: null, primaryMuscle: null,
+    secondaryMuscles: [], tags: [],
+    activityType: 'weighted', activityTrackType: 'repetitions',
+    equipment: null, isActive: true,
+  }
+}
+
+function formFromExercise(ex: ExcerciseOut): ExcerciseWriteRequest {
+  return {
+    name: ex.name,
+    shortDescription: ex.shortDescription,
+    primaryMuscle: ex.primaryMuscle ? normalizeMuscle(ex.primaryMuscle) : null,
+    secondaryMuscles: (ex.secondaryMuscles ?? []).map(normalizeMuscle),
+    tags: [...(ex.tags ?? [])],
+    activityType: ex.activityType ?? 'weighted',
+    activityTrackType: ex.activityTrackType ?? 'repetitions',
+    equipment: ex.equipment ?? null,
+    isActive: ex.isActive ?? true,
+  }
+}
+
+const form = ref<ExcerciseWriteRequest>(blankForm())
 const saving = ref(false)
 const confirmDelete = ref(false)
 
-watch(() => props.open, (val) => {
-  if (val) {
-    form.value = props.exercise
-      ? {
-          name: props.exercise.name,
-          shortDescription: props.exercise.shortDescription,
-          primaryMuscle: props.exercise.primaryMuscle,
-          secondaryMuscles: [...(props.exercise.secondaryMuscles ?? [])],
-          tags: [...(props.exercise.tags ?? [])],
-          activityType: props.exercise.activityType ?? 'weighted',
-          activityTrackType: props.exercise.activityTrackType ?? 'repetitions',
-          isActive: props.exercise.isActive ?? true,
-        }
-      : {
-          name: null, shortDescription: null, primaryMuscle: null,
-          secondaryMuscles: [], tags: [],
-          activityType: 'weighted', activityTrackType: 'repetitions',
-        }
+const availableEquipment = computed(() => EQUIPMENT_BY_TYPE[form.value.activityType] ?? [])
+
+watch(() => form.value.activityType, () => {
+  if (form.value.equipment && !availableEquipment.value.includes(form.value.equipment)) {
+    form.value.equipment = null
   }
 })
+
+watch(() => props.open, (val) => {
+  if (val) {
+    form.value = props.exercise ? formFromExercise(props.exercise) : blankForm()
+  }
+})
+
+function togglePrimary(key: string) {
+  form.value.primaryMuscle = form.value.primaryMuscle === key ? null : key
+}
+
+function toggleSecondary(key: string) {
+  const list = form.value.secondaryMuscles ?? []
+  form.value.secondaryMuscles = list.includes(key) ? list.filter(m => m !== key) : [...list, key]
+}
+
+function toggleEquipment(item: string) {
+  form.value.equipment = form.value.equipment === item ? null : item
+}
 
 async function save() {
   saving.value = true
@@ -98,55 +131,120 @@ async function doDelete() {
 </script>
 
 <template>
-  <BaseModal :open="open" :title="exercise ? 'Edit Exercise' : 'New Exercise'" size="md" @close="emit('close')">
-    <form class="flex flex-col gap-4" @submit.prevent="save">
-      <BaseInput v-model="form.name" label="Name" placeholder="e.g. Bench Press" />
-      <BaseTextarea v-model="form.shortDescription" label="Description" placeholder="Brief description..." :rows="2" />
-      <div class="flex flex-col gap-1">
-        <label class="text-sm font-medium text-text-primary dark:text-white">Primary Muscle</label>
-        <TagInput :model-value="!!form.primaryMuscle ? [form.primaryMuscle] : []" placeholder="Add muscle, press Enter" @update:model-value="form.primaryMuscle = $event[0]" />
-      </div>
-      <div class="flex flex-col gap-1">
-        <label class="text-sm font-medium text-text-primary dark:text-white">Secondary Muscles</label>
-        <TagInput :model-value="form.secondaryMuscles ?? []" placeholder="Add muscle, press Enter" @update:model-value="form.secondaryMuscles = $event" />
-      </div>
-      <div class="flex flex-col gap-1">
-        <label class="text-sm font-medium text-text-primary dark:text-white">Tags <span class="text-text-secondary font-normal">(include difficulty: Beginner / Intermediate / Advanced)</span></label>
-        <TagInput :model-value="form.tags ?? []" placeholder="Add tag, press Enter" @update:model-value="form.tags = $event" />
-      </div>
-      <BaseSelect
-        :model-value="form.activityType"
-        label="Activity Type"
-        :options="ACTIVITY_TYPE_OPTIONS"
-        @update:model-value="form.activityType = $event as typeof form.activityType"
-      />
-      <BaseSelect
-        :model-value="form.activityTrackType"
-        label="Track Type"
-        :options="ACTIVITY_TRACK_OPTIONS"
-        @update:model-value="form.activityTrackType = $event as typeof form.activityTrackType"
-      />
+  <BaseModal :open="open" :title="exercise ? 'Edit Exercise' : 'New Exercise'" size="xl" @close="emit('close')">
+    <div class="flex gap-6 h-full">
+      <!-- Left: form fields -->
+      <form class="flex-1 flex flex-col gap-4 overflow-y-auto custom-scrollbar min-h-0 pr-1" @submit.prevent="save">
+        <BaseInput v-model="form.name" label="Name" placeholder="e.g. Bench Press" />
+        <BaseTextarea v-model="form.shortDescription" label="Description" placeholder="Brief description..." :rows="2" />
 
-      <div class="flex items-center justify-between rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-surface-dark px-4 py-3">
-        <div>
-          <p class="text-sm font-medium text-text-primary dark:text-white">Active</p>
-          <p class="text-xs text-text-secondary dark:text-white/50 mt-0.5">Inactive exercises are hidden from regular users</p>
+        <BaseSelect
+          :model-value="form.activityType"
+          label="Activity Type"
+          :options="ACTIVITY_TYPE_OPTIONS"
+          @update:model-value="form.activityType = $event as typeof form.activityType"
+        />
+        <BaseSelect
+          :model-value="form.activityTrackType"
+          label="Track Type"
+          :options="ACTIVITY_TRACK_OPTIONS"
+          @update:model-value="form.activityTrackType = $event as typeof form.activityTrackType"
+        />
+
+        <!-- Equipment -->
+        <div class="flex flex-col gap-2">
+          <label class="text-sm font-medium text-text-primary dark:text-white">Equipment</label>
+          <div class="flex flex-wrap gap-1.5">
+            <button
+              v-for="item in availableEquipment"
+              :key="item"
+              type="button"
+              class="px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors"
+              :class="form.equipment === item
+                ? 'bg-primary border-primary text-white'
+                : 'bg-surface-card border-gray-200 dark:border-white/10 text-text-secondary hover:text-text-primary dark:hover:text-white hover:bg-gray-50 dark:hover:bg-surface-input'"
+              @click="toggleEquipment(item)"
+            >{{ item }}</button>
+          </div>
         </div>
-        <button
-          type="button"
-          role="switch"
-          :aria-checked="form.isActive"
-          class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-          :class="form.isActive ? 'bg-primary' : 'bg-gray-300 dark:bg-white/20'"
-          @click="form.isActive = !form.isActive"
-        >
-          <span
-            class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
-            :class="form.isActive ? 'translate-x-5' : 'translate-x-0'"
+
+        <!-- Primary Muscle -->
+        <div class="flex flex-col gap-2">
+          <label class="text-sm font-medium text-text-primary dark:text-white">Primary Muscle</label>
+          <div class="flex flex-wrap gap-1.5">
+            <button
+              v-for="m in MUSCLE_GROUPS"
+              :key="m.key"
+              type="button"
+              class="px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors"
+              :class="form.primaryMuscle === m.key
+                ? 'bg-primary border-primary text-white'
+                : 'bg-surface-card border-gray-200 dark:border-white/10 text-text-secondary hover:text-text-primary dark:hover:text-white hover:bg-gray-50 dark:hover:bg-surface-input'"
+              @click="togglePrimary(m.key)"
+            >{{ m.label }}</button>
+          </div>
+        </div>
+
+        <!-- Secondary Muscles -->
+        <div class="flex flex-col gap-2">
+          <label class="text-sm font-medium text-text-primary dark:text-white">Secondary Muscles</label>
+          <div class="flex flex-wrap gap-1.5">
+            <button
+              v-for="m in MUSCLE_GROUPS"
+              :key="m.key"
+              type="button"
+              class="px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors"
+              :class="(form.secondaryMuscles ?? []).includes(m.key)
+                ? 'bg-primary/15 border-primary/40 text-primary'
+                : 'bg-surface-card border-gray-200 dark:border-white/10 text-text-secondary hover:text-text-primary dark:hover:text-white hover:bg-gray-50 dark:hover:bg-surface-input'"
+              @click="toggleSecondary(m.key)"
+            >{{ m.label }}</button>
+          </div>
+        </div>
+
+        <!-- Tags -->
+        <div class="flex flex-col gap-1">
+          <label class="text-sm font-medium text-text-primary dark:text-white">
+            Tags <span class="text-text-secondary font-normal">(include difficulty: Beginner / Intermediate / Advanced)</span>
+          </label>
+          <TagInput :model-value="form.tags ?? []" placeholder="Add tag, press Enter" @update:model-value="form.tags = $event" />
+        </div>
+
+        <!-- Active toggle -->
+        <div class="flex items-center justify-between rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-surface-dark px-4 py-3">
+          <div>
+            <p class="text-sm font-medium text-text-primary dark:text-white">Active</p>
+            <p class="text-xs text-text-secondary dark:text-white/50 mt-0.5">Inactive exercises are hidden from regular users</p>
+          </div>
+          <button
+            type="button"
+            role="switch"
+            :aria-checked="form.isActive"
+            class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+            :class="form.isActive ? 'bg-primary' : 'bg-gray-300 dark:bg-white/20'"
+            @click="form.isActive = !form.isActive"
+          >
+            <span
+              class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+              :class="form.isActive ? 'translate-x-5' : 'translate-x-0'"
+            />
+          </button>
+        </div>
+      </form>
+
+      <!-- Right: live muscle visualization -->
+      <div class="w-52 flex-shrink-0 hidden sm:flex flex-col gap-2">
+        <p class="text-sm font-medium text-text-primary dark:text-white">Muscle Preview</p>
+        <div class="rounded-xl bg-gray-900 p-4 flex-1">
+          <ExerciseMuscleView
+            :primary-muscle="form.primaryMuscle ?? ''"
+            :secondary-muscles="(form.secondaryMuscles ?? []) as string[]"
+            interactive
+            @select="togglePrimary"
           />
-        </button>
+        </div>
       </div>
-    </form>
+    </div>
 
     <template #footer>
       <div class="flex items-center gap-2">

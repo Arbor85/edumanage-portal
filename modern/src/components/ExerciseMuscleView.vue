@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { normalizeMuscle as normalize } from '../utils/muscleGroups'
 
 const props = defineProps<{
   primaryMuscle: string
   secondaryMuscles?: string[]
+  interactive?: boolean
 }>()
-
-import { normalizeMuscle as normalize } from '../utils/muscleGroups'
+const emit = defineEmits<{ select: [key: string] }>()
 
 const primary = computed(() => normalize(props.primaryMuscle))
 const secondaries = computed(() => (props.secondaryMuscles ?? []).map(normalize))
@@ -21,9 +22,13 @@ function fill(muscle: string): string {
   return INACTIVE_COLOR
 }
 
+function onMuscle(key: string) {
+  if (props.interactive) emit('select', key)
+}
+
 const allMuscles = computed(() => {
   const list: { key: string; label: string; role: 'primary' | 'secondary' }[] = []
-  list.push({ key: primary.value, label: props.primaryMuscle, role: 'primary' })
+  if (props.primaryMuscle) list.push({ key: primary.value, label: props.primaryMuscle, role: 'primary' })
   for (const s of props.secondaryMuscles ?? []) {
     list.push({ key: normalize(s), label: s, role: 'secondary' })
   }
@@ -32,7 +37,7 @@ const allMuscles = computed(() => {
 </script>
 
 <template>
-  <div class="flex flex-col gap-6">
+  <div class="flex flex-col gap-6" :class="{ interactive }">
     <!-- Front + Back SVG bodies -->
     <div class="flex justify-center gap-8">
       <!-- Front view -->
@@ -44,55 +49,67 @@ const allMuscles = computed(() => {
           <circle cx="50" cy="13" r="11" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="0.8" />
           <!-- Neck -->
           <rect x="46" y="23" width="8" height="8" rx="3" fill="rgba(255,255,255,0.05)" />
-          <!-- Left shoulder -->
-          <ellipse cx="27" cy="34" rx="10" ry="7" :fill="fill('shoulders')" />
-          <ellipse cx="27" cy="34" rx="10" ry="7" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.8" />
-          <!-- Right shoulder -->
-          <ellipse cx="73" cy="34" rx="10" ry="7" :fill="fill('shoulders')" />
-          <ellipse cx="73" cy="34" rx="10" ry="7" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.8" />
-          <!-- Chest left -->
-          <path d="M37,29 L50,34 L50,61 L34,61 Z" :fill="fill('chest')" />
-          <path d="M37,29 L50,34 L50,61 L34,61 Z" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.8" />
-          <!-- Chest right -->
-          <path d="M63,29 L50,34 L50,61 L66,61 Z" :fill="fill('chest')" />
-          <path d="M63,29 L50,34 L50,61 L66,61 Z" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.8" />
-          <!-- Left bicep -->
-          <rect x="15" y="33" width="13" height="30" rx="5" :fill="fill('biceps')" />
-          <rect x="15" y="33" width="13" height="30" rx="5" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.8" />
-          <!-- Right bicep -->
-          <rect x="72" y="33" width="13" height="30" rx="5" :fill="fill('biceps')" />
-          <rect x="72" y="33" width="13" height="30" rx="5" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.8" />
-          <!-- Left tricep (visible from front, side) -->
-          <rect x="10" y="33" width="7" height="28" rx="3" :fill="fill('triceps')" />
-          <rect x="10" y="33" width="7" height="28" rx="3" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="0.8" />
-          <!-- Right tricep -->
-          <rect x="83" y="33" width="7" height="28" rx="3" :fill="fill('triceps')" />
-          <rect x="83" y="33" width="7" height="28" rx="3" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="0.8" />
-          <!-- Left forearm -->
-          <rect x="10" y="63" width="11" height="24" rx="4" :fill="fill('forearms')" />
-          <rect x="10" y="63" width="11" height="24" rx="4" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="0.8" />
-          <!-- Right forearm -->
-          <rect x="79" y="63" width="11" height="24" rx="4" :fill="fill('forearms')" />
-          <rect x="79" y="63" width="11" height="24" rx="4" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="0.8" />
-          <!-- Core / abs -->
-          <rect x="35" y="61" width="30" height="28" rx="3" :fill="fill('core')" />
-          <rect x="35" y="61" width="30" height="28" rx="3" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.8" />
-          <!-- Hip / glutes -->
-          <rect x="30" y="87" width="40" height="15" rx="3" :fill="fill('glutes')" />
-          <rect x="30" y="87" width="40" height="15" rx="3" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.8" />
-          <!-- Left quad -->
-          <rect x="29" y="102" width="19" height="44" rx="5" :fill="fill('quads')" />
-          <rect x="29" y="102" width="19" height="44" rx="5" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.8" />
-          <!-- Right quad -->
-          <rect x="52" y="102" width="19" height="44" rx="5" :fill="fill('quads')" />
-          <rect x="52" y="102" width="19" height="44" rx="5" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.8" />
-          <!-- Left calf -->
-          <rect x="30" y="148" width="16" height="38" rx="4" :fill="fill('calves')" />
-          <rect x="30" y="148" width="16" height="38" rx="4" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.8" />
-          <!-- Right calf -->
-          <rect x="54" y="148" width="16" height="38" rx="4" :fill="fill('calves')" />
-          <rect x="54" y="148" width="16" height="38" rx="4" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.8" />
-          <!-- Feet -->
+
+          <g class="mg" @click="onMuscle('shoulders')">
+            <ellipse cx="27" cy="34" rx="10" ry="7" :fill="fill('shoulders')" />
+            <ellipse cx="27" cy="34" rx="10" ry="7" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.8" pointer-events="none" />
+            <ellipse cx="73" cy="34" rx="10" ry="7" :fill="fill('shoulders')" />
+            <ellipse cx="73" cy="34" rx="10" ry="7" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.8" pointer-events="none" />
+          </g>
+
+          <g class="mg" @click="onMuscle('chest')">
+            <path d="M37,29 L50,34 L50,61 L34,61 Z" :fill="fill('chest')" />
+            <path d="M37,29 L50,34 L50,61 L34,61 Z" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.8" pointer-events="none" />
+            <path d="M63,29 L50,34 L50,61 L66,61 Z" :fill="fill('chest')" />
+            <path d="M63,29 L50,34 L50,61 L66,61 Z" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.8" pointer-events="none" />
+          </g>
+
+          <g class="mg" @click="onMuscle('biceps')">
+            <rect x="15" y="33" width="13" height="30" rx="5" :fill="fill('biceps')" />
+            <rect x="15" y="33" width="13" height="30" rx="5" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.8" pointer-events="none" />
+            <rect x="72" y="33" width="13" height="30" rx="5" :fill="fill('biceps')" />
+            <rect x="72" y="33" width="13" height="30" rx="5" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.8" pointer-events="none" />
+          </g>
+
+          <g class="mg" @click="onMuscle('triceps')">
+            <rect x="10" y="33" width="7" height="28" rx="3" :fill="fill('triceps')" />
+            <rect x="10" y="33" width="7" height="28" rx="3" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="0.8" pointer-events="none" />
+            <rect x="83" y="33" width="7" height="28" rx="3" :fill="fill('triceps')" />
+            <rect x="83" y="33" width="7" height="28" rx="3" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="0.8" pointer-events="none" />
+          </g>
+
+          <g class="mg" @click="onMuscle('forearms')">
+            <rect x="10" y="63" width="11" height="24" rx="4" :fill="fill('forearms')" />
+            <rect x="10" y="63" width="11" height="24" rx="4" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="0.8" pointer-events="none" />
+            <rect x="79" y="63" width="11" height="24" rx="4" :fill="fill('forearms')" />
+            <rect x="79" y="63" width="11" height="24" rx="4" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="0.8" pointer-events="none" />
+          </g>
+
+          <g class="mg" @click="onMuscle('core')">
+            <rect x="35" y="61" width="30" height="28" rx="3" :fill="fill('core')" />
+            <rect x="35" y="61" width="30" height="28" rx="3" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.8" pointer-events="none" />
+          </g>
+
+          <g class="mg" @click="onMuscle('glutes')">
+            <rect x="30" y="87" width="40" height="15" rx="3" :fill="fill('glutes')" />
+            <rect x="30" y="87" width="40" height="15" rx="3" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.8" pointer-events="none" />
+          </g>
+
+          <g class="mg" @click="onMuscle('quads')">
+            <rect x="29" y="102" width="19" height="44" rx="5" :fill="fill('quads')" />
+            <rect x="29" y="102" width="19" height="44" rx="5" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.8" pointer-events="none" />
+            <rect x="52" y="102" width="19" height="44" rx="5" :fill="fill('quads')" />
+            <rect x="52" y="102" width="19" height="44" rx="5" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.8" pointer-events="none" />
+          </g>
+
+          <g class="mg" @click="onMuscle('calves')">
+            <rect x="30" y="148" width="16" height="38" rx="4" :fill="fill('calves')" />
+            <rect x="30" y="148" width="16" height="38" rx="4" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.8" pointer-events="none" />
+            <rect x="54" y="148" width="16" height="38" rx="4" :fill="fill('calves')" />
+            <rect x="54" y="148" width="16" height="38" rx="4" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.8" pointer-events="none" />
+          </g>
+
+          <!-- Feet (non-interactive) -->
           <ellipse cx="38" cy="190" rx="11" ry="6" fill="rgba(255,255,255,0.04)" />
           <ellipse cx="62" cy="190" rx="11" ry="6" fill="rgba(255,255,255,0.04)" />
         </svg>
@@ -105,56 +122,71 @@ const allMuscles = computed(() => {
           <!-- Head -->
           <circle cx="50" cy="13" r="11" fill="rgba(255,255,255,0.06)" />
           <circle cx="50" cy="13" r="11" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="0.8" />
-          <!-- Neck -->
-          <rect x="46" y="23" width="8" height="8" rx="3" :fill="fill('neck')" />
-          <!-- Traps -->
-          <path d="M37,24 Q50,18 63,24 L66,40 Q50,35 34,40 Z" :fill="fill('traps')" />
-          <path d="M37,24 Q50,18 63,24 L66,40 Q50,35 34,40 Z" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.8" />
-          <!-- Left rear shoulder -->
-          <ellipse cx="27" cy="34" rx="10" ry="7" :fill="fill('shoulders')" />
-          <ellipse cx="27" cy="34" rx="10" ry="7" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.8" />
-          <!-- Right rear shoulder -->
-          <ellipse cx="73" cy="34" rx="10" ry="7" :fill="fill('shoulders')" />
-          <ellipse cx="73" cy="34" rx="10" ry="7" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.8" />
-          <!-- Left lat -->
-          <path d="M34,40 L50,38 L50,70 L30,75 Z" :fill="fill('lats')" />
-          <path d="M34,40 L50,38 L50,70 L30,75 Z" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.8" />
-          <!-- Right lat -->
-          <path d="M66,40 L50,38 L50,70 L70,75 Z" :fill="fill('lats')" />
-          <path d="M66,40 L50,38 L50,70 L70,75 Z" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.8" />
-          <!-- Left tricep -->
-          <rect x="15" y="33" width="13" height="30" rx="5" :fill="fill('triceps')" />
-          <rect x="15" y="33" width="13" height="30" rx="5" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.8" />
-          <!-- Right tricep -->
-          <rect x="72" y="33" width="13" height="30" rx="5" :fill="fill('triceps')" />
-          <rect x="72" y="33" width="13" height="30" rx="5" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.8" />
-          <!-- Left forearm -->
-          <rect x="10" y="63" width="11" height="24" rx="4" :fill="fill('forearms')" />
-          <rect x="10" y="63" width="11" height="24" rx="4" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="0.8" />
-          <!-- Right forearm -->
-          <rect x="79" y="63" width="11" height="24" rx="4" :fill="fill('forearms')" />
-          <rect x="79" y="63" width="11" height="24" rx="4" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="0.8" />
-          <!-- Lower back -->
-          <rect x="35" y="70" width="30" height="20" rx="3" :fill="fill('lower_back')" />
-          <rect x="35" y="70" width="30" height="20" rx="3" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.8" />
-          <!-- Glutes -->
-          <ellipse cx="38" cy="97" rx="12" ry="12" :fill="fill('glutes')" />
-          <ellipse cx="38" cy="97" rx="12" ry="12" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.8" />
-          <ellipse cx="62" cy="97" rx="12" ry="12" :fill="fill('glutes')" />
-          <ellipse cx="62" cy="97" rx="12" ry="12" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.8" />
-          <!-- Left hamstring -->
-          <rect x="29" y="108" width="19" height="40" rx="5" :fill="fill('hamstrings')" />
-          <rect x="29" y="108" width="19" height="40" rx="5" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.8" />
-          <!-- Right hamstring -->
-          <rect x="52" y="108" width="19" height="40" rx="5" :fill="fill('hamstrings')" />
-          <rect x="52" y="108" width="19" height="40" rx="5" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.8" />
-          <!-- Left calf (rear) -->
-          <rect x="30" y="150" width="16" height="36" rx="4" :fill="fill('calves')" />
-          <rect x="30" y="150" width="16" height="36" rx="4" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.8" />
-          <!-- Right calf (rear) -->
-          <rect x="54" y="150" width="16" height="36" rx="4" :fill="fill('calves')" />
-          <rect x="54" y="150" width="16" height="36" rx="4" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.8" />
-          <!-- Feet -->
+
+          <g class="mg" @click="onMuscle('neck')">
+            <rect x="46" y="23" width="8" height="8" rx="3" :fill="fill('neck')" />
+          </g>
+
+          <g class="mg" @click="onMuscle('traps')">
+            <path d="M37,24 Q50,18 63,24 L66,40 Q50,35 34,40 Z" :fill="fill('traps')" />
+            <path d="M37,24 Q50,18 63,24 L66,40 Q50,35 34,40 Z" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.8" pointer-events="none" />
+          </g>
+
+          <g class="mg" @click="onMuscle('shoulders')">
+            <ellipse cx="27" cy="34" rx="10" ry="7" :fill="fill('shoulders')" />
+            <ellipse cx="27" cy="34" rx="10" ry="7" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.8" pointer-events="none" />
+            <ellipse cx="73" cy="34" rx="10" ry="7" :fill="fill('shoulders')" />
+            <ellipse cx="73" cy="34" rx="10" ry="7" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.8" pointer-events="none" />
+          </g>
+
+          <g class="mg" @click="onMuscle('lats')">
+            <path d="M34,40 L50,38 L50,70 L30,75 Z" :fill="fill('lats')" />
+            <path d="M34,40 L50,38 L50,70 L30,75 Z" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.8" pointer-events="none" />
+            <path d="M66,40 L50,38 L50,70 L70,75 Z" :fill="fill('lats')" />
+            <path d="M66,40 L50,38 L50,70 L70,75 Z" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.8" pointer-events="none" />
+          </g>
+
+          <g class="mg" @click="onMuscle('triceps')">
+            <rect x="15" y="33" width="13" height="30" rx="5" :fill="fill('triceps')" />
+            <rect x="15" y="33" width="13" height="30" rx="5" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.8" pointer-events="none" />
+            <rect x="72" y="33" width="13" height="30" rx="5" :fill="fill('triceps')" />
+            <rect x="72" y="33" width="13" height="30" rx="5" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.8" pointer-events="none" />
+          </g>
+
+          <g class="mg" @click="onMuscle('forearms')">
+            <rect x="10" y="63" width="11" height="24" rx="4" :fill="fill('forearms')" />
+            <rect x="10" y="63" width="11" height="24" rx="4" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="0.8" pointer-events="none" />
+            <rect x="79" y="63" width="11" height="24" rx="4" :fill="fill('forearms')" />
+            <rect x="79" y="63" width="11" height="24" rx="4" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="0.8" pointer-events="none" />
+          </g>
+
+          <g class="mg" @click="onMuscle('lower_back')">
+            <rect x="35" y="70" width="30" height="20" rx="3" :fill="fill('lower_back')" />
+            <rect x="35" y="70" width="30" height="20" rx="3" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.8" pointer-events="none" />
+          </g>
+
+          <g class="mg" @click="onMuscle('glutes')">
+            <ellipse cx="38" cy="97" rx="12" ry="12" :fill="fill('glutes')" />
+            <ellipse cx="38" cy="97" rx="12" ry="12" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.8" pointer-events="none" />
+            <ellipse cx="62" cy="97" rx="12" ry="12" :fill="fill('glutes')" />
+            <ellipse cx="62" cy="97" rx="12" ry="12" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.8" pointer-events="none" />
+          </g>
+
+          <g class="mg" @click="onMuscle('hamstrings')">
+            <rect x="29" y="108" width="19" height="40" rx="5" :fill="fill('hamstrings')" />
+            <rect x="29" y="108" width="19" height="40" rx="5" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.8" pointer-events="none" />
+            <rect x="52" y="108" width="19" height="40" rx="5" :fill="fill('hamstrings')" />
+            <rect x="52" y="108" width="19" height="40" rx="5" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.8" pointer-events="none" />
+          </g>
+
+          <g class="mg" @click="onMuscle('calves')">
+            <rect x="30" y="150" width="16" height="36" rx="4" :fill="fill('calves')" />
+            <rect x="30" y="150" width="16" height="36" rx="4" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.8" pointer-events="none" />
+            <rect x="54" y="150" width="16" height="36" rx="4" :fill="fill('calves')" />
+            <rect x="54" y="150" width="16" height="36" rx="4" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.8" pointer-events="none" />
+          </g>
+
+          <!-- Feet (non-interactive) -->
           <ellipse cx="38" cy="190" rx="11" ry="6" fill="rgba(255,255,255,0.04)" />
           <ellipse cx="62" cy="190" rx="11" ry="6" fill="rgba(255,255,255,0.04)" />
         </svg>
@@ -162,7 +194,7 @@ const allMuscles = computed(() => {
     </div>
 
     <!-- Legend -->
-    <div class="flex flex-col gap-1.5">
+    <div v-if="allMuscles.length" class="flex flex-col gap-1.5">
       <div
         v-for="m in allMuscles"
         :key="m.key + m.role"
@@ -181,5 +213,18 @@ const allMuscles = computed(() => {
         </span>
       </div>
     </div>
+    <p v-else class="text-xs text-text-muted text-center">Click a muscle to select</p>
   </div>
 </template>
+
+<style scoped>
+g.mg {
+  transition: filter 120ms ease;
+}
+.interactive g.mg {
+  cursor: pointer;
+}
+.interactive g.mg:hover {
+  filter: brightness(1.5) drop-shadow(0 0 3px rgba(0, 200, 150, 0.4));
+}
+</style>
