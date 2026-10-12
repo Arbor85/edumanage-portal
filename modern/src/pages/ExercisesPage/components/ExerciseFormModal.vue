@@ -12,7 +12,10 @@ import TagInput from '../../../components/TagInput.vue'
 import BaseButton from '../../../components/BaseButton.vue'
 import ConfirmDialog from '../../../components/ConfirmDialog.vue'
 import ExerciseMuscleView from '../../../components/ExerciseMuscleView.vue'
+import ExerciseImagePickerModal from './ExerciseImagePickerModal.vue'
 import { MUSCLE_GROUPS, normalizeMuscle } from '../../../utils/muscleGroups'
+import { exerciseImageMap } from '../../../data/exerciseImageMap'
+import { EXERCISE_IMAGE_FALLBACK } from '../../../utils/exerciseImage'
 
 const ACTIVITY_TYPE_OPTIONS = [
   { value: 'weighted',   label: 'Weighted – free weights, barbells, dumbbells' },
@@ -64,6 +67,8 @@ function formFromExercise(ex: ExcerciseOut): ExcerciseWriteRequest {
     activityType: ex.activityType ?? 'weighted',
     activityTrackType: ex.activityTrackType ?? 'repetitions',
     equipment: ex.equipment ?? null,
+    imagePath: ex.imagePath ?? null,
+    gifPath: ex.gifPath ?? null,
     isActive: ex.isActive ?? true,
   }
 }
@@ -71,6 +76,24 @@ function formFromExercise(ex: ExcerciseOut): ExcerciseWriteRequest {
 const form = ref<ExcerciseWriteRequest>(blankForm())
 const saving = ref(false)
 const confirmDelete = ref(false)
+const imagePicker = ref(false)
+
+const previewImage = computed(() => {
+  if (form.value.imagePath) return form.value.imagePath
+  const mapEntry = exerciseImageMap[(form.value.name ?? '').toLowerCase()]
+  return mapEntry?.imagePath ?? null
+})
+
+function onImageSelected(paths: { imagePath: string; gifPath: string }) {
+  form.value.imagePath = paths.imagePath
+  form.value.gifPath = paths.gifPath
+  imagePicker.value = false
+}
+
+function clearImage() {
+  form.value.imagePath = null
+  form.value.gifPath = null
+}
 
 const availableEquipment = computed(() => EQUIPMENT_BY_TYPE[form.value.activityType] ?? [])
 
@@ -137,6 +160,38 @@ async function doDelete() {
       <form class="flex-1 flex flex-col gap-4 overflow-y-auto custom-scrollbar min-h-0 pr-1" @submit.prevent="save">
         <BaseInput v-model="form.name" label="Name" placeholder="e.g. Bench Press" />
         <BaseTextarea v-model="form.shortDescription" label="Description" placeholder="Brief description..." :rows="2" />
+
+        <!-- Image -->
+        <div class="flex flex-col gap-2">
+          <label class="text-sm font-medium text-text-primary dark:text-white">Image</label>
+          <div class="flex items-center gap-3">
+            <div class="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 bg-gray-100 dark:bg-surface-input border border-gray-200 dark:border-white/10">
+              <img
+                :src="previewImage ?? EXERCISE_IMAGE_FALLBACK"
+                alt="Exercise image"
+                class="w-full h-full object-cover"
+              />
+            </div>
+            <div class="flex flex-col gap-1.5 min-w-0">
+              <p v-if="form.imagePath" class="text-xs text-text-secondary truncate">{{ form.imagePath.split('/').pop() }}</p>
+              <p v-else-if="previewImage" class="text-xs text-text-secondary italic">Auto-matched from name</p>
+              <p v-else class="text-xs text-text-secondary italic">No image selected</p>
+              <div class="flex gap-1.5">
+                <button
+                  type="button"
+                  class="px-2.5 py-1 rounded-lg text-xs font-medium border border-gray-200 dark:border-white/10 bg-surface-card text-text-secondary hover:text-text-primary dark:hover:text-white hover:bg-gray-50 dark:hover:bg-surface-input transition-colors"
+                  @click="imagePicker = true"
+                >{{ form.imagePath ? 'Change' : 'Select' }}</button>
+                <button
+                  v-if="form.imagePath"
+                  type="button"
+                  class="px-2.5 py-1 rounded-lg text-xs font-medium border border-gray-200 dark:border-white/10 bg-surface-card text-text-secondary hover:text-red-500 hover:border-red-300 transition-colors"
+                  @click="clearImage"
+                >Remove</button>
+              </div>
+            </div>
+          </div>
+        </div>
 
         <BaseSelect
           :model-value="form.activityType"
@@ -264,5 +319,12 @@ async function doDelete() {
     variant="danger"
     @confirm="doDelete"
     @cancel="confirmDelete = false"
+  />
+
+  <ExerciseImagePickerModal
+    :open="imagePicker"
+    :current="form.imagePath ?? null"
+    @select="onImageSelected"
+    @close="imagePicker = false"
   />
 </template>
