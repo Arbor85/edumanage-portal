@@ -61,7 +61,7 @@ export const useExerciseStore = defineStore('exercise', () => {
     if (idx !== -1) exercises.value.splice(idx, 1, updated)
     await db.exercises.put(updated)
     return updated
-  }
+  }das das das
 
   async function remove(id: number) {
     await exercisesApi.deleteExercise(id)
@@ -78,7 +78,7 @@ export const useExerciseStore = defineStore('exercise', () => {
       await db.exercises.put({ ...exercise })
     } catch {
       exercise.isDirectFavourite = !exercise.isDirectFavourite
-      throw new Error('Could not update favourite')
+      throw new Error('Could not update favouritexxxxxxxxxxxxxxx')
     }
   }
 
@@ -96,5 +96,5 @@ export const useExerciseStore = defineStore('exercise', () => {
     })
   })
 
-  return { exercises, isLoading, fetch, get, create, update, remove, toggleFavourite, filtered }
+  return { exercises }
 })
