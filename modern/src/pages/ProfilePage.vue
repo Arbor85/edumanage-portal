@@ -4,6 +4,8 @@ import { usePageTitle } from '../composables/usePageTitle'
 usePageTitle('Profile')
 import { useAuthStore } from '../stores/authStore'
 import { useRouter } from 'vue-router'
+import { computed, ref } from 'vue'
+import { Check } from '@lucide/vue'
 import AppLayout from '../components/layout/AppLayout.vue'
 import PageHeader from '../components/layout/PageHeader.vue'
 import BaseAvatar from '../components/BaseAvatar.vue'
@@ -13,8 +15,31 @@ import { db } from '../db/offlineDb'
 const authStore = useAuthStore()
 const router = useRouter()
 
+<<<<<<< Updated upstream
 type Tab = 'account' | 'local-data'
 const activeTab = ref<Tab>('account')
+=======
+const PERMISSION_LABELS: Record<string, string> = {
+  'manage:clients': 'Zarządzanie klientami',
+  'manage:equipment': 'Zarządzanie sprzętem',
+  'manage:forms': 'Zarządzanie formularzami',
+  'manage:exercise': 'Zarządzanie ćwiczeniami',
+  'manage:organization': 'Zarządzanie organizacją',
+  'manage:buildings': 'Zarządzanie budynkami',
+  'view:schedule': 'Podgląd harmonogramu',
+}
+const COLLAPSED_COUNT = 6
+
+const showAll = ref(false)
+const permissionLabels = computed(() =>
+  authStore.permissions.length === 0
+    ? ['Użytkownik']
+    : authStore.permissions.map(p => PERMISSION_LABELS[p] ?? p),
+)
+const visiblePermissions = computed(() =>
+  showAll.value ? permissionLabels.value : permissionLabels.value.slice(0, COLLAPSED_COUNT),
+)
+>>>>>>> Stashed changes
 
 async function logout() {
   await authStore.logout()
@@ -113,8 +138,17 @@ function clearLsKey(key: LsKey) {
       <div
         class="bg-white dark:bg-surface-dark rounded-2xl border border-gray-100 dark:border-white/10 p-4 flex flex-col gap-2">
         <p class="text-xs font-semibold uppercase tracking-wide text-text-secondary">Permissions</p>
-        <p v-if="authStore.permissions.length === 0" class="text-xs text-text-secondary">No special permissions</p>
-        <p v-for="p in authStore.permissions" :key="p" class="text-xs text-green-500 font-bold">{{ p }}</p>
+        <ul class="flex flex-col gap-2">
+          <li v-for="label in visiblePermissions" :key="label"
+            class="flex items-center gap-2 text-sm text-text-primary dark:text-white">
+            <Check class="w-4 h-4 text-green-500 shrink-0" />
+            <span>{{ label }}</span>
+          </li>
+        </ul>
+        <button v-if="permissionLabels.length > COLLAPSED_COUNT" type="button"
+          class="self-start text-xs font-medium text-primary hover:underline" @click="showAll = !showAll">
+          {{ showAll ? 'Pokaż mniej' : `Pokaż więcej (${permissionLabels.length - COLLAPSED_COUNT})` }}
+        </button>
       </div>
 
       <BaseButton variant="danger" @click="logout">Log Out</BaseButton>
