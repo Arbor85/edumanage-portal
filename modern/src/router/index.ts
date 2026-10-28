@@ -132,12 +132,6 @@ const router = createRouter({
       component: () => import('../pages/McpApiKeysPage.vue'),
       meta: { requiresAuth: true, requiresPermission: 'manage:clients' },
     },
-    {
-      path: '/coach/mcp',
-      name: 'CoachMcp',
-      component: () => import('../pages/McpPage/McpPage.vue'),
-      meta: { requiresAuth: true, requiresPermission: 'manage:clients' },
-    },
 
     // ── Trainer schedule (read-only) ─────────────────────────────────────
     {
