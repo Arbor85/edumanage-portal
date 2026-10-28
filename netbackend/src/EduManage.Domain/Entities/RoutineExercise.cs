@@ -12,6 +12,7 @@ public class RoutineExercise
     public int? ExerciseId { get; set; }
     public string? SupersetGroupId { get; set; }
     public string? DropConfigJson { get; set; }
+    public string? RunConfigJson { get; set; }
 
     public Routine? Routine { get; set; }
     public ICollection<RoutineSet> Sets { get; set; } = [];

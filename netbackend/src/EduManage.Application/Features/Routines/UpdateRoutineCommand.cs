@@ -35,6 +35,7 @@ public sealed record UpdateRoutineCommand(string RoutineId, RoutineUpdate Reques
                 ExerciseId = e.ExerciseId,
                 SupersetGroupId = e.SupersetGroupId,
                 DropConfigJson = e.DropConfig == null ? null : JsonSerializer.Serialize(e.DropConfig, SerializerOptions),
+                RunConfigJson = e.RunConfig == null ? null : JsonSerializer.Serialize(e.RunConfig, SerializerOptions),
                 Sets = e.Sets.Select(s => new DomainRoutineSet
                 {
                     Type = s.Type,

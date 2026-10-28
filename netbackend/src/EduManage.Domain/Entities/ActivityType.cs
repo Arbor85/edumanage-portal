@@ -5,5 +5,6 @@ public enum ActivityType
     Weighted,
     Machine,
     Bodyweight,
-    Cardio
+    Cardio,
+    Running
 }

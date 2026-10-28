@@ -33,6 +33,20 @@ public sealed record SupersetGroup(string Id, string? Name, string Color);
 
 public sealed record DropConfig(int Count, double WeightDecreasePercent);
 
+public sealed record RunConfig(
+    RunType RunType,
+    ActivityTrackType TrackType,
+    int? Repeats = null,
+    int? IntervalDistanceMeters = null,
+    int? IntervalDurationSeconds = null,
+    int? RestSeconds = null,
+    int? TotalDistanceMeters = null,
+    int? TotalDurationSeconds = null,
+    double? TargetPaceMinPerKm = null,
+    EffortLevel? EffortLevel = null,
+    int? WarmupSeconds = null,
+    int? CooldownSeconds = null);
+
 public sealed record RoutineExcercise(
     string Name,
     ActivityType ActivityType,
@@ -40,7 +54,8 @@ public sealed record RoutineExcercise(
     IReadOnlyList<RoutineSet> Sets,
     string? SupersetGroupId = null,
     DropConfig? DropConfig = null,
-    int? ExerciseId = null);
+    int? ExerciseId = null,
+    RunConfig? RunConfig = null);
 
 public sealed record RoutineCreate(string Name, string? Note, IReadOnlyList<RoutineExcercise> Excercises, IReadOnlyList<SupersetGroup>? SupersetGroups = null);
 
@@ -206,7 +221,8 @@ public sealed record CompletedRoutineExcercise(
     string Name,
     ActivityType ActivityType,
     ActivityTrackType ActivityTrackType,
-    IReadOnlyList<CompletedRoutineSet> Sets);
+    IReadOnlyList<CompletedRoutineSet> Sets,
+    RunConfig? RunConfig = null);
 
 public sealed record CompletedSourceWorkout(string Id, string Name, string Date);
 

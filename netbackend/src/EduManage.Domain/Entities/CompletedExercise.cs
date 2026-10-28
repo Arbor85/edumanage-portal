@@ -7,6 +7,7 @@ public class CompletedExercise
     public string Name { get; set; } = string.Empty;
     public ActivityType ActivityType { get; set; } = ActivityType.Weighted;
     public ActivityTrackType ActivityTrackType { get; set; } = ActivityTrackType.Repetitions;
+    public string? RunConfigJson { get; set; }
 
     public WorkoutHistory? WorkoutHistory { get; set; }
     public ICollection<CompletedSet> Sets { get; set; } = [];

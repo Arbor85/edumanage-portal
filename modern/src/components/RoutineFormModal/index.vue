@@ -4,8 +4,9 @@ import { usePageTitle } from '../../composables/usePageTitle'
 import type {
   RoutineOut, RoutineCreate, RoutineUpdate, RoutineExcercise, RoutineSet,
   ExcerciseOut, DefaultWorkoutOut, ActivityType, ActivityTrackType,
-  SupersetGroup, SupersetColor, DropConfig, PlanWorkoutInput,
+  SupersetGroup, SupersetColor, DropConfig, PlanWorkoutInput, RunConfig,
 } from '../../types'
+import RunConfigEditor from '../RunConfigEditor/index.vue'
 import { useRoutineStore } from '../../stores/routineStore'
 import { useToast } from '../../composables/useToast'
 import FullSizeDialog from '../FullSizeDialog/index.vue'
@@ -86,6 +87,7 @@ const ACTIVITY_TYPE_BADGE: Record<ActivityType, { label: string; classes: string
   machine:    { label: 'Machine',    classes: 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-400' },
   bodyweight: { label: 'Bodyweight', classes: 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400' },
   cardio:     { label: 'Cardio',     classes: 'bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-400' },
+  running:    { label: 'Running',    classes: 'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400' },
 }
 
 // ── Form state ────────────────────────────────────────────────
@@ -173,6 +175,7 @@ watch(() => props.open, (val) => {
           supersetGroupId: ex.supersetGroupId ?? null,
           dropConfig: ex.dropConfig ?? null,
           exerciseId: ex.exerciseId ?? null,
+          runConfig: ex.runConfig ?? null,
         })),
         supersetGroups: (props.routine.supersetGroups ?? []).map(g => ({ ...g })),
       }
@@ -339,15 +342,18 @@ function defaultSetForTrackType(trackType: ActivityTrackType): RoutineSet {
 }
 
 function onExercisePicked(ex: ExcerciseOut) {
+  const activityType: ActivityType = ex.activityType ?? 'weighted'
   const trackType: ActivityTrackType = ex.activityTrackType ?? 'repetitions'
+  const isRunning = activityType === 'running'
   form.value.excercises.push({
     name: ex.name,
-    activityType: ex.activityType ?? 'weighted',
+    activityType,
     activityTrackType: trackType,
-    sets: [defaultSetForTrackType(trackType)],
+    sets: isRunning ? [] : [defaultSetForTrackType(trackType)],
     supersetGroupId: null,
     dropConfig: null,
     exerciseId: ex.id,
+    runConfig: isRunning ? { runType: 'easy', trackType: 'distance' } : null,
   })
 }
 
@@ -356,10 +362,18 @@ function onExercisesAdded(exercises: ExcerciseOut[]) {
 }
 
 function onExercisesAddedAsSuperset(exercises: ExcerciseOut[]) {
+  const nonRunning = exercises.filter(e => (e.activityType ?? 'weighted') !== 'running')
+  const running = exercises.filter(e => (e.activityType ?? 'weighted') === 'running')
+
+  // Running exercises are added individually (no superset)
+  for (const ex of running) onExercisePicked(ex)
+
+  if (nonRunning.length === 0) return
+
   const color = nextAvailableColor()
   const id = generateId()
-  form.value.supersetGroups.push({ id, name: exercises.map((e) => e.name).join(' / '), color })
-  for (const ex of exercises) {
+  form.value.supersetGroups.push({ id, name: nonRunning.map((e) => e.name).join(' / '), color })
+  for (const ex of nonRunning) {
     const trackType: ActivityTrackType = ex.activityTrackType ?? 'repetitions'
     form.value.excercises.push({
       name: ex.name,
@@ -369,6 +383,7 @@ function onExercisesAddedAsSuperset(exercises: ExcerciseOut[]) {
       supersetGroupId: id,
       dropConfig: null,
       exerciseId: ex.id,
+      runConfig: null,
     })
   }
   syncGroupSetCounts(id, 1)
@@ -821,42 +836,45 @@ async function doDelete() {
                   class="absolute right-0 top-8 z-50 w-48 rounded-xl bg-surface-card border border-gray-200 dark:border-white/10 shadow-lg py-1 text-sm"
                   @click.stop
                 >
-                  <!-- Superset actions (not available for drop sets) -->
-                  <template v-if="!form.excercises[block.exerciseIndex].dropConfig">
-                    <button
-                      type="button"
-                      class="w-full text-left px-3 py-2 text-text-secondary hover:bg-gray-50 dark:hover:bg-white/5 hover:text-text-primary dark:hover:text-white"
-                      @click="addToSuperset(block.exerciseIndex)"
-                    >
-                      Add to superset
-                    </button>
-                  </template>
-                  <!-- Drop set actions (not available if in superset) -->
-                  <template v-if="!form.excercises[block.exerciseIndex].supersetGroupId">
-                    <button
-                      v-if="!form.excercises[block.exerciseIndex].dropConfig"
-                      type="button"
-                      class="w-full text-left px-3 py-2 text-text-secondary hover:bg-gray-50 dark:hover:bg-white/5 hover:text-text-primary dark:hover:text-white"
-                      @click="openDropSetConfig(block.exerciseIndex)"
-                    >
-                      Convert to drop set
-                    </button>
-                    <button
-                      v-else
-                      type="button"
-                      class="w-full text-left px-3 py-2 text-text-secondary hover:bg-gray-50 dark:hover:bg-white/5 hover:text-text-primary dark:hover:text-white"
-                      @click="openDropSetConfig(block.exerciseIndex)"
-                    >
-                      Edit drop set
-                    </button>
-                    <button
-                      v-if="form.excercises[block.exerciseIndex].dropConfig"
-                      type="button"
-                      class="w-full text-left px-3 py-2 text-text-secondary hover:bg-gray-50 dark:hover:bg-white/5 hover:text-text-primary dark:hover:text-white"
-                      @click="removeDropConfig(block.exerciseIndex)"
-                    >
-                      Remove drop set
-                    </button>
+                  <!-- Superset / drop set actions (not available for running) -->
+                  <template v-if="form.excercises[block.exerciseIndex].activityType !== 'running'">
+                    <!-- Superset actions (not available for drop sets) -->
+                    <template v-if="!form.excercises[block.exerciseIndex].dropConfig">
+                      <button
+                        type="button"
+                        class="w-full text-left px-3 py-2 text-text-secondary hover:bg-gray-50 dark:hover:bg-white/5 hover:text-text-primary dark:hover:text-white"
+                        @click="addToSuperset(block.exerciseIndex)"
+                      >
+                        Add to superset
+                      </button>
+                    </template>
+                    <!-- Drop set actions (not available if in superset) -->
+                    <template v-if="!form.excercises[block.exerciseIndex].supersetGroupId">
+                      <button
+                        v-if="!form.excercises[block.exerciseIndex].dropConfig"
+                        type="button"
+                        class="w-full text-left px-3 py-2 text-text-secondary hover:bg-gray-50 dark:hover:bg-white/5 hover:text-text-primary dark:hover:text-white"
+                        @click="openDropSetConfig(block.exerciseIndex)"
+                      >
+                        Convert to drop set
+                      </button>
+                      <button
+                        v-else
+                        type="button"
+                        class="w-full text-left px-3 py-2 text-text-secondary hover:bg-gray-50 dark:hover:bg-white/5 hover:text-text-primary dark:hover:text-white"
+                        @click="openDropSetConfig(block.exerciseIndex)"
+                      >
+                        Edit drop set
+                      </button>
+                      <button
+                        v-if="form.excercises[block.exerciseIndex].dropConfig"
+                        type="button"
+                        class="w-full text-left px-3 py-2 text-text-secondary hover:bg-gray-50 dark:hover:bg-white/5 hover:text-text-primary dark:hover:text-white"
+                        @click="removeDropConfig(block.exerciseIndex)"
+                      >
+                        Remove drop set
+                      </button>
+                    </template>
                   </template>
                   <button
                     type="button"
@@ -897,6 +915,13 @@ async function doDelete() {
                 />
               </div>
             </div>
+
+            <!-- Running config -->
+            <RunConfigEditor
+              v-else-if="form.excercises[block.exerciseIndex].activityType === 'running'"
+              :run-config="form.excercises[block.exerciseIndex].runConfig"
+              @update:run-config="form.excercises[block.exerciseIndex].runConfig = $event"
+            />
 
             <!-- Normal sets -->
             <div v-else class="flex flex-col gap-2">

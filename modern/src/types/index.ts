@@ -63,7 +63,7 @@ export interface ExcerciseWriteRequest {
 // ─── Activity enums ───────────────────────────────────────────
 
 /** How the exercise is performed */
-export type ActivityType = 'weighted' | 'bodyweight' | 'cardio' | 'machine'
+export type ActivityType = 'weighted' | 'bodyweight' | 'cardio' | 'machine' | 'running'
 
 /** What metric is tracked per set */
 export type ActivityTrackType = 'repetitions' | 'time' | 'distance'
@@ -103,6 +103,26 @@ export interface DropConfig {
   weightDecreasePercent: number    // e.g. 20 → each drop weight = previous × 0.80
 }
 
+// ─── Running config ───────────────────────────────────────────
+
+export type RunType = 'intervals' | 'tempo' | 'longRun' | 'easy'
+export type EffortLevel = 'easy' | 'moderate' | 'tempo' | 'racePace'
+
+export interface RunConfig {
+  runType: RunType
+  trackType: 'distance' | 'time'
+  repeats?: number | null
+  intervalDistanceMeters?: number | null
+  intervalDurationSeconds?: number | null
+  restSeconds?: number | null
+  totalDistanceMeters?: number | null
+  totalDurationSeconds?: number | null
+  targetPaceMinPerKm?: number | null
+  effortLevel?: EffortLevel | null
+  warmupSeconds?: number | null
+  cooldownSeconds?: number | null
+}
+
 export interface RoutineExcercise {
   name: string | null
   activityType: ActivityType
@@ -111,6 +131,7 @@ export interface RoutineExcercise {
   supersetGroupId: string | null
   dropConfig: DropConfig | null
   exerciseId: number | null
+  runConfig?: RunConfig | null
 }
 
 export interface RoutineOut {
@@ -167,6 +188,7 @@ export interface CompletedRoutineExcercise {
   activityType: ActivityType
   activityTrackType: ActivityTrackType
   sets: CompletedRoutineSet[] | null
+  runConfig?: RunConfig | null
 }
 
 export interface CompletedSourceWorkout {

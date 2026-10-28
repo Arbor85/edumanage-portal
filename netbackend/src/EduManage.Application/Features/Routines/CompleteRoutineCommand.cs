@@ -1,6 +1,7 @@
 using EduManage.Application.Contracts;
 using EduManage.Domain.Entities;
 using MediatR;
+using System.Text.Json;
 
 namespace EduManage.Application.Features.Routines;
 
@@ -8,6 +9,8 @@ public sealed record CompleteRoutineCommand(CompleteRoutineCreate Request, strin
 {
     internal sealed class Handler(IWorkoutHistoryRepository repository) : IRequestHandler<CompleteRoutineCommand, WorkoutHistoryOut>
     {
+        private static readonly JsonSerializerOptions SerializerOptions = new(JsonSerializerDefaults.Web);
+
         public async Task<WorkoutHistoryOut> Handle(CompleteRoutineCommand request, CancellationToken cancellationToken)
         {
             var exercises = request.Request.Excercises?.Count > 0
@@ -35,6 +38,7 @@ public sealed record CompleteRoutineCommand(CompleteRoutineCreate Request, strin
                     Name = e.Name,
                     ActivityType = e.ActivityType,
                     ActivityTrackType = e.ActivityTrackType,
+                    RunConfigJson = e.RunConfig == null ? null : JsonSerializer.Serialize(e.RunConfig, SerializerOptions),
                     Sets = e.Sets.Select(s => new CompletedSet
                     {
                         Type = s.Type,
