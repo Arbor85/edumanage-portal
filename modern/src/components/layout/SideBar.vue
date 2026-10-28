@@ -6,7 +6,7 @@ import { prefetchRoutes } from '../../utils/prefetchRoutes'
 import {
   Home, TrendingUp, Compass, User,
   Users, ClipboardList, Calendar, BookOpen, Package, LogOut,
-  Building2, LayoutDashboard, CalendarDays, KeyRound, List, Dumbbell, FileText,
+  Building2, LayoutDashboard, CalendarDays, KeyRound, List, Dumbbell, FileText, Bot,
 } from '@lucide/vue'
 import DarkModeToggle from '../DarkModeToggle.vue'
 import AppLogo from '../AppLogo.vue'
@@ -34,6 +34,7 @@ const allCoachItems: { to: string; icon: Component; label: string; permission: s
   { to: '/coach/form-templates', icon: FileText,      label: 'Form Templates', permission: 'manage:forms' },
   { to: '/my-schedule',          icon: CalendarDays,  label: 'My Schedule',    permission: 'view:schedule' },
   { to: '/coach/mcp-keys',       icon: KeyRound,      label: 'MCP Keys',       permission: 'manage:clients' },
+  { to: '/coach/mcp',            icon: Bot,           label: 'MCP Tools',      permission: 'manage:clients' },
 ]
 
 const coachItems = computed(() =>
