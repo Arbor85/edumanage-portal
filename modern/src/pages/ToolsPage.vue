@@ -9,7 +9,7 @@ const tools = [
   {
     to: '/tools/emom-timer',
     icon: Timer,
-    title: 'EMOM Timer',
+    title: 'EMOM',
     description: 'Every Minute On the Minute workout timer',
   },
 ]
