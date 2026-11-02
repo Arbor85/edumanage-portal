@@ -29,9 +29,13 @@ function playBeep(frequency = 880, durationMs = 120) {
   }
 }
 
-function sendNotification(title: string) {
+function sendNotification(title: string, body: string) {
   if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return
-  new Notification(title)
+  try {
+    new Notification(title, { body, silent: true })
+  } catch {
+    // Web Notifications not supported in this context (e.g. iOS Safari outside PWA)
+  }
 }
 
 export async function requestNotificationPermission() {
@@ -65,17 +69,27 @@ function tick() {
   }
   if (phase.value === 'work') {
     playBeep(1100, 200)
-    sendNotification(`Session ${currentRound.value} done.`)
     if (currentRound.value >= totalRounds) {
+      sendNotification(
+        '🏁 Workout complete!',
+        `All ${totalRounds} round${totalRounds !== 1 ? 's' : ''} finished. Great work!`,
+      )
       clearTimer()
       phase.value = 'complete'
     } else {
+      sendNotification(
+        `💪 Round ${currentRound.value} done!`,
+        `${totalRounds - currentRound.value} round${totalRounds - currentRound.value !== 1 ? 's' : ''} remaining — rest now.`,
+      )
       phase.value = 'rest'
       secondsLeft.value = delaySeconds
     }
   } else if (phase.value === 'rest') {
     playBeep(1100, 200)
-    sendNotification('Rest done')
+    sendNotification(
+      '⏱ Rest over — go!',
+      `Starting round ${currentRound.value + 1} of ${totalRounds}.`,
+    )
     currentRound.value++
     phase.value = 'work'
     secondsLeft.value = 60
