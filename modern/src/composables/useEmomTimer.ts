@@ -29,35 +29,16 @@ function playBeep(frequency = 880, durationMs = 120) {
   }
 }
 
-// SW registration is module-level — persists across component mounts
-let swRegistration: ServiceWorkerRegistration | null = null
-
-async function registerTimerSW() {
-  if (!('serviceWorker' in navigator)) return
-  try {
-    swRegistration = await navigator.serviceWorker.register('/timer-sw.js', { scope: '/' })
-    // Ensure the SW is active immediately (not just installed)
-    if (swRegistration.installing) {
-      await new Promise<void>((resolve) => {
-        swRegistration!.installing!.addEventListener('statechange', function handler() {
-          if (this.state === 'activated') { resolve(); this.removeEventListener('statechange', handler) }
-        })
-      })
-    }
-  } catch {
-    // SW unavailable (non-HTTPS in some environments, or blocked by browser)
-  }
-}
-
 function sendNotification(title: string, body: string) {
   if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return
-  // Prefer SW path — creates a real OS notification that reaches paired watches
-  const sw = swRegistration?.active ?? navigator.serviceWorker?.controller
+  // Post to the VitePWA service worker — creates a real OS notification
+  // that the phone forwards to paired devices (Garmin, Apple Watch, etc.)
+  const sw = navigator.serviceWorker?.controller
   if (sw) {
     sw.postMessage({ type: 'SHOW_NOTIFICATION', title, body })
     return
   }
-  // Fallback: basic Web Notification (browser-level only, won't reach watch)
+  // Fallback: basic Web Notification (browser-level only, no watch forwarding)
   try {
     new Notification(title, { body, silent: true })
   } catch {
@@ -69,10 +50,6 @@ export async function requestNotificationPermission() {
   if (typeof Notification === 'undefined') return
   if (Notification.permission === 'default') {
     await Notification.requestPermission()
-  }
-  // Register SW after permission granted so showNotification() is allowed
-  if (Notification.permission === 'granted') {
-    await registerTimerSW()
   }
 }
 
