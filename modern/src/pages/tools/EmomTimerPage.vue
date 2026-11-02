@@ -3,7 +3,7 @@ import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ChevronLeft, Square, RotateCcw, Pause } from '@lucide/vue'
 import AppLayout from '../../components/layout/AppLayout.vue'
-import { useEmomTimer, requestNotificationPermission, emomWorkDuration } from '../../composables/useEmomTimer'
+import { useEmomTimer, requestNotificationPermission, getEmomProgress } from '../../composables/useEmomTimer'
 
 const router = useRouter()
 const rounds  = ref(20)
@@ -19,15 +19,18 @@ const CIRCUMFERENCE = 2 * Math.PI * RING_R
 const FILL_BOTTOM   = 140 + FILL_R
 const FILL_DIAMETER = FILL_R * 2
 
-const progress = computed(() => {
-  if (timer.phase.value === 'work') return (emomWorkDuration.value - timer.secondsLeft.value) / emomWorkDuration.value
-  if (timer.phase.value === 'rest') return (delay.value - timer.secondsLeft.value) / delay.value
-  return 0
-})
+// ── Sub-second smooth progress via requestAnimationFrame ─────────────────────
+const smoothProgress = ref(0)
+let rafId: number | null = null
 
-const fillY            = computed(() => FILL_BOTTOM - progress.value * FILL_DIAMETER)
-const fillHeight       = computed(() => Math.max(0, progress.value * FILL_DIAMETER))
-const strokeDashoffset = computed(() => CIRCUMFERENCE * (1 - progress.value))
+function rafLoop() {
+  smoothProgress.value = getEmomProgress()
+  rafId = requestAnimationFrame(rafLoop)
+}
+
+const fillY            = computed(() => FILL_BOTTOM - smoothProgress.value * FILL_DIAMETER)
+const fillHeight       = computed(() => Math.max(0, smoothProgress.value * FILL_DIAMETER))
+const strokeDashoffset = computed(() => CIRCUMFERENCE * (1 - smoothProgress.value))
 
 const isWork      = computed(() => timer.phase.value === 'work')
 const isRunning   = computed(() => timer.phase.value === 'work' || timer.phase.value === 'rest')
@@ -74,14 +77,46 @@ onMounted(() => {
     if (document.visibilityState === 'visible' && isRunning.value && !timer.isPaused.value) acquireWakeLock()
   })
   if (isRunning.value && !timer.isPaused.value) acquireWakeLock()
+  if (isRunning.value) rafId = requestAnimationFrame(rafLoop)
 })
 
-onUnmounted(() => releaseWakeLock())
+onUnmounted(() => {
+  releaseWakeLock()
+  if (rafId !== null) { cancelAnimationFrame(rafId); rafId = null }
+})
+
+watch(isRunning, (running) => {
+  if (running && rafId === null) rafId = requestAnimationFrame(rafLoop)
+  else if (!running && rafId !== null) { cancelAnimationFrame(rafId); rafId = null }
+})
 
 watch([() => timer.phase.value, () => timer.isPaused.value], ([phase, paused]) => {
   if ((phase === 'work' || phase === 'rest') && !paused) acquireWakeLock()
   else releaseWakeLock()
 })
+
+// ── Stop confirmation ─────────────────────────────────────────────────────────
+const showStopDialog = ref(false)
+
+function requestStop() {
+  if (!timer.isPaused.value) timer.pause()
+  showStopDialog.value = true
+}
+
+function confirmStop() {
+  showStopDialog.value = false
+  timer.stop()
+}
+
+function keepPaused() {
+  showStopDialog.value = false
+  // timer stays paused — user already paused above
+}
+
+function dismissStop() {
+  showStopDialog.value = false
+  timer.resume()
+}
 
 // ── Actions ───────────────────────────────────────────────────────────────────
 
@@ -259,11 +294,7 @@ async function handleStart() {
             <defs>
               <clipPath id="emom-fill-clip">
                 <rect x="0" width="280"
-                  :style="{
-                    y: `${fillY}px`,
-                    height: `${fillHeight}px`,
-                    transition: 'y 950ms linear, height 950ms linear',
-                  }"
+                  :style="{ y: `${fillY}px`, height: `${fillHeight}px` }"
                 />
               </clipPath>
             </defs>
@@ -274,7 +305,6 @@ async function handleStart() {
               stroke="currentColor" stroke-width="10" stroke-linecap="round"
               :stroke-dasharray="CIRCUMFERENCE" :stroke-dashoffset="strokeDashoffset"
               transform="rotate(-90 140 140)"
-              style="transition: stroke-dashoffset 950ms linear;"
             />
             <circle v-if="isLastThree" cx="140" cy="140" :r="RING_R"
               stroke="currentColor" stroke-width="4" fill="none" class="emom-ripple" />
@@ -322,12 +352,50 @@ async function handleStart() {
           class="flex-1 h-14 flex items-center justify-center gap-2 rounded-2xl
                  bg-red-500/10 border border-red-500/30 text-red-400 font-semibold text-sm
                  hover:bg-red-500/20 hover:border-red-500/50 active:scale-[0.97] transition-all"
-          @click="timer.stop()"
+          @click="requestStop"
         >
           <Square class="w-4 h-4" />
           Stop
         </button>
       </div>
+
+      <!-- Stop confirmation dialog -->
+      <Transition name="fade">
+        <div
+          v-if="showStopDialog"
+          class="absolute inset-0 flex items-end justify-center pb-6 z-10"
+          style="background: rgba(0,0,0,0.6)"
+          @click.self="dismissStop"
+        >
+          <div class="bg-surface-card border border-white/10 rounded-2xl p-5 mx-4 w-full max-w-sm shadow-2xl">
+            <h3 class="text-base font-bold text-text-primary dark:text-white mb-1">Stop workout?</h3>
+            <p class="text-sm text-text-muted mb-5">What would you like to do?</p>
+            <div class="flex flex-col gap-2">
+              <button
+                class="w-full h-12 bg-red-500/15 border border-red-500/30 text-red-400 font-semibold
+                       text-sm rounded-xl hover:bg-red-500/25 active:scale-[0.98] transition-all"
+                @click="confirmStop"
+              >
+                Yes, stop session
+              </button>
+              <button
+                class="w-full h-12 bg-primary/10 border border-primary/30 text-primary font-semibold
+                       text-sm rounded-xl hover:bg-primary/20 active:scale-[0.98] transition-all"
+                @click="keepPaused"
+              >
+                Just pause
+              </button>
+              <button
+                class="w-full h-12 bg-white/5 border border-white/8 text-text-muted font-semibold
+                       text-sm rounded-xl hover:border-white/20 hover:text-text-primary active:scale-[0.98] transition-all"
+                @click="dismissStop"
+              >
+                No, continue
+              </button>
+            </div>
+          </div>
+        </div>
+      </Transition>
     </div>
   </Teleport>
 </template>
