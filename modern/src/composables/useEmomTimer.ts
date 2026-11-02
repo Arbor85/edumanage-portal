@@ -31,18 +31,15 @@ function playBeep(frequency = 880, durationMs = 120) {
 
 function sendNotification(title: string, body: string) {
   if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return
-  // Post to the VitePWA service worker — creates a real OS notification
-  // that the phone forwards to paired devices (Garmin, Apple Watch, etc.)
   const sw = navigator.serviceWorker?.controller
   if (sw) {
     sw.postMessage({ type: 'SHOW_NOTIFICATION', title, body })
     return
   }
-  // Fallback: basic Web Notification (browser-level only, no watch forwarding)
   try {
     new Notification(title, { body, silent: true })
   } catch {
-    // Not supported in this context (e.g. iOS Safari outside installed PWA)
+    // Not supported in this context
   }
 }
 
@@ -57,6 +54,17 @@ let totalRounds = 0
 let delaySeconds = 0
 let workDurationSecs = 60
 let intervalId: ReturnType<typeof setInterval> | null = null
+
+// ── Timestamp tracking for sub-second smooth progress ────────────────────────
+let phaseStartedAt = 0   // Date.now() when current phase began (adjusted after pauses)
+let phaseDurationMs = 60000
+let pausedAt = 0         // Date.now() when pause() was called
+
+export function getEmomProgress(): number {
+  if (phase.value !== 'work' && phase.value !== 'rest') return 0
+  const now = isPaused.value ? pausedAt : Date.now()
+  return Math.min(1, Math.max(0, (now - phaseStartedAt) / phaseDurationMs))
+}
 
 const phase = ref<EmomPhase>('idle')
 const currentRound = ref(1)
@@ -93,6 +101,8 @@ function tick() {
       )
       phase.value = 'rest'
       secondsLeft.value = delaySeconds
+      phaseStartedAt = Date.now()
+      phaseDurationMs = delaySeconds * 1000
     }
   } else if (phase.value === 'rest') {
     playBeep(1100, 200)
@@ -103,6 +113,8 @@ function tick() {
     currentRound.value++
     phase.value = 'work'
     secondsLeft.value = workDurationSecs
+    phaseStartedAt = Date.now()
+    phaseDurationMs = workDurationSecs * 1000
   }
 }
 
@@ -121,15 +133,20 @@ export function useEmomTimer() {
     currentRound.value = 1
     secondsLeft.value = duration
     isPaused.value = false
+    phaseStartedAt = Date.now()
+    phaseDurationMs = duration * 1000
     intervalId = setInterval(tick, 1000)
   }
 
   function pause() {
     clearTimer()
     isPaused.value = true
+    pausedAt = Date.now()
   }
 
   function resume() {
+    // Shift phaseStartedAt forward by the time spent paused so progress stays accurate
+    phaseStartedAt += Date.now() - pausedAt
     isPaused.value = false
     intervalId = setInterval(tick, 1000)
   }
@@ -143,8 +160,8 @@ export function useEmomTimer() {
   }
 
   function resetPhase() {
-    if (phase.value === 'work') secondsLeft.value = workDurationSecs
-    else if (phase.value === 'rest') secondsLeft.value = delaySeconds
+    secondsLeft.value = phase.value === 'work' ? workDurationSecs : delaySeconds
+    phaseStartedAt = Date.now()
   }
 
   return { phase, currentRound, secondsLeft, isPaused, start, pause, resume, stop, resetPhase }
