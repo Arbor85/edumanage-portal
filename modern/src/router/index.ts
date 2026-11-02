@@ -96,6 +96,18 @@ const router = createRouter({
       component: () => import('../pages/tools/EmomTimerPage.vue'),
       meta: { requiresAuth: true },
     },
+    {
+      path: '/tools/calorie-calculator',
+      name: 'CalorieCalculator',
+      component: () => import('../pages/tools/CalorieWizardPage.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/tools/calorie-calculator/results',
+      name: 'CalorieResults',
+      component: () => import('../pages/tools/CalorieResultsPage.vue'),
+      meta: { requiresAuth: true },
+    },
 
     // ── Coach routes (trainers only) ──────────────────────────────────────
     {

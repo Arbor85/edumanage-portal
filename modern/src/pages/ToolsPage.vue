@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
-import { Timer } from '@lucide/vue'
+import { Timer, Calculator } from '@lucide/vue'
 import AppLayout from '../components/layout/AppLayout.vue'
 
 const router = useRouter()
@@ -11,6 +11,12 @@ const tools = [
     icon: Timer,
     title: 'EMOM',
     description: 'Every Minute On the Minute workout timer',
+  },
+  {
+    to: '/tools/calorie-calculator',
+    icon: Calculator,
+    title: 'Calorie Calculator',
+    description: 'Estimate your TDEE and healthy calorie targets',
   },
 ]
 </script>
