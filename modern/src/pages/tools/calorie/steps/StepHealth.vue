@@ -1,5 +1,6 @@
-﻿<script setup lang="ts">
+<script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue'
+import { Switch } from '@headlessui/vue'
 import type { WizardAnswers } from '../../../../utils/calorieCalc'
 
 const props = defineProps<{
@@ -29,40 +30,6 @@ watch(isValid, (v) => emit('valid', v))
 onMounted(() => emit('valid', isValid.value))
 
 defineExpose({ isValid, getData })
-
-interface HealthQuestion {
-  label: string
-  ref: { value: boolean }
-  setter: (v: boolean) => void
-}
-
-const questions: HealthQuestion[] = [
-  {
-    label: 'Are you under 18 years old?',
-    ref: isMinor,
-    setter: (v) => { isMinor.value = v },
-  },
-  {
-    label: 'Are you pregnant or breastfeeding?',
-    ref: isPregnantOrBreastfeeding,
-    setter: (v) => { isPregnantOrBreastfeeding.value = v },
-  },
-  {
-    label: 'Do you have a history of eating disorders?',
-    ref: hasEatingDisorder,
-    setter: (v) => { hasEatingDisorder.value = v },
-  },
-  {
-    label: 'Do you have a medical condition or take medication that significantly affects your metabolism or weight?',
-    ref: hasMetabolicCondition,
-    setter: (v) => { hasMetabolicCondition.value = v },
-  },
-  {
-    label: 'Have you experienced unexplained weight changes recently?',
-    ref: unexplainedWeightChanges,
-    setter: (v) => { unexplainedWeightChanges.value = v },
-  },
-]
 </script>
 
 <template>
@@ -72,39 +39,95 @@ const questions: HealthQuestion[] = [
       <p class="text-sm text-text-muted">These help us keep recommendations safe. All are optional.</p>
     </div>
 
-    <div class="space-y-4">
-      <div
-        v-for="(q, i) in questions"
-        :key="i"
-        class="flex items-start justify-between gap-4 py-3 border-b border-white/8 last:border-0"
-      >
-        <span class="text-sm text-text-secondary flex-1 leading-relaxed">{{ q.label }}</span>
-        <div class="flex gap-2 shrink-0">
-          <button
-            type="button"
-            class="px-3 py-1.5 rounded-lg border text-xs font-bold transition-all"
-            :class="
-              q.ref.value
-                ? 'bg-primary/10 border-primary/40 text-primary'
-                : 'bg-surface-input border-white/8 text-text-muted hover:border-white/20'
-            "
-            @click="q.setter(true)"
-          >
-            Yes
-          </button>
-          <button
-            type="button"
-            class="px-3 py-1.5 rounded-lg border text-xs font-bold transition-all"
-            :class="
-              !q.ref.value
-                ? 'bg-primary/10 border-primary/40 text-primary'
-                : 'bg-surface-input border-white/8 text-text-muted hover:border-white/20'
-            "
-            @click="q.setter(false)"
-          >
-            No
-          </button>
+    <div class="bg-surface-input border border-white/8 rounded-xl divide-y divide-white/8">
+      <!-- Under 18 -->
+      <div class="flex items-center justify-between px-4 py-4">
+        <div>
+          <p class="text-sm font-semibold text-text-primary dark:text-white">Are you under 18 years old?</p>
+          <p class="text-xs text-text-muted mt-0.5">Calorie needs differ for adolescents</p>
         </div>
+        <Switch
+          v-model="isMinor"
+          class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          :class="isMinor ? 'bg-primary' : 'bg-white/10'"
+        >
+          <span
+            class="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform"
+            :class="isMinor ? 'translate-x-6' : 'translate-x-1'"
+          />
+        </Switch>
+      </div>
+
+      <!-- Pregnant or breastfeeding -->
+      <div class="flex items-center justify-between px-4 py-4">
+        <div>
+          <p class="text-sm font-semibold text-text-primary dark:text-white">Are you pregnant or breastfeeding?</p>
+          <p class="text-xs text-text-muted mt-0.5">Significant impact on caloric needs</p>
+        </div>
+        <Switch
+          v-model="isPregnantOrBreastfeeding"
+          class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          :class="isPregnantOrBreastfeeding ? 'bg-primary' : 'bg-white/10'"
+        >
+          <span
+            class="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform"
+            :class="isPregnantOrBreastfeeding ? 'translate-x-6' : 'translate-x-1'"
+          />
+        </Switch>
+      </div>
+
+      <!-- Eating disorder -->
+      <div class="flex items-center justify-between px-4 py-4">
+        <div>
+          <p class="text-sm font-semibold text-text-primary dark:text-white">History of eating disorders?</p>
+          <p class="text-xs text-text-muted mt-0.5">Calorie targets may need professional guidance</p>
+        </div>
+        <Switch
+          v-model="hasEatingDisorder"
+          class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          :class="hasEatingDisorder ? 'bg-primary' : 'bg-white/10'"
+        >
+          <span
+            class="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform"
+            :class="hasEatingDisorder ? 'translate-x-6' : 'translate-x-1'"
+          />
+        </Switch>
+      </div>
+
+      <!-- Metabolic condition -->
+      <div class="flex items-center justify-between px-4 py-4">
+        <div>
+          <p class="text-sm font-semibold text-text-primary dark:text-white">Metabolic condition or medication?</p>
+          <p class="text-xs text-text-muted mt-0.5">Conditions or meds that significantly affect metabolism</p>
+        </div>
+        <Switch
+          v-model="hasMetabolicCondition"
+          class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          :class="hasMetabolicCondition ? 'bg-primary' : 'bg-white/10'"
+        >
+          <span
+            class="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform"
+            :class="hasMetabolicCondition ? 'translate-x-6' : 'translate-x-1'"
+          />
+        </Switch>
+      </div>
+
+      <!-- Unexplained weight changes -->
+      <div class="flex items-center justify-between px-4 py-4">
+        <div>
+          <p class="text-sm font-semibold text-text-primary dark:text-white">Unexplained weight changes recently?</p>
+          <p class="text-xs text-text-muted mt-0.5">Changes not explained by diet or exercise</p>
+        </div>
+        <Switch
+          v-model="unexplainedWeightChanges"
+          class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          :class="unexplainedWeightChanges ? 'bg-primary' : 'bg-white/10'"
+        >
+          <span
+            class="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform"
+            :class="unexplainedWeightChanges ? 'translate-x-6' : 'translate-x-1'"
+          />
+        </Switch>
       </div>
     </div>
   </div>

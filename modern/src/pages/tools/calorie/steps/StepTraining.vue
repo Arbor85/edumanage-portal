@@ -1,6 +1,7 @@
-﻿<script setup lang="ts">
+<script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue'
-import { X } from '@lucide/vue'
+import { RadioGroup, RadioGroupOption, Switch } from '@headlessui/vue'
+import { Check, Plus, X } from '@lucide/vue'
 import type { WizardAnswers, TrainingActivity, ActivityType, Intensity } from '../../../../utils/calorieCalc'
 
 const props = defineProps<{
@@ -117,8 +118,8 @@ function intensityLabel(intensity: Intensity): string {
             {{ activityLabel(act.type) }}
           </div>
           <div class="text-xs text-text-muted mt-0.5">
-            {{ act.sessionsPerWeek }}Ã—/week Â· {{ act.avgDurationMin }} min Â· {{ intensityLabel(act.intensity) }}
-            <span v-if="act.weeklyVolumeKm"> Â· {{ act.weeklyVolumeKm }} km/wk</span>
+            {{ act.sessionsPerWeek }}×/week · {{ act.avgDurationMin }} min · {{ intensityLabel(act.intensity) }}
+            <span v-if="act.weeklyVolumeKm"> · {{ act.weeklyVolumeKm }} km/wk</span>
           </div>
         </div>
         <button
@@ -136,91 +137,112 @@ function intensityLabel(intensity: Intensity): string {
     </div>
 
     <!-- Inline form -->
-    <div v-if="showForm" class="border border-white/8 rounded-xl p-4 space-y-4 bg-surface-input">
-      <p class="text-xs font-bold tracking-widest uppercase text-text-muted">New Activity</p>
+    <div v-if="showForm" class="border border-white/8 rounded-xl p-4 space-y-5 bg-surface-input">
+      <p class="text-xs font-semibold text-text-muted">New Activity</p>
 
-      <!-- Type -->
+      <!-- Activity type -->
       <div>
-        <label class="block text-xs font-bold tracking-widest uppercase text-text-muted mb-2">Activity type</label>
-        <div class="grid grid-cols-2 gap-2">
-          <button
-            v-for="opt in activityTypeOptions"
-            :key="opt.value"
-            type="button"
-            class="w-full text-left px-3 py-2 rounded-lg border transition-all text-sm font-medium"
-            :class="
-              formType === opt.value
-                ? 'bg-primary/10 border-primary/40 text-primary'
-                : 'bg-surface-card border-white/8 text-text-secondary hover:border-white/20 hover:text-text-primary'
-            "
-            @click="formType = opt.value"
-          >
-            {{ opt.label }}
-          </button>
-        </div>
+        <label class="block text-sm font-semibold text-text-primary dark:text-white mb-2">Activity type</label>
+        <RadioGroup v-model="formType">
+          <div class="grid grid-cols-2 gap-2">
+            <RadioGroupOption
+              v-for="opt in activityTypeOptions"
+              :key="opt.value"
+              :value="opt.value"
+              v-slot="{ checked }"
+            >
+              <div
+                class="flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all"
+                :class="checked
+                  ? 'bg-primary/10 border-primary/40'
+                  : 'bg-surface-card border-white/8 hover:border-white/20'"
+              >
+                <div class="flex-1">
+                  <p class="text-sm font-semibold" :class="checked ? 'text-primary' : 'text-text-primary dark:text-white'">{{ opt.label }}</p>
+                </div>
+                <div
+                  class="w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all"
+                  :class="checked ? 'border-primary bg-primary' : 'border-white/20'"
+                >
+                  <Check v-if="checked" class="w-2.5 h-2.5 text-white" />
+                </div>
+              </div>
+            </RadioGroupOption>
+          </div>
+        </RadioGroup>
       </div>
 
       <!-- Sessions per week -->
       <div>
-        <label class="block text-xs font-bold tracking-widest uppercase text-text-muted mb-2">Sessions per week</label>
-        <input
-          v-model.number="formSessions"
-          type="number"
-          min="1"
-          max="14"
-          placeholder="e.g. 3"
-          class="w-full h-12 px-4 bg-surface-card border border-white/8 rounded-xl text-base font-semibold text-text-primary dark:text-white outline-none focus-visible:ring-2 focus-visible:ring-primary/50 transition-all"
-        />
+        <label class="block text-sm font-semibold text-text-primary dark:text-white mb-2">Sessions per week</label>
+        <div class="relative">
+          <input
+            v-model.number="formSessions"
+            type="number"
+            min="1"
+            max="14"
+            placeholder="e.g. 3"
+            class="w-full h-12 px-4 pr-16 bg-surface-card border border-white/8 rounded-xl text-base font-semibold text-text-primary dark:text-white outline-none focus-visible:ring-2 focus-visible:ring-primary/50 transition-all"
+          />
+          <span class="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-text-muted pointer-events-none">/ wk</span>
+        </div>
       </div>
 
       <!-- Average duration -->
       <div>
-        <label class="block text-xs font-bold tracking-widest uppercase text-text-muted mb-2">Average duration (min)</label>
-        <input
-          v-model.number="formDuration"
-          type="number"
-          min="10"
-          max="300"
-          placeholder="e.g. 60"
-          class="w-full h-12 px-4 bg-surface-card border border-white/8 rounded-xl text-base font-semibold text-text-primary dark:text-white outline-none focus-visible:ring-2 focus-visible:ring-primary/50 transition-all"
-        />
+        <label class="block text-sm font-semibold text-text-primary dark:text-white mb-2">Average duration</label>
+        <div class="relative">
+          <input
+            v-model.number="formDuration"
+            type="number"
+            min="10"
+            max="300"
+            placeholder="e.g. 60"
+            class="w-full h-12 px-4 pr-16 bg-surface-card border border-white/8 rounded-xl text-base font-semibold text-text-primary dark:text-white outline-none focus-visible:ring-2 focus-visible:ring-primary/50 transition-all"
+          />
+          <span class="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-text-muted pointer-events-none">min</span>
+        </div>
       </div>
 
       <!-- Intensity -->
       <div>
-        <label class="block text-xs font-bold tracking-widest uppercase text-text-muted mb-2">Intensity</label>
-        <div class="space-y-2">
-          <button
-            v-for="opt in intensityOptions"
-            :key="opt.value"
-            type="button"
-            class="w-full text-left px-4 py-2.5 rounded-xl border transition-all"
-            :class="
-              formIntensity === opt.value
-                ? 'bg-primary/10 border-primary/40 text-primary'
-                : 'bg-surface-card border-white/8 text-text-secondary hover:border-white/20 hover:text-text-primary'
-            "
-            @click="formIntensity = opt.value"
-          >
-            <span class="text-sm font-semibold">{{ opt.label }}</span>
-            <span class="text-xs opacity-70 ml-2">{{ opt.description }}</span>
-          </button>
-        </div>
+        <label class="block text-sm font-semibold text-text-primary dark:text-white mb-2">Intensity</label>
+        <RadioGroup v-model="formIntensity">
+          <div class="grid grid-cols-3 gap-2">
+            <RadioGroupOption
+              v-for="opt in intensityOptions"
+              :key="opt.value"
+              :value="opt.value"
+              v-slot="{ checked }"
+            >
+              <div
+                class="flex flex-col items-center gap-1 px-3 py-3 rounded-xl border cursor-pointer transition-all text-center"
+                :class="checked
+                  ? 'bg-primary/10 border-primary/40'
+                  : 'bg-surface-card border-white/8 hover:border-white/20'"
+              >
+                <p class="text-sm font-semibold" :class="checked ? 'text-primary' : 'text-text-primary dark:text-white'">{{ opt.label }}</p>
+                <p class="text-xs text-text-muted leading-tight">{{ opt.description }}</p>
+              </div>
+            </RadioGroupOption>
+          </div>
+        </RadioGroup>
       </div>
 
       <!-- Weekly volume km (running / cycling only) -->
       <div v-if="showVolumeKm">
-        <label class="block text-xs font-bold tracking-widest uppercase text-text-muted mb-2">
-          Weekly volume (km) â€” optional
-        </label>
-        <input
-          v-model.number="formVolumeKm"
-          type="number"
-          min="0"
-          max="500"
-          placeholder="e.g. 40"
-          class="w-full h-12 px-4 bg-surface-card border border-white/8 rounded-xl text-base font-semibold text-text-primary dark:text-white outline-none focus-visible:ring-2 focus-visible:ring-primary/50 transition-all"
-        />
+        <label class="block text-sm font-semibold text-text-primary dark:text-white mb-2">Weekly volume <span class="font-normal text-text-muted">(optional)</span></label>
+        <div class="relative">
+          <input
+            v-model.number="formVolumeKm"
+            type="number"
+            min="0"
+            max="500"
+            placeholder="e.g. 40"
+            class="w-full h-12 px-4 pr-16 bg-surface-card border border-white/8 rounded-xl text-base font-semibold text-text-primary dark:text-white outline-none focus-visible:ring-2 focus-visible:ring-primary/50 transition-all"
+          />
+          <span class="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-text-muted pointer-events-none">km</span>
+        </div>
       </div>
 
       <div class="flex gap-3 pt-1">
@@ -246,23 +268,29 @@ function intensityLabel(intensity: Intensity): string {
     <button
       v-if="!showForm"
       type="button"
-      class="w-full h-11 border border-dashed border-white/20 rounded-xl text-sm font-semibold text-text-muted hover:border-primary/40 hover:text-primary transition-all"
+      class="w-full h-11 flex items-center justify-center gap-2 border border-dashed border-white/20 rounded-xl text-sm font-semibold text-text-muted hover:border-primary/40 hover:text-primary transition-all"
       @click="openForm"
     >
-      + Add activity
+      <Plus class="w-4 h-4" />
+      Add activity
     </button>
 
     <!-- Volume varies toggle -->
-    <div class="flex items-center gap-3 pt-1">
-      <input
-        id="volumeVaries"
+    <div class="flex items-center justify-between py-3 border-b border-white/8 last:border-0">
+      <div>
+        <p class="text-sm font-semibold text-text-primary dark:text-white">Volume varies significantly</p>
+        <p class="text-xs text-text-muted mt-0.5">Training load changes considerably between weeks</p>
+      </div>
+      <Switch
         v-model="volumeVariesSignificantly"
-        type="checkbox"
-        class="w-4 h-4 rounded accent-primary"
-      />
-      <label for="volumeVaries" class="text-sm text-text-secondary cursor-pointer select-none">
-        Volume varies significantly between weeks
-      </label>
+        class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        :class="volumeVariesSignificantly ? 'bg-primary' : 'bg-white/10'"
+      >
+        <span
+          class="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform"
+          :class="volumeVariesSignificantly ? 'translate-x-6' : 'translate-x-1'"
+        />
+      </Switch>
     </div>
   </div>
 </template>

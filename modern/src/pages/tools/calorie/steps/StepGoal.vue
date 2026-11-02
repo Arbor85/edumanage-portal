@@ -1,5 +1,7 @@
-﻿<script setup lang="ts">
+<script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue'
+import { RadioGroup, RadioGroupOption } from '@headlessui/vue'
+import { Check } from '@lucide/vue'
 import type { WizardAnswers, PrimaryGoal } from '../../../../utils/calorieCalc'
 
 const props = defineProps<{
@@ -53,49 +55,66 @@ const goalOptions: { value: PrimaryGoal; label: string; sub: string; description
 </script>
 
 <template>
-  <div class="bg-surface-card border border-white/8 rounded-2xl p-6 space-y-6">
+  <div class="bg-surface-card border border-white/8 rounded-2xl p-6 space-y-8">
     <div>
       <h2 class="text-lg font-bold text-text-primary dark:text-white mb-1">Your Primary Goal</h2>
       <p class="text-sm text-text-muted">Choose the goal that best matches what you want to achieve right now.</p>
     </div>
 
-    <!-- Goal cards -->
-    <div class="space-y-2">
-      <button
-        v-for="opt in goalOptions"
-        :key="opt.value"
-        type="button"
-        class="w-full text-left px-4 py-4 rounded-xl border transition-all"
-        :class="
-          primary === opt.value
-            ? 'bg-primary/10 border-primary/40 text-primary'
-            : 'bg-surface-input border-white/8 text-text-secondary hover:border-white/20 hover:text-text-primary'
-        "
-        @click="primary = opt.value"
-      >
-        <div class="text-sm font-bold">{{ opt.label }}</div>
-        <div class="text-xs font-medium mt-0.5 opacity-80">{{ opt.sub }}</div>
-        <div class="text-xs mt-1 opacity-60">{{ opt.description }}</div>
-      </button>
+    <!-- Goal selection -->
+    <div>
+      <label class="block text-sm font-semibold text-text-primary dark:text-white mb-1">What is your primary goal?</label>
+      <p class="text-xs text-text-muted mb-3">This determines your calorie target direction</p>
+      <RadioGroup v-model="primary">
+        <div class="space-y-2">
+          <RadioGroupOption
+            v-for="opt in goalOptions"
+            :key="opt.value"
+            :value="opt.value"
+            v-slot="{ checked }"
+          >
+            <div
+              class="flex items-center gap-3 px-4 py-3 rounded-xl border cursor-pointer transition-all"
+              :class="checked
+                ? 'bg-primary/10 border-primary/40'
+                : 'bg-surface-input border-white/8 hover:border-white/20'"
+            >
+              <div class="flex-1">
+                <p class="text-sm font-semibold" :class="checked ? 'text-primary' : 'text-text-primary dark:text-white'">{{ opt.label }}</p>
+                <p class="text-xs font-medium mt-0.5" :class="checked ? 'text-primary/80' : 'text-text-secondary'">{{ opt.sub }}</p>
+                <p class="text-xs text-text-muted mt-0.5">{{ opt.description }}</p>
+              </div>
+              <div
+                class="w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all"
+                :class="checked ? 'border-primary bg-primary' : 'border-white/20'"
+              >
+                <Check v-if="checked" class="w-3 h-3 text-white" />
+              </div>
+            </div>
+          </RadioGroupOption>
+        </div>
+      </RadioGroup>
     </div>
 
     <!-- Target rate -->
-    <div v-if="primary !== null" class="border-t border-white/8 pt-5">
-      <label class="block text-xs font-bold tracking-widest uppercase text-text-muted mb-2">
-        What's your target rate of change? (optional)
+    <div v-if="primary !== null">
+      <label class="block text-sm font-semibold text-text-primary dark:text-white mb-1">
+        Target rate of change <span class="font-normal text-text-muted">(optional)</span>
       </label>
-      <input
-        v-model.number="desiredRateKgPerWeek"
-        type="number"
-        step="0.1"
-        min="0"
-        max="2"
-        placeholder="kg / week"
-        class="w-full h-12 px-4 bg-surface-input border border-white/8 rounded-xl text-base font-semibold text-text-primary dark:text-white outline-none focus-visible:ring-2 focus-visible:ring-primary/50 transition-all"
-      />
-      <p class="text-xs text-text-muted mt-2">
-        We'll adjust this if it seems too aggressive.
-      </p>
+      <p class="text-xs text-text-muted mb-2">How fast do you want to change your weight?</p>
+      <div class="relative">
+        <input
+          v-model.number="desiredRateKgPerWeek"
+          type="number"
+          step="0.1"
+          min="0"
+          max="2"
+          placeholder="e.g. 0.5"
+          class="w-full h-12 px-4 pr-20 bg-surface-input border border-white/8 rounded-xl text-base font-semibold text-text-primary dark:text-white outline-none focus-visible:ring-2 focus-visible:ring-primary/50 transition-all"
+        />
+        <span class="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-text-muted pointer-events-none">kg/wk</span>
+      </div>
+      <p class="text-xs text-text-muted mt-2">We'll cap this if it seems too aggressive.</p>
     </div>
   </div>
 </template>
