@@ -55,12 +55,14 @@ export async function requestNotificationPermission() {
 
 let totalRounds = 0
 let delaySeconds = 0
+let workDurationSecs = 60
 let intervalId: ReturnType<typeof setInterval> | null = null
 
 const phase = ref<EmomPhase>('idle')
 const currentRound = ref(1)
 const secondsLeft = ref(0)
 const isPaused = ref(false)
+const workDuration = ref(60)
 
 function clearTimer() {
   if (intervalId !== null) {
@@ -100,22 +102,24 @@ function tick() {
     )
     currentRound.value++
     phase.value = 'work'
-    secondsLeft.value = 60
+    secondsLeft.value = workDurationSecs
   }
 }
 
-export { phase as emomPhase }
+export { phase as emomPhase, workDuration as emomWorkDuration }
 
 // ── Composable — returns refs to shared singleton state ───────────────────────
 
 export function useEmomTimer() {
-  function start(rounds: number, delay: number) {
+  function start(rounds: number, delay: number, duration = 60) {
     totalRounds = rounds
     delaySeconds = delay
+    workDurationSecs = duration
+    workDuration.value = duration
     clearTimer()
     phase.value = 'work'
     currentRound.value = 1
-    secondsLeft.value = 60
+    secondsLeft.value = duration
     isPaused.value = false
     intervalId = setInterval(tick, 1000)
   }
@@ -138,5 +142,10 @@ export function useEmomTimer() {
     isPaused.value = false
   }
 
-  return { phase, currentRound, secondsLeft, isPaused, start, pause, resume, stop }
+  function resetPhase() {
+    if (phase.value === 'work') secondsLeft.value = workDurationSecs
+    else if (phase.value === 'rest') secondsLeft.value = delaySeconds
+  }
+
+  return { phase, currentRound, secondsLeft, isPaused, start, pause, resume, stop, resetPhase }
 }
