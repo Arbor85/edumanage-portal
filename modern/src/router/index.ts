@@ -83,6 +83,20 @@ const router = createRouter({
       meta: { requiresAuth: true, requiresPermission: 'manage:clients' },
     },
 
+    // ── Tools (all authenticated users) ──────────────────────────────────
+    {
+      path: '/tools',
+      name: 'Tools',
+      component: () => import('../pages/ToolsPage.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/tools/emom-timer',
+      name: 'EmomTimer',
+      component: () => import('../pages/tools/EmomTimerPage.vue'),
+      meta: { requiresAuth: true },
+    },
+
     // ── Coach routes (trainers only) ──────────────────────────────────────
     {
       path: '/coach/clients',

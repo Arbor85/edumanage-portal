@@ -6,8 +6,11 @@ import { prefetchRoutes } from '../../utils/prefetchRoutes'
 import {
   Home, TrendingUp, Compass, User,
   Users, ClipboardList, Calendar, BookOpen, Package, LogOut,
-  Building2, LayoutDashboard, CalendarDays, KeyRound, List, Dumbbell, FileText,
+  Building2, LayoutDashboard, CalendarDays, KeyRound, List, Dumbbell, FileText, Timer,
 } from '@lucide/vue'
+import { emomPhase } from '../../composables/useEmomTimer'
+
+const timerRunning = computed(() => emomPhase.value === 'work' || emomPhase.value === 'rest')
 import DarkModeToggle from '../DarkModeToggle.vue'
 import AppLogo from '../AppLogo.vue'
 import type { Component } from 'vue'
@@ -22,6 +25,7 @@ const clientItems: { to: string; icon: Component; label: string }[] = [
   { to: '/gym-profile',  icon: Dumbbell,      label: 'Gym Profile' },
   { to: '/progress',     icon: TrendingUp,    label: 'Progress' },
   { to: '/explore',      icon: Compass,       label: 'Explore' },
+  { to: '/tools',        icon: Timer,         label: 'Tools' },
   { to: '/profile',      icon: User,          label: 'Profile' },
 ]
 
@@ -167,6 +171,10 @@ const organizerActiveIdx = computed(() => organizerItems.value.findIndex(item =>
       >
         <component :is="item.icon" class="w-5 h-5 flex-shrink-0" />
         <span>{{ item.label }}</span>
+        <span
+          v-if="item.to === '/tools' && timerRunning"
+          class="ml-auto w-2 h-2 rounded-full bg-primary animate-pulse"
+        />
       </RouterLink>
     </nav>
 

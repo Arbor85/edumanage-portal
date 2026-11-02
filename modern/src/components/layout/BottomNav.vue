@@ -2,7 +2,11 @@
 import { onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAuthStore } from '../../stores/authStore'
-import { Home, List, ClipboardList, TrendingUp, Compass, User } from '@lucide/vue'
+import { Home, List, ClipboardList, TrendingUp, Compass, User, Timer } from '@lucide/vue'
+import { computed } from 'vue'
+import { emomPhase } from '../../composables/useEmomTimer'
+
+const timerRunning = computed(() => emomPhase.value === 'work' || emomPhase.value === 'rest')
 import type { Component } from 'vue'
 import { prefetchRoutes } from '../../utils/prefetchRoutes'
 
@@ -17,6 +21,7 @@ const items: { to: string; icon: Component; label: string }[] = [
   { to: '/plans',     icon: ClipboardList, label: 'Plans' },
   { to: '/progress',  icon: TrendingUp,    label: 'Progress' },
   { to: '/explore',   icon: Compass,       label: 'Explore' },
+  { to: '/tools',     icon: Timer,         label: 'Tools' },
   { to: '/profile',   icon: User,          label: 'Profile' },
 ]
 
@@ -35,7 +40,13 @@ function isActive(to: string) {
       class="relative flex flex-col items-center gap-0.5 py-2.5 px-3 min-h-[56px] min-w-[52px] text-xs font-semibold transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-primary rounded-xl"
       :class="isActive(item.to) ? 'text-primary' : 'text-text-secondary'"
     >
-      <component :is="item.icon" class="w-5 h-5 transition-transform duration-150" :class="isActive(item.to) ? 'scale-110' : ''" />
+      <span class="relative">
+        <component :is="item.icon" class="w-5 h-5 transition-transform duration-150" :class="isActive(item.to) ? 'scale-110' : ''" />
+        <span
+          v-if="item.to === '/tools' && timerRunning"
+          class="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-primary animate-pulse"
+        />
+      </span>
       <span class="transition-opacity duration-150" :class="isActive(item.to) ? 'opacity-100' : 'opacity-70'">{{ item.label }}</span>
       <!-- Active dot -->
       <span
