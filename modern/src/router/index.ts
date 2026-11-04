@@ -8,19 +8,19 @@ const router = createRouter({
     {
       path: '/login',
       name: 'Login',
-      component: () => import('../pages/LoginPage.vue'),
+      component: () => import('../pages/AuthPage.vue'),
+      meta: { redirectIfAuthenticated: true },
+    },
+    {
+      path: '/signup',
+      name: 'Signup',
+      component: () => import('../pages/AuthPage.vue'),
       meta: { redirectIfAuthenticated: true },
     },
     {
       path: '/auth/callback',
       name: 'AuthCallback',
       component: () => import('../pages/AuthCallbackPage.vue'),
-    },
-    {
-      path: '/signup',
-      name: 'Signup',
-      component: () => import('../pages/SignupPage.vue'),
-      meta: { redirectIfAuthenticated: true },
     },
     {
       path: '/invite/:code',
