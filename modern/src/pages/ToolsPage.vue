@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
-import { Timer, Calculator } from '@lucide/vue'
+import { Timer, Calculator, Activity } from '@lucide/vue'
 import AppLayout from '../components/layout/AppLayout.vue'
 
 const router = useRouter()
@@ -17,6 +17,12 @@ const tools = [
     icon: Calculator,
     title: 'Calorie Calculator',
     description: 'Estimate your TDEE and healthy calorie targets',
+  },
+  {
+    to: '/tools/cooper-test',
+    icon: Activity,
+    title: 'Cooper Test',
+    description: 'Evaluate your aerobic fitness with the 12-minute run test',
   },
 ]
 </script>

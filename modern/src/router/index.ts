@@ -113,6 +113,12 @@ const router = createRouter({
       component: () => import('../pages/tools/CalorieResultsPage.vue'),
       meta: { requiresAuth: true },
     },
+    {
+      path: '/tools/cooper-test',
+      name: 'CooperTest',
+      component: () => import('../pages/tools/CooperTestPage.vue'),
+      meta: { requiresAuth: true },
+    },
 
     // ── Coach routes (trainers only) ──────────────────────────────────────
     {
