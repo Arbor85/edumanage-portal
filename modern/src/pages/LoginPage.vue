@@ -1,12 +1,34 @@
 <script setup lang="ts">
+import { ref } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { usePageTitle } from '../composables/usePageTitle'
 usePageTitle('Sign In')
 import { useAuth0 } from '@auth0/auth0-vue'
+import { usePasswordAuth } from '../composables/usePasswordAuth'
 import AppLogo from '../components/AppLogo.vue'
 import BaseButton from '../components/BaseButton.vue'
-import { Users, CalendarDays, TrendingUp } from '@lucide/vue'
+import BaseInput from '../components/BaseInput.vue'
+import { Users, CalendarDays, TrendingUp, Eye, EyeOff, AlertCircle } from '@lucide/vue'
 
 const { loginWithRedirect } = useAuth0()
+const ropg = usePasswordAuth()
+const router = useRouter()
+const route = useRoute()
+
+const email = ref('')
+const password = ref('')
+const showPassword = ref(false)
+
+async function handleSignIn() {
+  if (!email.value || !password.value) return
+  try {
+    await ropg.login(email.value, password.value)
+    const redirect = (route.query.redirect as string) ?? '/'
+    router.replace(redirect)
+  } catch {
+    // error is exposed via ropg.error
+  }
+}
 
 const features = [
   {
@@ -34,12 +56,10 @@ const features = [
       class="hidden lg:flex lg:w-[55%] relative flex-col justify-between p-12 overflow-hidden"
       style="background: linear-gradient(145deg, #00C896 0%, #00876A 55%, #005C47 100%)"
     >
-      <!-- Decorative circles -->
       <div class="absolute -top-28 -right-28 w-96 h-96 rounded-full bg-white/10 pointer-events-none" />
       <div class="absolute -bottom-36 -left-20 w-80 h-80 rounded-full bg-white/10 pointer-events-none" />
       <div class="absolute top-1/2 right-10 w-52 h-52 rounded-full bg-white/5 pointer-events-none" />
 
-      <!-- Logo -->
       <div class="relative z-10 flex items-center gap-3">
         <svg class="w-10 h-10" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
           <rect width="40" height="40" rx="10" fill="rgba(255,255,255,0.2)" />
@@ -52,7 +72,6 @@ const features = [
         </span>
       </div>
 
-      <!-- Headline + features -->
       <div class="relative z-10 flex-1 flex flex-col justify-center py-16">
         <h1 class="text-4xl xl:text-5xl font-bold text-white leading-tight mb-4">
           Train smarter.<br />Coach better.
@@ -74,40 +93,100 @@ const features = [
         </div>
       </div>
 
-      <!-- Footer -->
       <p class="relative z-10 text-white/35 text-xs">© 2026 ArborCoach. All rights reserved.</p>
     </div>
 
     <!-- Right login panel -->
     <div class="flex-1 flex flex-col items-center justify-center p-6 bg-white dark:bg-gray-950 min-h-screen lg:min-h-0">
-      <!-- Mobile logo -->
       <div class="lg:hidden mb-10">
         <AppLogo size="lg" />
       </div>
 
       <div class="w-full max-w-sm">
-        <!-- Desktop logo -->
         <div class="hidden lg:flex justify-center mb-8">
           <AppLogo size="md" />
         </div>
 
         <div class="text-center mb-8">
           <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Welcome back</h2>
-          <p class="text-sm text-text-secondary">Sign in to your ArborCoach account to continue</p>
+          <p class="text-sm text-text-secondary">Sign in to your ArborCoach account</p>
         </div>
 
-        <div class="flex flex-col gap-3">
-          <BaseButton variant="primary" :full-width="true" size="lg" @click="loginWithRedirect()">
-            Sign In
-          </BaseButton>
+        <!-- Email / password form -->
+        <form class="flex flex-col gap-4" @submit.prevent="handleSignIn">
+          <BaseInput
+            v-model="email"
+            label="Email"
+            type="email"
+            placeholder="you@example.com"
+            :disabled="ropg.isLoading.value"
+            autocomplete="email"
+          />
+
+          <!-- Password with show/hide toggle -->
+          <div class="flex flex-col gap-1.5">
+            <div class="flex items-center justify-between">
+              <label class="text-sm font-semibold text-text-primary dark:text-white">Password</label>
+              <button
+                type="button"
+                class="text-xs text-primary hover:underline cursor-pointer"
+                @click="loginWithRedirect()"
+              >
+                Forgot password?
+              </button>
+            </div>
+            <div class="relative">
+              <input
+                v-model="password"
+                :type="showPassword ? 'text' : 'password'"
+                placeholder="••••••••"
+                :disabled="ropg.isLoading.value"
+                autocomplete="current-password"
+                class="w-full px-3 py-2.5 pr-10 min-h-[44px] rounded-xl border text-sm bg-white dark:bg-surface-input text-text-primary dark:text-white placeholder:text-text-muted outline-none
+                  transition-[border-color,box-shadow] duration-150
+                  hover:border-gray-300 dark:hover:border-white/20
+                  focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-0 focus-visible:border-primary
+                  disabled:opacity-50 disabled:cursor-not-allowed
+                  border-gray-200 dark:border-white/10"
+              />
+              <button
+                type="button"
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary hover:text-text-primary dark:hover:text-white transition-colors"
+                :aria-label="showPassword ? 'Hide password' : 'Show password'"
+                @click="showPassword = !showPassword"
+              >
+                <EyeOff v-if="showPassword" class="w-4 h-4" />
+                <Eye v-else class="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+
+          <!-- Error message -->
+          <div
+            v-if="ropg.error.value"
+            class="flex items-start gap-2 rounded-xl bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 px-3.5 py-3"
+          >
+            <AlertCircle class="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
+            <p class="text-xs text-red-600 dark:text-red-400">{{ ropg.error.value }}</p>
+          </div>
+
           <BaseButton
-            variant="secondary"
+            type="submit"
+            variant="primary"
             :full-width="true"
             size="lg"
-            @click="loginWithRedirect({ authorizationParams: { screen_hint: 'signup' } })"
+            :loading="ropg.isLoading.value"
+            :disabled="!email || !password"
           >
-            Create Account
+            Sign In
           </BaseButton>
+        </form>
+
+        <div class="mt-4 text-center">
+          <span class="text-sm text-text-secondary">Don't have an account?</span>
+          <router-link to="/signup" class="ml-1.5 text-sm font-semibold text-primary hover:underline">
+            Create one
+          </router-link>
         </div>
 
         <!-- Divider -->

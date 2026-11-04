@@ -1,5 +1,4 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { useAuth0 } from '@auth0/auth0-vue'
 import { useAuthStore } from '../stores/authStore'
 
 const router = createRouter({
@@ -16,6 +15,12 @@ const router = createRouter({
       path: '/auth/callback',
       name: 'AuthCallback',
       component: () => import('../pages/AuthCallbackPage.vue'),
+    },
+    {
+      path: '/signup',
+      name: 'Signup',
+      component: () => import('../pages/SignupPage.vue'),
+      meta: { redirectIfAuthenticated: true },
     },
     {
       path: '/invite/:code',
@@ -218,7 +223,6 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to) => {
-  const { isAuthenticated } = useAuth0()
   const authStore = useAuthStore()
 
   if (!authStore.appReady) {
@@ -232,13 +236,13 @@ router.beforeEach(async (to) => {
     })
   }
 
-  if (to.meta.redirectIfAuthenticated && isAuthenticated.value) {
+  if (to.meta.redirectIfAuthenticated && authStore.isAuthenticated) {
     return { name: 'Profile' }
   }
 
   if (!to.meta.requiresAuth) return true
 
-  if (!isAuthenticated.value) {
+  if (!authStore.isAuthenticated) {
     return { name: 'Login', query: { redirect: to.fullPath } }
   }
 

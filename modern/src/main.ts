@@ -7,6 +7,7 @@ import App from './App.vue'
 import router from './router'
 import { useWorkoutStore } from './stores/workoutStore'
 import { initApiAuth } from './services/apiClient'
+import { getPasswordAuthToken } from './composables/usePasswordAuth'
 
 const app = createApp(App)
 
@@ -27,7 +28,13 @@ app.use(
 app.use(router)
 
 initApiAuth(
-  () => (app.config.globalProperties.$auth0 as ReturnType<typeof createAuth0>).getAccessTokenSilently(),
+  async () => {
+    try {
+      return await (app.config.globalProperties.$auth0 as ReturnType<typeof createAuth0>).getAccessTokenSilently()
+    } catch {
+      return getPasswordAuthToken()
+    }
+  },
   () => (app.config.globalProperties.$auth0 as ReturnType<typeof createAuth0>).logout({ logoutParams: { returnTo: window.location.origin + '/login' } }),
 )
 
