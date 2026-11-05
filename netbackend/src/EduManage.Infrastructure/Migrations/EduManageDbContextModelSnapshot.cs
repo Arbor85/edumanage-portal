@@ -197,6 +197,9 @@ namespace EduManage.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("RunConfigJson")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("WorkoutHistoryId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
@@ -792,6 +795,9 @@ namespace EduManage.Infrastructure.Migrations
                     b.Property<string>("RoutineId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("RunConfigJson")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SupersetGroupId")
                         .HasColumnType("nvarchar(max)");
