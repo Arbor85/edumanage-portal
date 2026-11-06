@@ -22,6 +22,8 @@ import PrUpdateDialog from '../components/PrUpdateDialog.vue'
 import type { PrCandidate } from '../components/PrUpdateDialog.vue'
 import WorkoutStartPanel from './ActiveWorkoutPage/components/WorkoutStartPanel.vue'
 import SetTimerRow from './ActiveWorkoutPage/components/SetTimerRow.vue'
+import SetSummary from '../components/SetSummary.vue'
+import SetEditorDialog from '../components/SetEditorDialog/index.vue'
 import { useWorkoutStore } from '../stores/workoutStore'
 import { useExerciseStore } from '../stores/exerciseStore'
 import { useGymProfileStore } from '../stores/gymProfileStore'
@@ -162,6 +164,7 @@ const pickerField = ref<'reps' | null>(null)
 const weightPickerOpen = ref(false)
 const editingReps = ref(0)
 const editingWeight = ref(0)
+const activeSetDialogOpen = ref(false)
 
 function wt(kg: number | null | undefined): string {
   if (kg === null || kg === undefined) return '0'
@@ -222,6 +225,16 @@ const isTimeBased = computed(() => currentEx.value?.activityTrackType === 'time'
 const hasWeight = computed(() =>
   currentEx.value?.activityType === 'weighted' || currentEx.value?.activityType === 'machine'
 )
+
+const previousActiveSet = computed(() => {
+  const step = currentStep.value
+  if (!step || step.type !== 'normal-set' || !workout.value) return undefined
+  const setIdx = (step as { type: 'normal-set'; exerciseIndex: number; setIndex: number }).setIndex
+  if (setIdx === 0) return undefined
+  const prevSet = workout.value.exercises[(step as any).exerciseIndex]?.sets[setIdx - 1]
+  if (!prevSet?.completed) return undefined
+  return { reps: prevSet.actualReps, weight: prevSet.actualWeight }
+})
 const supersetItemHasWeight = computed(() => {
   const ex = currentSupersetItem.value?.exercise
   return ex?.activityType === 'weighted' || ex?.activityType === 'machine'
@@ -837,39 +850,28 @@ function onWorkoutDone() {
                 </span>
 
                 <div class="flex items-center gap-2 flex-1">
-                  <!-- Weight chip -->
-                  <button
-                    v-if="hasWeight && !set.completed && i === (currentStep as any).setIndex"
-                    class="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-surface-input border border-white/10
-                           text-white font-bold text-sm active:scale-95 transition-all"
-                    @click="weightPickerOpen = true"
-                  >
-                    {{ wt(i === (currentStep as any).setIndex ? editingWeight : (set.weight ?? 0)) }}
-                    <span class="text-text-muted text-xs">{{ unit }}</span>
-                  </button>
-                  <span
-                    v-else-if="hasWeight"
-                    class="text-sm font-semibold"
-                    :class="set.completed ? 'text-green-400' : 'text-text-secondary'"
-                  >{{ wt(set.actualWeight ?? set.weight ?? 0) }}{{ unit }}</span>
-
-                  <span v-if="hasWeight" class="text-text-muted text-sm">×</span>
-
-                  <!-- Reps chip -->
-                  <button
-                    v-if="!set.completed && i === (currentStep as any).setIndex"
-                    class="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-surface-input border border-white/10
-                           text-white font-bold text-sm active:scale-95 transition-all"
-                    @click="openPicker('reps')"
-                  >
-                    {{ editingReps }}
-                    <span class="text-text-muted text-xs">reps</span>
-                  </button>
-                  <span
-                    v-else
-                    class="text-sm font-semibold"
-                    :class="set.completed ? 'text-green-400' : 'text-text-secondary'"
-                  >{{ set.actualReps ?? set.reps ?? 0 }} reps</span>
+                  <!-- Current set: SetSummary opens editor dialog -->
+                  <template v-if="!set.completed && i === (currentStep as any).setIndex">
+                    <SetSummary
+                      :set="{ type: 'normal', reps: editingReps, weight: hasWeight ? editingWeight : null, duration: null, distance: null, note: null }"
+                      :activity-type="currentEx!.activityType"
+                      :activity-track-type="currentEx!.activityTrackType"
+                      @click="activeSetDialogOpen = true"
+                    />
+                  </template>
+                  <!-- Completed or upcoming: show values as text -->
+                  <template v-else>
+                    <span
+                      v-if="hasWeight"
+                      class="text-sm font-semibold"
+                      :class="set.completed ? 'text-green-400' : 'text-text-secondary'"
+                    >{{ wt(set.actualWeight ?? set.weight ?? 0) }}{{ unit }}</span>
+                    <span v-if="hasWeight" class="text-text-muted text-sm">×</span>
+                    <span
+                      class="text-sm font-semibold"
+                      :class="set.completed ? 'text-green-400' : 'text-text-secondary'"
+                    >{{ set.completed ? `${set.actualReps} reps` : `${set.reps} reps` }}</span>
+                  </template>
                 </div>
 
                 <!-- Done button -->
@@ -983,6 +985,21 @@ function onWorkoutDone() {
       :candidate="prQueue[0] ?? null"
       @confirm="onPrConfirm"
       @skip="onPrSkip"
+    />
+
+    <SetEditorDialog
+      v-if="currentStep?.type === 'normal-set' && currentEx"
+      :open="activeSetDialogOpen"
+      :set="{ type: 'normal', reps: editingReps, weight: editingWeight, duration: null, distance: null, note: null }"
+      :activity-type="currentEx.activityType"
+      :activity-track-type="currentEx.activityTrackType"
+      :set-index="(currentStep as any).setIndex"
+      mode="active"
+      :active-reps="editingReps"
+      :active-weight="editingWeight"
+      :previous-set-in-session="previousActiveSet"
+      @update:open="activeSetDialogOpen = $event"
+      @confirm-active="(reps, weight) => { editingReps = reps; editingWeight = weight }"
     />
 
     <ExercisePickerDialog

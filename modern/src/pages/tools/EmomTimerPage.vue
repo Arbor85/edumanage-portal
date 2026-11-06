@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted, nextTick, type Ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ChevronLeft, Square, RotateCcw, Pause } from '@lucide/vue'
 import AppLayout from '../../components/layout/AppLayout.vue'
@@ -9,6 +9,88 @@ const router = useRouter()
 const rounds  = ref(20)
 const delay   = ref(5)
 const workDur = ref(60)
+
+// ── Animated display values (tween toward slider target) ────────────────────
+const displayRounds  = ref(rounds.value)
+const displayWorkDur = ref(workDur.value)
+const displayDelay   = ref(delay.value)
+
+const roundsText  = computed(() => Math.round(displayRounds.value))
+const workDurText = computed(() => Math.round(displayWorkDur.value))
+const delayText   = computed(() => Math.round(displayDelay.value))
+
+function animateTo(target: Ref<number>, value: number, duration = 220) {
+  const startVal = target.value
+  const startT = performance.now()
+  const step = (now: number) => {
+    const p = Math.min(1, (now - startT) / duration)
+    const eased = 1 - Math.pow(1 - p, 3)
+    target.value = startVal + (value - startVal) * eased
+    if (p < 1) requestAnimationFrame(step)
+    else target.value = value
+  }
+  requestAnimationFrame(step)
+}
+
+// ── Click sound via Web Audio API ───────────────────────────────────────────
+let audioCtx: AudioContext | null = null
+function playClick() {
+  try {
+    if (!audioCtx) {
+      const Ctor = (window as any).AudioContext || (window as any).webkitAudioContext
+      if (!Ctor) return
+      audioCtx = new Ctor()
+    }
+    const ctx = audioCtx!
+    if (ctx.state === 'suspended') ctx.resume()
+    const now = ctx.currentTime
+    const osc = ctx.createOscillator()
+    const gain = ctx.createGain()
+    osc.type = 'square'
+    osc.frequency.setValueAtTime(1600, now)
+    gain.gain.setValueAtTime(0.0001, now)
+    gain.gain.exponentialRampToValueAtTime(0.08, now + 0.004)
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.045)
+    osc.connect(gain).connect(ctx.destination)
+    osc.start(now)
+    osc.stop(now + 0.05)
+  } catch { /* silent */ }
+}
+
+watch(rounds,  (v) => { playClick(); animateTo(displayRounds,  v) })
+watch(workDur, (v) => { playClick(); animateTo(displayWorkDur, v) })
+watch(delay,   (v) => { playClick(); animateTo(displayDelay,   v) })
+
+// ── Click-to-edit numeric input ─────────────────────────────────────────────
+type Field = 'rounds' | 'workDur' | 'delay'
+const editing = ref<Field | null>(null)
+const editBuffer = ref('')
+
+const limits: Record<Field, { min: number; max: number; ref: Ref<number> }> = {
+  rounds:  { min: 1,  max: 50,  ref: rounds  },
+  workDur: { min: 30, max: 360, ref: workDur },
+  delay:   { min: 3,  max: 30,  ref: delay   },
+}
+
+function startEdit(field: Field) {
+  editBuffer.value = String(limits[field].ref.value)
+  editing.value = field
+  nextTick(() => {
+    const el = document.getElementById(`emom-edit-${field}`) as HTMLInputElement | null
+    el?.focus()
+    el?.select()
+  })
+}
+
+function commitEdit() {
+  if (!editing.value) return
+  const { min, max, ref: r } = limits[editing.value]
+  const n = Math.floor(Number(editBuffer.value))
+  if (!isNaN(n)) r.value = Math.max(min, Math.min(max, n))
+  editing.value = null
+}
+
+function cancelEdit() { editing.value = null }
 
 const timer = useEmomTimer()
 
@@ -152,7 +234,23 @@ async function handleStart() {
           <div>
             <div class="flex items-baseline justify-between mb-4">
               <span class="text-sm font-semibold text-text-primary dark:text-white">Rounds</span>
-              <span class="text-2xl font-black text-primary tabular-nums">{{ rounds }}</span>
+              <input
+                v-if="editing === 'rounds'"
+                id="emom-edit-rounds"
+                v-model="editBuffer"
+                type="number" min="1" max="50"
+                class="emom-num-input text-2xl font-black text-primary tabular-nums"
+                @blur="commitEdit"
+                @keydown.enter.prevent="commitEdit"
+                @keydown.esc.prevent="cancelEdit"
+              />
+              <button
+                v-else
+                type="button"
+                class="text-2xl font-black text-primary tabular-nums emom-num-btn"
+                :key="roundsText"
+                @click="startEdit('rounds')"
+              >{{ roundsText }}</button>
             </div>
             <input v-model.number="rounds" type="range" min="1" max="50" step="1"
               class="emom-slider w-full" :style="{ '--pct': `${roundsPct}%` }" />
@@ -166,7 +264,26 @@ async function handleStart() {
           <div>
             <div class="flex items-baseline justify-between mb-4">
               <span class="text-sm font-semibold text-text-primary dark:text-white">Work duration</span>
-              <span class="text-2xl font-black text-primary tabular-nums">{{ workDur }}s</span>
+              <div class="flex items-baseline">
+                <input
+                  v-if="editing === 'workDur'"
+                  id="emom-edit-workDur"
+                  v-model="editBuffer"
+                  type="number" min="30" max="360"
+                  class="emom-num-input text-2xl font-black text-primary tabular-nums"
+                  @blur="commitEdit"
+                  @keydown.enter.prevent="commitEdit"
+                  @keydown.esc.prevent="cancelEdit"
+                />
+                <button
+                  v-else
+                  type="button"
+                  class="text-2xl font-black text-primary tabular-nums emom-num-btn"
+                  :key="workDurText"
+                  @click="startEdit('workDur')"
+                >{{ workDurText }}</button>
+                <span class="text-2xl font-black text-primary">s</span>
+              </div>
             </div>
             <input v-model.number="workDur" type="range" min="30" max="360" step="5"
               class="emom-slider w-full" :style="{ '--pct': `${workDurPct}%` }" />
@@ -180,7 +297,26 @@ async function handleStart() {
           <div>
             <div class="flex items-baseline justify-between mb-4">
               <span class="text-sm font-semibold text-text-primary dark:text-white">Rest between rounds</span>
-              <span class="text-2xl font-black text-primary tabular-nums">{{ delay }}s</span>
+              <div class="flex items-baseline">
+                <input
+                  v-if="editing === 'delay'"
+                  id="emom-edit-delay"
+                  v-model="editBuffer"
+                  type="number" min="3" max="30"
+                  class="emom-num-input text-2xl font-black text-primary tabular-nums"
+                  @blur="commitEdit"
+                  @keydown.enter.prevent="commitEdit"
+                  @keydown.esc.prevent="cancelEdit"
+                />
+                <button
+                  v-else
+                  type="button"
+                  class="text-2xl font-black text-primary tabular-nums emom-num-btn"
+                  :key="delayText"
+                  @click="startEdit('delay')"
+                >{{ delayText }}</button>
+                <span class="text-2xl font-black text-primary">s</span>
+              </div>
             </div>
             <input v-model.number="delay" type="range" min="3" max="30" step="1"
               class="emom-slider w-full" :style="{ '--pct': `${delayPct}%` }" />
@@ -465,7 +601,40 @@ async function handleStart() {
 .fade-enter-active, .fade-leave-active { transition: opacity 200ms; }
 .fade-enter-from, .fade-leave-to { opacity: 0; }
 
+/* Clickable animated number */
+.emom-num-btn {
+  background: transparent;
+  border: none;
+  padding: 0 2px;
+  cursor: pointer;
+  border-radius: 6px;
+  animation: emom-num-pop 220ms ease-out;
+  transition: background-color 150ms;
+}
+.emom-num-btn:hover { background: rgba(0, 200, 150, 0.1); }
+@keyframes emom-num-pop {
+  0%   { transform: scale(1.18); filter: brightness(1.3); }
+  60%  { transform: scale(0.96); }
+  100% { transform: scale(1);    filter: brightness(1); }
+}
+
+.emom-num-input {
+  background: transparent;
+  border: none;
+  outline: none;
+  width: 4ch;
+  text-align: right;
+  padding: 0 2px;
+  border-bottom: 2px solid rgb(var(--color-primary, 0 200 150));
+  -moz-appearance: textfield;
+}
+.emom-num-input::-webkit-outer-spin-button,
+.emom-num-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .emom-ripple, .emom-glow, .emom-text-pulse { animation: none; }
+  .emom-ripple, .emom-glow, .emom-text-pulse, .emom-num-btn { animation: none; }
 }
 </style>

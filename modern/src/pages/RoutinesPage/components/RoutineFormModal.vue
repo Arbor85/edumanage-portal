@@ -14,13 +14,16 @@ import ExercisePickerDialog from '../../../components/ExercisePickerDialog/index
 import ConfirmDialog from '../../../components/ConfirmDialog.vue'
 import BaseButton from '../../../components/BaseButton.vue'
 import EmptyState from '../../../components/EmptyState.vue'
-import EditSet from '../../../components/EditSet/index.vue'
+import SetSummary from '../../../components/SetSummary.vue'
+import SetEditorDialog from '../../../components/SetEditorDialog/index.vue'
 import AddSetsDialog from '../../../components/AddSetsDialog/index.vue'
 import DefaultWorkoutPickerDialog from '../../../components/DefaultWorkoutPickerDialog/index.vue'
 import ExerciseMuscleView from '../../../components/ExerciseMuscleView.vue'
 import ExerciseMaxBadge from '../../../components/ExerciseMaxBadge.vue'
 import { useGymProfileStore } from '../../../stores/gymProfileStore'
+import { useWorkoutStore } from '../../../stores/workoutStore'
 import { X, Plus, Dumbbell, MoreVertical, ChevronUp, ChevronDown, Activity } from '@lucide/vue'
+import type { CompletedRoutineSet, UserExerciseMax } from '../../../types'
 import { exerciseImageMap } from '../../../data/exerciseImageMap'
 
 const EXERCISE_FALLBACK = '/images/benchpress.png'
@@ -40,6 +43,7 @@ usePageTitle(() => props.routine ? 'Edit Routine' : 'New Routine', () => props.o
 const routineStore = useRoutineStore()
 const exerciseStore = useExerciseStore()
 const gymProfileStore = useGymProfileStore()
+const workoutStore = useWorkoutStore()
 const toast = useToast()
 
 // ── Color config ──────────────────────────────────────────────
@@ -118,6 +122,7 @@ const routineMuscleData = computed(() => {
   }
 })
 const addSetsForExIdx = ref<number | null>(null)
+const openSetEditor = ref<{ exIdx: number; setIdx: number } | null>(null)
 
 // per-exercise ⋮ menu
 const openMenuFor = ref<number | null>(null)
@@ -514,6 +519,23 @@ function removeDropConfig(exIdx: number) {
   openMenuFor.value = null
 }
 
+// ── Set editor helpers ────────────────────────────────────────
+
+function findPreviousSessionSet(exerciseName: string | null, setIdx: number): CompletedRoutineSet | undefined {
+  if (!exerciseName) return undefined
+  const name = exerciseName.toLowerCase()
+  for (const entry of workoutStore.history) {
+    const ex = entry.excercises?.find(e => (e.name ?? '').toLowerCase() === name)
+    if (ex?.sets?.[setIdx]) return ex.sets[setIdx]
+  }
+  return undefined
+}
+
+function exerciseMaxFor(exIdx: number): UserExerciseMax | undefined {
+  const id = form.value.excercises[exIdx]?.exerciseId
+  return id != null ? gymProfileStore.getByExerciseId(id) : undefined
+}
+
 // ── Request close ─────────────────────────────────────────────
 
 function requestClose() {
@@ -728,12 +750,12 @@ async function doDelete() {
                     class="flex items-center gap-2"
                   >
                     <span class="text-xs text-text-secondary w-6 text-center flex-shrink-0">{{ setIdx + 1 }}</span>
-                    <EditSet
+                    <SetSummary
                       :set="set"
                       :activity-type="form.excercises[exIdx].activityType"
                       :activity-track-type="form.excercises[exIdx].activityTrackType"
                       class="flex-1"
-                      @update:set="form.excercises[exIdx].sets![setIdx] = $event"
+                      @click="openSetEditor = { exIdx, setIdx }"
                     />
                     <button
                       type="button"
@@ -879,12 +901,12 @@ async function doDelete() {
               <!-- Still allow editing the starting set weight -->
               <div class="flex items-center gap-2">
                 <span class="text-xs text-text-secondary w-6 text-center flex-shrink-0">1</span>
-                <EditSet
+                <SetSummary
                   :set="form.excercises[block.exerciseIndex].sets?.[0] ?? { type: 'normal', reps: null, weight: null, duration: null, distance: null, note: null }"
                   :activity-type="form.excercises[block.exerciseIndex].activityType"
                   :activity-track-type="form.excercises[block.exerciseIndex].activityTrackType"
                   class="flex-1"
-                  @update:set="form.excercises[block.exerciseIndex].sets = [$event]"
+                  @click="openSetEditor = { exIdx: block.exerciseIndex, setIdx: 0 }"
                 />
               </div>
             </div>
@@ -897,12 +919,12 @@ async function doDelete() {
                 class="flex items-center gap-2"
               >
                 <span class="text-xs text-text-secondary w-6 text-center flex-shrink-0">{{ setIdx + 1 }}</span>
-                <EditSet
+                <SetSummary
                   :set="set"
                   :activity-type="form.excercises[block.exerciseIndex].activityType"
                   :activity-track-type="form.excercises[block.exerciseIndex].activityTrackType"
                   class="flex-1"
-                  @update:set="form.excercises[block.exerciseIndex].sets![setIdx] = $event"
+                  @click="openSetEditor = { exIdx: block.exerciseIndex, setIdx }"
                 />
                 <button
                   type="button"
@@ -990,6 +1012,21 @@ async function doDelete() {
       </div>
     </template>
   </FullSizeDialog>
+
+  <!-- Set editor dialog -->
+  <SetEditorDialog
+    v-if="openSetEditor !== null"
+    :open="openSetEditor !== null"
+    :set="form.excercises[openSetEditor.exIdx]?.sets?.[openSetEditor.setIdx] ?? { type: 'normal', reps: null, weight: null, duration: null, distance: null, note: null }"
+    :activity-type="form.excercises[openSetEditor.exIdx]?.activityType"
+    :activity-track-type="form.excercises[openSetEditor.exIdx]?.activityTrackType"
+    :set-index="openSetEditor.setIdx"
+    mode="planning"
+    :exercise-max="exerciseMaxFor(openSetEditor.exIdx)"
+    :previous-session-set="findPreviousSessionSet(form.excercises[openSetEditor.exIdx]?.name, openSetEditor.setIdx)"
+    @update:open="$event || (openSetEditor = null)"
+    @confirm-planning="(newSet) => { form.excercises[openSetEditor!.exIdx].sets![openSetEditor!.setIdx] = newSet; openSetEditor = null }"
+  />
 
   <!-- Dialogs -->
   <ConfirmDialog
