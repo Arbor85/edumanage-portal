@@ -53,6 +53,7 @@ export async function requestNotificationPermission() {
 let totalRounds = 0
 let delaySeconds = 0
 let workDurationSecs = 60
+let autoPauseEveryRounds = 0  // 0 = disabled
 let intervalId: ReturnType<typeof setInterval> | null = null
 
 // ── Timestamp tracking for sub-second smooth progress ────────────────────────
@@ -64,6 +65,21 @@ export function getEmomProgress(): number {
   if (phase.value !== 'work' && phase.value !== 'rest') return 0
   const now = isPaused.value ? pausedAt : Date.now()
   return Math.min(1, Math.max(0, (now - phaseStartedAt) / phaseDurationMs))
+}
+
+export function getEmomOverallProgress(): number {
+  if (phase.value === 'idle') return 0
+  if (phase.value === 'complete') return 1
+  const totalMs = (totalRounds * workDurationSecs + Math.max(0, totalRounds - 1) * delaySeconds) * 1000
+  if (totalMs <= 0) return 0
+  const completedRounds = currentRound.value - 1
+  const completedMs =
+    completedRounds * workDurationSecs * 1000 +
+    completedRounds * delaySeconds * 1000 +
+    (phase.value === 'rest' ? workDurationSecs * 1000 : 0)
+  const now = isPaused.value ? pausedAt : Date.now()
+  const inPhaseMs = Math.min(phaseDurationMs, Math.max(0, now - phaseStartedAt))
+  return Math.min(1, Math.max(0, (completedMs + inPhaseMs) / totalMs))
 }
 
 const phase = ref<EmomPhase>('idle')
@@ -103,6 +119,15 @@ function tick() {
       secondsLeft.value = delaySeconds
       phaseStartedAt = Date.now()
       phaseDurationMs = delaySeconds * 1000
+      if (autoPauseEveryRounds > 0 && currentRound.value % autoPauseEveryRounds === 0) {
+        clearTimer()
+        isPaused.value = true
+        pausedAt = Date.now()
+        sendNotification(
+          '⏸ Auto-paused',
+          `Completed ${currentRound.value} round${currentRound.value !== 1 ? 's' : ''}. Tap to resume.`,
+        )
+      }
     }
   } else if (phase.value === 'rest') {
     playBeep(1100, 200)
@@ -123,10 +148,11 @@ export { phase as emomPhase, workDuration as emomWorkDuration }
 // ── Composable — returns refs to shared singleton state ───────────────────────
 
 export function useEmomTimer() {
-  function start(rounds: number, delay: number, duration = 60) {
+  function start(rounds: number, delay: number, duration = 60, autoPauseEvery = 0) {
     totalRounds = rounds
     delaySeconds = delay
     workDurationSecs = duration
+    autoPauseEveryRounds = autoPauseEvery
     workDuration.value = duration
     clearTimer()
     phase.value = 'work'

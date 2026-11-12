@@ -3,21 +3,24 @@ import { ref, computed, watch, onMounted, onUnmounted, nextTick, type Ref } from
 import { useRouter } from 'vue-router'
 import { ChevronLeft, Square, RotateCcw, Pause } from '@lucide/vue'
 import AppLayout from '../../components/layout/AppLayout.vue'
-import { useEmomTimer, requestNotificationPermission, getEmomProgress } from '../../composables/useEmomTimer'
+import { useEmomTimer, requestNotificationPermission, getEmomProgress, getEmomOverallProgress } from '../../composables/useEmomTimer'
 
 const router = useRouter()
-const rounds  = ref(20)
-const delay   = ref(5)
-const workDur = ref(60)
+const rounds    = ref(20)
+const delay     = ref(5)
+const workDur   = ref(60)
+const autoPause = ref(0) // 0 = disabled
 
 // ── Animated display values (tween toward slider target) ────────────────────
-const displayRounds  = ref(rounds.value)
-const displayWorkDur = ref(workDur.value)
-const displayDelay   = ref(delay.value)
+const displayRounds    = ref(rounds.value)
+const displayWorkDur   = ref(workDur.value)
+const displayDelay     = ref(delay.value)
+const displayAutoPause = ref(autoPause.value)
 
-const roundsText  = computed(() => Math.round(displayRounds.value))
-const workDurText = computed(() => Math.round(displayWorkDur.value))
-const delayText   = computed(() => Math.round(displayDelay.value))
+const roundsText    = computed(() => Math.round(displayRounds.value))
+const workDurText   = computed(() => Math.round(displayWorkDur.value))
+const delayText     = computed(() => Math.round(displayDelay.value))
+const autoPauseText = computed(() => Math.round(displayAutoPause.value))
 
 function animateTo(target: Ref<number>, value: number, duration = 220) {
   const startVal = target.value
@@ -57,19 +60,21 @@ function playClick() {
   } catch { /* silent */ }
 }
 
-watch(rounds,  (v) => { playClick(); animateTo(displayRounds,  v) })
-watch(workDur, (v) => { playClick(); animateTo(displayWorkDur, v) })
-watch(delay,   (v) => { playClick(); animateTo(displayDelay,   v) })
+watch(rounds,    (v) => { playClick(); animateTo(displayRounds,    v) })
+watch(workDur,   (v) => { playClick(); animateTo(displayWorkDur,   v) })
+watch(delay,     (v) => { playClick(); animateTo(displayDelay,     v) })
+watch(autoPause, (v) => { playClick(); animateTo(displayAutoPause, v) })
 
 // ── Click-to-edit numeric input ─────────────────────────────────────────────
-type Field = 'rounds' | 'workDur' | 'delay'
+type Field = 'rounds' | 'workDur' | 'delay' | 'autoPause'
 const editing = ref<Field | null>(null)
 const editBuffer = ref('')
 
 const limits: Record<Field, { min: number; max: number; ref: Ref<number> }> = {
-  rounds:  { min: 1,  max: 50,  ref: rounds  },
-  workDur: { min: 30, max: 360, ref: workDur },
-  delay:   { min: 3,  max: 30,  ref: delay   },
+  rounds:    { min: 1,  max: 50,  ref: rounds    },
+  workDur:   { min: 30, max: 360, ref: workDur   },
+  delay:     { min: 3,  max: 30,  ref: delay     },
+  autoPause: { min: 0,  max: 20,  ref: autoPause },
 }
 
 function startEdit(field: Field) {
@@ -95,24 +100,29 @@ function cancelEdit() { editing.value = null }
 const timer = useEmomTimer()
 
 // SVG geometry constants (viewBox 0 0 280 280, center 140,140)
-const RING_R        = 120
-const FILL_R        = 108
-const CIRCUMFERENCE = 2 * Math.PI * RING_R
-const FILL_BOTTOM   = 140 + FILL_R
-const FILL_DIAMETER = FILL_R * 2
+const RING_R         = 120
+const FILL_R         = 108
+const OVERALL_RING_R = 134  // outer ring for overall session progress
+const CIRCUMFERENCE  = 2 * Math.PI * RING_R
+const OVERALL_CIRC   = 2 * Math.PI * OVERALL_RING_R
+const FILL_BOTTOM    = 140 + FILL_R
+const FILL_DIAMETER  = FILL_R * 2
 
 // ── Sub-second smooth progress via requestAnimationFrame ─────────────────────
 const smoothProgress = ref(0)
+const smoothOverall  = ref(0)
 let rafId: number | null = null
 
 function rafLoop() {
   smoothProgress.value = getEmomProgress()
+  smoothOverall.value  = getEmomOverallProgress()
   rafId = requestAnimationFrame(rafLoop)
 }
 
-const fillY            = computed(() => FILL_BOTTOM - smoothProgress.value * FILL_DIAMETER)
-const fillHeight       = computed(() => Math.max(0, smoothProgress.value * FILL_DIAMETER))
-const strokeDashoffset = computed(() => CIRCUMFERENCE * (1 - smoothProgress.value))
+const fillY                   = computed(() => FILL_BOTTOM - smoothProgress.value * FILL_DIAMETER)
+const fillHeight              = computed(() => Math.max(0, smoothProgress.value * FILL_DIAMETER))
+const strokeDashoffset        = computed(() => CIRCUMFERENCE * (1 - smoothProgress.value))
+const overallStrokeDashoffset = computed(() => OVERALL_CIRC * (1 - smoothOverall.value))
 
 const isWork      = computed(() => timer.phase.value === 'work')
 const isRunning   = computed(() => timer.phase.value === 'work' || timer.phase.value === 'rest')
@@ -136,9 +146,10 @@ const formattedTime = computed(() => {
 })
 
 // Slider fill percentages
-const roundsPct  = computed(() => ((rounds.value - 1)   / (50 - 1))   * 100)
-const workDurPct = computed(() => ((workDur.value - 30) / (360 - 30)) * 100)
-const delayPct   = computed(() => ((delay.value - 3)    / (30 - 3))   * 100)
+const roundsPct    = computed(() => ((rounds.value - 1)   / (50 - 1))   * 100)
+const workDurPct   = computed(() => ((workDur.value - 30) / (360 - 30)) * 100)
+const delayPct     = computed(() => ((delay.value - 3)    / (30 - 3))   * 100)
+const autoPausePct = computed(() => (autoPause.value / 20) * 100)
 
 // ── Wake Lock ─────────────────────────────────────────────────────────────────
 
@@ -204,7 +215,7 @@ function dismissStop() {
 
 async function handleStart() {
   await requestNotificationPermission()
-  timer.start(rounds.value, delay.value, workDur.value)
+  timer.start(rounds.value, delay.value, workDur.value, autoPause.value)
 }
 </script>
 
@@ -326,6 +337,41 @@ async function handleStart() {
             </div>
           </div>
 
+          <!-- Auto-pause every N rounds -->
+          <div>
+            <div class="flex items-baseline justify-between mb-4">
+              <span class="text-sm font-semibold text-text-primary dark:text-white">Auto-pause every</span>
+              <div class="flex items-baseline">
+                <input
+                  v-if="editing === 'autoPause'"
+                  id="emom-edit-autoPause"
+                  v-model="editBuffer"
+                  type="number" min="0" max="20"
+                  class="emom-num-input text-2xl font-black text-primary tabular-nums"
+                  @blur="commitEdit"
+                  @keydown.enter.prevent="commitEdit"
+                  @keydown.esc.prevent="cancelEdit"
+                />
+                <button
+                  v-else
+                  type="button"
+                  class="text-2xl font-black text-primary tabular-nums emom-num-btn"
+                  :key="autoPauseText"
+                  @click="startEdit('autoPause')"
+                >{{ autoPauseText === 0 ? 'Off' : autoPauseText }}</button>
+                <span v-if="autoPauseText !== 0" class="text-sm font-semibold text-primary ml-1">
+                  round{{ autoPauseText !== 1 ? 's' : '' }}
+                </span>
+              </div>
+            </div>
+            <input v-model.number="autoPause" type="range" min="0" max="20" step="1"
+              class="emom-slider w-full" :style="{ '--pct': `${autoPausePct}%` }" />
+            <div class="flex justify-between mt-1.5">
+              <span class="text-xs text-text-muted">Off</span>
+              <span class="text-xs text-text-muted">20</span>
+            </div>
+          </div>
+
         </div>
 
         <p class="text-xs text-text-muted text-center">
@@ -434,6 +480,15 @@ async function handleStart() {
                 />
               </clipPath>
             </defs>
+            <!-- Overall session progress (outer thin ring) -->
+            <circle cx="140" cy="140" :r="OVERALL_RING_R" stroke="currentColor" stroke-width="3" opacity="0.1" />
+            <circle
+              cx="140" cy="140" :r="OVERALL_RING_R"
+              stroke="currentColor" stroke-width="3" stroke-linecap="round" opacity="0.55"
+              :stroke-dasharray="OVERALL_CIRC" :stroke-dashoffset="overallStrokeDashoffset"
+              transform="rotate(-90 140 140)"
+              style="transition: stroke-dashoffset 120ms linear"
+            />
             <circle cx="140" cy="140" :r="RING_R" stroke="currentColor" stroke-width="10" opacity="0.15" />
             <circle cx="140" cy="140" :r="FILL_R" fill="currentColor" opacity="0.18" clip-path="url(#emom-fill-clip)" />
             <circle
