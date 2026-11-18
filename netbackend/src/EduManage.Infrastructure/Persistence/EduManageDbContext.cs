@@ -39,6 +39,7 @@ public class EduManageDbContext : DbContext
     public DbSet<SchedulePlan> SchedulePlans { get; set; }
     public DbSet<ScheduleEntry> ScheduleEntries { get; set; }
     public DbSet<McpApiKey> McpApiKeys { get; set; }
+    public DbSet<QueuedWorkout> QueuedWorkouts { get; set; }
     public DbSet<FormTemplate> FormTemplates { get; set; }
     public DbSet<FormTemplateVersion> FormTemplateVersions { get; set; }
     public DbSet<FormResponse> FormResponses { get; set; }
@@ -87,5 +88,6 @@ public class EduManageDbContext : DbContext
         modelBuilder.ApplyConfiguration(new UserProfileConfiguration());
         modelBuilder.ApplyConfiguration(new UserChallengeLogConfiguration());
         modelBuilder.ApplyConfiguration(new BodyMeasurementConfiguration());
+        modelBuilder.ApplyConfiguration(new QueuedWorkoutConfiguration());
     }
 }

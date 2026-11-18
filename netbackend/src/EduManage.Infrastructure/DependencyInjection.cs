@@ -40,6 +40,7 @@ public static class DependencyInjection
         services.AddScoped<ISchedulePlanRepository, SchedulePlanRepository>();
         services.AddScoped<IScheduleEntryRepository, ScheduleEntryRepository>();
         services.AddScoped<IApiKeyRepository, ApiKeyRepository>();
+        services.AddScoped<IQueuedWorkoutRepository, QueuedWorkoutRepository>();
         services.AddScoped<IFormTemplateRepository, FormTemplateRepository>();
         services.AddScoped<IFormTemplateVersionRepository, FormTemplateVersionRepository>();
         services.AddScoped<IFormResponseRepository, FormResponseRepository>();

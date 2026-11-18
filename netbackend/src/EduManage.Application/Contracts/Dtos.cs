@@ -458,3 +458,11 @@ public sealed record BodyMeasurementCreate(
     float? ButtCm,
     int? SystolicMmHg,
     int? DiastolicMmHg);
+
+public sealed record QueuedWorkoutCreate(string RoutineId, string? Source);
+
+public sealed record QueuedWorkoutOut(
+    string Id,
+    string RoutineId,
+    string CreatedAt,
+    string Source);

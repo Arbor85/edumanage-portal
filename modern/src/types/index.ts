@@ -850,3 +850,16 @@ export interface BodyMeasurementCreate {
   diastolicMmHg: number | null
 }
 
+
+
+export interface QueuedWorkoutOut {
+  id: string
+  routineId: string
+  createdAt: string
+  source: string
+}
+
+export interface QueuedWorkoutCreate {
+  routineId: string
+  source?: string | null
+}

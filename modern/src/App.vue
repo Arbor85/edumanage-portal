@@ -14,6 +14,7 @@ import { useNavDrawer } from './composables/useNavDrawer'
 import { useAuthStore } from './stores/authStore'
 import AppLogo from './components/AppLogo.vue'
 import { useBackendHealth } from './composables/useBackendHealth'
+import { useQueuedWorkoutStart } from './composables/useQueuedWorkoutStart'
 
 const { transitionName } = useRouteTransition()
 const { start } = useOfflineSync()
@@ -24,6 +25,7 @@ const { isReady: backendReady, waitUntilHealthy } = useBackendHealth()
 onMounted(async () => {
   await waitUntilHealthy()
   start()
+  useQueuedWorkoutStart().consumeOnce().catch(() => {})
 })
 </script>
 

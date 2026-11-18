@@ -3,6 +3,7 @@ using EduManage.Application.Common.Exceptions;
 using EduManage.Application.Contracts;
 using EduManage.Application.Features.ApiKeys;
 using MediatR;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,7 +11,7 @@ namespace EduManage.Api.Controllers;
 
 [ApiController]
 [Route("api/mcp-keys")]
-[Authorize(Policy = "manage:clients")]
+[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "manage:clients")]
 public sealed class ApiKeysController(ISender mediator, ICurrentUserService currentUserService) : ControllerBase
 {
     [HttpGet]

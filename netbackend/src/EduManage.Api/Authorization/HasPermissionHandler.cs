@@ -12,6 +12,12 @@ public sealed class HasPermissionHandler : AuthorizationHandler<HasPermissionReq
     /// <inheritdoc />
     protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, HasPermissionRequirement requirement)
     {
+        if (context.User.Identity?.AuthenticationType == "ApiKey")
+        {
+            context.Succeed(requirement);
+            return Task.CompletedTask;
+        }
+
         var permissions = context.User.FindAll("permissions").Select(c => c.Value);
 
         if (permissions.Contains(requirement.Permission))

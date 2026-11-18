@@ -1,3 +1,4 @@
+using EduManage.Api.Authentication;
 using EduManage.Api.Authorization;
 using EduManage.Api.Mcp;
 using EduManage.Api.Services;
@@ -64,7 +65,8 @@ builder.Services
 				return Task.CompletedTask;
 			}
 		};
-	});
+	})
+		.AddScheme<ApiKeyAuthenticationOptions, ApiKeyAuthenticationHandler>(ApiKeyAuthenticationOptions.Scheme, _ => { });
 builder.Services
 	.AddControllers()
 	.AddJsonOptions(options =>
@@ -73,22 +75,28 @@ builder.Services
 	});
 builder.Services.AddAuthorization(options =>
 {
-	options.AddPolicy("manage:clients", policy =>
-		policy.Requirements.Add(new HasPermissionRequirement("manage:clients")));
-	options.AddPolicy("manage:equipment", policy =>
-		policy.Requirements.Add(new HasPermissionRequirement("manage:equipment")));
-	options.AddPolicy("manage:forms", policy =>
-		policy.Requirements.Add(new HasPermissionRequirement("manage:forms")));
-	options.AddPolicy("manage:organization", policy =>
-		policy.Requirements.Add(new HasPermissionRequirement("manage:organization")));
-	options.AddPolicy("manage:buildings", policy =>
-		policy.Requirements.Add(new HasPermissionRequirement("manage:buildings")));
-	options.AddPolicy("manage:schedule-plans", policy =>
-		policy.Requirements.Add(new HasPermissionRequirement("manage:schedule-plans")));
-	options.AddPolicy("view:schedule", policy =>
-		policy.Requirements.Add(new HasPermissionRequirement("view:schedule")));
-	options.AddPolicy("manage:exercise", policy =>
-		policy.Requirements.Add(new HasPermissionRequirement("manage:exercise")));
+	var schemes = new[] { JwtBearerDefaults.AuthenticationScheme, ApiKeyAuthenticationOptions.Scheme };
+
+	options.DefaultPolicy = new AuthorizationPolicyBuilder(schemes)
+		.RequireAuthenticatedUser()
+		.Build();
+
+	void AddPermissionPolicy(string name) =>
+		options.AddPolicy(name, policy =>
+		{
+			policy.AddAuthenticationSchemes(schemes);
+			policy.RequireAuthenticatedUser();
+			policy.Requirements.Add(new HasPermissionRequirement(name));
+		});
+
+	AddPermissionPolicy("manage:clients");
+	AddPermissionPolicy("manage:equipment");
+	AddPermissionPolicy("manage:forms");
+	AddPermissionPolicy("manage:organization");
+	AddPermissionPolicy("manage:buildings");
+	AddPermissionPolicy("manage:schedule-plans");
+	AddPermissionPolicy("view:schedule");
+	AddPermissionPolicy("manage:exercise");
 });
 builder.Services.AddSingleton<IAuthorizationHandler, HasPermissionHandler>();
 builder.Services.AddEndpointsApiExplorer();
