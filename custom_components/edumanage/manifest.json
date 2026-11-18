@@ -1,0 +1,12 @@
+{
+  "domain": "edumanage",
+  "name": "EduManage",
+  "codeowners": ["@Arbor85"],
+  "config_flow": true,
+  "documentation": "https://github.com/Arbor85/edumanage-portal",
+  "integration_type": "service",
+  "iot_class": "local_polling",
+  "issue_tracker": "https://github.com/Arbor85/edumanage-portal/issues",
+  "requirements": [],
+  "version": "0.1.0"
+}

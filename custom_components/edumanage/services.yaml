@@ -1,0 +1,15 @@
+queue_routine:
+  name: Queue routine
+  description: >-
+    Queue an EduManage routine. The web app will auto-start it the next time
+    it is opened (provided no workout is currently in progress).
+  fields:
+    routine_id:
+      name: Routine ID
+      description: The ID of the routine to queue. See the Routines sensor attributes.
+      required: true
+      selector:
+        text:
+cancel_queue:
+  name: Cancel queue
+  description: Cancel any pending queued routines on the configured EduManage instance.
