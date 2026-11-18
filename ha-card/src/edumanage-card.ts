@@ -3,12 +3,26 @@ import { customElement, state } from 'lit/decorators.js'
 import { cardStyles } from './styles'
 import { CardConfig, NormalizedCardConfig, QueuedWorkoutOut, RoutineTile, normalizeConfig, ApiError } from './types'
 import { deleteQueue, listQueue, listRoutines, queueWorkout } from './api'
+import './edumanage-card-editor'
 
 @customElement('edumanage-card')
 export class EdumanageCard extends LitElement {
   static styles = cardStyles
 
+  static async getConfigElement() {
+    return document.createElement('edumanage-card-editor')
+  }
+
+  static getStubConfig(): CardConfig {
+    return {
+      type: 'custom:edumanage-card',
+      api_base_url: '',
+      api_key: '',
+    }
+  }
+
   @state() private _config?: NormalizedCardConfig
+  @state() private _configError: string | null = null
   @state() private _routines: RoutineTile[] = []
   @state() private _queue: QueuedWorkoutOut[] = []
   @state() private _loading = true
@@ -18,7 +32,13 @@ export class EdumanageCard extends LitElement {
   private _timer: ReturnType<typeof setInterval> | null = null
 
   setConfig(config: CardConfig) {
-    this._config = normalizeConfig(config)
+    try {
+      this._config = normalizeConfig(config)
+      this._configError = null
+    } catch (err) {
+      this._config = undefined
+      this._configError = (err as Error).message
+    }
   }
 
   connectedCallback() {
@@ -88,7 +108,16 @@ export class EdumanageCard extends LitElement {
   }
 
   render() {
-    if (!this._config) return nothing
+    if (!this._config) {
+      return html`
+        <ha-card>
+          <div class="header"><span class="title">EduManage</span></div>
+          <div class="empty">
+            ${this._configError ?? 'Open the card editor to set the API URL and key.'}
+          </div>
+        </ha-card>
+      `
+    }
     const queued = this._queue[0]
     const queuedRoutine = queued ? this._routines.find((r) => r.id === queued.routineId) : undefined
     return html`
