@@ -2,6 +2,8 @@
 
 A Lovelace custom card that lists your EduManage routines and lets you queue one. The next time you open the EduManage web app, the queued routine auto-starts.
 
+> Looking for a full HA integration (entities + services + automations)? See [Arbor85/edumanage-ha-integration](https://github.com/Arbor85/edumanage-ha-integration) — install via HACS as an *Integration*.
+
 ## Prerequisites
 
 - A running EduManage backend reachable from your Home Assistant instance.
